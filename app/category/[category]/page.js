@@ -7,88 +7,89 @@ const supabase = createClient(
 );
 
 export default async function CategoryPage({ params }) {
-  const { category: rawCategory } = await params;
-  const category = decodeURIComponent(rawCategory);
+  const { category } = await params;
+  const categoryName = decodeURIComponent(category);
 
+  // Get all subcategories and a sample product image for each
   const { data: products } = await supabase
     .from('products')
-    .select('id, name, supplier_sku, category, subcategory, product_colours(images)')
-    .eq('category', category)
+    .select('id, name, subcategory, product_colours(images)')
+    .ilike('category', categoryName)
     .eq('status', 'active');
 
-  const subcategories = [...new Set(products?.map(p => p.subcategory).filter(Boolean))].sort();
+  // Group by subcategory
+  const subcategoryMap = {};
+  products?.forEach(p => {
+    const sub = p.subcategory || 'Other';
+    if (!subcategoryMap[sub]) {
+      subcategoryMap[sub] = {
+        name: sub,
+        count: 0,
+        image: null,
+      };
+    }
+    subcategoryMap[sub].count++;
+    if (!subcategoryMap[sub].image) {
+      const imgs = p.product_colours?.[0]?.images;
+      if (Array.isArray(imgs) && imgs.length > 0) {
+        subcategoryMap[sub].image = imgs[0];
+      }
+    }
+  });
+
+  const subcategories = Object.values(subcategoryMap).sort((a, b) => a.name.localeCompare(b.name));
+  const totalProducts = products?.length || 0;
 
   return (
-    <div style={{ fontFamily: 'sans-serif', minHeight: '100vh', background: '#f8f8f6' }}>
-      <nav style={{
-        background: '#1a1a1a', color: 'white',
-        padding: '0 2rem', display: 'flex',
-        alignItems: 'center', height: '64px'
-      }}>
-        <Link href="/" style={{ color: 'white', textDecoration: 'none', fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '2px' }}>
-          PROMOHUB
-        </Link>
-      </nav>
+    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", minHeight: '100vh', background: '#F4F2EE', color: '#1A1714' }}>
 
-      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem' }}>
-        <div style={{ marginBottom: '1.5rem', fontSize: '0.875rem', color: '#666' }}>
-          <Link href="/" style={{ color: '#666', textDecoration: 'none' }}>Home</Link>
-          <span style={{ margin: '0 0.5rem' }}>→</span>
-          <span>{category}</span>
+      {/* BREADCRUMB */}
+      <div style={{ padding: '10px 32px', fontSize: '12px', color: '#7A7570', background: '#fff', borderBottom: '1px solid #E0DDD7' }}>
+        <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <span style={{ margin: '0 6px' }}>›</span>
+        <span style={{ textTransform: 'capitalize' }}>{categoryName}</span>
+      </div>
+
+      {/* HEADER */}
+      <div style={{ background: '#1A1714', color: '#fff', padding: '40px 32px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <h1 style={{ fontFamily: 'serif', fontSize: '36px', fontWeight: 400, margin: '0 0 8px', textTransform: 'capitalize' }}>
+            {categoryName}
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,.5)', margin: 0, fontSize: '14px' }}>
+            {totalProducts} products across {subcategories.length} categories
+          </p>
         </div>
+      </div>
 
-        <h1 style={{ fontSize: '2rem', fontWeight: '300', marginBottom: '2rem', letterSpacing: '2px', textTransform: 'uppercase' }}>
-          {category}
-        </h1>
-
-        {subcategories.length > 0 && (
-          <div style={{ marginBottom: '2rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
-            {subcategories.map(sub => (
-              <Link key={sub} href={`/subcategory/${encodeURIComponent(sub)}`}
-                style={{
-                  padding: '0.5rem 1.25rem',
-                  border: '1px solid #1a1a1a',
-                  textDecoration: 'none',
-                  color: '#1a1a1a',
-                  fontSize: '0.8rem',
-                  letterSpacing: '1px',
-                  textTransform: 'uppercase',
-                  background: 'white'
-                }}>
-                {sub}
-              </Link>
-            ))}
-          </div>
-        )}
-
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '1.5rem'
-        }}>
-          {products?.map(product => {
-            const images = product.product_colours?.[0]?.images;
-            const firstImage = Array.isArray(images) ? images[0] : null;
-            return (
-              <Link key={product.id} href={`/products/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div style={{ background: 'white', borderRadius: '4px', overflow: 'hidden', cursor: 'pointer' }}>
-                  {firstImage ? (
-                    <img src={firstImage} alt={product.name}
-                      style={{ width: '100%', height: '220px', objectFit: 'contain', padding: '1rem' }} />
-                  ) : (
-                    <div style={{ width: '100%', height: '220px', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
-                      No image
-                    </div>
-                  )}
-                  <div style={{ padding: '1rem', borderTop: '1px solid #f0f0f0' }}>
-                    <p style={{ fontWeight: '500', margin: '0 0 0.25rem', fontSize: '0.9rem' }}>{product.name}</p>
-                    <p style={{ color: '#999', margin: '0 0 0.25rem', fontSize: '0.75rem' }}>SKU: {product.supplier_sku}</p>
-                    <p style={{ color: '#666', margin: 0, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '1px' }}>{product.subcategory}</p>
-                  </div>
+      {/* SUBCATEGORY GRID */}
+      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '20px' }}>
+          {subcategories.map(sub => (
+            <Link
+              key={sub.name}
+              href={`/subcategory/${encodeURIComponent(sub.name.toLowerCase().replace(/ /g, '-'))}`}
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              <div style={{ background: '#fff', borderRadius: '14px', overflow: 'hidden', border: '1px solid #E0DDD7', transition: 'box-shadow .2s', cursor: 'pointer' }}>
+                {/* Image */}
+                <div style={{ height: '200px', background: '#F8F7F5', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                  {sub.image
+                    ? <img src={sub.image} alt={sub.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+                    : <div style={{ color: '#C8C4BC', fontSize: '40px' }}>📦</div>
+                  }
                 </div>
-              </Link>
-            );
-          })}
+                {/* Info */}
+                <div style={{ padding: '16px 20px', borderTop: '1px solid #F0EEED', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '15px', fontWeight: 600, marginBottom: '4px' }}>{sub.name}</div>
+                    <div style={{ fontSize: '12px', color: '#7A7570' }}>{sub.count} products</div>
+                  </div>
+                  <div style={{ color: '#0C7A6B', fontSize: '18px' }}>→</div>
+                </div>
+              </div>
+            </Link>
+          ))}
         </div>
       </main>
     </div>

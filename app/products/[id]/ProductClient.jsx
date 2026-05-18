@@ -24,10 +24,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
     return s;
   });
 
-  // Bottom thumbnails: main image + extra images
   const bottomImages = [mainImage, ...(extraImages || [])].filter(Boolean);
-
-  // Big image: colour selected → show colour image, else show bottom panel selection
   const bigImage = selectedColour !== null
     ? (colours[selectedColour]?.image || mainImage)
     : (bottomImages[leftIdx] || mainImage);
@@ -82,20 +79,15 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   }
 
   return (
-    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", minHeight: '100vh', background: '#F4F2EE', color: '#1A1714' }}>
-
-      {/* NAV */}
-      <nav style={{ background: '#1A1714', height: '54px', display: 'flex', alignItems: 'center', padding: '0 32px' }}>
-        <Link href="/" style={{ fontFamily: 'serif', fontSize: '19px', color: '#fff', textDecoration: 'none', letterSpacing: '1px' }}>
-          PROMO<span style={{ color: '#E07050' }}>HUB</span>
-        </Link>
-      </nav>
+    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", background: '#F4F2EE', color: '#1A1714' }}>
 
       {/* BREADCRUMB */}
       <div style={{ padding: '10px 32px', fontSize: '12px', color: '#7A7570', background: '#fff', borderBottom: '1px solid #E0DDD7' }}>
         <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
         <span style={{ margin: '0 6px' }}>›</span>
-        <Link href={`/category/${encodeURIComponent(product.category)}`} style={{ color: '#7A7570', textDecoration: 'none' }}>{product.category}</Link>
+        <Link href={`/category/${encodeURIComponent(product.category?.toLowerCase())}`} style={{ color: '#7A7570', textDecoration: 'none' }}>{product.category}</Link>
+        <span style={{ margin: '0 6px' }}>›</span>
+        <Link href={`/subcategory/${encodeURIComponent((product.subcategory || '').toLowerCase().replace(/ /g, '-'))}`} style={{ color: '#7A7570', textDecoration: 'none' }}>{product.subcategory}</Link>
         <span style={{ margin: '0 6px' }}>›</span>
         <span>{product.name}</span>
       </div>
@@ -103,29 +95,19 @@ export default function ProductClient({ product, mainImage, colours, extraImages
       {/* MAIN LAYOUT */}
       <div style={{ maxWidth: '1240px', margin: '0 auto', padding: '28px 32px 80px', display: 'grid', gridTemplateColumns: '480px 1fr', gap: '48px', alignItems: 'start' }}>
 
-        {/* LEFT: BIG IMAGE + HORIZONTAL THUMBNAILS BELOW */}
-        <div style={{ position: 'sticky', top: '20px' }}>
-
-          {/* Big image */}
+        {/* LEFT: BIG IMAGE + HORIZONTAL THUMBNAILS */}
+        <div style={{ position: 'sticky', top: '70px' }}>
           <div style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '16px', width: '100%', aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '12px' }}>
             {bigImage
               ? <img src={bigImage} alt={product.name} style={{ width: '85%', height: '85%', objectFit: 'contain' }} />
               : <div style={{ color: '#B0AAA3', fontSize: '14px' }}>No image</div>
             }
           </div>
-
-          {/* Horizontal thumbnails below: main + extra images */}
           {bottomImages.length > 1 && (
             <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
               {bottomImages.map((src, i) => (
                 <div key={i} onClick={() => handleBottomThumb(i)} style={{ cursor: 'pointer', flexShrink: 0 }}>
-                  <div style={{
-                    width: '80px', height: '80px', borderRadius: '10px',
-                    border: leftIdx === i && selectedColour === null ? '2.5px solid #0C7A6B' : '1.5px solid #E0DDD7',
-                    background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    overflow: 'hidden',
-                    boxShadow: leftIdx === i && selectedColour === null ? '0 2px 8px rgba(12,122,107,.2)' : 'none',
-                  }}>
+                  <div style={{ width: '80px', height: '80px', borderRadius: '10px', border: leftIdx === i && selectedColour === null ? '2.5px solid #0C7A6B' : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: leftIdx === i && selectedColour === null ? '0 2px 8px rgba(12,122,107,.2)' : 'none' }}>
                     <img src={src} alt="" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                   </div>
                 </div>
@@ -136,8 +118,6 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
         {/* RIGHT: DETAILS */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-          {/* Title */}
           <div>
             <div style={{ fontSize: '12px', color: '#B0AAA3', marginBottom: '4px' }}>{product.supplier_sku}</div>
             <h1 style={{ fontFamily: 'serif', fontSize: '28px', fontWeight: 500, margin: '0 0 6px' }}>{product.name}</h1>
@@ -153,21 +133,13 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '10px' }}>
                 {colours.map((c, i) => (
                   <div key={i} onClick={() => handleSelectColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
-                    <div style={{
-                      width: '60px', height: '60px', borderRadius: '10px',
-                      border: selectedColour === i ? '2.5px solid #0C7A6B' : '1.5px solid #E0DDD7',
-                      background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      overflow: 'hidden', marginBottom: '4px',
-                      boxShadow: selectedColour === i ? '0 2px 10px rgba(12,122,107,.2)' : '0 1px 3px rgba(0,0,0,.06)',
-                    }}>
+                    <div style={{ width: '60px', height: '60px', borderRadius: '10px', border: selectedColour === i ? '2.5px solid #0C7A6B' : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '4px', boxShadow: selectedColour === i ? '0 2px 10px rgba(12,122,107,.2)' : '0 1px 3px rgba(0,0,0,.06)' }}>
                       {c.image
                         ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                         : <div style={{ width: '30px', height: '30px', borderRadius: '50%', background: c.hex || '#C8C4BC' }} />
                       }
                     </div>
-                    <div style={{ fontSize: '10px', color: selectedColour === i ? '#0C7A6B' : '#7A7570', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '60px', lineHeight: '1.2' }}>
-                      {c.name}
-                    </div>
+                    <div style={{ fontSize: '10px', color: selectedColour === i ? '#0C7A6B' : '#7A7570', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '60px', lineHeight: '1.2' }}>{c.name}</div>
                   </div>
                 ))}
               </div>
@@ -177,13 +149,10 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           {/* STEP 2: QUANTITY */}
           <div>
             <StepLabel num={2} text="Enter Quantity" />
-            <div style={{ fontSize: '12px', color: '#7A7570', margin: '4px 0 10px' }}>
-              Minimum order: <strong>{product.min_qty} units</strong>
-            </div>
+            <div style={{ fontSize: '12px', color: '#7A7570', margin: '4px 0 10px' }}>Minimum order: <strong>{product.min_qty} units</strong></div>
             <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #C8C4BC', borderRadius: '8px', overflow: 'hidden', width: 'fit-content' }}>
               <button onClick={() => handleQtyChange(String(Math.max(product.min_qty, qty - 1)))} style={qtyBtnStyle}>−</button>
-              <input type="number" value={qtyInput} onChange={e => handleQtyChange(e.target.value)}
-                style={{ width: '80px', textAlign: 'center', border: 'none', padding: '10px', fontSize: '16px', fontWeight: 600, outline: 'none', fontFamily: 'inherit' }} />
+              <input type="number" value={qtyInput} onChange={e => handleQtyChange(e.target.value)} style={{ width: '80px', textAlign: 'center', border: 'none', padding: '10px', fontSize: '16px', fontWeight: 600, outline: 'none', fontFamily: 'inherit' }} />
               <button onClick={() => handleQtyChange(String(qty + 1))} style={qtyBtnStyle}>+</button>
             </div>
             {!isValidQty && <div style={{ fontSize: '12px', color: '#C0392B', marginTop: '6px' }}>Minimum order quantity is {product.min_qty} units.</div>}
@@ -208,9 +177,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                     <td style={tdLabelStyle}>Price</td>
                     {pricingTiers.map(t => {
                       const isActive = activeTier?.id === t.id;
-                      return <td key={t.id} style={{ ...tdStyle, fontWeight: 600, color: isActive ? '#0C7A6B' : undefined, background: isActive ? '#E6F5F2' : undefined, fontSize: isActive ? '15px' : undefined }}>
-                        ${(t.base_price * MARGIN).toFixed(2)}
-                      </td>;
+                      return <td key={t.id} style={{ ...tdStyle, fontWeight: 600, color: isActive ? '#0C7A6B' : undefined, background: isActive ? '#E6F5F2' : undefined, fontSize: isActive ? '15px' : undefined }}>${(t.base_price * MARGIN).toFixed(2)}</td>;
                     })}
                   </tr>
                   <tr>
@@ -264,9 +231,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                           <td style={tdStyle}>{d.has_setup ? `$${(SETUP_FEE * MARGIN).toFixed(2)}` : '—'}</td>
                           <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                             {d.has_setup ? (
-                              <input type="number" value={st.setupQty} min="1"
-                                disabled={!st.on || !d.setup_qty_editable}
-                                onChange={e => setSetupQty(d.id, e.target.value)}
+                              <input type="number" value={st.setupQty} min="1" disabled={!st.on || !d.setup_qty_editable} onChange={e => setSetupQty(d.id, e.target.value)}
                                 style={{ width: '54px', border: '1.5px solid #C8C4BC', borderRadius: '6px', padding: '5px 6px', fontSize: '13px', fontWeight: 600, textAlign: 'center', fontFamily: 'inherit', background: (!st.on || !d.setup_qty_editable) ? '#F4F2EE' : '#fff', color: (!st.on || !d.setup_qty_editable) ? '#B0AAA3' : '#1A1714', outline: 'none' }} />
                             ) : <span style={{ color: '#B0AAA3' }}>—</span>}
                           </td>
@@ -358,11 +323,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
           {/* TRUST BADGES */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-            {[
-              { icon: '🎨', text: 'Free digital proof' },
-              { icon: '🚚', text: '$30 flat shipping' },
-              { icon: '✅', text: 'Quality guarantee' },
-            ].map(b => (
+            {[{ icon: '🎨', text: 'Free digital proof' }, { icon: '🚚', text: '$30 flat shipping' }, { icon: '✅', text: 'Quality guarantee' }].map(b => (
               <div key={b.text} style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '10px', padding: '14px 10px', textAlign: 'center' }}>
                 <div style={{ fontSize: '22px', marginBottom: '6px' }}>{b.icon}</div>
                 <div style={{ fontSize: '12px', color: '#3D3A36', fontWeight: 500 }}>{b.text}</div>
@@ -381,38 +342,25 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
             <div style={{ padding: '20px', fontSize: '14px', lineHeight: '1.8', color: '#3D3A36' }}>
               {activeTab === 'Description' && (
-                <>
-                  {product.description
-                    ? <p style={{ margin: '0 0 12px' }}>{product.description}</p>
-                    : <p style={{ margin: 0, color: '#B0AAA3' }}>No description available.</p>}
-                  {product.short_desc && <p style={{ margin: 0, color: '#7A7570' }}>{product.short_desc}</p>}
-                </>
+                <>{product.description ? <p style={{ margin: '0 0 12px' }}>{product.description}</p> : <p style={{ margin: 0, color: '#B0AAA3' }}>No description available.</p>}
+                  {product.short_desc && <p style={{ margin: 0, color: '#7A7570' }}>{product.short_desc}</p>}</>
               )}
               {activeTab === 'Specifications' && (
-                <>
-                  {product.material && <SpecRow label="Material" value={product.material} />}
+                <>{product.material && <SpecRow label="Material" value={product.material} />}
                   {product.dimensions && <SpecRow label="Dimensions" value={product.dimensions} />}
                   {product.weight && <SpecRow label="Weight" value={product.weight} />}
                   <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />
-                  <SpecRow label="SKU" value={product.supplier_sku} />
-                  {!product.material && !product.dimensions && !product.weight && (
-                    <p style={{ margin: '8px 0 0', color: '#B0AAA3' }}>No additional specifications available.</p>
-                  )}
-                </>
+                  <SpecRow label="SKU" value={product.supplier_sku} /></>
               )}
               {activeTab === 'Decoration' && (
-                <>
-                  {decorations.length > 0 ? decorations.map(d => (
-                    <div key={d.id} style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #F0EEED' }}>
-                      <div style={{ fontWeight: 600, marginBottom: '2px' }}>{d.name}</div>
-                      {d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#7A7570', fontSize: '13px' }}>{d.detail}</div>}
-                    </div>
-                  )) : <p style={{ margin: 0, color: '#B0AAA3' }}>No decoration options available.</p>}
-                </>
+                <>{decorations.length > 0 ? decorations.map(d => (
+                  <div key={d.id} style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #F0EEED' }}>
+                    <div style={{ fontWeight: 600, marginBottom: '2px' }}>{d.name}</div>
+                    {d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#7A7570', fontSize: '13px' }}>{d.detail}</div>}
+                  </div>
+                )) : <p style={{ margin: 0, color: '#B0AAA3' }}>No decoration options available.</p>}</>
               )}
-              {activeTab === 'Packaging' && (
-                <p style={{ margin: 0 }}>{product.packing || 'Packaging information not available.'}</p>
-              )}
+              {activeTab === 'Packaging' && <p style={{ margin: 0 }}>{product.packing || 'Packaging information not available.'}</p>}
               {activeTab === 'How to Order' && (
                 <ol style={{ margin: 0, paddingLeft: '20px' }}>
                   <li style={{ marginBottom: '8px' }}>Select your colour and enter your required quantity above.</li>
@@ -423,21 +371,16 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                 </ol>
               )}
               {activeTab === 'Returns' && (
-                <>
-                  <p style={{ margin: '0 0 10px' }}>We stand behind every order. If there's a quality issue, we'll make it right.</p>
-                  <p style={{ margin: 0, color: '#7A7570' }}>Custom branded products cannot be returned unless there is a manufacturing defect. Contact us within 14 days of receiving your order.</p>
-                </>
+                <><p style={{ margin: '0 0 10px' }}>We stand behind every order. If there's a quality issue, we'll make it right.</p>
+                  <p style={{ margin: 0, color: '#7A7570' }}>Custom branded products cannot be returned unless there is a manufacturing defect. Contact us within 14 days of receiving your order.</p></>
               )}
               {activeTab === 'Shipping' && (
-                <>
-                  <p style={{ margin: '0 0 10px' }}><strong>$30 flat rate</strong> shipping on all orders Australia-wide.</p>
+                <><p style={{ margin: '0 0 10px' }}><strong>$30 flat rate</strong> shipping on all orders Australia-wide.</p>
                   <p style={{ margin: '0 0 10px' }}>Standard production time is 7–10 business days after proof approval.</p>
-                  <p style={{ margin: 0, color: '#7A7570' }}>Delivery typically takes 2–5 business days after dispatch.</p>
-                </>
+                  <p style={{ margin: 0, color: '#7A7570' }}>Delivery typically takes 2–5 business days after dispatch.</p></>
               )}
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -471,13 +414,7 @@ function SpecRow({ label, value }) {
   );
 }
 
-const qtyBtnStyle = {
-  width: '38px', height: '42px', background: '#F4F2EE', border: 'none',
-  fontSize: '20px', cursor: 'pointer', color: '#3D3A36', fontFamily: 'inherit',
-};
-const thStyle = {
-  fontSize: '11px', fontWeight: 600, padding: '8px 10px',
-  textAlign: 'center', color: '#7A7570', borderBottom: '1px solid #E0DDD7',
-};
+const qtyBtnStyle = { width: '38px', height: '42px', background: '#F4F2EE', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#3D3A36', fontFamily: 'inherit' };
+const thStyle = { fontSize: '11px', fontWeight: 600, padding: '8px 10px', textAlign: 'center', color: '#7A7570', borderBottom: '1px solid #E0DDD7' };
 const tdStyle = { padding: '8px 10px', fontSize: '13px', textAlign: 'center' };
 const tdLabelStyle = { padding: '8px 10px', fontSize: '11px', color: '#7A7570', fontWeight: 500, background: '#FAFAF8' };

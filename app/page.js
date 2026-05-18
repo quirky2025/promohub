@@ -13,71 +13,34 @@ export default async function Home() {
     .eq('status', 'active')
     .limit(24);
 
-  const { data: allProducts } = await supabase
-    .from('products')
-    .select('category, subcategory')
-    .eq('status', 'active');
-
-  const categoryMap = {};
-  allProducts?.forEach(({ category, subcategory }) => {
-    if (!category) return;
-    if (!categoryMap[category]) categoryMap[category] = new Set();
-    if (subcategory) categoryMap[category].add(subcategory);
-  });
-
   return (
-    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", minHeight: '100vh', background: '#F4F2EE', color: '#1A1714' }}>
-
-      {/* NAV */}
-      <nav style={{ background: '#1A1714', padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '54px', position: 'sticky', top: 0, zIndex: 100 }}>
-        <Link href="/" style={{ fontFamily: 'serif', fontSize: '19px', color: '#fff', textDecoration: 'none', letterSpacing: '1px' }}>
-          PROMO<span style={{ color: '#E07050' }}>HUB</span>
-        </Link>
-        <div style={{ display: 'flex', gap: '24px' }}>
-          {Object.keys(categoryMap).sort().map(cat => (
-            <Link key={cat} href={`/category/${encodeURIComponent(cat)}`}
-              style={{ color: '#C8C4BC', textDecoration: 'none', fontSize: '12px', letterSpacing: '1px', textTransform: 'uppercase' }}>
-              {cat}
-            </Link>
-          ))}
-        </div>
-      </nav>
+    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", color: '#1A1714' }}>
 
       {/* HERO */}
-      <div style={{ background: '#1A1714', color: '#fff', padding: '48px 32px', textAlign: 'center' }}>
-        <h1 style={{ fontFamily: 'serif', fontSize: '42px', fontWeight: 400, margin: '0 0 12px', letterSpacing: '2px' }}>
+      <div style={{ background: '#1A1714', color: '#fff', padding: '64px 32px', textAlign: 'center' }}>
+        <h1 style={{ fontFamily: 'serif', fontSize: '48px', fontWeight: 400, margin: '0 0 16px', letterSpacing: '2px' }}>
           Premium Promotional Products
         </h1>
-        <p style={{ color: '#7A7570', fontSize: '15px', margin: 0 }}>
+        <p style={{ color: 'rgba(255,255,255,.6)', fontSize: '16px', margin: '0 0 32px' }}>
           High-quality branded merchandise for Australian businesses
         </p>
-      </div>
-
-      {/* CATEGORY PILLS */}
-      <div style={{ padding: '20px 32px', display: 'flex', gap: '10px', flexWrap: 'wrap', borderBottom: '1px solid #E0DDD7', background: '#fff' }}>
-        <Link href="/" style={{ padding: '6px 16px', borderRadius: '20px', background: '#1A1714', color: '#fff', textDecoration: 'none', fontSize: '12px', fontWeight: 600 }}>
-          All
+        <Link href="/category/drinkware" style={{ background: '#E07050', color: '#fff', padding: '14px 32px', borderRadius: '8px', textDecoration: 'none', fontSize: '15px', fontWeight: 600 }}>
+          Shop Now
         </Link>
-        {Object.keys(categoryMap).sort().map(cat => (
-          <Link key={cat} href={`/category/${encodeURIComponent(cat)}`}
-            style={{ padding: '6px 16px', borderRadius: '20px', border: '1px solid #C8C4BC', color: '#3D3A36', textDecoration: 'none', fontSize: '12px' }}>
-            {cat}
-          </Link>
-        ))}
       </div>
 
       {/* PRODUCT GRID */}
-      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '28px 32px' }}>
-        <p style={{ fontSize: '13px', color: '#7A7570', marginBottom: '20px' }}>{products?.length || 0} products</p>
+      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px' }}>
+        <h2 style={{ fontFamily: 'serif', fontSize: '24px', fontWeight: 400, marginBottom: '24px' }}>Featured Products</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '16px' }}>
           {products?.map(product => {
             const images = product.product_colours?.[0]?.images;
             const firstImage = Array.isArray(images) ? images[0] : null;
             return (
               <Link key={product.id} href={`/products/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', transition: 'box-shadow .2s' }}>
+                <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7' }}>
                   {firstImage
-                    ? <img src={firstImage} alt={product.name} style={{ width: '100%', height: '200px', objectFit: 'contain', padding: '16px', background: '#fff' }} />
+                    ? <img src={firstImage} alt={product.name} style={{ width: '100%', height: '200px', objectFit: 'contain', padding: '16px', boxSizing: 'border-box' }} />
                     : <div style={{ width: '100%', height: '200px', background: '#F4F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#B0AAA3', fontSize: '13px' }}>No image</div>
                   }
                   <div style={{ padding: '12px 14px', borderTop: '1px solid #F0EEED' }}>

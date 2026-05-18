@@ -7,129 +7,64 @@ const supabase = createClient(
 );
 
 export default async function SubcategoryPage({ params }) {
-  const { subcategory: rawSub } = await params;
-  const subcategory = decodeURIComponent(rawSub);
+  const { subcategory } = await params;
+  const subcategoryName = decodeURIComponent(subcategory).replace(/-/g, ' ');
 
   const { data: products } = await supabase
     .from('products')
     .select('id, name, supplier_sku, category, subcategory, min_qty, product_colours(images)')
-    .eq('subcategory', subcategory)
-    .eq('status', 'active');
+    .ilike('subcategory', subcategoryName)
+    .eq('status', 'active')
+    .order('name');
 
   const category = products?.[0]?.category || '';
 
   return (
-    <div style={{ fontFamily: 'sans-serif', minHeight: '100vh', background: '#f8f8f6' }}>
-      {/* 导航栏 */}
-      <nav style={{
-        background: '#1a1a1a', color: 'white',
-        padding: '0 2rem', display: 'flex',
-        alignItems: 'center', height: '64px'
-      }}>
-        <Link href="/" style={{ color: 'white', textDecoration: 'none', fontSize: '1.5rem', fontWeight: 'bold', letterSpacing: '2px' }}>
-          PROMOHUB
-        </Link>
-      </nav>
+    <div style={{ fontFamily: "'IBM Plex Sans', sans-serif", minHeight: '100vh', background: '#F4F2EE', color: '#1A1714' }}>
 
-      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '2rem' }}>
-        {/* 面包屑 */}
-        <div style={{ marginBottom: '1.5rem', fontSize: '0.875rem', color: '#666' }}>
-          <Link href="/" style={{ color: '#666', textDecoration: 'none' }}>Home</Link>
-          <span style={{ margin: '0 0.5rem' }}>→</span>
-          <Link href={`/category/${encodeURIComponent(category)}`} style={{ color: '#666', textDecoration: 'none' }}>{category}</Link>
-          <span style={{ margin: '0 0.5rem' }}>→</span>
-          <span>{subcategory}</span>
+      {/* BREADCRUMB */}
+      <div style={{ padding: '10px 32px', fontSize: '12px', color: '#7A7570', background: '#fff', borderBottom: '1px solid #E0DDD7' }}>
+        <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <span style={{ margin: '0 6px' }}>›</span>
+        <Link href={`/category/${encodeURIComponent(category.toLowerCase())}`} style={{ color: '#7A7570', textDecoration: 'none', textTransform: 'capitalize' }}>{category}</Link>
+        <span style={{ margin: '0 6px' }}>›</span>
+        <span style={{ textTransform: 'capitalize' }}>{subcategoryName}</span>
+      </div>
+
+      {/* HEADER */}
+      <div style={{ background: '#1A1714', color: '#fff', padding: '40px 32px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <h1 style={{ fontFamily: 'serif', fontSize: '36px', fontWeight: 400, margin: '0 0 8px', textTransform: 'capitalize' }}>
+            {subcategoryName}
+          </h1>
+          <p style={{ color: 'rgba(255,255,255,.5)', margin: 0, fontSize: '14px' }}>
+            {products?.length || 0} products
+          </p>
         </div>
+      </div>
 
-        <h1 style={{ fontSize: '2rem', fontWeight: '300', marginBottom: '2rem', letterSpacing: '2px', textTransform: 'uppercase' }}>
-          {subcategory}
-        </h1>
-
-        <div style={{ display: 'flex', gap: '2rem' }}>
-          {/* 左侧 Filter */}
-          <div style={{ width: '260px', flexShrink: 0 }}>
-            <div style={{ background: 'white', padding: '1.5rem', borderRadius: '4px' }}>
-              <h3 style={{ fontSize: '0.8rem', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '1.5rem', fontWeight: '600' }}>
-                Filter
-              </h3>
-
-              {/* Price filter */}
-              <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>Price</span>
-                  <span>›</span>
+      {/* PRODUCT GRID */}
+      <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '16px' }}>
+          {products?.map(product => {
+            const images = product.product_colours?.[0]?.images;
+            const firstImage = Array.isArray(images) ? images[0] : null;
+            return (
+              <Link key={product.id} href={`/products/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7' }}>
+                  {firstImage
+                    ? <img src={firstImage} alt={product.name} style={{ width: '100%', height: '200px', objectFit: 'contain', padding: '16px', boxSizing: 'border-box' }} />
+                    : <div style={{ width: '100%', height: '200px', background: '#F4F2EE', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#B0AAA3', fontSize: '13px' }}>No image</div>
+                  }
+                  <div style={{ padding: '12px 14px', borderTop: '1px solid #F0EEED' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 600, marginBottom: '4px' }}>{product.name}</div>
+                    <div style={{ fontSize: '11px', color: '#B0AAA3', marginBottom: '4px' }}>{product.supplier_sku}</div>
+                    <div style={{ fontSize: '11px', color: '#7A7570' }}>Min. {product.min_qty} units</div>
+                  </div>
                 </div>
-              </div>
-
-              {/* Min Qty filter */}
-              <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>Minimum Quantity</span>
-                  <span>›</span>
-                </div>
-              </div>
-
-              {/* Colour filter */}
-              <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>Colour</span>
-                  <span>›</span>
-                </div>
-              </div>
-
-              {/* Decoration filter */}
-              <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginBottom: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>Decoration</span>
-                  <span>›</span>
-                </div>
-              </div>
-
-              {/* Material filter */}
-              <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
-                  <span style={{ fontSize: '0.9rem', fontWeight: '500' }}>Material</span>
-                  <span>›</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 右侧产品网格 */}
-          <div style={{ flex: 1 }}>
-            <p style={{ color: '#666', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
-              {products?.length || 0} products
-            </p>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-              gap: '1.5rem'
-            }}>
-              {products?.map(product => {
-                const images = product.product_colours?.[0]?.images;
-                const firstImage = Array.isArray(images) ? images[0] : null;
-                return (
-                  <Link key={product.id} href={`/products/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <div style={{ background: 'white', borderRadius: '4px', overflow: 'hidden', cursor: 'pointer' }}>
-                      {firstImage ? (
-                        <img src={firstImage} alt={product.name}
-                          style={{ width: '100%', height: '200px', objectFit: 'contain', padding: '1rem' }} />
-                      ) : (
-                        <div style={{ width: '100%', height: '200px', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999' }}>
-                          No image
-                        </div>
-                      )}
-                      <div style={{ padding: '1rem', borderTop: '1px solid #f0f0f0' }}>
-                        <p style={{ fontWeight: '500', margin: '0 0 0.25rem', fontSize: '0.9rem' }}>{product.name}</p>
-                        <p style={{ color: '#999', margin: '0 0 0.25rem', fontSize: '0.75rem' }}>SKU: {product.supplier_sku}</p>
-                        <p style={{ color: '#666', margin: 0, fontSize: '0.75rem' }}>Min qty: {product.min_qty}</p>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
+              </Link>
+            );
+          })}
         </div>
       </main>
     </div>
