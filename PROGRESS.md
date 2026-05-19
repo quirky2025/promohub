@@ -5,7 +5,7 @@
 
 ## 项目基本信息
 - **网站名称**：QuirkyPromo
-- **域名**：quirkypromo.com.au
+- **域名**：quirkypromo.com.au（待绑定，在GoDaddy，考虑换域名）
 - **业务**：澳洲B2B促销品电商
 - **主要客户**：大企业/品牌部门
 - **品牌定位**：高端专业（Premium & Corporate）
@@ -14,6 +14,7 @@
 - **数据库**：Supabase
 - **Supabase URL**：`https://ztfmeopyknfzmxvbpnxo.supabase.co`
 - **Vercel项目名**：promohub-store
+- **线上网址**：https://promohub-store.vercel.app/
 
 ---
 
@@ -45,7 +46,7 @@
 **product_colours：**
 - id, product_id, name（大部分是"Default"）, hex（大部分NULL）
 - images（jsonb，URL数组）— 按文件名数字排序
-- 图片规律：images[0]=主图，images[1..N]=颜色图（N=colours字段颜色数量），images[N+1..]=包装/feature图
+- 图片规律：images[0]=主图，images[1..N]=颜色图（N=colours字段颜色数量），images[N+1..]=包装图
 
 **pricing_tiers：** id, product_id, min_qty, max_qty, base_price, sort_order
 
@@ -55,6 +56,14 @@
 
 ## 导航结构（方案B）
 All Products（mega下拉）/ Collections / Brands / Eco / New Arrivals / Sale
+
+---
+
+## 重要URL规则
+- subcategory slug：`&`→`-and-`，空格→`-`
+  例：`Pads & Planners` → `/subcategory/pads-and-planners`
+- 还原时：先`-and-`→` & `，再`-`→空格
+- category slug：直接lowercase + 空格→`-`
 
 ---
 
@@ -78,7 +87,7 @@ All Products（mega下拉）/ Collections / Brands / Eco / New Arrivals / Sale
 promohub/
 ├── app/
 │   ├── layout.js                       ✅ 含Google Fonts + Nav + Footer
-│   ├── globals.css                     ✅ 全局样式（含dropdown link hover样式）
+│   ├── globals.css                     ✅ 全局样式
 │   ├── page.js                         首页
 │   ├── products/
 │   │   └── [slug]/
@@ -86,11 +95,13 @@ promohub/
 │   │       └── ProductClient.jsx       ✅ 产品详情客户端
 │   ├── subcategory/
 │   │   └── [slug]/
-│   │       └── page.js                 ✅ 子分类页面含Filter
-│   ├── category/                       ⏳ 待做（显示Coming Soon）
+│   │       └── page.js                 ✅ 子分类页面含Filter（&符号处理正确）
+│   ├── category/
+│   │   └── [category]/
+│   │       └── page.js                 ✅ 分类页面，显示子分类网格
 │   └── ...其他页面（coming soon）
 ├── components/
-│   ├── Nav.jsx                         ✅ 完成，hover正常
+│   ├── Nav.jsx                         ✅ hover正常，Collections/Brands跟按钮走
 │   └── Footer.jsx                      ✅ 完成
 ├── lib/
 │   └── supabase.js                     ✅ Supabase客户端
@@ -99,34 +110,29 @@ promohub/
 
 ---
 
-## Vercel部署
-- 已push到GitHub，但Vercel部署失败
-- **原因**：Vercel没有设置环境变量
-- **待办**：去Vercel → Settings → Environment Variables 添加：
-  - NEXT_PUBLIC_SUPABASE_URL = https://ztfmeopyknfzmxvbpnxo.supabase.co
-  - NEXT_PUBLIC_SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp0Zm1lb3B5a25mem14dmJwbnhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4NzgyNDMsImV4cCI6MjA5NDQ1NDI0M30.wKUraRxUq9yJNDeeOQ-X_ek3Wx_GMmeaSMxq9RyboKY
-  - 添加后Redeploy
-
----
-
 ## 已完成 ✅
 1. Header — Logo + 搜索 + 电话(02 9477 4748) + Sign In + Cart，128px高
 2. Footer — 4列，Subscribe栏，白色文字
-3. Nav — ✅ hover正常，mega下拉，Collections/Brands跟按钮走，hover变蓝色底色
+3. Nav — hover正常，mega下拉，Collections/Brands跟按钮走，hover变蓝色
 4. 字体 — 全站统一三种字体
 5. Subcategory页面 — Filter + 产品网格 + 价格 + 颜色圆点
-6. 产品详情页 — 图片切换（主图+颜色缩略图）+ 颜色名称（从products.colours读取）+ 阶梯价格 + 装饰选项 + 价格计算 + Add to Cart + Get a Quote + Trust badges + Tabs + Similar Products
+6. 产品详情页 — 图片切换 + 颜色选择 + 阶梯价格 + 装饰选项 + 价格计算 + Add to Cart + Get a Quote + Trust badges + Tabs + Similar Products
+7. Category页面 — 显示所有子分类网格，有图片和产品数量
+8. Vercel部署 ✅ + 环境变量 ✅
+9. &符号URL问题修复 ✅
 
 ---
 
-## 明天继续 ⏳
-1. **Vercel环境变量设置** — 让线上网站能用（Settings → Environment Variables）
-2. **Category页面** — 点All Products下拉里的分类，显示该分类下所有子分类
-3. **Get a Quote表单** — 弹窗，发邮件给你
-4. **客户登录/注册** — Supabase Auth
-5. **购物车**
-6. **结账** — Stripe + EFT
-7. **Invoice自动生成**
+## 下一步 ⏳（按优先级）
+1. **Get a Quote表单** ← 最重要！客户能询价就能接单
+   - 产品详情页"Get a Quote"按钮 → 弹窗表单
+   - 表单内容：客户姓名、公司、邮件、电话、数量、颜色、备注
+   - 提交后发邮件给你（用Resend服务）
+2. **客户登录/注册** — Supabase Auth
+3. **购物车**
+4. **结账** — Stripe + EFT
+5. **Invoice自动生成**
+6. **域名绑定** — 等确认域名后绑定到Vercel
 
 ## Phase 2（之后）
 - 搜索功能
@@ -147,4 +153,4 @@ promohub/
 - 运费：$30
 - GST：10%
 
-最后更新：2026-05-19
+最后更新：2026-05-20

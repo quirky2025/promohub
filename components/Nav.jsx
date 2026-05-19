@@ -177,7 +177,7 @@ export default function Nav() {
                     </Link>
                     {subs.map(sub => (
                       <Link key={sub}
-                        href={`/subcategory/${encodeURIComponent(sub.toLowerCase().replace(/ /g, '-'))}`}
+                        href={`/subcategory/${sub.toLowerCase().replace(/ & /g, '-and-').replace(/ /g, '-')}`}
                         onClick={() => setActiveDropdown(null)}
                         style={dropdownLinkStyle}
                         onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}

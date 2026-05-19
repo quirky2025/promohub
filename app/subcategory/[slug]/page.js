@@ -10,7 +10,10 @@ const GOLD = '#C9A96E';
 
 export default function SubcategoryPage() {
   const { slug } = useParams();
-  const subcategoryName = slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  const subcategoryName = decodeURIComponent(slug)
+  .replace(/-and-/g, ' & ')
+  .replace(/-/g, ' ')
+  .replace(/\b\w/g, c => c.toUpperCase());
 
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
