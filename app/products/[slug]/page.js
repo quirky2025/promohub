@@ -1,0 +1,98 @@
+import { createClient } from '@supabase/supabase-js';
+import ProductClient from './ProductClient';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
+
+function extractImgNum(url) {
+  const match = url.match(/-(\d+)\.\w+$/);
+  return match ? parseInt(match[1]) : 999;
+}
+
+export default async function ProductPage({ params }) {
+  const { slug } = await params;
+
+  const { data: product, error } = await supabase
+    .from('products')
+    .select(`
+      *,
+      product_colours(id, name, hex, images, sort_order),
+      pricing_tiers(id, min_qty, max_qty, base_price, sort_order),
+      decoration_options(id, name, detail, per_unit, has_setup, default_setup_qty, setup_qty_editable, sort_order)
+    `)
+    .eq('slug', slug)
+    .single();
+
+  if (error) console.error('Product fetch error:', error);
+  if (!product) return (
+    <div style={{ padding: '4rem', textAlign: 'center', fontFamily: '"DM Sans", sans-serif', color: '#1B2A4A' }}>
+      Product not found
+    </div>
+  );
+
+  const pricingTiers = [...(product.pricing_tiers || [])].sort((a, b) => a.sort_order - b.sort_order);
+  const decorations = [...(product.decoration_options || [])].sort((a, b) => a.sort_order - b.sort_order);
+
+  // ── GET COLOUR NAMES ──
+  // Try products.colours jsonb field first
+  // Format: [{"name": "Navy", "hex": "#000080"}, {"name": "Black", "hex": "#000000"}]
+  let colourData = [];
+  if (product.colours) {
+    if (Array.isArray(product.colours)) {
+      colourData = product.colours;
+    } else if (typeof product.colours === 'string') {
+      try { colourData = JSON.parse(product.colours); } catch (e) {}
+    }
+  }
+
+  // Fallback: use product_colours table records (if multiple and not all "Default")
+  if (colourData.length === 0) {
+    const pcRecords = [...(product.product_colours || [])].sort((a, b) => a.sort_order - b.sort_order);
+    const nonDefault = pcRecords.filter(pc => pc.name && pc.name !== 'Default');
+    if (nonDefault.length > 0) {
+      colourData = nonDefault.map(pc => ({ name: pc.name, hex: pc.hex || '' }));
+    }
+  }
+
+  const colourCount = colourData.length;
+
+  // ── GET ALL IMAGES sorted by number in URL ──
+  const rawColours = [...(product.product_colours || [])].sort((a, b) => a.sort_order - b.sort_order);
+  const firstColour = rawColours[0];
+  const rawImages = firstColour?.images
+    ? (Array.isArray(firstColour.images) ? firstColour.images : Object.values(firstColour.images))
+    : [];
+  const sortedImages = [...rawImages].sort((a, b) => extractImgNum(a) - extractImgNum(b));
+
+  // ── SPLIT IMAGES ──
+  // [0] = main hero image
+  // [1..colourCount] = one image per colour
+  // [colourCount+1..] = packaging/feature images
+  const mainImage = sortedImages[0] || null;
+  const colourImages = sortedImages.slice(1, colourCount + 1);
+  const extraImages = sortedImages.slice(colourCount + 1);
+
+  // ── BUILD COLOUR OBJECTS ──
+  const colours = colourCount > 0
+    ? colourData.map((c, i) => ({
+        id: i,
+        name: c.name || `Colour ${i + 1}`,
+        hex: c.hex || null,
+        image: colourImages[i] || null,
+        images: colourImages[i] ? [colourImages[i]] : [],
+      }))
+    : []; // no colours = just show images in thumbnails
+
+  return (
+    <ProductClient
+      product={product}
+      mainImage={mainImage}
+      extraImages={colourCount > 0 ? extraImages : sortedImages.slice(1)}
+      colours={colours}
+      pricingTiers={pricingTiers}
+      decorations={decorations}
+    />
+  );
+}

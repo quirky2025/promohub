@@ -1,96 +1,129 @@
 import Link from 'next/link';
-
+ 
+const NAVY = '#1B2A4A';
+const GOLD = '#C9A96E';
+ 
 export default function Footer() {
   return (
-    <footer style={{ background: '#1A1714', color: 'rgba(255,255,255,.6)', marginTop: 'auto' }}>
-
-      {/* MAIN FOOTER */}
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '48px 32px 32px', display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr', gap: '40px' }}>
-
-        {/* BRAND */}
-        <div>
-          <div style={{ fontFamily: 'serif', fontSize: '22px', color: '#fff', letterSpacing: '1px', marginBottom: '12px' }}>
-            PROMO<span style={{ color: '#E07050' }}>HUB</span>
+    <footer style={{ background: NAVY, color: '#ffffff', marginTop: 'auto' }}>
+ 
+      {/* SUBSCRIBE BAR */}
+      <div style={{ borderBottom: '1px solid rgba(255,255,255,.08)', padding: '32px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '24px', flexWrap: 'wrap' }}>
+          <div>
+            <div style={{ color: '#fff', fontSize: '18px', fontFamily: '"Cormorant Garamond", serif', fontWeight: 500, marginBottom: '6px' }}>Stay in the loop</div>
+            <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.7)', fontFamily: '"DM Sans", sans-serif' }}>Subscribe for new arrivals, promotions and industry tips.</div>
           </div>
-          <p style={{ fontSize: '13px', lineHeight: '1.8', marginBottom: '16px', color: 'rgba(255,255,255,.5)' }}>
-            Premium promotional products for Australian businesses. High-quality branded merchandise delivered Australia-wide.
-          </p>
-          <a href="tel:0294774748" style={{ color: '#E07050', textDecoration: 'none', fontSize: '14px', fontWeight: 600 }}>
-            📞 02 9477 4748
-          </a>
-        </div>
-
-        {/* PRODUCTS */}
-        <div>
-          <div style={{ color: '#fff', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>Products</div>
-          {['Bags', 'Drinkware', 'Headwear', 'Pens', 'Technology', 'Leisure'].map(cat => (
-            <Link key={cat} href={`/category/${cat.toLowerCase()}`}
-              style={{ display: 'block', fontSize: '13px', color: 'rgba(255,255,255,.5)', textDecoration: 'none', marginBottom: '8px' }}>
-              {cat}
-            </Link>
-          ))}
-        </div>
-
-        {/* SERVICES */}
-        <div>
-          <div style={{ color: '#fff', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>Services</div>
-          {[
-            { label: 'Decoration Methods', href: '/services/decoration-methods' },
-            { label: 'Sourcing', href: '/services/sourcing' },
-            { label: 'Logistics', href: '/services/logistics' },
-            { label: 'Warehousing', href: '/services/warehousing' },
-            { label: 'Merch Store', href: '/services/merch-store' },
-          ].map(s => (
-            <Link key={s.href} href={s.href}
-              style={{ display: 'block', fontSize: '13px', color: 'rgba(255,255,255,.5)', textDecoration: 'none', marginBottom: '8px' }}>
-              {s.label}
-            </Link>
-          ))}
-        </div>
-
-        {/* COMPANY */}
-        <div>
-          <div style={{ color: '#fff', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>Company</div>
-          {[
-            { label: 'About Us', href: '/about' },
-            { label: 'Portfolio', href: '/resources/portfolio' },
-            { label: 'Sustainability', href: '/sustainability' },
-            { label: 'Contact Us', href: '/contact' },
-          ].map(s => (
-            <Link key={s.href} href={s.href}
-              style={{ display: 'block', fontSize: '13px', color: 'rgba(255,255,255,.5)', textDecoration: 'none', marginBottom: '8px' }}>
-              {s.label}
-            </Link>
-          ))}
-        </div>
-
-        {/* RESOURCES */}
-        <div>
-          <div style={{ color: '#fff', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '14px' }}>Resources</div>
-          {[
-            { label: 'PMS Colour Chart', href: '/resources/pms-chart' },
-            { label: 'Best Sellers', href: '/best-sellers' },
-            { label: 'New Arrivals', href: '/new-arrivals' },
-            { label: 'My Account', href: '/account' },
-          ].map(s => (
-            <Link key={s.href} href={s.href}
-              style={{ display: 'block', fontSize: '13px', color: 'rgba(255,255,255,.5)', textDecoration: 'none', marginBottom: '8px' }}>
-              {s.label}
-            </Link>
-          ))}
+          <div style={{ display: 'flex', gap: '0', flexShrink: 0 }}>
+            <input
+              type="email"
+              placeholder="Enter your email address"
+              style={{ padding: '12px 16px', border: 'none', background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: '13px', outline: 'none', fontFamily: '"DM Sans", sans-serif', borderRadius: '8px 0 0 8px', width: '280px' }}
+            />
+            <button style={{ background: GOLD, color: '#fff', border: 'none', padding: '12px 24px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', borderRadius: '0 8px 8px 0' }}>
+              Subscribe
+            </button>
+          </div>
         </div>
       </div>
-
-      {/* BOTTOM BAR */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', padding: '16px 32px', maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
-        <div style={{ color: 'rgba(255,255,255,.3)' }}>
-          © {new Date().getFullYear()} PromoHub. All rights reserved.
+ 
+      {/* MAIN FOOTER - 4 COLUMNS */}
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '48px 32px 32px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '40px' }}>
+ 
+        {/* COL 1 - ABOUT US */}
+        <div>
+          <div style={{ color: GOLD, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '16px', fontFamily: '"DM Sans", sans-serif' }}>About Us</div>
+          {[
+            { label: 'About Us', href: '/about' },
+            { label: 'Contact Us', href: '/contact' },
+            { label: 'Testimonials', href: '/testimonials' },
+            { label: 'Google Reviews', href: '/reviews' },
+            { label: 'Digital Catalog', href: '/catalog' },
+          ].map(item => (
+            <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: '13px', color: '#ffffff', textDecoration: 'none', marginBottom: '10px', lineHeight: '1.4', fontFamily: '"DM Sans", sans-serif' }}>
+              {item.label}
+            </Link>
+          ))}
         </div>
-        <div style={{ display: 'flex', gap: '20px' }}>
-          <Link href="/privacy" style={{ color: 'rgba(255,255,255,.3)', textDecoration: 'none' }}>Privacy Policy</Link>
-          <Link href="/terms" style={{ color: 'rgba(255,255,255,.3)', textDecoration: 'none' }}>Terms & Conditions</Link>
+ 
+        {/* COL 2 - SERVICES */}
+        <div>
+          <div style={{ color: GOLD, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '16px', fontFamily: '"DM Sans", sans-serif' }}>Services</div>
+          {[
+            { label: 'Sourcing & Manufacturing', href: '/services/sourcing' },
+            { label: 'International Logistics', href: '/services/logistics' },
+            { label: 'Made to Order Merch', href: '/services/made-to-order' },
+          ].map(item => (
+            <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: '13px', color: '#ffffff', textDecoration: 'none', marginBottom: '10px', lineHeight: '1.4', fontFamily: '"DM Sans", sans-serif' }}>
+              {item.label}
+            </Link>
+          ))}
+        </div>
+ 
+        {/* COL 3 - SUPPORT */}
+        <div>
+          <div style={{ color: GOLD, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '16px', fontFamily: '"DM Sans", sans-serif' }}>Support</div>
+          {[
+            { label: 'FAQ', href: '/faq' },
+            { label: 'Sample Policy', href: '/sample-policy' },
+            { label: 'Shipping', href: '/shipping' },
+            { label: 'Refund & Return', href: '/refund-return' },
+            { label: 'Track Your Order', href: '/track-order' },
+            { label: 'PMS Colour Match', href: '/resources/pms-chart' },
+            { label: 'Decoration Methods', href: '/services/decoration-methods' },
+            { label: 'Your Merch Store', href: '/services/merch-store' },
+          ].map(item => (
+            <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: '13px', color: '#ffffff', textDecoration: 'none', marginBottom: '10px', lineHeight: '1.4', fontFamily: '"DM Sans", sans-serif' }}>
+              {item.label}
+            </Link>
+          ))}
+        </div>
+ 
+        {/* COL 4 - RESOURCES */}
+        <div>
+          <div style={{ color: GOLD, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '16px', fontFamily: '"DM Sans", sans-serif' }}>Resources</div>
+          {[
+            { label: 'Digital Catalog', href: '/catalog' },
+            { label: 'Blog', href: '/blog' },
+          ].map(item => (
+            <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: '13px', color: '#ffffff', textDecoration: 'none', marginBottom: '10px', lineHeight: '1.4', fontFamily: '"DM Sans", sans-serif' }}>
+              {item.label}
+            </Link>
+          ))}
+ 
+          {/* LOGO IN COL 4 */}
+          <div style={{ marginTop: '32px' }}>
+            <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: '#fff', letterSpacing: '3px', marginBottom: '10px', fontWeight: 600 }}>
+              QUIRKY<span style={{ color: GOLD }}>PROMO</span>
+            </div>
+            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.7)', lineHeight: '1.8', margin: '0 0 12px', fontFamily: '"DM Sans", sans-serif' }}>
+              Premium promotional products for Australian businesses.
+            </p>
+            <a href="tel:0294774748" style={{ color: GOLD, textDecoration: 'none', fontSize: '14px', fontWeight: 600, fontFamily: '"DM Mono", monospace' }}>
+              📞 02 9477 4748
+            </a>
+          </div>
+        </div>
+      </div>
+ 
+      {/* BOTTOM BAR */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,.08)', padding: '16px 32px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+ 
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <span style={{ fontSize: '12px', color: 'rgba(255,255,255,.6)', fontFamily: '"DM Sans", sans-serif' }}>© {new Date().getFullYear()} QuirkyPromo. All rights reserved.</span>
+          </div>
+ 
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+            <Link href="/privacy" style={{ color: '#ffffff', textDecoration: 'none', fontSize: '12px', fontFamily: '"DM Sans", sans-serif' }}>Privacy Policy</Link>
+            <span style={{ color: 'rgba(255,255,255,.3)' }}>|</span>
+            <Link href="/sales-terms" style={{ color: '#ffffff', textDecoration: 'none', fontSize: '12px', fontFamily: '"DM Sans", sans-serif' }}>Sales Terms & Conditions</Link>
+            <span style={{ color: 'rgba(255,255,255,.3)' }}>|</span>
+            <Link href="/terms" style={{ color: '#ffffff', textDecoration: 'none', fontSize: '12px', fontFamily: '"DM Sans", sans-serif' }}>Website Terms & Conditions</Link>
+          </div>
         </div>
       </div>
     </footer>
   );
 }
+ 
