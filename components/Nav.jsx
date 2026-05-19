@@ -36,6 +36,17 @@ const BRANDS = [
   'TRENDSWEAR', 'WNSDY', 'XD Design',
 ];
 
+const dropdownLinkStyle = {
+  fontFamily: '"DM Sans", sans-serif',
+  fontSize: '14px',
+  color: '#111',
+  textDecoration: 'none',
+  display: 'block',
+  padding: '5px 8px',
+  borderRadius: '4px',
+  transition: 'background .15s, color .15s',
+};
+
 export default function Nav() {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const timeoutRef = useRef(null);
@@ -46,154 +57,98 @@ export default function Nav() {
   }
 
   function handleMouseLeave() {
-    // 400ms 给用户足够时间移动到dropdown
-    timeoutRef.current = setTimeout(() => setActiveDropdown(null), 600);
+    timeoutRef.current = setTimeout(() => setActiveDropdown(null), 150);
   }
 
   useEffect(() => {
     return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
   }, []);
 
-  // 透明桥接样式 — 填补按钮和dropdown之间的空隙
-  const bridgeStyle = {
+  const dropPanel = {
     position: 'absolute',
-    top: '-8px',       // 往上延伸8px覆盖空隙
-    left: 0,
-    right: 0,
-    height: '8px',
-    background: 'transparent',
+    top: '56px',
+    background: '#fff',
+    borderTop: `2px solid ${GOLD}`,
+    borderBottom: '1px solid #E0DDD7',
+    boxShadow: '0 8px 32px rgba(0,0,0,.12)',
+    zIndex: 200,
+    padding: '20px 28px',
   };
 
   return (
     <>
       {/* TOP BAR */}
       <div style={{ background: NAVY }}>
-        <div style={{
-          maxWidth: '1400px', margin: '0 auto', padding: '0 40px',
-          height: '128px', display: 'flex', alignItems: 'center',
-          justifyContent: 'space-between', gap: '32px',
-        }}>
-          {/* LOGO */}
-          <Link href="/" style={{
-            fontFamily: '"Cormorant Garamond", "Cormorant", Georgia, serif',
-            fontSize: '36px', color: '#ffffff', textDecoration: 'none',
-            letterSpacing: '4px', flexShrink: 0, fontWeight: 600, lineHeight: 1,
-          }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px', height: '128px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '32px' }}>
+          <Link href="/" style={{ fontFamily: '"Cormorant Garamond", Georgia, serif', fontSize: '36px', color: '#fff', textDecoration: 'none', letterSpacing: '4px', flexShrink: 0, fontWeight: 600, lineHeight: 1 }}>
             QUIRKY<span style={{ color: GOLD }}>PROMO</span>
           </Link>
-
-          {/* SEARCH */}
           <div style={{ flex: 1, maxWidth: '640px', position: 'relative' }}>
-            <input
-              type="text"
-              placeholder="Search products, brands, categories..."
-              style={{
-                width: '100%', padding: '16px 52px 16px 22px', borderRadius: '10px',
-                border: '1px solid rgba(255,255,255,.25)', background: 'rgba(255,255,255,.1)',
-                color: '#ffffff', fontSize: '15px', outline: 'none',
-                fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', letterSpacing: '0.2px',
-              }}
-            />
+            <input type="text" placeholder="Search products, brands, categories..."
+              style={{ width: '100%', padding: '16px 52px 16px 22px', borderRadius: '10px', border: '1px solid rgba(255,255,255,.25)', background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: '15px', outline: 'none', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
             <span style={{ position: 'absolute', right: '18px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.6)', fontSize: '20px' }}>🔍</span>
           </div>
-
-          {/* RIGHT */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '32px', flexShrink: 0 }}>
-            <a href="tel:0294774748" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '3px' }}>
+            <a href="tel:0294774748" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '3px' }}>
               <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '10px', color: GOLD, letterSpacing: '2px', textTransform: 'uppercase', fontWeight: 600 }}>Call Us</span>
-              <span style={{ fontFamily: '"DM Mono", "Courier New", monospace', fontSize: '22px', color: '#ffffff', fontWeight: 500, letterSpacing: '1.5px' }}>02 9477 4748</span>
+              <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '22px', color: '#fff', fontWeight: 500, letterSpacing: '1.5px' }}>02 9477 4748</span>
             </a>
             <div style={{ width: '1px', height: '44px', background: 'rgba(255,255,255,.2)' }} />
-            <Link href="/account/login" style={{ color: '#ffffff', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 500 }}>
-              👤 <span>Sign In</span>
-            </Link>
-            <Link href="/cart" style={{ color: '#ffffff', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 500 }}>
-              🛒 <span>Cart</span>
-            </Link>
+            <Link href="/account/login" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 500 }}>👤 <span>Sign In</span></Link>
+            <Link href="/cart" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 500 }}>🛒 <span>Cart</span></Link>
           </div>
         </div>
       </div>
 
-      {/* CATEGORY NAV BAR */}
+      {/* NAV BAR */}
       <nav style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,.06)' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px', display: 'flex', alignItems: 'center', height: '56px', gap: '4px' }}>
 
-          {/* ALL PRODUCTS */}
-          <div
-            style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center' }}
-            onMouseEnter={() => handleMouseEnter('products')}
-            onMouseLeave={handleMouseLeave}
-          >
-            <NavItem
-              label="All Products"
-              active={activeDropdown === 'products'}
-              onEnter={() => handleMouseEnter('products')}
-              onLeave={handleMouseLeave}
-              navy={NAVY} gold={GOLD}
-            />
-          </div>
+          {/* ALL PRODUCTS — full width dropdown via nav position:relative */}
+          <NavItem label="All Products" active={activeDropdown === 'products'}
+            onEnter={() => handleMouseEnter('products')} onLeave={handleMouseLeave} />
 
-          {/* COLLECTIONS */}
-          <div
-            style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center' }}
+          {/* COLLECTIONS — wrapper is position:relative so dropdown follows button */}
+          <div style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center' }}
             onMouseEnter={() => handleMouseEnter('collections')}
             onMouseLeave={handleMouseLeave}
           >
-            <NavItem label="Collections" active={activeDropdown === 'collections'} onEnter={() => handleMouseEnter('collections')} onLeave={handleMouseLeave} navy={NAVY} gold={GOLD} />
+            <NavItem label="Collections" active={activeDropdown === 'collections'}
+              onEnter={() => handleMouseEnter('collections')} onLeave={handleMouseLeave} />
             {activeDropdown === 'collections' && (
-              <div style={{
-                position: 'absolute', top: '56px', left: 0,
-                background: '#fff', borderTop: `2px solid ${GOLD}`,
-                borderBottom: '1px solid #E0DDD7',
-                boxShadow: '0 8px 32px rgba(0,0,0,.14)',
-                zIndex: 200, padding: '20px 28px', minWidth: '300px',
-                borderRadius: '0 0 8px 8px',
-              }}>
-                {/* 透明桥接 — 防止鼠标从按钮移到dropdown时消失 */}
-                <div style={bridgeStyle} onMouseEnter={() => handleMouseEnter('collections')} />
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 32px' }}>
+              <div style={{ ...dropPanel, left: 0, minWidth: '300px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 24px' }}>
                   {COLLECTIONS.map(col => (
-                    <Link
-                      key={col}
+                    <Link key={col}
                       href={`/collections/${encodeURIComponent(col.toLowerCase().replace(/ /g, '-'))}`}
                       onClick={() => setActiveDropdown(null)}
-                      style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', color: '#111111', textDecoration: 'none', padding: '5px 0', display: 'block', fontWeight: 400 }}
-                    >
-                      {col}
-                    </Link>
+                      style={dropdownLinkStyle}
+                      onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; }}
+                    >{col}</Link>
                   ))}
                 </div>
               </div>
             )}
           </div>
 
-          {/* BRANDS */}
-          <div
-            style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center' }}
+          {/* BRANDS — same wrapper trick */}
+          <div style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center' }}
             onMouseEnter={() => handleMouseEnter('brands')}
             onMouseLeave={handleMouseLeave}
           >
-            <NavItem label="Brands" active={activeDropdown === 'brands'} onEnter={() => handleMouseEnter('brands')} onLeave={handleMouseLeave} navy={NAVY} gold={GOLD} />
+            <NavItem label="Brands" active={activeDropdown === 'brands'}
+              onEnter={() => handleMouseEnter('brands')} onLeave={handleMouseLeave} />
             {activeDropdown === 'brands' && (
-              <div style={{
-                position: 'absolute', top: '56px', left: 0,
-                background: '#fff', borderTop: `2px solid ${GOLD}`,
-                borderBottom: '1px solid #E0DDD7',
-                boxShadow: '0 8px 32px rgba(0,0,0,.14)',
-                zIndex: 200, padding: '20px 28px', minWidth: '220px',
-                borderRadius: '0 0 8px 8px',
-              }}>
-                {/* 透明桥接 */}
-                <div style={bridgeStyle} onMouseEnter={() => handleMouseEnter('brands')} />
+              <div style={{ ...dropPanel, left: 0, minWidth: '220px' }}>
                 {BRANDS.map(brand => (
-                  <Link
-                    key={brand}
+                  <Link key={brand}
                     href={`/brands/${encodeURIComponent(brand.toLowerCase().replace(/ /g, '-'))}`}
                     onClick={() => setActiveDropdown(null)}
-                    style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', color: '#111111', textDecoration: 'none', padding: '7px 0', display: 'block', borderBottom: '1px solid #F0EEED', fontWeight: 400 }}
-                  >
-                    {brand}
-                  </Link>
+                    style={{ ...dropdownLinkStyle, borderBottom: '1px solid #F0EEED' }}
+                    onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; }}
+                  >{brand}</Link>
                 ))}
               </div>
             )}
@@ -215,22 +170,19 @@ export default function Nav() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px 40px' }}>
                 {Object.entries(ALL_PRODUCTS).map(([cat, subs]) => (
                   <div key={cat} style={{ marginBottom: '20px' }}>
-                    <Link
-                      href={`/category/${encodeURIComponent(cat.toLowerCase())}`}
+                    <Link href={`/category/${encodeURIComponent(cat.toLowerCase())}`}
                       onClick={() => setActiveDropdown(null)}
-                      style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 700, color: NAVY, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '8px', borderBottom: `1px solid ${GOLD}`, paddingBottom: '4px' }}
-                    >
+                      style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', fontWeight: 700, color: NAVY, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '8px', borderBottom: `1px solid ${GOLD}`, paddingBottom: '4px' }}>
                       {cat}
                     </Link>
                     {subs.map(sub => (
-                      <Link
-                        key={sub}
+                      <Link key={sub}
                         href={`/subcategory/${encodeURIComponent(sub.toLowerCase().replace(/ /g, '-'))}`}
                         onClick={() => setActiveDropdown(null)}
-                        style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#111111', textDecoration: 'none', display: 'block', padding: '3px 0', lineHeight: '1.9', fontWeight: 400 }}
-                      >
-                        {sub}
-                      </Link>
+                        style={dropdownLinkStyle}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; }}
+                      >{sub}</Link>
                     ))}
                   </div>
                 ))}
@@ -243,21 +195,18 @@ export default function Nav() {
   );
 }
 
-function NavItem({ label, active, onEnter, onLeave, navy, gold }) {
+function NavItem({ label, active, onEnter, onLeave }) {
   return (
-    <button
-      onMouseEnter={onEnter}
-      onMouseLeave={onLeave}
+    <button onMouseEnter={onEnter} onMouseLeave={onLeave}
       style={{
         padding: '0 16px', height: '56px', background: 'none', border: 'none',
         fontSize: '15px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
-        color: active ? navy : '#1a1a1a', cursor: 'pointer',
-        borderBottom: active ? `2px solid ${gold}` : '2px solid transparent',
+        color: active ? NAVY : '#1a1a1a', cursor: 'pointer',
+        borderBottom: active ? `2px solid ${GOLD}` : '2px solid transparent',
         display: 'flex', alignItems: 'center', gap: '4px',
-        transition: 'color .15s', letterSpacing: '0.3px',
-      }}
-    >
-      {label} <span style={{ fontSize: '11px', color: active ? gold : '#B0AAA3' }}>▾</span>
+        letterSpacing: '0.3px', whiteSpace: 'nowrap',
+      }}>
+      {label} <span style={{ fontSize: '11px', color: active ? GOLD : '#B0AAA3' }}>▾</span>
     </button>
   );
 }
@@ -266,5 +215,5 @@ const navLinkStyle = {
   padding: '0 16px', height: '56px', fontSize: '15px', fontWeight: 500,
   fontFamily: '"DM Sans", sans-serif', color: '#1a1a1a', textDecoration: 'none',
   display: 'flex', alignItems: 'center', borderBottom: '2px solid transparent',
-  letterSpacing: '0.3px',
+  letterSpacing: '0.3px', whiteSpace: 'nowrap',
 };
