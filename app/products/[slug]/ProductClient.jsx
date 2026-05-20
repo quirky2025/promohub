@@ -19,6 +19,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   const [qtyInput, setQtyInput] = useState(String(product.min_qty || 48));
   const [activeTab, setActiveTab] = useState('Description');
   const [similarProducts, setSimilarProducts] = useState([]);
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const [addonState, setAddonState] = useState(() => {
     const s = {};
     decorations.forEach(d => {
@@ -27,15 +28,12 @@ export default function ProductClient({ product, mainImage, colours, extraImages
     return s;
   });
 
-  // Bottom thumbnails: main image + extra angles
   const bottomImages = [mainImage, ...(extraImages || [])].filter(Boolean);
 
-  // Big image: if colour selected → that colour's image, else → bottom thumb
   const bigImage = selectedColour !== null
     ? (colours[selectedColour]?.image || mainImage)
     : (bottomImages[leftIdx] || mainImage);
 
-  // Fetch similar products
   useEffect(() => {
     async function fetchSimilar() {
       if (!product.subcategory) return;
@@ -133,7 +131,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
       {/* MAIN LAYOUT */}
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 40px 60px', display: 'grid', gridTemplateColumns: '480px 1fr', gap: '48px', alignItems: 'start' }}>
 
-        {/* LEFT: BIG IMAGE + HORIZONTAL THUMBNAILS */}
+        {/* LEFT */}
         <div style={{ position: 'sticky', top: '70px' }}>
           <div style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '16px', width: '100%', aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '12px' }}>
             {bigImage
@@ -141,19 +139,11 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               : <div style={{ color: '#B0AAA3', fontSize: '14px' }}>No image available</div>
             }
           </div>
-
-          {/* BOTTOM THUMBNAILS — main image + extra angles */}
           {bottomImages.length > 1 && (
             <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
               {bottomImages.map((src, i) => (
                 <div key={i} onClick={() => handleBottomThumb(i)} style={{ cursor: 'pointer', flexShrink: 0 }}>
-                  <div style={{
-                    width: '80px', height: '80px', borderRadius: '10px',
-                    border: leftIdx === i && selectedColour === null ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7',
-                    background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    overflow: 'hidden',
-                    boxShadow: leftIdx === i && selectedColour === null ? `0 2px 8px rgba(201,169,110,.3)` : 'none',
-                  }}>
+                  <div style={{ width: '80px', height: '80px', borderRadius: '10px', border: leftIdx === i && selectedColour === null ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: leftIdx === i && selectedColour === null ? `0 2px 8px rgba(201,169,110,.3)` : 'none' }}>
                     <img src={src} alt="" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                   </div>
                 </div>
@@ -162,10 +152,8 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           )}
         </div>
 
-        {/* RIGHT: DETAILS */}
+        {/* RIGHT */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-
-          {/* TITLE */}
           <div>
             <div style={{ fontSize: '12px', color: '#B0AAA3', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku}</div>
             <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.name}</h1>
@@ -174,38 +162,24 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           </div>
 
-          {/* STEP 1: COLOUR */}
           {colours.length > 0 && (
             <div>
               <StepLabel num={1} text="Choose Product Colour" />
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
                 {colours.map((c, i) => (
                   <div key={i} onClick={() => handleSelectColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
-                    <div style={{
-                      width: '64px', height: '64px', borderRadius: '10px',
-                      border: selectedColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7',
-                      background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      overflow: 'hidden', marginBottom: '6px',
-                      boxShadow: selectedColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)',
-                      transition: 'border .15s, box-shadow .15s',
-                    }}>
-                      {c.image
-                        ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
-                        : c.hex
-                          ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: c.hex }} />
-                          : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />
-                      }
+                    <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
+                      {c.image ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                        : c.hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: c.hex }} />
+                        : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
                     </div>
-                    <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#7A7570', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>
-                      {c.name}
-                    </div>
+                    <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#7A7570', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* STEP 2: QUANTITY */}
           <div>
             <StepLabel num={colours.length > 0 ? 2 : 1} text="Enter Quantity" />
             <div style={{ fontSize: '13px', color: '#7A7570', margin: '6px 0 12px' }}>Minimum order: <strong style={{ color: NAVY }}>{product.min_qty} units</strong></div>
@@ -217,7 +191,6 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             {!isValidQty && <div style={{ fontSize: '12px', color: '#C0392B', marginTop: '8px' }}>Minimum order quantity is {product.min_qty} units.</div>}
           </div>
 
-          {/* UNBRANDED PRICING */}
           {pricingTiers.length > 0 && (
             <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
               <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Unbranded Pricing (excl. GST)</div>
@@ -242,7 +215,6 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           )}
 
-          {/* STEP 3: BRANDING */}
           {decorations.length > 0 && (
             <div>
               <StepLabel num={colours.length > 0 ? 3 : 2} text="Add Branding Options" />
@@ -301,7 +273,6 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           )}
 
-          {/* PRICE SUMMARY TABLE */}
           {pricingTiers.length > 0 && (
             <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
               <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Price Summary</div>
@@ -326,7 +297,6 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           )}
 
-          {/* DARK PRICE SUMMARY */}
           {isValidQty && unitPrice > 0 && (
             <div style={{ background: NAVY, borderRadius: '16px', padding: '24px', color: '#fff' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '16px' }}>
@@ -348,17 +318,14 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           )}
 
-          {/* ADD TO CART */}
           <button disabled={!isValidQty} style={{ width: '100%', background: isValidQty ? GOLD : '#C8C4BC', color: '#fff', border: 'none', borderRadius: '12px', padding: '20px', fontSize: '19px', fontWeight: 700, cursor: isValidQty ? 'pointer' : 'not-allowed', fontFamily: '"DM Sans", sans-serif', boxShadow: isValidQty ? '0 4px 16px rgba(201,169,110,.4)' : 'none' }}>
             {isValidQty ? `Add to Cart  —  $${grand.toFixed(2)} incl. GST` : 'Enter quantity to see pricing'}
           </button>
 
-          {/* GET A QUOTE */}
-          <button style={{ width: '100%', background: NAVY, color: '#fff', border: 'none', borderRadius: '12px', padding: '18px', fontSize: '17px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+          <button onClick={() => setQuoteOpen(true)} style={{ width: '100%', background: NAVY, color: '#fff', border: 'none', borderRadius: '12px', padding: '18px', fontSize: '17px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
             <span style={{ fontSize: '20px' }}>💬</span> Get a Quote / Ask a Question
           </button>
 
-          {/* TRUST BADGES */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
             {[{ icon: '🎨', text: 'Free digital proof' }, { icon: '🚚', text: '$30 flat shipping' }, { icon: '✅', text: 'Quality guarantee' }].map(b => (
               <div key={b.text} style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '10px', padding: '14px 10px', textAlign: 'center' }}>
@@ -368,7 +335,6 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             ))}
           </div>
 
-          {/* TABS */}
           <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', background: '#fff' }}>
             <div style={{ display: 'flex', overflowX: 'auto', borderBottom: '1px solid #E0DDD7' }}>
               {TABS.map(tab => (
@@ -378,49 +344,18 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               ))}
             </div>
             <div style={{ padding: '24px', fontSize: '14px', lineHeight: '1.8', color: '#3D3A36', fontFamily: '"DM Sans", sans-serif' }}>
-              {activeTab === 'Description' && (
-                <>{product.description ? <p style={{ margin: '0 0 12px' }}>{product.description}</p> : <p style={{ margin: 0, color: '#B0AAA3' }}>No description available.</p>}
-                  {product.short_desc && <p style={{ margin: 0, color: '#7A7570' }}>{product.short_desc}</p>}</>
-              )}
-              {activeTab === 'Specifications' && (
-                <><SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />
-                  {product.lead_time_days && <SpecRow label="Lead Time" value={`${product.lead_time_days} days`} />}
-                  {product.packing && <SpecRow label="Packing" value={product.packing} />}
-                  <SpecRow label="SKU" value={product.supplier_sku} /></>
-              )}
-              {activeTab === 'Decoration' && (
-                <>{decorations.length > 0 ? decorations.map(d => (
-                  <div key={d.id} style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #F0EEED' }}>
-                    <div style={{ fontWeight: 700, color: NAVY, marginBottom: '2px' }}>{d.name}</div>
-                    {d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#7A7570', fontSize: '13px' }}>{d.detail}</div>}
-                  </div>
-                )) : <p style={{ margin: 0, color: '#B0AAA3' }}>No decoration options available.</p>}</>
-              )}
+              {activeTab === 'Description' && (<>{product.description ? <p style={{ margin: '0 0 12px' }}>{product.description}</p> : <p style={{ margin: 0, color: '#B0AAA3' }}>No description available.</p>}{product.short_desc && <p style={{ margin: 0, color: '#7A7570' }}>{product.short_desc}</p>}</>)}
+              {activeTab === 'Specifications' && (<><SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />{product.lead_time_days && <SpecRow label="Lead Time" value={`${product.lead_time_days} days`} />}{product.packing && <SpecRow label="Packing" value={product.packing} />}<SpecRow label="SKU" value={product.supplier_sku} /></>)}
+              {activeTab === 'Decoration' && (<>{decorations.length > 0 ? decorations.map(d => (<div key={d.id} style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #F0EEED' }}><div style={{ fontWeight: 700, color: NAVY, marginBottom: '2px' }}>{d.name}</div>{d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#7A7570', fontSize: '13px' }}>{d.detail}</div>}</div>)) : <p style={{ margin: 0, color: '#B0AAA3' }}>No decoration options available.</p>}</>)}
               {activeTab === 'Packaging' && <p style={{ margin: 0 }}>{product.packing || 'Packaging information not available.'}</p>}
-              {activeTab === 'How to Order' && (
-                <ol style={{ margin: 0, paddingLeft: '20px' }}>
-                  <li style={{ marginBottom: '8px' }}>Select your colour and enter your required quantity above.</li>
-                  <li style={{ marginBottom: '8px' }}>Choose any branding options you need.</li>
-                  <li style={{ marginBottom: '8px' }}>Click <strong>Add to Cart</strong> or <strong>Get a Quote</strong> for custom arrangements.</li>
-                  <li style={{ marginBottom: '8px' }}>Our team will send you a free digital proof before production.</li>
-                  <li>Approve the proof and we'll get your order into production.</li>
-                </ol>
-              )}
-              {activeTab === 'Returns' && (
-                <><p style={{ margin: '0 0 10px' }}>We stand behind every order. If there's a quality issue, we'll make it right.</p>
-                  <p style={{ margin: 0, color: '#7A7570' }}>Custom branded products cannot be returned unless there is a manufacturing defect. Contact us within 14 days of receiving your order.</p></>
-              )}
-              {activeTab === 'Shipping' && (
-                <><p style={{ margin: '0 0 10px' }}><strong>$30 flat rate</strong> shipping on all orders Australia-wide.</p>
-                  <p style={{ margin: '0 0 10px' }}>Standard production time is 7–10 business days after proof approval.</p>
-                  <p style={{ margin: 0, color: '#7A7570' }}>Delivery typically takes 2–5 business days after dispatch.</p></>
-              )}
+              {activeTab === 'How to Order' && (<ol style={{ margin: 0, paddingLeft: '20px' }}><li style={{ marginBottom: '8px' }}>Select your colour and enter your required quantity above.</li><li style={{ marginBottom: '8px' }}>Choose any branding options you need.</li><li style={{ marginBottom: '8px' }}>Click <strong>Add to Cart</strong> or <strong>Get a Quote</strong> for custom arrangements.</li><li style={{ marginBottom: '8px' }}>Our team will send you a free digital proof before production.</li><li>Approve the proof and we'll get your order into production.</li></ol>)}
+              {activeTab === 'Returns' && (<><p style={{ margin: '0 0 10px' }}>We stand behind every order. If there's a quality issue, we'll make it right.</p><p style={{ margin: 0, color: '#7A7570' }}>Custom branded products cannot be returned unless there is a manufacturing defect. Contact us within 14 days of receiving your order.</p></>)}
+              {activeTab === 'Shipping' && (<><p style={{ margin: '0 0 10px' }}><strong>$30 flat rate</strong> shipping on all orders Australia-wide.</p><p style={{ margin: '0 0 10px' }}>Standard production time is 7–10 business days after proof approval.</p><p style={{ margin: 0, color: '#7A7570' }}>Delivery typically takes 2–5 business days after dispatch.</p></>)}
             </div>
           </div>
         </div>
       </div>
 
-      {/* SIMILAR PRODUCTS */}
       {similarProducts.length > 0 && (
         <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '48px 40px' }}>
           <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
@@ -436,22 +371,13 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
                     >
                       <div style={{ height: '180px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px' }}>
-                        {img ? <img src={img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                          : <div style={{ fontSize: '32px', color: '#D0CCC8' }}>📦</div>}
+                        {img ? <img src={img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <div style={{ fontSize: '32px', color: '#D0CCC8' }}>📦</div>}
                       </div>
                       <div style={{ padding: '14px 16px' }}>
                         <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', fontWeight: 600, color: NAVY, marginBottom: '8px', lineHeight: '1.4' }}>{p.name}</div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          {price > 0 && (
-                            <div>
-                              <div style={{ fontSize: '11px', color: '#7A7570' }}>As low as</div>
-                              <div style={{ fontSize: '16px', fontWeight: 400, color: GOLD }}>${price.toFixed(2)}</div>
-                            </div>
-                          )}
-                          <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '11px', color: '#7A7570' }}>Min Qty</div>
-                            <div style={{ fontSize: '16px', fontWeight: 400, color: NAVY }}>{p.min_qty}</div>
-                          </div>
+                          {price > 0 && (<div><div style={{ fontSize: '11px', color: '#7A7570' }}>As low as</div><div style={{ fontSize: '16px', fontWeight: 400, color: GOLD }}>${price.toFixed(2)}</div></div>)}
+                          <div style={{ textAlign: 'right' }}><div style={{ fontSize: '11px', color: '#7A7570' }}>Min Qty</div><div style={{ fontSize: '16px', fontWeight: 400, color: NAVY }}>{p.min_qty}</div></div>
                         </div>
                       </div>
                     </div>
@@ -462,10 +388,439 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           </div>
         </div>
       )}
+
+      {quoteOpen && (
+        <QuoteModal
+          product={product}
+          colours={colours}
+          decorations={decorations}
+          selectedColour={selectedColour !== null ? colours[selectedColour]?.name : ''}
+          qty={qty}
+          onClose={() => setQuoteOpen(false)}
+        />
+      )}
+
     </div>
   );
 }
 
+function QuoteModal({ product, colours, decorations, selectedColour, qty, onClose }) {
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const STATES = ['ACT','NSW','NT','QLD','SA','TAS','VIC','WA'];
+  const currentYear = new Date().getFullYear();
+  const YEARS = [currentYear, currentYear+1, currentYear+2];
+
+  const [form, setForm] = useState({
+    qty: String(qty),
+    colour: selectedColour || '',
+    brandingMethod: '',
+    printColours: '1',
+    personalisationLines: '1',
+    pmsColours: '',
+    requiredDate: '',
+    street: '', street2: '', suburb: '', state: '', postcode: '',
+    name: '', company: '', email: '', phone: '',
+    notes: '', artworkFileName: '',
+  });
+  const [status, setStatus] = useState('idle');
+  const [extraSelected, setExtraSelected] = useState({});
+
+  // Classification rules
+  function isPrinting(d) {
+    if (!d.has_setup) return false;
+    const n = (d.name || '').toLowerCase();
+    if (n.includes('sample') || n.includes('production sample')) return false;
+    return true;
+  }
+  function isAddon(d) { return !isPrinting(d); }
+
+  // Screen print colour logic: fixed 1 colour only if detail says so
+  function isOneColourOnly(d) {
+    const detail = (d.detail || '').toLowerCase();
+    return detail.includes('one colour') || detail.includes('1 colour');
+  }
+
+  // Branding type for sub-options
+  function getBrandingType(name) {
+    const n = (name || '').toLowerCase();
+    if (n.includes('pad print')) return 'pad';
+    if (n.includes('screen print')) return 'screen';
+    if (n.includes('personalisation') || n.includes('personalization')) return 'personalisation';
+    return 'other';
+  }
+
+  // Parse detail for position hint
+  function parsePositionHint(detail) {
+    if (!detail || detail === 'EMPTY') return null;
+    const parts = detail.split('|').map(s => s.trim()).filter(Boolean);
+    if (parts.length > 1) {
+      return `${parts.length} positions available: ${parts.map((p, i) => `Position ${i+1} (${p})`).join(' · ')}`;
+    }
+    return `Print area: ${parts[0]}`;
+  }
+
+  const printingDecorations = decorations.filter(isPrinting);
+  const addonDecorations = decorations.filter(isAddon);
+  const selectedDecoration = printingDecorations.find(d => d.name === form.brandingMethod);
+  const brandingType = selectedDecoration ? getBrandingType(selectedDecoration.name) : '';
+  const positionHint = selectedDecoration ? parsePositionHint(selectedDecoration.detail) : null;
+  const oneColourOnly = selectedDecoration ? isOneColourOnly(selectedDecoration) : false;
+
+  function handleChange(e) {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+  }
+  function toggleExtra(name) {
+    setExtraSelected(prev => ({ ...prev, [name]: !prev[name] }));
+  }
+
+  async function handleSubmit() {
+    if (!form.name || !form.email) return;
+    setStatus('sending');
+    const requiredDate = form.requiredDate
+      ? new Date(form.requiredDate + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
+      : '';
+    const deliveryAddress = [form.street, form.street2, form.suburb, form.state, form.postcode, 'Australia'].filter(Boolean).join(', ');
+    try {
+      const payload = {
+        ...form,
+        requiredDate,
+        deliveryAddress,
+        extraOptions: Object.keys(extraSelected).filter(k => extraSelected[k]),
+        productName: product.name,
+        productSku: product.supplier_sku,
+      };
+      const res = await fetch('/api/quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) setStatus('success');
+      else setStatus('error');
+    } catch { setStatus('error'); }
+  }
+
+  function handleBackdrop(e) {
+    if (e.target === e.currentTarget) onClose();
+  }
+
+  const inputStyle = {
+    width: '100%', padding: '10px 14px', border: '1.5px solid #E0DDD7', borderRadius: '8px',
+    fontSize: '14px', fontFamily: '"DM Sans", sans-serif', color: '#000000',
+    outline: 'none', boxSizing: 'border-box', background: '#fff',
+  };
+  const selectStyle = {
+    ...inputStyle, cursor: 'pointer', appearance: 'none',
+    backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%231B2A4A' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
+    backgroundRepeat: 'no-repeat', backgroundPosition: 'right 14px center', paddingRight: '36px',
+  };
+  const labelStyle = {
+    fontSize: '11px', fontWeight: 700, color: '#1B2A4A', marginBottom: '6px',
+    display: 'block', textTransform: 'uppercase', letterSpacing: '0.08em',
+    fontFamily: '"DM Sans", sans-serif',
+  };
+
+  // Section header — gold circle number like product page
+  function SectionHead({ num, text }) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+        <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: '#C9A96E', color: '#fff', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: '"DM Sans", sans-serif' }}>{num}</div>
+        <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 700, color: '#1B2A4A', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{text}</div>
+      </div>
+    );
+  }
+
+  const canSubmit = form.name && form.email;
+
+  return (
+    <div onClick={handleBackdrop} style={{ position: 'fixed', inset: 0, background: 'rgba(27,42,74,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <div style={{ background: '#fff', borderRadius: '20px', width: '100%', maxWidth: '580px', maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(27,42,74,0.3)' }}>
+
+        {/* Sticky Header */}
+        <div style={{ padding: '22px 28px 16px', borderBottom: '1px solid #E0DDD7', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'sticky', top: 0, background: '#fff', zIndex: 10 }}>
+          <div>
+            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '26px', fontWeight: 600, color: '#1B2A4A', margin: '0 0 3px' }}>Get a Quote</h2>
+            <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#7A7570', margin: 0 }}>{product.name}</p>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: '#B0AAA3', lineHeight: 1, padding: '4px 8px' }}>✕</button>
+        </div>
+
+        {status === 'success' ? (
+          <div style={{ padding: '48px 32px', textAlign: 'center' }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
+            <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: '#1B2A4A', margin: '0 0 10px' }}>Quote Request Sent!</h3>
+            <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', color: '#7A7570', margin: '0 0 24px' }}>We'll get back to you within 1 hour.</p>
+            <button onClick={onClose} style={{ background: '#C9A96E', color: '#fff', border: 'none', borderRadius: '10px', padding: '13px 32px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>Close</button>
+          </div>
+        ) : (
+          <div style={{ padding: '24px 28px 28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+
+            {/* SECTION 1: PRODUCT */}
+            <div>
+              <SectionHead num={1} text="Product Details" />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={labelStyle}>Quantity *</label>
+                  <input name="qty" type="text" inputMode="numeric" value={form.qty} onChange={handleChange}
+                    placeholder={`e.g. ${product.min_qty} units (min. ${product.min_qty})`}
+                    style={{ ...inputStyle, fontFamily: '"DM Mono", monospace' }} />
+                </div>
+                <div>
+                  <label style={labelStyle}>Colour *</label>
+                  {colours.length > 0 ? (
+                    <select name="colour" value={form.colour} onChange={handleChange} style={selectStyle}>
+                      <option value="">Select a colour</option>
+                      {colours.map((c, i) => <option key={i} value={c.name}>{c.name}</option>)}
+                    </select>
+                  ) : (
+                    <input name="colour" value={form.colour} onChange={handleChange} placeholder="e.g. Navy" style={inputStyle} />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* SECTION 2: BRANDING */}
+            {printingDecorations.length > 0 && (
+              <div style={{ borderTop: '1px solid #F0EEED', paddingTop: '20px' }}>
+                <SectionHead num={2} text="Branding Method" />
+
+                <div style={{ marginBottom: '12px' }}>
+                  <label style={labelStyle}>Select Method</label>
+                  <select name="brandingMethod" value={form.brandingMethod} onChange={handleChange} style={selectStyle}>
+                    <option value="">No branding / Unbranded</option>
+                    {printingDecorations.map(d => (
+                      <option key={d.id} value={d.name}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Position hint */}
+                {form.brandingMethod && positionHint && (
+                  <div style={{ background: '#F8F7F4', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '10px 14px', fontSize: '12px', color: '#1B2A4A', marginBottom: '12px', fontFamily: '"DM Sans", sans-serif', lineHeight: 1.5 }}>
+                    📍 {positionHint}
+                    <span style={{ color: '#7A7570' }}> — need extra positions? Note in Additional Notes.</span>
+                  </div>
+                )}
+
+                {/* PAD PRINT: colour count */}
+                {form.brandingMethod && brandingType === 'pad' && (
+                  <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '14px 16px', marginBottom: '12px' }}>
+                    <label style={labelStyle}>Number of Print Colours</label>
+                    <select name="printColours" value={form.printColours} onChange={handleChange} style={selectStyle}>
+                      {['1','2','3','4'].map(n => <option key={n} value={n}>{n} colour{n > '1' ? 's' : ''}</option>)}
+                    </select>
+                  </div>
+                )}
+
+                {/* SCREEN PRINT: 1 colour fixed OR selectable */}
+                {form.brandingMethod && brandingType === 'screen' && (
+                  <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '14px 16px', marginBottom: '12px' }}>
+                    {oneColourOnly ? (
+                      <div style={{ fontSize: '13px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>
+                        🖨 Screen Print: <strong style={{ color: '#1B2A4A' }}>1 colour only</strong>
+                      </div>
+                    ) : (
+                      <>
+                        <label style={labelStyle}>Number of Print Colours</label>
+                        <select name="printColours" value={form.printColours} onChange={handleChange} style={selectStyle}>
+                          {['1','2','3','4'].map(n => <option key={n} value={n}>{n} colour{n > '1' ? 's' : ''}</option>)}
+                        </select>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* PERSONALISATION: lines */}
+                {form.brandingMethod && brandingType === 'personalisation' && (
+                  <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '14px 16px', marginBottom: '12px' }}>
+                    <label style={labelStyle}>Number of Lines</label>
+                    <select name="personalisationLines" value={form.personalisationLines || '1'} onChange={handleChange} style={selectStyle}>
+                      {['1','2','3','4','5'].map(n => <option key={n} value={n}>{n} line{n > '1' ? 's' : ''}</option>)}
+                    </select>
+                  </div>
+                )}
+
+                {/* PMS Colours */}
+                {form.brandingMethod && brandingType !== 'personalisation' && (
+                  <div>
+                    <label style={labelStyle}>PMS Colour(s)</label>
+                    <input name="pmsColours" value={form.pmsColours} onChange={handleChange}
+                      placeholder="e.g. PMS 286C, PMS 485C" style={inputStyle} />
+                    <div style={{ marginTop: '6px', fontSize: '12px', fontFamily: '"DM Sans", sans-serif' }}>
+                      <span style={{ color: '#7A7570' }}>Not sure? </span>
+                      <a href="https://www.quirkypromo.com.au/resources/pms-chart" target="_blank" rel="noopener noreferrer"
+                        style={{ color: '#C9A96E', textDecoration: 'none', fontWeight: 600 }}>
+                        View PMS Colour Chart →
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SECTION 3: ADD-ONS */}
+            {addonDecorations.length > 0 && (
+              <div style={{ borderTop: '1px solid #F0EEED', paddingTop: '20px' }}>
+                <SectionHead num={3} text="Add-ons & Extras" />
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {addonDecorations.map(d => (
+                    <label key={d.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '10px 14px', border: `1.5px solid ${extraSelected[d.name] ? '#C9A96E' : '#E0DDD7'}`, borderRadius: '8px', background: extraSelected[d.name] ? '#FDF8F0' : '#fff', transition: 'all .15s' }}>
+                      <input type="checkbox" checked={!!extraSelected[d.name]} onChange={() => toggleExtra(d.name)}
+                        style={{ width: '16px', height: '16px', accentColor: '#C9A96E', cursor: 'pointer', flexShrink: 0 }} />
+                      <div>
+                        <div style={{ fontSize: '13px', fontWeight: 600, color: '#1B2A4A', fontFamily: '"DM Sans", sans-serif' }}>{d.name}</div>
+                        {d.detail && d.detail !== 'EMPTY' && (
+                          <div style={{ fontSize: '11px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>{d.detail}</div>
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* SECTION 4: DELIVERY & ARTWORK */}
+            <div style={{ borderTop: '1px solid #F0EEED', paddingTop: '20px' }}>
+              <SectionHead num={printingDecorations.length > 0 ? (addonDecorations.length > 0 ? 4 : 3) : (addonDecorations.length > 0 ? 3 : 2)} text="Delivery & Artwork" />
+
+              {/* Required Date — calendar picker, AU format display */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={labelStyle}>Required Date</label>
+                <input
+                  name="requiredDate"
+                  type="date"
+                  value={form.requiredDate}
+                  onChange={handleChange}
+                  style={inputStyle}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+                {form.requiredDate && (
+                  <div style={{ marginTop: '6px', fontSize: '12px', color: '#1B2A4A', fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}>
+                    📅 {new Date(form.requiredDate + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </div>
+                )}
+              </div>
+
+              {/* Delivery Address */}
+              <div style={{ marginBottom: '14px' }}>
+                <label style={labelStyle}>Delivery Address</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <input name="street" value={form.street} onChange={handleChange}
+                    placeholder="Address Line 1 (e.g. 123 George Street)" style={inputStyle} />
+                  <input name="street2" value={form.street2 || ''} onChange={handleChange}
+                    placeholder="Address Line 2 (Suite, Level, Unit — optional)" style={inputStyle} />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <input name="suburb" value={form.suburb} onChange={handleChange}
+                      placeholder="Suburb" style={inputStyle} />
+                    <select name="state" value={form.state} onChange={handleChange} style={selectStyle}>
+                      <option value="">State / Territory</option>
+                      {STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <input name="postcode" value={form.postcode} onChange={handleChange}
+                      placeholder="Postcode" style={{ ...inputStyle, fontFamily: '"DM Mono", monospace' }} />
+                    <input value="Australia" readOnly style={{ ...inputStyle, background: '#F8F7F4', color: '#9CA3AF', cursor: 'not-allowed' }} />
+                  </div>
+                </div>
+                <div style={{ marginTop: '6px', fontSize: '11px', color: '#9CA3AF', fontFamily: '"DM Sans", sans-serif' }}>
+                  Need delivery to multiple locations? Please note in Additional Notes.
+                </div>
+              </div>
+
+              {/* Upload Artwork */}
+              <div>
+                <label style={labelStyle}>Upload Artwork <span style={{ color: '#B0AAA3', fontWeight: 400, textTransform: 'none', fontSize: '11px' }}>(AI, PDF, PNG, JPG, EPS)</span></label>
+                <div style={{ border: '1.5px dashed #C9A96E', borderRadius: '8px', padding: '16px', textAlign: 'center', background: '#FDF8F0', cursor: 'pointer' }}
+                  onClick={() => document.getElementById('artworkUpload').click()}>
+                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>🎨</div>
+                  <div style={{ fontSize: '13px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Click to upload your logo / artwork</div>
+                  <div style={{ fontSize: '11px', color: '#B0AAA3', marginTop: '3px', fontFamily: '"DM Sans", sans-serif' }}>or email to hello@quirkypromo.com.au after submitting</div>
+                  <input id="artworkUpload" type="file" accept=".ai,.pdf,.png,.jpg,.jpeg,.eps,.svg" style={{ display: 'none' }}
+                    onChange={e => {
+                      const file = e.target.files[0];
+                      if (file) setForm(prev => ({ ...prev, artworkFileName: file.name }));
+                    }} />
+                </div>
+                {form.artworkFileName && (
+                  <div style={{ marginTop: '6px', fontSize: '12px', color: '#2D6A4F', fontFamily: '"DM Sans", sans-serif' }}>✅ {form.artworkFileName}</div>
+                )}
+              </div>
+            </div>
+
+            {/* SECTION 5: YOUR DETAILS */}
+            <div style={{ borderTop: '1px solid #F0EEED', paddingTop: '20px' }}>
+              <SectionHead num={printingDecorations.length > 0 ? (addonDecorations.length > 0 ? 5 : 4) : (addonDecorations.length > 0 ? 4 : 3)} text="Your Details" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={labelStyle}>Your Name *</label>
+                    <input name="name" value={form.name} onChange={handleChange} placeholder="Jane Smith" style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Company</label>
+                    <input name="company" value={form.company} onChange={handleChange} placeholder="Acme Corp" style={inputStyle} />
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={labelStyle}>Email *</label>
+                    <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="jane@company.com" style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Phone</label>
+                    <input name="phone" value={form.phone} onChange={handleChange} placeholder="04xx xxx xxx" style={{ ...inputStyle, fontFamily: '"DM Mono", monospace' }} />
+                  </div>
+                </div>
+                <div>
+                  <label style={labelStyle}>Additional Notes</label>
+                  <textarea name="notes" value={form.notes} onChange={handleChange}
+                    placeholder="e.g. Need 2 print positions, specific requirements, multiple delivery locations..."
+                    rows={3} style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.6' }} />
+                </div>
+              </div>
+            </div>
+
+            {/* Validation hint */}
+            {!canSubmit && (
+              <div style={{ textAlign: 'center', fontSize: '12px', color: '#B0AAA3', fontFamily: '"DM Sans", sans-serif' }}>
+                Please fill in your name and email to submit
+              </div>
+            )}
+
+            {status === 'error' && (
+              <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#DC2626', fontFamily: '"DM Sans", sans-serif' }}>
+                Something went wrong. Please try again or call us on 02 9477 4748.
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <button
+              onClick={handleSubmit}
+              disabled={status === 'sending' || !canSubmit}
+              style={{
+                width: '100%',
+                background: !canSubmit ? '#C8C4BC' : status === 'sending' ? '#1B2A4A' : '#C9A96E',
+                color: '#fff', border: 'none', borderRadius: '10px', padding: '18px',
+                fontSize: '17px', fontWeight: 700,
+                cursor: (!canSubmit || status === 'sending') ? 'not-allowed' : 'pointer',
+                fontFamily: '"DM Sans", sans-serif', transition: 'background .25s',
+                boxShadow: canSubmit && status !== 'sending' ? '0 4px 16px rgba(201,169,110,.4)' : 'none',
+              }}
+            >
+              {status === 'sending' ? '⏳ Sending…' : 'Send Quote Request'}
+            </button>
+
+            {/* Reply line */}
+            <p style={{ textAlign: 'center', fontSize: '14px', fontWeight: 600, color: '#1B2A4A', fontFamily: '"DM Sans", sans-serif', margin: 0 }}>
+              We'll reply within 1 hour · 📞 02 9477 4748
+            </p>
+
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 function StepLabel({ num, text }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
