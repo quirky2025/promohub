@@ -36,6 +36,13 @@ const BRANDS = [
   'TRENDSWEAR', 'WNSDY', 'XD Design',
 ];
 
+function toSlug(name) {
+  return name.toLowerCase()
+    .replace(/ & /g, '-and-')
+    .replace(/&/g, 'and')
+    .replace(/ /g, '-');
+}
+
 const dropdownLinkStyle = {
   fontFamily: '"DM Sans", sans-serif',
   fontSize: '14px',
@@ -104,11 +111,9 @@ export default function Nav() {
       <nav style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,.06)' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px', display: 'flex', alignItems: 'center', height: '56px', gap: '4px' }}>
 
-          {/* ALL PRODUCTS — full width dropdown via nav position:relative */}
           <NavItem label="All Products" active={activeDropdown === 'products'}
             onEnter={() => handleMouseEnter('products')} onLeave={handleMouseLeave} />
 
-          {/* COLLECTIONS — wrapper is position:relative so dropdown follows button */}
           <div style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center' }}
             onMouseEnter={() => handleMouseEnter('collections')}
             onMouseLeave={handleMouseLeave}
@@ -120,7 +125,7 @@ export default function Nav() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 24px' }}>
                   {COLLECTIONS.map(col => (
                     <Link key={col}
-                      href={`/collections/${encodeURIComponent(col.toLowerCase().replace(/ /g, '-'))}`}
+                      href={`/collections/${toSlug(col)}`}
                       onClick={() => setActiveDropdown(null)}
                       style={dropdownLinkStyle}
                       onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}
@@ -132,7 +137,6 @@ export default function Nav() {
             )}
           </div>
 
-          {/* BRANDS — same wrapper trick */}
           <div style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center' }}
             onMouseEnter={() => handleMouseEnter('brands')}
             onMouseLeave={handleMouseLeave}
@@ -143,7 +147,7 @@ export default function Nav() {
               <div style={{ ...dropPanel, left: 0, minWidth: '220px' }}>
                 {BRANDS.map(brand => (
                   <Link key={brand}
-                    href={`/brands/${encodeURIComponent(brand.toLowerCase().replace(/ /g, '-'))}`}
+                    href={`/brands/${toSlug(brand)}`}
                     onClick={() => setActiveDropdown(null)}
                     style={{ ...dropdownLinkStyle, borderBottom: '1px solid #F0EEED' }}
                     onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}
@@ -170,14 +174,14 @@ export default function Nav() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px 40px' }}>
                 {Object.entries(ALL_PRODUCTS).map(([cat, subs]) => (
                   <div key={cat} style={{ marginBottom: '20px' }}>
-                    <Link href={`/category/${encodeURIComponent(cat.toLowerCase())}`}
+                    <Link href={`/category/${toSlug(cat)}`}
                       onClick={() => setActiveDropdown(null)}
                       style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', fontWeight: 700, color: NAVY, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '8px', borderBottom: `1px solid ${GOLD}`, paddingBottom: '4px' }}>
                       {cat}
                     </Link>
                     {subs.map(sub => (
                       <Link key={sub}
-                        href={`/subcategory/${sub.toLowerCase().replace(/ & /g, '-and-').replace(/ /g, '-')}`}
+                        href={`/category/${toSlug(cat)}/${toSlug(sub)}`}
                         onClick={() => setActiveDropdown(null)}
                         style={dropdownLinkStyle}
                         onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}

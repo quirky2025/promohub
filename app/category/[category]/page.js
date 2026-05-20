@@ -78,12 +78,11 @@ export default async function CategoryPage({ params }) {
           {subcategories.map(sub => (
             <Link
               key={sub.name}
-              href={`/subcategory/${toSlug(sub.name)}`}
+              href={`/category/${toSlug(categoryName)}/${toSlug(sub.name)}`}
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
               <div style={{ background: '#fff', borderRadius: '14px', overflow: 'hidden', border: '1px solid #E0DDD7', transition: 'box-shadow .2s, transform .2s', cursor: 'pointer' }}
-                onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,.1)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-                onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
+                
               >
                 <div style={{ height: '200px', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                   {sub.image
