@@ -4,6 +4,15 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getCart, clearCart } from '@/lib/cart';
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  Elements,
+  PaymentElement,
+  useStripe,
+  useElements,
+} from '@stripe/react-stripe-js';
+
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -12,12 +21,77 @@ const GST = 0.10;
 const STRIPE_SURCHARGE = 0.02;
 const STATES = ['ACT','NSW','NT','QLD','SA','TAS','VIC','WA'];
 
+// Stripe payment form component
+function StripePaymentForm({ orderData, onSuccess, onError }) {
+  const stripe = useStripe();
+  const elements = useElements();
+  const [processing, setProcessing] = useState(false);
+
+  async function handleStripeSubmit(e) {
+    e.preventDefault();
+    if (!stripe || !elements) return;
+    setProcessing(true);
+
+    const { error, paymentIntent } = await stripe.confirmPayment({
+      elements,
+      redirect: 'if_required',
+    });
+
+    if (error) {
+      onError(error.message);
+      setProcessing(false);
+    } else if (paymentIntent.status === 'succeeded') {
+      // Payment successful, now save order
+      try {
+        const res = await fetch('/api/order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...orderData, paymentMethod: 'stripe', stripePaymentId: paymentIntent.id }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          clearCart();
+          onSuccess(data.invoiceNumber);
+        } else {
+          onError('Order could not be saved. Please contact us.');
+        }
+      } catch {
+        onError('Something went wrong. Please contact us.');
+      }
+      setProcessing(false);
+    }
+  }
+
+  return (
+    <form onSubmit={handleStripeSubmit}>
+      <PaymentElement options={{ layout: 'tabs' }} />
+      <button
+        type="submit"
+        disabled={!stripe || processing}
+        style={{
+          width: '100%', marginTop: '20px',
+          background: processing ? NAVY : GOLD,
+          color: '#fff', border: 'none', borderRadius: '10px', padding: '16px',
+          fontSize: '16px', fontWeight: 700,
+          cursor: processing ? 'not-allowed' : 'pointer',
+          fontFamily: '"DM Sans", sans-serif',
+          transition: 'background .2s',
+        }}
+      >
+        {processing ? '⏳ Processing payment...' : `Pay Now & Place Order`}
+      </button>
+    </form>
+  );
+}
+
 export default function CheckoutPage() {
   const [cart, setCart] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('eft');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [clientSecret, setClientSecret] = useState('');
+  const [showStripeForm, setShowStripeForm] = useState(false);
   const [form, setForm] = useState({
     name: '', company: '', email: '', phone: '',
     street: '', street2: '', suburb: '', state: '', postcode: '',
@@ -44,30 +118,31 @@ export default function CheckoutPage() {
 
   const canSubmit = form.name && form.email && form.street && form.suburb && form.state && form.postcode;
 
-  async function handleSubmit() {
+  const orderData = {
+    customer: form,
+    items: cart,
+    subtotal: totalSubtotal,
+    shipping: orderShipping,
+    gst: orderGst,
+    total: orderTotalWithSurcharge,
+    surcharge: stripeSurcharge,
+  };
+
+  // EFT submit
+  async function handleEFTSubmit() {
     if (!canSubmit) return;
     setSubmitting(true);
     setError('');
     try {
-      const orderData = {
-        customer: form,
-        items: cart,
-        subtotal: totalSubtotal,
-        shipping: orderShipping,
-        gst: orderGst,
-        total: paymentMethod === 'stripe' ? orderTotalWithSurcharge : orderTotal,
-        paymentMethod,
-        surcharge: paymentMethod === 'stripe' ? stripeSurcharge : 0,
-      };
       const res = await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderData),
+        body: JSON.stringify({ ...orderData, total: orderTotal, paymentMethod: 'eft', surcharge: 0 }),
       });
       if (res.ok) {
         const data = await res.json();
         clearCart();
-        router.push(`/order-confirmation?invoice=${data.invoiceNumber}&method=${paymentMethod}`);
+        router.push(`/order-confirmation?invoice=${data.invoiceNumber}&method=eft`);
       } else {
         setError('Something went wrong. Please try again or call us on 02 9477 4748.');
       }
@@ -76,6 +151,41 @@ export default function CheckoutPage() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  // Stripe: create payment intent first
+  async function handleStripeInit() {
+    if (!canSubmit) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      const res = await fetch('/api/stripe/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: orderTotalWithSurcharge, orderData }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setClientSecret(data.clientSecret);
+        setShowStripeForm(true);
+      } else {
+        setError('Could not initialise payment. Please try again.');
+      }
+    } catch {
+      setError('Could not initialise payment. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  function handleStripeSuccess(invoiceNumber) {
+    router.push(`/order-confirmation?invoice=${invoiceNumber}&method=stripe`);
+  }
+
+  function handleStripeError(msg) {
+    setError(msg);
+    setShowStripeForm(false);
+    setClientSecret('');
   }
 
   const inputStyle = {
@@ -118,37 +228,32 @@ export default function CheckoutPage() {
           {/* LEFT */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}>
 
-          {/* Two column info blocks */}
-<div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-
-  {/* What happens next */}
-  <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7' }}>
-    <div style={{ background: GOLD, padding: '14px 20px' }}>
-      <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>📋 What happens next?</div>
-    </div>
-    <div style={{ background: '#fff', padding: '16px 20px', height: '100%', boxSizing: 'border-box' }}>
-      <div style={{ fontSize: '13px', color: '#000', fontFamily: '"DM Sans", sans-serif', lineHeight: 1.7 }}>
-        After placing your order, we'll send you a <strong>free digital proof</strong> for approval. Production only begins after you approve the artwork.
-      </div>
-    </div>
-  </div>
-
-  {/* Order With Confidence */}
-  <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7' }}>
-    <div style={{ background: GOLD, padding: '14px 20px' }}>
-      <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>✅ Order With Confidence</div>
-    </div>
-    <div style={{ background: '#fff', padding: '16px 20px' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
-        <div>✓ Free proof before anything is printed</div>
-        <div>✓ No production until artwork approved</div>
-        <div>✓ No risk or penalty for cancelling</div>
-        <div>✓ Unlimited changes to your proof</div>
-      </div>
-    </div>
-  </div>
-
-</div>
+            {/* Two column info blocks */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7' }}>
+                <div style={{ background: GOLD, padding: '14px 20px' }}>
+                  <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>📋 What happens next?</div>
+                </div>
+                <div style={{ background: '#fff', padding: '16px 20px' }}>
+                  <div style={{ fontSize: '13px', color: '#000', fontFamily: '"DM Sans", sans-serif', lineHeight: 1.7 }}>
+                    After placing your order, we'll send you a <strong>free digital proof</strong> for approval. Production only begins after you approve the artwork.
+                  </div>
+                </div>
+              </div>
+              <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7' }}>
+                <div style={{ background: GOLD, padding: '14px 20px' }}>
+                  <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>✅ Order With Confidence</div>
+                </div>
+                <div style={{ background: '#fff', padding: '16px 20px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
+                    <div>✓ Free proof before anything is printed</div>
+                    <div>✓ No production until artwork approved</div>
+                    <div>✓ No risk or penalty for cancelling</div>
+                    <div>✓ Unlimited changes to your proof</div>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             {/* Contact Info */}
             <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px' }}>
@@ -221,7 +326,7 @@ export default function CheckoutPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
                 {/* EFT */}
-                <label style={{ cursor: 'pointer', display: 'block' }}>
+                <label style={{ cursor: 'pointer', display: 'block' }} onClick={() => { setShowStripeForm(false); setClientSecret(''); }}>
                   <div style={{ border: `2px solid ${paymentMethod === 'eft' ? GOLD : '#E0DDD7'}`, borderRadius: '10px', padding: '16px 20px', background: paymentMethod === 'eft' ? '#FDF8F0' : '#fff', transition: 'all .15s' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: paymentMethod === 'eft' ? '14px' : 0 }}>
                       <input type="radio" name="payment" value="eft" checked={paymentMethod === 'eft'} onChange={() => setPaymentMethod('eft')} style={{ accentColor: GOLD, width: '18px', height: '18px' }} />
@@ -258,16 +363,24 @@ export default function CheckoutPage() {
                 {/* Stripe */}
                 <label style={{ cursor: 'pointer', display: 'block' }}>
                   <div style={{ border: `2px solid ${paymentMethod === 'stripe' ? GOLD : '#E0DDD7'}`, borderRadius: '10px', padding: '16px 20px', background: paymentMethod === 'stripe' ? '#FDF8F0' : '#fff', transition: 'all .15s' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: paymentMethod === 'stripe' ? '10px' : 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: paymentMethod === 'stripe' && showStripeForm ? '16px' : 0 }}>
                       <input type="radio" name="payment" value="stripe" checked={paymentMethod === 'stripe'} onChange={() => setPaymentMethod('stripe')} style={{ accentColor: GOLD, width: '18px', height: '18px' }} />
                       <div>
                         <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>💳 Pay Now by Credit Card</div>
                         <div style={{ fontSize: '12px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Visa, Mastercard, Amex · 2% surcharge applies</div>
                       </div>
                     </div>
-                    {paymentMethod === 'stripe' && (
-                      <div style={{ background: '#FEF9EC', border: '1px solid #F5E6B8', borderRadius: '8px', padding: '10px 14px', fontSize: '12px', color: '#92640A', fontFamily: '"DM Sans", sans-serif' }}>
+                    {paymentMethod === 'stripe' && !showStripeForm && (
+                      <div style={{ background: '#FEF9EC', border: '1px solid #F5E6B8', borderRadius: '8px', padding: '10px 14px', fontSize: '12px', color: '#92640A', fontFamily: '"DM Sans", sans-serif', marginTop: '10px' }}>
                         💳 A 2% credit card surcharge of <strong>${stripeSurcharge.toFixed(2)}</strong> will be added. Total: <strong>${orderTotalWithSurcharge.toFixed(2)}</strong>
+                      </div>
+                    )}
+                    {/* Stripe Payment Form */}
+                    {showStripeForm && clientSecret && (
+                      <div style={{ marginTop: '16px' }}>
+                        <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'stripe', variables: { colorPrimary: GOLD } } }}>
+                          <StripePaymentForm orderData={orderData} onSuccess={handleStripeSuccess} onError={handleStripeError} />
+                        </Elements>
                       </div>
                     )}
                   </div>
@@ -287,24 +400,27 @@ export default function CheckoutPage() {
               </div>
             )}
 
-            <button
-              onClick={handleSubmit}
-              disabled={!canSubmit || submitting}
-              style={{
-                width: '100%',
-                background: !canSubmit ? '#C8C4BC' : GOLD,
-                color: '#fff', border: 'none', borderRadius: '12px', padding: '20px',
-                fontSize: '18px', fontWeight: 700,
-                cursor: !canSubmit || submitting ? 'not-allowed' : 'pointer',
-                fontFamily: '"DM Sans", sans-serif',
-                boxShadow: canSubmit ? '0 4px 16px rgba(201,169,110,.4)' : 'none',
-                transition: 'background .2s',
-              }}
-            >
-              {submitting ? '⏳ Processing...' : paymentMethod === 'stripe'
-                ? `Pay Now & Place Order — $${orderTotalWithSurcharge.toFixed(2)}`
-                : `Place Order & Pay by EFT — $${orderTotal.toFixed(2)}`}
-            </button>
+            {/* Submit buttons */}
+            {!showStripeForm && (
+              <button
+                onClick={paymentMethod === 'eft' ? handleEFTSubmit : handleStripeInit}
+                disabled={!canSubmit || submitting}
+                style={{
+                  width: '100%',
+                  background: !canSubmit ? '#C8C4BC' : GOLD,
+                  color: '#fff', border: 'none', borderRadius: '12px', padding: '20px',
+                  fontSize: '18px', fontWeight: 700,
+                  cursor: !canSubmit || submitting ? 'not-allowed' : 'pointer',
+                  fontFamily: '"DM Sans", sans-serif',
+                  boxShadow: canSubmit ? '0 4px 16px rgba(201,169,110,.4)' : 'none',
+                  transition: 'background .2s',
+                }}
+              >
+                {submitting ? '⏳ Processing...' : paymentMethod === 'stripe'
+                  ? `Continue to Payment — $${orderTotalWithSurcharge.toFixed(2)}`
+                  : `Place Order & Pay by EFT — $${orderTotal.toFixed(2)}`}
+              </button>
+            )}
 
             <p style={{ textAlign: 'center', fontSize: '12px', color: '#B0AAA3', fontFamily: '"DM Sans", sans-serif', margin: 0 }}>
               By placing your order you agree to our terms and conditions.
