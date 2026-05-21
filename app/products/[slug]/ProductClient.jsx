@@ -2,7 +2,9 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { addToCart } from '@/lib/cart';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -20,6 +22,8 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   const [activeTab, setActiveTab] = useState('Description');
   const [similarProducts, setSimilarProducts] = useState([]);
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [cartAdded, setCartAdded] = useState(false);
+  const router = useRouter();
   const [addonState, setAddonState] = useState(() => {
     const s = {};
     decorations.forEach(d => {
@@ -110,6 +114,38 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   function getSimilarLowestPrice(p) {
     if (!p.pricing_tiers?.length) return 0;
     return Math.min(...p.pricing_tiers.map(t => parseFloat(t.base_price) * MARGIN));
+  }
+
+  function handleAddToCart() {
+    const selectedAddons = decorations
+      .filter(d => addonState[d.id]?.on)
+      .map(d => ({
+        id: d.id,
+        name: d.name,
+        perUnit: d.per_unit * MARGIN,
+        setupFee: d.has_setup ? SETUP_FEE * MARGIN : 0,
+        setupQty: addonState[d.id]?.setupQty || 1,
+      }));
+
+    const item = {
+      productId: product.id,
+      productName: product.name,
+      productSlug: product.slug,
+      sku: product.supplier_sku,
+      image: bigImage || mainImage,
+      colour: selectedColour !== null ? colours[selectedColour]?.name : '',
+      qty,
+      unitPrice,
+      subtotal: Math.round(unitPrice * qty * 100) / 100,
+      shipping: SHIPPING,
+      gst: Math.round((Math.round(unitPrice * qty * 100) / 100 + SHIPPING) * GST * 100) / 100,
+      grand,
+      addons: selectedAddons,
+      minQty: product.min_qty,
+    };
+
+    addToCart(item);
+    setCartAdded(true);
   }
 
   return (
@@ -318,9 +354,31 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           )}
 
-          <button disabled={!isValidQty} style={{ width: '100%', background: isValidQty ? GOLD : '#C8C4BC', color: '#fff', border: 'none', borderRadius: '12px', padding: '20px', fontSize: '19px', fontWeight: 700, cursor: isValidQty ? 'pointer' : 'not-allowed', fontFamily: '"DM Sans", sans-serif', boxShadow: isValidQty ? '0 4px 16px rgba(201,169,110,.4)' : 'none' }}>
-            {isValidQty ? `Add to Cart  —  $${grand.toFixed(2)} incl. GST` : 'Enter quantity to see pricing'}
+          <button
+            onClick={isValidQty ? handleAddToCart : undefined}
+            disabled={!isValidQty}
+            style={{
+              width: '100%',
+              background: isValidQty ? GOLD : '#C8C4BC',
+              color: '#fff', border: 'none', borderRadius: '12px', padding: '20px',
+              fontSize: '19px', fontWeight: 700,
+              cursor: isValidQty ? 'pointer' : 'not-allowed',
+              fontFamily: '"DM Sans", sans-serif',
+              boxShadow: isValidQty ? '0 4px 16px rgba(201,169,110,.4)' : 'none',
+              transition: 'background .3s',
+            }}>
+            {cartAdded ? '✅ Added to Cart!' : isValidQty ? `Add to Cart  —  $${grand.toFixed(2)} incl. GST` : 'Enter quantity to see pricing'}
           </button>
+          {cartAdded && (
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={() => router.push('/cart')} style={{ flex: 1, background: GOLD, color: '#fff', border: 'none', borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                🛒 View Cart
+              </button>
+              <button onClick={() => router.push(`/category/${encodeURIComponent((product.category || '').toLowerCase())}`)} style={{ flex: 1, background: '#fff', color: NAVY, border: `1.5px solid ${NAVY}`, borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                ← Keep Shopping
+              </button>
+            </div>
+          )}
 
           <button onClick={() => setQuoteOpen(true)} style={{ width: '100%', background: NAVY, color: '#fff', border: 'none', borderRadius: '12px', padding: '18px', fontSize: '17px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
             <span style={{ fontSize: '20px' }}>💬</span> Get a Quote / Ask a Question
