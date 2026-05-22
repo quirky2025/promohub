@@ -1,11 +1,13 @@
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
+import Stripe from 'stripe';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 async function generateInvoiceNumber() {
   const year = new Date().getFullYear();
@@ -19,7 +21,20 @@ async function generateInvoiceNumber() {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { customer, items, subtotal, shipping, gst, total, paymentMethod, surcharge } = body;
+    const { customer, items, subtotal, shipping, gst, total, paymentMethod, surcharge, stripePaymentId } = body;
+
+    // ✅ 服务端验证：Stripe付款必须经过Stripe确认才能标记paid
+    let paymentStatus = 'unpaid';
+    if (paymentMethod === 'stripe') {
+      if (!stripePaymentId) {
+        return Response.json({ error: 'Missing payment ID' }, { status: 400 });
+      }
+      const paymentIntent = await stripe.paymentIntents.retrieve(stripePaymentId);
+      if (paymentIntent.status !== 'succeeded') {
+        return Response.json({ error: 'Payment not completed' }, { status: 400 });
+      }
+      paymentStatus = 'paid';
+    }
 
     const invoiceNumber = await generateInvoiceNumber();
     const deliveryAddress = [
@@ -45,7 +60,7 @@ export async function POST(req) {
       gst,
       total,
       payment_method: paymentMethod,
-      payment_status: paymentMethod === 'stripe' ? 'paid' : 'unpaid',
+      payment_status: paymentStatus,  // ✅ 现在由服务端验证决定，不再盲目信任前端
       created_at: new Date().toISOString(),
     });
 
@@ -103,7 +118,7 @@ export async function POST(req) {
             </tr>
           </table>
 
-          <p style="font-size: 13px; color: #7A7570; margin: 0 0 4px;">Payment Status: <strong style="color: ${paymentMethod === 'stripe' ? '#2D6A4F' : '#C0392B'}">${paymentMethod === 'stripe' ? 'PAID' : 'AWAITING PAYMENT'}</strong></p>
+          <p style="font-size: 13px; color: #7A7570; margin: 0 0 4px;">Payment Status: <strong style="color: ${paymentStatus === 'paid' ? '#2D6A4F' : '#C0392B'}">${paymentStatus === 'paid' ? 'PAID' : 'AWAITING PAYMENT'}</strong></p>
 
           ${bankDetailsHtml}
 

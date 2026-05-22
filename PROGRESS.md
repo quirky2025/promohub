@@ -10,7 +10,7 @@
 - **图片存储**：Cloudinary（待配置Upload Preset）
 - **域名**：quirkypromo.com.au（已绑定Vercel，DNS在Hostinger）
 - **邮件服务**：Resend（已验证quirkypromo.com.au）
-- **支付**：Stripe（已安装，Live Key已配置，付款方式待开启）
+- **支付**：Stripe（Live Key已配置，Cards/Afterpay/Klarna/Zip/PayTo已开启）
 - **代码仓库**：GitHub（quirky2025/promohub）
 
 ---
@@ -39,17 +39,20 @@
 ---
 
 ## URL结构（已完成）
-/category/bags                          ← 分类页面（显示子分类网格）
-/category/bags/backpacks               ← 子分类页面（显示产品列表）
-/products/alumni-soft-touch-backpack   ← 产品详情页
+/category/bags                          ← 分类页面
+/category/bags/backpacks               ← 子分类页面
+/products/[slug]                       ← 产品详情页
 /cart                                  ← 购物车
 /checkout                              ← 结账
 /order-confirmation                    ← 订单确认
+/account                               ← 账户主页+订单历史
+/account/login                         ← 登录
+/account/register                      ← 注册
+/account/forgot-password               ← 忘记密码
 
 ## Slug规则
 - & → -and-，空格 → -
 - 例：Pads & Planners → pads-and-planners
-- 还原：先-and-→ & ，再-→空格
 - 产品slug已去掉末尾SKU号
 
 ---
@@ -57,24 +60,19 @@
 ## 数据库结构（Supabase）
 5个表：products / product_colours / pricing_tiers / decoration_options / orders
 
-**products主要字段：**
-- id, supplier_sku, name, slug（干净格式，无SKU号）
-- category, subcategory, description, short_desc
-- min_qty, setup_fee, shipping, margin, status
-- packing, lead_time_days, has_rush, rush_multiplier
-- colours（jsonb）：[{"name": "Navy", "hex": "", "images": [...]}, ...]
-
-**product_colours：**
-- images（jsonb，URL数组）— 按文件名数字排序
-- 图片规律：images[0]=主图，images[1..N]=颜色图，images[N+1..]=包装图
-
-**pricing_tiers：** id, product_id, min_qty, max_qty, base_price, sort_order
-
-**decoration_options：** id, product_id, name, detail, per_unit, has_setup, setup_qty_editable, default_setup_qty, sort_order
-
-**orders：** id, invoice_number, customer_name, customer_email, customer_phone, customer_company, delivery_address, items(jsonb), subtotal, shipping, gst, total, payment_method, payment_status, created_at
+**orders表字段：**
+id, invoice_number, customer_name, customer_email, customer_phone,
+customer_company, delivery_address, items(jsonb), subtotal, shipping,
+gst, total, payment_method, payment_status, created_at
 - RLS: DISABLED
 - Invoice格式：QP-2026-0001
+
+**Supabase Auth：**
+- 已开启邮箱注册/登录
+- 自定义SMTP：Resend（smtp.resend.com:465）
+- 发件人：QuirkyPromo <noreply@quirkypromo.com.au>
+- 邮件模板已改成QuirkyPromo风格（Confirm signup + Reset password）
+- 订单通过customer_email关联账户（包括游客订单）
 
 ---
 
@@ -90,78 +88,89 @@
 
 ## 邮件设置
 - 发件人：QuirkyPromo <noreply@quirkypromo.com.au>
-- 询盘收件：hello@quirkypromo.com.au
-- 客户自动回复：replyTo = hello@quirkypromo.com.au
+- 询盘/订单收件：hello@quirkypromo.com.au
 - Resend：域名已验证，API Key已配置
 
 ---
 
 ## 支付方案
-- Pay by EFT → 生成Invoice（UNPAID）→ 发邮件给客户+老板
+- **Pay by EFT** → 生成Invoice（UNPAID）→ 发邮件
   - 银行：ANZ，BSB：012-306，账号：192040129
   - 账户名：Grow Your Marketing，ABN：95 656 714 270
-- Pay Now → Stripe → 生成Invoice（PAID）→ 发邮件
-  - Stripe Live Key已配置到.env.local和Vercel
-  - 待开启：Cards、Apple Pay/Google Pay、PayID、Afterpay
+- **Pay Now** → Stripe → 生成Invoice（PAID）→ 发邮件
+  - 已开启：Cards、Apple Pay、Google Pay、Afterpay、Klarna、Zip、PayTo
 
 ---
 
 ## 文件结构
+```
 promohub/
 ├── app/
-│   ├── layout.js                       ✅ Google Fonts + Nav + Footer
-│   ├── globals.css                     ✅ 全局样式（placeholder颜色已修复）
+│   ├── layout.js                       ✅
+│   ├── globals.css                     ✅
 │   ├── page.js                         首页（待做）
 │   ├── api/
 │   │   ├── quote/route.js              ✅ Get a Quote发邮件
-│   │   ├── order/route.js              ✅ 订单处理+发邮件+Supabase
-│   │   └── stripe/create-payment-intent/route.js  ⏳ 待放入
+│   │   ├── order/route.js              ✅ 订单处理+Supabase+邮件
+│   │   └── stripe/create-payment-intent/route.js  ✅ Stripe付款
 │   ├── products/[slug]/
 │   │   ├── page.js                     ✅
-│   │   └── ProductClient.jsx           ✅ 含Add to Cart + Get a Quote
+│   │   └── ProductClient.jsx           ✅ Add to Cart + Get a Quote
 │   ├── cart/page.js                    ✅ 购物车（$30固定运费）
-│   ├── checkout/page.js                ⏳ 待更新含Stripe（checkout-stripe-page.js）
+│   ├── checkout/page.js                ✅ 结账（EFT + Stripe）
 │   ├── order-confirmation/page.js      ✅ 订单确认
+│   ├── account/
+│   │   ├── page.js                     ✅ 账户主页+订单历史
+│   │   ├── login/page.js               ✅ 登录
+│   │   ├── register/page.js            ✅ 注册
+│   │   └── forgot-password/page.js     ✅ 忘记密码
 │   └── category/[category]/
 │       ├── page.js                     ✅ 分类页面
 │       └── [subcategory]/page.js       ✅ 子分类页面
 ├── components/
-│   ├── Nav.jsx                         ✅ 含Cart数量角标
+│   ├── Nav.jsx                         ✅ Cart角标+登录状态
 │   └── Footer.jsx                      ✅
 ├── lib/
 │   ├── supabase.js                     ✅
 │   └── cart.js                         ✅ localStorage购物车
 └── .env.local                          ✅ Supabase + Resend + Stripe Keys
+```
 
 ---
 
 ## 已完成 ✅
-1. Header / Footer / Nav（Cart角标）
+1. Header / Footer / Nav（Cart角标 + 登录状态显示）
 2. 字体颜色主题
 3. Category / Subcategory / 产品详情页
 4. URL树形结构
 5. Vercel部署 + 域名绑定
 6. Resend邮件配置
-7. Get a Quote升级版表单
-8. Add to Cart + 购物车页面
-9. 结账页面（EFT完成，Stripe框架完成）
+7. Get a Quote升级版表单（动态颜色/印刷/addon）
+8. Add to Cart + 购物车页面（$30固定运费）
+9. 结账页面（EFT + Stripe完整流程）
 10. 订单API（Invoice编号 + Supabase + 邮件）
-11. 订单确认页面
-12. Stripe包安装
+11. 订单确认页面（EFT显示银行信息）
+12. Stripe付款（Card/Afterpay/Klarna/Zip/PayTo）
+13. 客户登录/注册/忘记密码
+14. 账户页面（订单历史，通过email关联游客订单）
+15. Supabase自定义SMTP（Resend发件）
+16. Supabase邮件模板改成QuirkyPromo风格
 
 ---
 
-## 明天待做 ⏳
+## 下一步 ⏳（按优先级）
 
-1. **完成Stripe接入**
-   - 放入 stripe-payment-intent.js → app/api/stripe/create-payment-intent/route.js
-   - 更新 checkout/page.js（用checkout-stripe-page.js）
-   - Stripe Dashboard开启：Cards、Apple Pay/Google Pay、PayID、Afterpay
-   - 测试信用卡付款
+1. **测试完整流程**
+   - 登录后查看账户页面
+   - 确认游客订单自动关联
 
-2. **客户登录/注册**（Supabase Auth）
+2. **Reset Password页面**
+   - 需要新建 app/account/reset-password/page.js
+   - 客户点邮件链接后可以设置新密码
 
-3. **首页设计**（最后做）
+3. **Git Push** — 同步所有改动到线上
+
+4. **首页设计**（最后做）
 
 ## Phase 2
 - 搜索功能
@@ -182,4 +191,4 @@ promohub/
 - 银行：ANZ，BSB：012-306，账号：192040129，户名：Grow Your Marketing
 - ABN：95 656 714 270
 
-最后更新：2026-05-21
+最后更新：2026-05-22
