@@ -94,17 +94,38 @@ async function generateQuotePDF({
   y -= 22;
 
   // Product row
-  page.drawRectangle({ x: 40, y: y - 16, width: width - 80, height: 48, color: LIGHT });
+  // Calculate row height based on content
+  const addonsList = addons ? addons.split(', ').filter(Boolean) : [];
+  const hasBranding = brandingSummary && brandingSummary !== 'None / Unbranded';
+  const rowLines = 1 + (colour ? 1 : 0) + (hasBranding ? 1 : 0) + addonsList.length;
+  const rowHeight = Math.max(48, rowLines * 14 + 10);
+
+  page.drawRectangle({ x: 40, y: y - rowHeight + 24, width: width - 80, height: rowHeight, color: LIGHT });
+
+  // Product name
   page.drawText(product.name || '', { x: 48, y: y + 16, size: 9, font: fontBold, color: NAVY });
-  if (colour) page.drawText(`Colour: ${colour}`, { x: 48, y: y + 4, size: 8, font: fontReg, color: GREY });
-  if (brandingSummary && brandingSummary !== 'None / Unbranded') {
-    page.drawText(`Branding: ${brandingSummary.substring(0, 55)}`, { x: 48, y: y - 8, size: 7.5, font: fontReg, color: GREY });
+  let detailY = y + 4;
+  // Colour
+  if (colour) {
+    page.drawText(`Colour: ${colour}`, { x: 48, y: detailY, size: 8, font: fontReg, color: GREY });
+    detailY -= 12;
   }
+  // Branding
+  if (hasBranding) {
+    page.drawText(`Branding: ${brandingSummary.substring(0, 55)}`, { x: 48, y: detailY, size: 7.5, font: fontReg, color: GREY });
+    detailY -= 12;
+  }
+  // Add-ons — listed right under branding
+  addonsList.forEach(addon => {
+    page.drawText(`Add-on: ${addon}`, { x: 48, y: detailY, size: 7.5, font: fontReg, color: GREY });
+    detailY -= 12;
+  });
+
   page.drawText(String(qty), { x: 295, y: y + 8, size: 9, font: fontReg, color: BLACK });
   page.drawText(`$${unitPrice.toFixed(2)}`, { x: 350, y: y + 8, size: 9, font: fontReg, color: BLACK });
   page.drawText(`$${subtotal.toFixed(2)}`, { x: 430, y: y + 8, size: 9, font: fontBold, color: NAVY });
   page.drawText('10%', { x: 520, y: y + 8, size: 9, font: fontReg, color: BLACK });
-  y -= 40;
+  y -= rowHeight;
 
   // Shipping row
   page.drawRectangle({ x: 40, y: y - 4, width: width - 80, height: 20, color: WHITE });
@@ -135,10 +156,6 @@ async function generateQuotePDF({
   y -= 20;
 
   // ── ADDITIONAL INFO ─────────────────────────────────────
-  if (addons) {
-    page.drawText(`Add-ons: ${addons}`, { x: 40, y, size: 8, font: fontReg, color: GREY });
-    y -= 14;
-  }
   if (requiredDate) {
     page.drawText(`Required by: ${requiredDate}`, { x: 40, y, size: 8, font: fontReg, color: GREY });
     y -= 14;

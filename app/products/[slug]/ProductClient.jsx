@@ -483,6 +483,9 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
     colour: selectedColour || '',
     brandingMethod: '',
     printColours: '1',
+    padPositions: '1',
+    screenPositions: '1',
+    otherPositions: '1',
     personalisationLines: '1',
     pmsColours: '',
     requiredDate: '',
@@ -493,12 +496,14 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
   const [status, setStatus] = useState('idle');
   const [extraSelected, setExtraSelected] = useState({});
 
-  // Classification rules
+  // Classification rules — only pad/screen print are Branding Methods
   function isPrinting(d) {
     if (!d.has_setup) return false;
     const n = (d.name || '').toLowerCase();
     if (n.includes('sample') || n.includes('production sample')) return false;
-    return true;
+    // Only pad print and screen print are branding methods
+    if (n.includes('pad print') || n.includes('screen print')) return true;
+    return false;
   }
   function isAddon(d) { return !isPrinting(d); }
 
@@ -550,11 +555,39 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
     const deliveryAddress = [form.street, form.street2, form.suburb, form.state, form.postcode, 'Australia'].filter(Boolean).join(', ');
 
     const formQty = parseInt(form.qty) || qty;
+
+    // Find matching pricing tier
     const matchedTier = pricingTiers.reduce((best, tier) => {
       if (formQty >= tier.min_qty) return !best || tier.min_qty > best.min_qty ? tier : best;
       return best;
     }, null) || pricingTiers[0];
-    const unitPrice = matchedTier ? calcUnit(matchedTier.base_price, formQty) : 0;
+
+    // Calculate price from Quote form's own branding selections
+    let unitPrice = matchedTier ? matchedTier.base_price * MARGIN : 0;
+    const numPositions = parseInt(form.padPositions) || parseInt(form.screenPositions) || parseInt(form.otherPositions) || 1;
+    const numColours = parseInt(form.printColours) || 1;
+
+    if (form.brandingMethod) {
+      const brandingDeco = decorations.find(d => d.name === form.brandingMethod);
+      if (brandingDeco) {
+        unitPrice += brandingDeco.per_unit * MARGIN * numPositions;
+        if (brandingDeco.has_setup) {
+          unitPrice += (SETUP_FEE * numPositions / formQty) * MARGIN;
+        }
+      }
+    }
+
+    const selectedExtras = Object.keys(extraSelected).filter(k => extraSelected[k]);
+    selectedExtras.forEach(extraName => {
+      const extraDeco = decorations.find(d => d.name === extraName);
+      if (extraDeco) {
+        unitPrice += extraDeco.per_unit * MARGIN;
+        if (extraDeco.has_setup) {
+          unitPrice += (SETUP_FEE / formQty) * MARGIN;
+        }
+      }
+    });
+
     const subtotal = Math.round(unitPrice * formQty * 100) / 100;
     const gst = Math.round((subtotal + SHIPPING) * GST * 100) / 100;
     const total = subtotal + SHIPPING + gst;
@@ -564,7 +597,7 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
         ...form,
         requiredDate,
         deliveryAddress,
-        extraOptions: Object.keys(extraSelected).filter(k => extraSelected[k]),
+        extraOptions: selectedExtras,
         productName: product.name,
         productSku: product.supplier_sku,
         unitPrice,
@@ -573,6 +606,9 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
         gst,
         total,
         qty: formQty,
+        padPositions: numPositions,
+        padColours: numColours,
+        screenPositions: numPositions,
       };
       const res = await fetch('/api/quote', {
         method: 'POST',
@@ -686,30 +722,60 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
                   </div>
                 )}
 
-                {/* PAD PRINT: colour count */}
+                {/* PAD PRINT: positions + colour count */}
                 {form.brandingMethod && brandingType === 'pad' && (
-                  <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '14px 16px', marginBottom: '12px' }}>
-                    <label style={labelStyle}>Number of Print Colours</label>
-                    <select name="printColours" value={form.printColours} onChange={handleChange} style={selectStyle}>
-                      {['1','2','3','4'].map(n => <option key={n} value={n}>{n} colour{n > '1' ? 's' : ''}</option>)}
-                    </select>
+                  <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '14px 16px', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {(() => {
+                      const d = printingDecorations.find(dec => dec.name === form.brandingMethod);
+                      const maxPos = d?.detail && d.detail !== 'EMPTY' ? d.detail.split('|').filter(Boolean).length : 1;
+                      return maxPos > 1 ? (
+                        <div>
+                          <label style={labelStyle}>Number of Positions</label>
+                          <select name="padPositions" value={form.padPositions || '1'} onChange={handleChange} style={selectStyle}>
+                            {Array.from({ length: maxPos }, (_, i) => i + 1).map(n => (
+                              <option key={n} value={n}>{n} position{n > 1 ? 's' : ''}</option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : null;
+                    })()}
+                    <div>
+                      <label style={labelStyle}>Number of Print Colours</label>
+                      <select name="printColours" value={form.printColours} onChange={handleChange} style={selectStyle}>
+                        {['1','2','3','4'].map(n => <option key={n} value={n}>{n} colour{n > '1' ? 's' : ''}</option>)}
+                      </select>
+                    </div>
                   </div>
                 )}
 
-                {/* SCREEN PRINT: 1 colour fixed OR selectable */}
+                {/* SCREEN PRINT: positions + colour */}
                 {form.brandingMethod && brandingType === 'screen' && (
-                  <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '14px 16px', marginBottom: '12px' }}>
+                  <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '14px 16px', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {(() => {
+                      const d = printingDecorations.find(dec => dec.name === form.brandingMethod);
+                      const maxPos = d?.detail && d.detail !== 'EMPTY' ? d.detail.split('|').filter(Boolean).length : 1;
+                      return maxPos > 1 ? (
+                        <div>
+                          <label style={labelStyle}>Number of Positions</label>
+                          <select name="screenPositions" value={form.screenPositions || '1'} onChange={handleChange} style={selectStyle}>
+                            {Array.from({ length: maxPos }, (_, i) => i + 1).map(n => (
+                              <option key={n} value={n}>{n} position{n > 1 ? 's' : ''}</option>
+                            ))}
+                          </select>
+                        </div>
+                      ) : null;
+                    })()}
                     {oneColourOnly ? (
                       <div style={{ fontSize: '13px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>
-                        🖨 Screen Print: <strong style={{ color: '#1B2A4A' }}>1 colour only</strong>
+                        Screen Print: <strong style={{ color: '#1B2A4A' }}>1 colour only</strong>
                       </div>
                     ) : (
-                      <>
+                      <div>
                         <label style={labelStyle}>Number of Print Colours</label>
                         <select name="printColours" value={form.printColours} onChange={handleChange} style={selectStyle}>
                           {['1','2','3','4'].map(n => <option key={n} value={n}>{n} colour{n > '1' ? 's' : ''}</option>)}
                         </select>
-                      </>
+                      </div>
                     )}
                   </div>
                 )}
