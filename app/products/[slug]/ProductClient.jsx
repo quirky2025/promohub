@@ -538,6 +538,19 @@ function QuoteModal({ product, colours, decorations, selectedColour, qty, onClos
       ? new Date(form.requiredDate + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
       : '';
     const deliveryAddress = [form.street, form.street2, form.suburb, form.state, form.postcode, 'Australia'].filter(Boolean).join(', ');
+
+    // ✅ 计算价格 — 从pricingTiers找到匹配数量的tier
+    const formQty = parseInt(form.qty) || qty;
+    const matchedTier = pricingTiers.reduce((best, tier) => {
+      if (formQty >= tier.min_qty) return !best || tier.min_qty > best.min_qty ? tier : best;
+      return best;
+    }, null) || pricingTiers[0];
+
+    const unitPrice = matchedTier ? calcUnit(matchedTier.base_price, formQty) : 0;
+    const subtotal = Math.round(unitPrice * formQty * 100) / 100;
+    const gst = Math.round((subtotal + SHIPPING) * GST * 100) / 100;
+    const total = subtotal + SHIPPING + gst;
+
     try {
       const payload = {
         ...form,
@@ -546,6 +559,13 @@ function QuoteModal({ product, colours, decorations, selectedColour, qty, onClos
         extraOptions: Object.keys(extraSelected).filter(k => extraSelected[k]),
         productName: product.name,
         productSku: product.supplier_sku,
+        // ✅ 新增：价格信息
+        unitPrice,
+        subtotal,
+        shipping: SHIPPING,
+        gst,
+        total,
+        qty: formQty,
       };
       const res = await fetch('/api/quote', {
         method: 'POST',
