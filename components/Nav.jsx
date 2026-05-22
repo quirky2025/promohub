@@ -2,6 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { getCartCount } from '@/lib/cart';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -57,6 +60,33 @@ const dropdownLinkStyle = {
 export default function Nav() {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const timeoutRef = useRef(null);
+  const [user, setUser] = useState(null);
+  const [cartCount, setCartCount] = useState(0);
+  const router = useRouter();
+
+  useEffect(() => {
+    // Get current user
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+    });
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+    // Cart count
+    setCartCount(getCartCount());
+    function onCartUpdate() { setCartCount(getCartCount()); }
+    window.addEventListener('cart-updated', onCartUpdate);
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('cart-updated', onCartUpdate);
+    };
+  }, []);
+
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.push('/');
+  }
 
   function handleMouseEnter(menu) {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -101,8 +131,26 @@ export default function Nav() {
               <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '22px', color: '#fff', fontWeight: 500, letterSpacing: '1.5px' }}>02 9477 4748</span>
             </a>
             <div style={{ width: '1px', height: '44px', background: 'rgba(255,255,255,.2)' }} />
-            <Link href="/account/login" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 500 }}>👤 <span>Sign In</span></Link>
-            <Link href="/cart" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 500 }}>🛒 <span>Cart</span></Link>
+            {user ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <Link href="/account" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 500 }}>
+                  👤 <span>{user.user_metadata?.name?.split(' ')[0] || 'Account'}</span>
+                </Link>
+                <button onClick={handleSignOut} style={{ background: 'none', border: '1px solid rgba(255,255,255,.3)', borderRadius: '6px', color: 'rgba(255,255,255,.7)', fontSize: '12px', padding: '4px 10px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link href="/account/login" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 500 }}>👤 <span>Sign In</span></Link>
+            )}
+            <Link href="/cart" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 500, position: 'relative' }}>
+              🛒 <span>Cart</span>
+              {cartCount > 0 && (
+                <span style={{ position: 'absolute', top: '-8px', right: '-10px', background: '#C9A96E', color: '#fff', borderRadius: '50%', width: '18px', height: '18px', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </Link>
           </div>
         </div>
       </div>
