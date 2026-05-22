@@ -219,11 +219,19 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           <div>
             <StepLabel num={colours.length > 0 ? 2 : 1} text="Enter Quantity" />
             <div style={{ fontSize: '13px', color: '#7A7570', margin: '6px 0 12px' }}>Minimum order: <strong style={{ color: NAVY }}>{product.min_qty} units</strong></div>
-            <div style={{ display: 'flex', alignItems: 'center', border: '1.5px solid #C8C4BC', borderRadius: '8px', overflow: 'hidden', width: 'fit-content' }}>
-              <button onClick={() => handleQtyChange(String(Math.max(product.min_qty, qty - 1)))} style={qtyBtnStyle}>−</button>
-              <input type="number" value={qtyInput} onChange={e => handleQtyChange(e.target.value)} style={{ width: '80px', textAlign: 'center', border: 'none', padding: '10px', fontSize: '16px', fontWeight: 600, outline: 'none', fontFamily: '"DM Sans", sans-serif', color: NAVY }} />
-              <button onClick={() => handleQtyChange(String(qty + 1))} style={qtyBtnStyle}>+</button>
-            </div>
+            <input
+              type="number"
+              value={qtyInput}
+              onChange={e => handleQtyChange(e.target.value)}
+              min={product.min_qty}
+              placeholder={`Min. ${product.min_qty}`}
+              style={{
+                width: '160px', padding: '10px 16px', border: '1.5px solid #C8C4BC',
+                borderRadius: '8px', fontSize: '18px', fontWeight: 600,
+                fontFamily: '"DM Sans", sans-serif', color: NAVY, outline: 'none',
+                boxSizing: 'border-box',
+              }}
+            />
             {!isValidQty && <div style={{ fontSize: '12px', color: '#C0392B', marginTop: '8px' }}>Minimum order quantity is {product.min_qty} units.</div>}
           </div>
 
@@ -452,6 +460,8 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           product={product}
           colours={colours}
           decorations={decorations}
+          pricingTiers={pricingTiers}
+          calcUnit={calcUnit}
           selectedColour={selectedColour !== null ? colours[selectedColour]?.name : ''}
           qty={qty}
           onClose={() => setQuoteOpen(false)}
@@ -462,7 +472,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   );
 }
 
-function QuoteModal({ product, colours, decorations, selectedColour, qty, onClose }) {
+function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, selectedColour, qty, onClose }) {
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const STATES = ['ACT','NSW','NT','QLD','SA','TAS','VIC','WA'];
   const currentYear = new Date().getFullYear();
@@ -539,13 +549,11 @@ function QuoteModal({ product, colours, decorations, selectedColour, qty, onClos
       : '';
     const deliveryAddress = [form.street, form.street2, form.suburb, form.state, form.postcode, 'Australia'].filter(Boolean).join(', ');
 
-    // ✅ 计算价格 — 从pricingTiers找到匹配数量的tier
     const formQty = parseInt(form.qty) || qty;
     const matchedTier = pricingTiers.reduce((best, tier) => {
       if (formQty >= tier.min_qty) return !best || tier.min_qty > best.min_qty ? tier : best;
       return best;
     }, null) || pricingTiers[0];
-
     const unitPrice = matchedTier ? calcUnit(matchedTier.base_price, formQty) : 0;
     const subtotal = Math.round(unitPrice * formQty * 100) / 100;
     const gst = Math.round((subtotal + SHIPPING) * GST * 100) / 100;
@@ -559,7 +567,6 @@ function QuoteModal({ product, colours, decorations, selectedColour, qty, onClos
         extraOptions: Object.keys(extraSelected).filter(k => extraSelected[k]),
         productName: product.name,
         productSku: product.supplier_sku,
-        // ✅ 新增：价格信息
         unitPrice,
         subtotal,
         shipping: SHIPPING,

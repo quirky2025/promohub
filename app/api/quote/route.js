@@ -170,12 +170,12 @@ async function generateQuotePDF({
   // ── WHY QUIRKYPROMO BOX ──────────────────────────────────
   page.drawRectangle({ x: 40, y: y - 72, width: width - 80, height: 82, color: LIGHT, borderColor: rgb(0.88, 0.87, 0.84), borderWidth: 0.5 });
   page.drawText('Why Choose QuirkyPromo?', { x: 52, y: y - 6, size: 9, font: fontBold, color: NAVY });
-  const reasons = [
-    '✓  Free digital proof — production only begins after your approval',
-    '✓  $30 flat rate shipping Australia-wide',
-    '✓  Quality guarantee — we make it right if something\'s wrong',
-    '✓  Reply within 1 hour · 02 9477 4748 · hello@quirkypromo.com.au',
-  ];
+const reasons = [
+  '*  Free digital proof — production only begins after your approval',
+  '*  $30 flat rate shipping Australia-wide',
+  '*  Quality guarantee — we make it right if something\'s wrong',
+  '*  Reply within 1 hour  |  02 9477 4748  |  hello@quirkypromo.com.au',
+];
   reasons.forEach((r, i) => {
     page.drawText(r, { x: 52, y: y - 20 - (i * 13), size: 8, font: fontReg, color: GREY });
   });
