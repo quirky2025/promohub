@@ -14,6 +14,15 @@ const STATUS_COLORS = {
   approved: { bg: '#D1FAE5', text: '#065F46', label: 'Approved' },
 };
 
+// Convert Cloudinary PDF URL to displayable JPG using pg_1 transformation
+function toDisplayUrl(url) {
+  if (!url) return url;
+  if (!url.toLowerCase().includes('.pdf')) return url;
+  return url
+    .replace('/upload/', '/upload/pg_1/')
+    .replace(/\.pdf$/, '.jpg');
+}
+
 export default function AdminArtworksPage() {
   const [artworks, setArtworks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,24 +49,17 @@ export default function AdminArtworksPage() {
     if (!mockupFile || !selected) return;
     setUploading(true);
 
-    // Upload to Cloudinary
     const formData = new FormData();
     formData.append('file', mockupFile);
     formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
 
-   const isPdfFile = mockupFile.name.toLowerCase().endsWith('.pdf');
-const uploadEndpoint = isPdfFile ? 'raw' : 'image';
-const cloudRes = await fetch(
-  `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/${uploadEndpoint}/upload`,
-  { method: 'POST', body: formData }
-);
+    const cloudRes = await fetch(
+      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      { method: 'POST', body: formData }
+    );
     const cloudData = await cloudRes.json();
-const isPdfUrl = cloudData.secure_url.includes('.pdf');
-const mockupUrl = isPdfUrl 
-  ? cloudData.secure_url.replace('/image/upload/', '/raw/upload/')
-  : cloudData.secure_url;
+    const mockupUrl = cloudData.secure_url;
 
-    // Save and send to customer
     const res = await fetch('/api/admin/artworks/send-mockup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -73,12 +75,10 @@ const mockupUrl = isPdfUrl
     setUploading(false);
   }
 
-  // Button label and style based on status
   function getActionButton(art) {
     if (art.status === 'logo_received') {
       return (
-        <button
-          onClick={() => { setSelected(art); setMockupFile(null); setSuccess(''); }}
+        <button onClick={() => { setSelected(art); setMockupFile(null); setSuccess(''); }}
           style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap' }}>
           Upload Mockup
         </button>
@@ -86,8 +86,7 @@ const mockupUrl = isPdfUrl
     }
     if (art.status === 'mockup_sent') {
       return (
-        <button
-          onClick={() => { setSelected(art); setMockupFile(null); setSuccess(''); }}
+        <button onClick={() => { setSelected(art); setMockupFile(null); setSuccess(''); }}
           style={{ background: '#fff', color: NAVY, border: `1.5px solid ${NAVY}`, borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap' }}>
           Upload New Version
         </button>
@@ -95,8 +94,7 @@ const mockupUrl = isPdfUrl
     }
     if (art.status === 'changes_requested') {
       return (
-        <button
-          onClick={() => { setSelected(art); setMockupFile(null); setSuccess(''); }}
+        <button onClick={() => { setSelected(art); setMockupFile(null); setSuccess(''); }}
           style={{ background: '#991B1B', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap' }}>
           Upload Revised Mockup
         </button>
@@ -108,7 +106,6 @@ const mockupUrl = isPdfUrl
     return null;
   }
 
-  // Modal title based on status
   function getModalTitle(art) {
     if (art.status === 'mockup_sent') return 'Upload New Version';
     if (art.status === 'changes_requested') return 'Upload Revised Mockup';
@@ -117,7 +114,6 @@ const mockupUrl = isPdfUrl
 
   return (
     <div style={{ background: '#F8F7F4', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
-      {/* Nav */}
       <div style={{ background: NAVY, padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '56px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
           <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', fontWeight: 600, color: '#fff', letterSpacing: '2px' }}>
@@ -151,7 +147,6 @@ const mockupUrl = isPdfUrl
           )}
         </div>
 
-        {/* Filter tabs */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '24px' }}>
           {['all', 'awaiting_logo', 'logo_received', 'mockup_sent', 'changes_requested', 'approved'].map(f => (
             <button key={f} onClick={() => setFilter(f)}
@@ -161,7 +156,6 @@ const mockupUrl = isPdfUrl
           ))}
         </div>
 
-        {/* Artworks list */}
         {loading ? (
           <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570' }}>Loading...</div>
         ) : artworks.length === 0 ? (
@@ -190,7 +184,6 @@ const mockupUrl = isPdfUrl
                     )}
                   </div>
 
-                  {/* Logo preview */}
                   {art.logo_url && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Logo</div>
@@ -201,20 +194,16 @@ const mockupUrl = isPdfUrl
                     </div>
                   )}
 
-                  {/* Mockup preview */}
                   {art.mockup_url && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Mockup</div>
-                      <img src={art.mockup_url} alt="Mockup" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }}
-                        onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} />
-                      <div style={{ display: 'none', width: '80px', height: '80px', border: '1px solid #E0DDD7', borderRadius: '8px', background: '#F8F7F4', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>📄</div>
+                      <img src={toDisplayUrl(art.mockup_url)} alt="Mockup" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
                       <div style={{ marginTop: '4px' }}>
                         <a href={art.mockup_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: GOLD, textDecoration: 'none' }}>View</a>
                       </div>
                     </div>
                   )}
 
-                  {/* Actions */}
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '160px', alignItems: 'flex-end' }}>
                     {getActionButton(art)}
                   </div>
@@ -225,7 +214,6 @@ const mockupUrl = isPdfUrl
         )}
       </div>
 
-      {/* Upload Mockup Modal */}
       {selected && (
         <div onClick={e => e.target === e.currentTarget && setSelected(null)}
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
@@ -237,7 +225,6 @@ const mockupUrl = isPdfUrl
               Order: <strong style={{ color: GOLD }}>{selected.order_number}</strong> · {selected.customer_name}
             </p>
 
-            {/* Show customer change notes if changes_requested */}
             {selected.status === 'changes_requested' && selected.notes && (
               <div style={{ background: '#FEF3C7', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontSize: '13px', color: '#92400E' }}>
                 <strong>Customer requested:</strong><br />{selected.notes}
@@ -256,8 +243,7 @@ const mockupUrl = isPdfUrl
               </div>
             )}
 
-            <div
-              onClick={() => document.getElementById('mockup-upload').click()}
+            <div onClick={() => document.getElementById('mockup-upload').click()}
               style={{ border: `2px dashed ${mockupFile ? GOLD : '#C8C4BC'}`, borderRadius: '10px', padding: '32px', textAlign: 'center', cursor: 'pointer', background: mockupFile ? '#FFFBF4' : '#F8F7F4', marginBottom: '20px' }}>
               <input id="mockup-upload" type="file" accept="image/*,.pdf" style={{ display: 'none' }}
                 onChange={e => { if (e.target.files[0]) setMockupFile(e.target.files[0]); }} />

@@ -9,12 +9,12 @@ const GOLD = '#C9A96E';
 function MockupViewer({ url }) {
   if (!url) return null;
 
-  const isPdf = url.toLowerCase().includes('.pdf') || url.toLowerCase().includes('/pdf');
+  const isPdf = url.toLowerCase().includes('.pdf');
 
-  // Cloudinary trick: convert PDF first page to JPG for display
-  // Original: https://res.cloudinary.com/xxx/image/upload/v123/file.pdf
-  // Display:  https://res.cloudinary.com/xxx/image/upload/v123/file.jpg  (Cloudinary auto-converts)
-  const displayUrl = isPdf ? url.replace(/\.pdf($|\?)/, '.jpg') : url;
+  // Use Cloudinary pg_1 transformation to render PDF first page as JPG
+  const displayUrl = isPdf
+    ? url.replace('/upload/', '/upload/pg_1/').replace(/\.pdf$/, '.jpg')
+    : url;
 
   return (
     <div>
@@ -157,7 +157,6 @@ export default function ArtworkPage() {
 
   return (
     <div style={{ background: '#F8F7F4', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
-      {/* Header */}
       <div style={{ background: NAVY, padding: '20px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', fontWeight: 600, color: '#fff', letterSpacing: '2px' }}>
           QUIRKY<span style={{ color: GOLD }}>PROMO</span>
@@ -169,14 +168,12 @@ export default function ArtworkPage() {
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px' }}>
 
-        {/* Changes requested notice */}
         {isChangesRequested && (
           <div style={{ background: '#FEF3C7', border: '1px solid #F59E0B', borderRadius: '10px', padding: '14px 18px', marginBottom: '20px', fontSize: '14px', color: '#92400E' }}>
             ⏳ <strong>Changes requested.</strong> We're working on a revised mockup and will notify you by email when it's ready.
           </div>
         )}
 
-        {/* Order info */}
         <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '20px 24px', marginBottom: '24px' }}>
           <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', fontSize: '14px' }}>
             <div><span style={{ color: '#7A7570' }}>Order Number: </span><strong style={{ color: GOLD }}>{artwork?.order_number}</strong></div>
@@ -185,7 +182,6 @@ export default function ArtworkPage() {
           </div>
         </div>
 
-        {/* Mockup */}
         <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: NAVY, margin: '0 0 20px' }}>Your Artwork Mockup</h2>
           <MockupViewer url={artwork?.mockup_url} />
@@ -194,7 +190,6 @@ export default function ArtworkPage() {
           </p>
         </div>
 
-        {/* Approval form — hidden if changes already requested */}
         {!isChangesRequested && (
           <>
             {!requestingChanges ? (
@@ -205,26 +200,16 @@ export default function ArtworkPage() {
                   <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                     Your Full Name *
                   </label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
-                    placeholder="Jane Smith"
-                    style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '15px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none' }}
-                  />
+                  <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Jane Smith"
+                    style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '15px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none' }} />
                 </div>
 
                 <div style={{ marginBottom: '24px' }}>
                   <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                     Additional Notes (optional)
                   </label>
-                  <textarea
-                    value={notes}
-                    onChange={e => setNotes(e.target.value)}
-                    placeholder="Any comments about the artwork..."
-                    rows={3}
-                    style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none', resize: 'vertical' }}
-                  />
+                  <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Any comments about the artwork..." rows={3}
+                    style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none', resize: 'vertical' }} />
                 </div>
 
                 <div style={{ background: '#F8F7F4', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontSize: '12px', color: '#7A7570' }}>
@@ -232,24 +217,12 @@ export default function ArtworkPage() {
                 </div>
 
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                  <button
-                    onClick={handleApprove}
-                    disabled={!name.trim() || submitting}
-                    style={{
-                      flex: 1, background: !name.trim() ? '#C8C4BC' : '#2D6A4F', color: '#fff',
-                      border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px',
-                      fontWeight: 700, cursor: !name.trim() ? 'not-allowed' : 'pointer',
-                      fontFamily: '"DM Sans", sans-serif', minWidth: '200px',
-                    }}>
+                  <button onClick={handleApprove} disabled={!name.trim() || submitting}
+                    style={{ flex: 1, background: !name.trim() ? '#C8C4BC' : '#2D6A4F', color: '#fff', border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px', fontWeight: 700, cursor: !name.trim() ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif', minWidth: '200px' }}>
                     {submitting ? 'Processing...' : '✅ I Approve This Artwork'}
                   </button>
-                  <button
-                    onClick={() => setRequestingChanges(true)}
-                    style={{
-                      flex: 1, background: '#fff', color: NAVY, border: `1.5px solid ${NAVY}`,
-                      borderRadius: '10px', padding: '16px', fontSize: '15px', fontWeight: 600,
-                      cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', minWidth: '160px',
-                    }}>
+                  <button onClick={() => setRequestingChanges(true)}
+                    style={{ flex: 1, background: '#fff', color: NAVY, border: `1.5px solid ${NAVY}`, borderRadius: '10px', padding: '16px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', minWidth: '160px' }}>
                     ✏️ Request Changes
                   </button>
                 </div>
