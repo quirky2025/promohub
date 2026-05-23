@@ -45,12 +45,12 @@ export default function AdminArtworksPage() {
     formData.append('file', mockupFile);
     formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
 
-    const cloudRes = await fetch(
-      mockupFile.type === 'application/pdf'
-  ? `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/raw/upload`
-  : `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-      { method: 'POST', body: formData }
-    );
+   const isPdfFile = mockupFile.name.toLowerCase().endsWith('.pdf');
+const uploadEndpoint = isPdfFile ? 'raw' : 'image';
+const cloudRes = await fetch(
+  `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/${uploadEndpoint}/upload`,
+  { method: 'POST', body: formData }
+);
     const cloudData = await cloudRes.json();
     const mockupUrl = cloudData.secure_url;
 
