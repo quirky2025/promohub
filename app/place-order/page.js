@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { getCart, clearCart } from '@/lib/cart';
+import { getCart, clearCart, removeFromCart } from '@/lib/cart';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -50,7 +50,6 @@ function StripePaymentForm({ orderData, onSuccess, onError }) {
         });
         if (res.ok) {
           const data = await res.json();
-          clearCart();
           onSuccess(data.orderNumber);
         } else {
           onError('Order could not be saved. Please contact us.');
@@ -89,6 +88,9 @@ export default function PlaceOrderPage() {
   const [loaded, setLoaded] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('eft');
   const [submitting, setSubmitting] = useState(false);
+  const [logoFile, setLogoFile] = useState(null);
+  const [logoUrl, setLogoUrl] = useState('');
+  const [logoUploading, setLogoUploading] = useState(false);
   const [error, setError] = useState('');
   const [clientSecret, setClientSecret] = useState('');
   const [showStripeForm, setShowStripeForm] = useState(false);
@@ -102,7 +104,7 @@ export default function PlaceOrderPage() {
     const c = getCart();
     setCart(c);
     setLoaded(true);
-    if (c.length === 0) router.push('/cart');
+    if (c.length === 0) router.push('/products');
   }, []);
 
   const totalSubtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
@@ -129,11 +131,86 @@ export default function PlaceOrderPage() {
   };
 
   // EFT submit
+  // Upload logo to Cloudinary
+  async function uploadLogo(file) {
+    if (!file) return null;
+    setLogoUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
+      const res = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: 'POST', body: formData }
+      );
+      const data = await res.json();
+      setLogoUploading(false);
+      return data.secure_url;
+    } catch {
+      setLogoUploading(false);
+      return null;
+    }
+  }
+
+  // Trigger artwork mockup after order placed
+  async function triggerArtwork({ orderNumber, customerName, customerEmail, paymentMethod, uploadedLogoUrl, savedCartItems }) {
+    console.log('triggerArtwork called:', { orderNumber, customerName, paymentMethod, uploadedLogoUrl });
+    const cartItems = savedCartItems || getCart();
+    console.log('cartItems:', cartItems?.length, cartItems?.[0]?.productName);
+    const firstItem = cartItems[0];
+    if (!firstItem) {
+      console.log('No cart items found!');
+      return;
+    }
+
+    const logoToUse = uploadedLogoUrl || logoUrl;
+    console.log('logoToUse:', logoToUse);
+
+    if (logoToUse) {
+      // Logo available - generate mockup automatically
+      await fetch('/api/artwork/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderNumber,
+          customerName,
+          customerEmail,
+          productName: firstItem.productName,
+          productImageUrl: firstItem.image || '',
+          logoUrl: logoToUse,
+          paymentMethod,
+          colour: firstItem.colour || '',
+          qty: firstItem.qty,
+        }),
+      });
+    } else {
+      // No logo - send "please upload logo" email
+      await fetch('/api/artwork/request-logo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderNumber,
+          customerName,
+          customerEmail,
+          productName: firstItem.productName,
+          paymentMethod,
+        }),
+      });
+    }
+  }
+
   async function handleEFTSubmit() {
+    console.log('EFT submit - canSubmit:', canSubmit, 'form:', form);
     if (!canSubmit) return;
     setSubmitting(true);
     setError('');
     try {
+      // Upload logo first if file selected
+      let uploadedLogoUrl = logoUrl;
+      if (logoFile && !logoUrl) {
+        uploadedLogoUrl = await uploadLogo(logoFile);
+        if (uploadedLogoUrl) setLogoUrl(uploadedLogoUrl);
+      }
       const res = await fetch('/api/order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -141,7 +218,19 @@ export default function PlaceOrderPage() {
       });
       if (res.ok) {
         const data = await res.json();
+        // Save cart items before clearing
+        const savedItems = getCart();
         clearCart();
+        // Trigger artwork workflow
+        console.log('About to call triggerArtwork, savedItems:', savedItems?.length);
+        await triggerArtwork({
+          orderNumber: data.orderNumber,
+          customerName: form.name,
+          customerEmail: form.email,
+          paymentMethod: 'eft',
+          uploadedLogoUrl: uploadedLogoUrl,
+          savedCartItems: savedItems,
+        });
         router.push(`/order-confirmation?order=${data.orderNumber}&method=eft`);
       } else {
         setError('Something went wrong. Please try again or call us on 02 9477 4748.');
@@ -178,7 +267,17 @@ export default function PlaceOrderPage() {
     }
   }
 
-  function handleStripeSuccess(orderNumber) {
+  async function handleStripeSuccess(orderNumber) {
+    const savedItems = getCart();
+    clearCart();
+    await triggerArtwork({
+      orderNumber,
+      customerName: customer.name,
+      customerEmail: customer.email,
+      paymentMethod: 'stripe',
+      uploadedLogoUrl: logoUrl,
+      savedCartItems: savedItems,
+    });
     router.push(`/order-confirmation?order=${orderNumber}&method=stripe`);
   }
 
@@ -214,7 +313,7 @@ export default function PlaceOrderPage() {
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
           <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href="/cart" style={{ color: '#7A7570', textDecoration: 'none' }}>Shopping Cart</Link>
+          <Link href="/place-order" style={{ color: '#7A7570', textDecoration: 'none' }}>Place Order</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>Place Order</span>
         </div>
@@ -318,6 +417,51 @@ export default function PlaceOrderPage() {
                   </div>
                 </div>
               </div>
+            </div>
+
+            {/* Logo Upload */}
+            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px' }}>
+              <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', fontWeight: 600, color: NAVY, margin: '0 0 8px' }}>Upload Your Logo</h2>
+              <p style={{ fontSize: '13px', color: '#7A7570', margin: '0 0 20px' }}>Optional — you can also email your logo to hello@quirkypromo.com.au after placing your order.</p>
+
+              <div
+                onClick={() => document.getElementById('logo-upload-input').click()}
+                style={{
+                  border: `2px dashed ${logoFile ? GOLD : '#C8C4BC'}`,
+                  borderRadius: '10px',
+                  padding: '32px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  background: logoFile ? '#FFFBF4' : '#F8F7F4',
+                  transition: 'all .2s',
+                }}>
+                <input
+                  id="logo-upload-input"
+                  type="file"
+                  accept=".ai,.pdf,.png,.jpg,.jpeg,.eps,.svg"
+                  style={{ display: 'none' }}
+                  onChange={e => {
+                    const file = e.target.files[0];
+                    if (file) setLogoFile(file);
+                  }}
+                />
+                {logoFile ? (
+                  <>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>✅</div>
+                    <div style={{ fontWeight: 600, color: NAVY, fontSize: '15px' }}>{logoFile.name}</div>
+                    <div style={{ fontSize: '12px', color: '#7A7570', marginTop: '4px' }}>Click to change file</div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎨</div>
+                    <div style={{ fontWeight: 600, color: NAVY, fontSize: '15px', marginBottom: '4px' }}>Click to upload your logo / artwork</div>
+                    <div style={{ fontSize: '12px', color: '#7A7570' }}>AI, PDF, PNG, JPG, EPS, SVG accepted</div>
+                  </>
+                )}
+              </div>
+              {logoUploading && (
+                <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '13px', color: '#7A7570' }}>Uploading logo...</div>
+              )}
             </div>
 
             {/* Payment Method */}
@@ -446,7 +590,13 @@ export default function PlaceOrderPage() {
                       ))}
                       <div style={{ fontSize: '11px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Qty: {item.qty}</div>
                     </div>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: NAVY, fontFamily: '"DM Mono", monospace', flexShrink: 0 }}>${item.subtotal.toFixed(2)}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
+                      <div style={{ fontSize: '13px', fontWeight: 600, color: NAVY, fontFamily: '"DM Mono", monospace' }}>${item.subtotal.toFixed(2)}</div>
+                      <button
+                        onClick={() => { setCart(removeFromCart(item.id)); }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#B0AAA3', fontSize: '11px', fontFamily: '"DM Sans", sans-serif', padding: 0, textDecoration: 'underline' }}
+                      >Remove</button>
+                    </div>
                   </div>
                 ))}
               </div>

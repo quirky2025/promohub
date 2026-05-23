@@ -10,14 +10,14 @@ const supabase = createClient(
 );
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ✅ ORD260001 格式
+// ✅ PO260001 格式
 async function generateOrderNumber() {
   const year = String(new Date().getFullYear()).slice(2);
   const { count } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true });
   const num = String((count || 0) + 1).padStart(4, '0');
-  return `ORD${year}${num}`;
+  return `PO${year}${num}`;
 }
 
 // ✅ 生成 Invoice PDF
@@ -27,6 +27,8 @@ async function generateInvoicePDF({
   items, subtotal, shipping, gst, surcharge, total,
   paymentMethod, paymentStatus,
 }) {
+  const isEFT = paymentMethod === 'eft';
+  const docTitle = isEFT ? 'ORDER CONFIRMATION' : 'INVOICE';
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]); // A4
   const { width, height } = page.getSize();
@@ -52,7 +54,7 @@ async function generateInvoicePDF({
   });
 
   // INVOICE label
-  page.drawText('INVOICE', { x: width - 130, y: height - 38, size: 28, font: fontBold, color: GOLD });
+  page.drawText(docTitle, { x: width - (isEFT ? 220 : 130), y: height - 38, size: isEFT ? 14 : 28, font: fontBold, color: GOLD });
   page.drawText(orderNumber, { x: width - 130, y: height - 52, size: 9, font: fontReg, color: WHITE });
   page.drawText(`Date: ${invoiceDate}`, { x: width - 130, y: height - 64, size: 8, font: fontReg, color: rgb(0.7, 0.7, 0.7) });
 
@@ -75,8 +77,8 @@ async function generateInvoicePDF({
   y -= 90;
 
   // ── PAYMENT STATUS BADGE ─────────────────────────────────
-  const badgeColor = paymentStatus === 'paid' ? GREEN : RED;
-  const badgeText = paymentStatus === 'paid' ? 'PAID' : 'AWAITING PAYMENT';
+  const badgeColor = paymentStatus === 'paid' ? GREEN : (isEFT ? rgb(0.106, 0.165, 0.290) : RED);
+  const badgeText = paymentStatus === 'paid' ? 'PAID' : (isEFT ? 'ORDER RECEIVED' : 'AWAITING PAYMENT');
   page.drawRectangle({ x: 40, y: y - 6, width: 120, height: 20, color: badgeColor, borderRadius: 4 });
   page.drawText(badgeText, { x: 48, y: y - 1, size: 8, font: fontBold, color: WHITE });
 
@@ -282,7 +284,7 @@ export async function POST(req) {
         </div>
         <div style="background: #fff; border: 1px solid #E0DDD7; border-top: none; padding: 28px 32px; border-radius: 0 0 12px 12px;">
           <p style="font-size: 15px; margin: 0 0 16px;">Hi ${customer.name},</p>
-          <p style="font-size: 15px; margin: 0 0 24px;">Thank you for your order! Please find your <strong>Invoice PDF attached</strong>. We'll send you a free digital proof for approval shortly. Production only begins after you approve the artwork.</p>
+          <p style="font-size: 15px; margin: 0 0 24px;">Thank you for your order! Please find your <strong>${paymentMethod === 'eft' ? 'Order Confirmation' : 'Invoice'} PDF attached</strong>. We'll send you a free digital proof for approval shortly. Production only begins after you approve the artwork.</p>
 
           <h2 style="font-size: 14px; color: #1B2A4A; margin: 0 0 12px; padding-bottom: 10px; border-bottom: 1px solid #F0EEED; text-transform: uppercase; letter-spacing: 0.08em;">Order Details</h2>
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
@@ -322,9 +324,9 @@ export async function POST(req) {
       from: 'QuirkyPromo <noreply@quirkypromo.com.au>',
       replyTo: 'hello@quirkypromo.com.au',
       to: [customer.email],
-      subject: `Order Confirmed — ${orderNumber}`,
+      subject: paymentMethod === 'eft' ? `Order Confirmation — ${orderNumber}` : `Invoice — ${orderNumber}`,
       html: emailHtml,
-      attachments: [{ filename: `${orderNumber}.pdf`, content: pdfBase64 }],
+      attachments: [{ filename: paymentMethod === 'eft' ? `OrderConfirmation_${orderNumber}.pdf` : `Invoice_${orderNumber}.pdf`, content: pdfBase64 }],
     });
 
     // ✅ Email to you with PDF
@@ -334,7 +336,7 @@ export async function POST(req) {
       to: ['hello@quirkypromo.com.au'],
       subject: `New Order: ${orderNumber} — ${customer.name}`,
       html: emailHtml,
-      attachments: [{ filename: `${orderNumber}.pdf`, content: pdfBase64 }],
+      attachments: [{ filename: paymentMethod === 'eft' ? `OrderConfirmation_${orderNumber}.pdf` : `Invoice_${orderNumber}.pdf`, content: pdfBase64 }],
     });
 
     return Response.json({ success: true, orderNumber });
