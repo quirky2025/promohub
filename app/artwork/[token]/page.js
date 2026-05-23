@@ -6,6 +6,43 @@ import { useParams } from 'next/navigation';
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 
+function MockupViewer({ url }) {
+  if (!url) return null;
+  const isPdf = url.toLowerCase().includes('.pdf') || url.toLowerCase().includes('/pdf');
+
+  if (isPdf) {
+    return (
+      <div>
+        <iframe
+          src={url}
+          style={{ width: '100%', height: '600px', border: '1px solid #E0DDD7', borderRadius: '8px' }}
+          title="Artwork Mockup"
+        />
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'inline-block', marginTop: '12px', padding: '10px 20px',
+            background: NAVY, color: '#fff', borderRadius: '8px', fontSize: '13px',
+            fontWeight: 600, textDecoration: 'none', fontFamily: '"DM Sans", sans-serif',
+          }}
+        >
+          ↗ Open PDF in New Tab
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={url}
+      alt="Artwork Mockup"
+      style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #E0DDD7' }}
+    />
+  );
+}
+
 export default function ArtworkPage() {
   const { token } = useParams();
   const [artwork, setArtwork] = useState(null);
@@ -82,7 +119,7 @@ export default function ArtworkPage() {
         <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '16px', fontSize: '14px', color: '#7A7570' }}>
           {artwork?.payment_method === 'eft'
             ? 'Your Invoice will arrive shortly. Production begins once payment is received.'
-            : 'Production is now starting. We\'ll notify you when your order is dispatched.'}
+            : "Production is now starting. We'll notify you when your order is dispatched."}
         </div>
       </div>
     </div>
@@ -93,7 +130,12 @@ export default function ArtworkPage() {
       <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '500px', width: '100%', textAlign: 'center' }}>
         <div style={{ fontSize: '64px', marginBottom: '16px' }}>📝</div>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 12px' }}>Changes Requested</h1>
-        <p style={{ fontSize: '15px', color: '#7A7570' }}>We've received your feedback and will send a revised mockup shortly.</p>
+        <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 16px' }}>
+          We've received your feedback and will send a revised mockup shortly.
+        </p>
+        <p style={{ fontSize: '13px', color: '#9CA3AF' }}>
+          You'll receive an email when the updated mockup is ready. Use the same link to review and approve.
+        </p>
       </div>
     </div>
   );
@@ -103,26 +145,37 @@ export default function ArtworkPage() {
       <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '500px', width: '100%', textAlign: 'center' }}>
         <div style={{ fontSize: '64px', marginBottom: '16px' }}>✅</div>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 12px' }}>Already Approved</h1>
-        <p style={{ fontSize: '15px', color: '#7A7570' }}>This artwork has already been approved by <strong>{artwork.approved_by}</strong>.</p>
+        <p style={{ fontSize: '15px', color: '#7A7570' }}>
+          This artwork has already been approved by <strong>{artwork.approved_by}</strong>.
+        </p>
       </div>
     </div>
   );
+
+  // Status badge for changes_requested
+  const isChangesRequested = artwork?.status === 'changes_requested';
 
   return (
     <div style={{ background: '#F8F7F4', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
       {/* Header */}
       <div style={{ background: NAVY, padding: '20px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
-          <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', fontWeight: 600, color: '#fff', letterSpacing: '2px' }}>
-            QUIRKY<span style={{ color: GOLD }}>PROMO</span>
-          </span>
-        </div>
+        <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', fontWeight: 600, color: '#fff', letterSpacing: '2px' }}>
+          QUIRKY<span style={{ color: GOLD }}>PROMO</span>
+        </span>
         <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)' }}>
           Artwork Approval · <span style={{ color: GOLD, fontWeight: 600 }}>{artwork?.order_number}</span>
         </div>
       </div>
 
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '40px 20px' }}>
+
+        {/* Changes requested notice */}
+        {isChangesRequested && (
+          <div style={{ background: '#FEF3C7', border: '1px solid #F59E0B', borderRadius: '10px', padding: '14px 18px', marginBottom: '20px', fontSize: '14px', color: '#92400E' }}>
+            ⏳ <strong>Changes requested.</strong> We're working on a revised mockup and will notify you by email when it's ready.
+          </div>
+        )}
+
         {/* Order info */}
         <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '20px 24px', marginBottom: '24px' }}>
           <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', fontSize: '14px' }}>
@@ -135,98 +188,98 @@ export default function ArtworkPage() {
         {/* Mockup */}
         <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: NAVY, margin: '0 0 20px' }}>Your Artwork Mockup</h2>
-          <img
-            src={artwork?.mockup_url}
-            alt="Artwork Mockup"
-            style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #E0DDD7' }}
-          />
+          <MockupViewer url={artwork?.mockup_url} />
           <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '12px' }}>
             This mockup is for positional reference only. Colours on screen may differ from the final printed product.
           </p>
         </div>
 
-        {/* Approval form */}
-        {!requestingChanges ? (
-          <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px' }}>
-            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 20px' }}>Review & Sign</h2>
+        {/* Approval form — hidden if changes already requested */}
+        {!isChangesRequested && (
+          <>
+            {!requestingChanges ? (
+              <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px' }}>
+                <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 20px' }}>Review & Sign</h2>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                Your Full Name *
-              </label>
-              <input
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value)}
-                placeholder="Jane Smith"
-                style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '15px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none' }}
-              />
-            </div>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    Your Full Name *
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={e => setName(e.target.value)}
+                    placeholder="Jane Smith"
+                    style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '15px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none' }}
+                  />
+                </div>
 
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                Additional Notes (optional)
-              </label>
-              <textarea
-                value={notes}
-                onChange={e => setNotes(e.target.value)}
-                placeholder="Any comments about the artwork..."
-                rows={3}
-                style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none', resize: 'vertical' }}
-              />
-            </div>
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                    Additional Notes (optional)
+                  </label>
+                  <textarea
+                    value={notes}
+                    onChange={e => setNotes(e.target.value)}
+                    placeholder="Any comments about the artwork..."
+                    rows={3}
+                    style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none', resize: 'vertical' }}
+                  />
+                </div>
 
-            <div style={{ background: '#F8F7F4', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontSize: '12px', color: '#7A7570' }}>
-              By clicking "I Approve This Artwork", you confirm that you have reviewed the mockup and approve it for production. This approval is legally binding.
-            </div>
+                <div style={{ background: '#F8F7F4', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontSize: '12px', color: '#7A7570' }}>
+                  By clicking "I Approve This Artwork", you confirm that you have reviewed the mockup and approve it for production. This approval is legally binding.
+                </div>
 
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <button
-                onClick={handleApprove}
-                disabled={!name.trim() || submitting}
-                style={{
-                  flex: 1, background: !name.trim() ? '#C8C4BC' : '#2D6A4F', color: '#fff',
-                  border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px',
-                  fontWeight: 700, cursor: !name.trim() ? 'not-allowed' : 'pointer',
-                  fontFamily: '"DM Sans", sans-serif', minWidth: '200px',
-                }}>
-                {submitting ? 'Processing...' : '✅ I Approve This Artwork'}
-              </button>
-              <button
-                onClick={() => setRequestingChanges(true)}
-                style={{
-                  flex: 1, background: '#fff', color: NAVY, border: `1.5px solid ${NAVY}`,
-                  borderRadius: '10px', padding: '16px', fontSize: '15px', fontWeight: 600,
-                  cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', minWidth: '160px',
-                }}>
-                ✏️ Request Changes
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px' }}>
-            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 20px' }}>Request Changes</h2>
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your Name *</label>
-              <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Jane Smith"
-                style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '15px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none' }} />
-            </div>
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>What changes do you need? *</label>
-              <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Please describe the changes you'd like..." rows={4}
-                style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none', resize: 'vertical' }} />
-            </div>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={handleRequestChanges} disabled={!name.trim() || !notes.trim() || submitting}
-                style={{ flex: 1, background: GOLD, color: '#fff', border: 'none', borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
-                {submitting ? 'Sending...' : 'Submit Changes Request'}
-              </button>
-              <button onClick={() => setRequestingChanges(false)}
-                style={{ background: '#fff', color: '#7A7570', border: '1.5px solid #E0DDD7', borderRadius: '10px', padding: '14px 20px', fontSize: '14px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
-                Cancel
-              </button>
-            </div>
-          </div>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={handleApprove}
+                    disabled={!name.trim() || submitting}
+                    style={{
+                      flex: 1, background: !name.trim() ? '#C8C4BC' : '#2D6A4F', color: '#fff',
+                      border: 'none', borderRadius: '10px', padding: '16px', fontSize: '16px',
+                      fontWeight: 700, cursor: !name.trim() ? 'not-allowed' : 'pointer',
+                      fontFamily: '"DM Sans", sans-serif', minWidth: '200px',
+                    }}>
+                    {submitting ? 'Processing...' : '✅ I Approve This Artwork'}
+                  </button>
+                  <button
+                    onClick={() => setRequestingChanges(true)}
+                    style={{
+                      flex: 1, background: '#fff', color: NAVY, border: `1.5px solid ${NAVY}`,
+                      borderRadius: '10px', padding: '16px', fontSize: '15px', fontWeight: 600,
+                      cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', minWidth: '160px',
+                    }}>
+                    ✏️ Request Changes
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px' }}>
+                <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 20px' }}>Request Changes</h2>
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your Name *</label>
+                  <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Jane Smith"
+                    style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '15px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none' }} />
+                </div>
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>What changes do you need? *</label>
+                  <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Please describe the changes you'd like..." rows={4}
+                    style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none', resize: 'vertical' }} />
+                </div>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button onClick={handleRequestChanges} disabled={!name.trim() || !notes.trim() || submitting}
+                    style={{ flex: 1, background: GOLD, color: '#fff', border: 'none', borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                    {submitting ? 'Sending...' : 'Submit Changes Request'}
+                  </button>
+                  <button onClick={() => setRequestingChanges(false)}
+                    style={{ background: '#fff', color: '#7A7570', border: '1.5px solid #E0DDD7', borderRadius: '10px', padding: '14px 20px', fontSize: '14px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
