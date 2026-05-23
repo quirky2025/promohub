@@ -8,38 +8,39 @@ const GOLD = '#C9A96E';
 
 function MockupViewer({ url }) {
   if (!url) return null;
+
   const isPdf = url.toLowerCase().includes('.pdf') || url.toLowerCase().includes('/pdf');
 
-  if (isPdf) {
-    return (
-      <div>
-        <iframe
-          src={url}
-          style={{ width: '100%', height: '600px', border: '1px solid #E0DDD7', borderRadius: '8px' }}
-          title="Artwork Mockup"
-        />
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'inline-block', marginTop: '12px', padding: '10px 20px',
-            background: NAVY, color: '#fff', borderRadius: '8px', fontSize: '13px',
-            fontWeight: 600, textDecoration: 'none', fontFamily: '"DM Sans", sans-serif',
-          }}
-        >
-          ↗ Open PDF in New Tab
-        </a>
-      </div>
-    );
-  }
+  // Cloudinary trick: convert PDF first page to JPG for display
+  // Original: https://res.cloudinary.com/xxx/image/upload/v123/file.pdf
+  // Display:  https://res.cloudinary.com/xxx/image/upload/v123/file.jpg  (Cloudinary auto-converts)
+  const displayUrl = isPdf ? url.replace(/\.pdf($|\?)/, '.jpg') : url;
 
   return (
-    <img
-      src={url}
-      alt="Artwork Mockup"
-      style={{ maxWidth: '100%', maxHeight: '500px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #E0DDD7' }}
-    />
+    <div>
+      <img
+        src={displayUrl}
+        alt="Artwork Mockup"
+        style={{ maxWidth: '100%', maxHeight: '600px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #E0DDD7' }}
+      />
+      {isPdf && (
+        <div style={{ marginTop: '16px' }}>
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'inline-flex', alignItems: 'center', gap: '8px',
+              padding: '10px 20px', background: NAVY, color: '#fff',
+              borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+              textDecoration: 'none', fontFamily: '"DM Sans", sans-serif',
+            }}
+          >
+            📄 Download PDF Mockup
+          </a>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -152,7 +153,6 @@ export default function ArtworkPage() {
     </div>
   );
 
-  // Status badge for changes_requested
   const isChangesRequested = artwork?.status === 'changes_requested';
 
   return (
@@ -189,7 +189,7 @@ export default function ArtworkPage() {
         <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px', marginBottom: '24px', textAlign: 'center' }}>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: NAVY, margin: '0 0 20px' }}>Your Artwork Mockup</h2>
           <MockupViewer url={artwork?.mockup_url} />
-          <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '12px' }}>
+          <p style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '16px' }}>
             This mockup is for positional reference only. Colours on screen may differ from the final printed product.
           </p>
         </div>

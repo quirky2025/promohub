@@ -44,6 +44,7 @@ export default function AdminArtworksPage() {
     const formData = new FormData();
     formData.append('file', mockupFile);
     formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
+
     const cloudRes = await fetch(
       `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
       { method: 'POST', body: formData }
@@ -65,6 +66,48 @@ export default function AdminArtworksPage() {
       loadArtworks();
     }
     setUploading(false);
+  }
+
+  // Button label and style based on status
+  function getActionButton(art) {
+    if (art.status === 'logo_received') {
+      return (
+        <button
+          onClick={() => { setSelected(art); setMockupFile(null); setSuccess(''); }}
+          style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap' }}>
+          Upload Mockup
+        </button>
+      );
+    }
+    if (art.status === 'mockup_sent') {
+      return (
+        <button
+          onClick={() => { setSelected(art); setMockupFile(null); setSuccess(''); }}
+          style={{ background: '#fff', color: NAVY, border: `1.5px solid ${NAVY}`, borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap' }}>
+          Upload New Version
+        </button>
+      );
+    }
+    if (art.status === 'changes_requested') {
+      return (
+        <button
+          onClick={() => { setSelected(art); setMockupFile(null); setSuccess(''); }}
+          style={{ background: '#991B1B', color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap' }}>
+          Upload Revised Mockup
+        </button>
+      );
+    }
+    if (art.status === 'approved') {
+      return <span style={{ fontSize: '12px', color: '#065F46', fontWeight: 600 }}>✅ Approved</span>;
+    }
+    return null;
+  }
+
+  // Modal title based on status
+  function getModalTitle(art) {
+    if (art.status === 'mockup_sent') return 'Upload New Version';
+    if (art.status === 'changes_requested') return 'Upload Revised Mockup';
+    return 'Upload Mockup';
   }
 
   return (
@@ -135,6 +178,11 @@ export default function AdminArtworksPage() {
                     <div style={{ fontSize: '13px', color: '#7A7570', marginBottom: '4px' }}>{art.customer_email}</div>
                     <div style={{ fontSize: '13px', color: '#7A7570', marginBottom: '4px' }}>Product: <strong style={{ color: NAVY }}>{art.product_name}</strong></div>
                     <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{new Date(art.created_at).toLocaleString('en-AU')}</div>
+                    {art.notes && (
+                      <div style={{ marginTop: '8px', background: '#FEF3C7', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', color: '#92400E' }}>
+                        <strong>Customer notes:</strong> {art.notes}
+                      </div>
+                    )}
                   </div>
 
                   {/* Logo preview */}
@@ -152,21 +200,18 @@ export default function AdminArtworksPage() {
                   {art.mockup_url && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Mockup</div>
-                      <img src={art.mockup_url} alt="Mockup" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
+                      <img src={art.mockup_url} alt="Mockup" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }}
+                        onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'block'; }} />
+                      <div style={{ display: 'none', width: '80px', height: '80px', border: '1px solid #E0DDD7', borderRadius: '8px', background: '#F8F7F4', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>📄</div>
+                      <div style={{ marginTop: '4px' }}>
+                        <a href={art.mockup_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: GOLD, textDecoration: 'none' }}>View</a>
+                      </div>
                     </div>
                   )}
 
                   {/* Actions */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '140px' }}>
-                    {(art.status === 'logo_received' || art.status === 'changes_requested') && (
-                      <button onClick={() => { setSelected(art); setMockupFile(null); setSuccess(''); }}
-                        style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
-                        Upload Mockup
-                      </button>
-                    )}
-                    {art.status === 'approved' && (
-                      <span style={{ fontSize: '12px', color: '#065F46', fontWeight: 600 }}>✅ Approved</span>
-                    )}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '160px', alignItems: 'flex-end' }}>
+                    {getActionButton(art)}
                   </div>
                 </div>
               </div>
@@ -180,10 +225,19 @@ export default function AdminArtworksPage() {
         <div onClick={e => e.target === e.currentTarget && setSelected(null)}
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
           <div style={{ background: '#fff', borderRadius: '16px', padding: '32px', maxWidth: '500px', width: '100%' }}>
-            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: NAVY, margin: '0 0 8px' }}>Upload Mockup</h2>
+            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: NAVY, margin: '0 0 8px' }}>
+              {getModalTitle(selected)}
+            </h2>
             <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 20px' }}>
               Order: <strong style={{ color: GOLD }}>{selected.order_number}</strong> · {selected.customer_name}
             </p>
+
+            {/* Show customer change notes if changes_requested */}
+            {selected.status === 'changes_requested' && selected.notes && (
+              <div style={{ background: '#FEF3C7', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontSize: '13px', color: '#92400E' }}>
+                <strong>Customer requested:</strong><br />{selected.notes}
+              </div>
+            )}
 
             {selected.logo_url && (
               <div style={{ marginBottom: '20px' }}>
