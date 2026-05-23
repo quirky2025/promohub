@@ -52,7 +52,10 @@ const cloudRes = await fetch(
   { method: 'POST', body: formData }
 );
     const cloudData = await cloudRes.json();
-    const mockupUrl = cloudData.secure_url;
+const isPdfUrl = cloudData.secure_url.includes('.pdf');
+const mockupUrl = isPdfUrl 
+  ? cloudData.secure_url.replace('/image/upload/', '/raw/upload/')
+  : cloudData.secure_url;
 
     // Save and send to customer
     const res = await fetch('/api/admin/artworks/send-mockup', {
