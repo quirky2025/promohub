@@ -375,12 +375,12 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               boxShadow: isValidQty ? '0 4px 16px rgba(201,169,110,.4)' : 'none',
               transition: 'background .3s',
             }}>
-            {cartAdded ? '✅ Added to Cart!' : isValidQty ? `Add to Cart  —  $${grand.toFixed(2)} incl. GST` : 'Enter quantity to see pricing'}
+            {cartAdded ? '✅ Added to Cart!' : isValidQty ? `Place Order  —  $${grand.toFixed(2)} incl. GST` : 'Enter quantity to see pricing'}
           </button>
           {cartAdded && (
             <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={() => router.push('/cart')} style={{ flex: 1, background: GOLD, color: '#fff', border: 'none', borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
-                🛒 View Cart
+              <button onClick={() => router.push('/place-order')} style={{ flex: 1, background: GOLD, color: '#fff', border: 'none', borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                View Order
               </button>
               <button onClick={() => router.push(`/category/${encodeURIComponent((product.category || '').toLowerCase())}`)} style={{ flex: 1, background: '#fff', color: NAVY, border: `1.5px solid ${NAVY}`, borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
                 ← Keep Shopping
@@ -414,7 +414,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               {activeTab === 'Specifications' && (<><SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />{product.lead_time_days && <SpecRow label="Lead Time" value={`${product.lead_time_days} days`} />}{product.packing && <SpecRow label="Packing" value={product.packing} />}<SpecRow label="SKU" value={product.supplier_sku} /></>)}
               {activeTab === 'Decoration' && (<>{decorations.length > 0 ? decorations.map(d => (<div key={d.id} style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #F0EEED' }}><div style={{ fontWeight: 700, color: NAVY, marginBottom: '2px' }}>{d.name}</div>{d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#7A7570', fontSize: '13px' }}>{d.detail}</div>}</div>)) : <p style={{ margin: 0, color: '#B0AAA3' }}>No decoration options available.</p>}</>)}
               {activeTab === 'Packaging' && <p style={{ margin: 0 }}>{product.packing || 'Packaging information not available.'}</p>}
-              {activeTab === 'How to Order' && (<ol style={{ margin: 0, paddingLeft: '20px' }}><li style={{ marginBottom: '8px' }}>Select your colour and enter your required quantity above.</li><li style={{ marginBottom: '8px' }}>Choose any branding options you need.</li><li style={{ marginBottom: '8px' }}>Click <strong>Add to Cart</strong> or <strong>Get a Quote</strong> for custom arrangements.</li><li style={{ marginBottom: '8px' }}>Our team will send you a free digital proof before production.</li><li>Approve the proof and we'll get your order into production.</li></ol>)}
+              {activeTab === 'How to Order' && (<ol style={{ margin: 0, paddingLeft: '20px' }}><li style={{ marginBottom: '8px' }}>Select your colour and enter your required quantity above.</li><li style={{ marginBottom: '8px' }}>Choose any branding options you need.</li><li style={{ marginBottom: '8px' }}>Click <strong>Place Order</strong> or <strong>Get a Quote</strong> for custom arrangements.</li><li style={{ marginBottom: '8px' }}>Our team will send you a free digital proof before production.</li><li>Approve the proof and we'll get your order into production.</li></ol>)}
               {activeTab === 'Returns' && (<><p style={{ margin: '0 0 10px' }}>We stand behind every order. If there's a quality issue, we'll make it right.</p><p style={{ margin: 0, color: '#7A7570' }}>Custom branded products cannot be returned unless there is a manufacturing defect. Contact us within 14 days of receiving your order.</p></>)}
               {activeTab === 'Shipping' && (<><p style={{ margin: '0 0 10px' }}><strong>$30 flat rate</strong> shipping on all orders Australia-wide.</p><p style={{ margin: '0 0 10px' }}>Standard production time is 7–10 business days after proof approval.</p><p style={{ margin: 0, color: '#7A7570' }}>Delivery typically takes 2–5 business days after dispatch.</p></>)}
             </div>

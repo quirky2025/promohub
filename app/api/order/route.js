@@ -10,19 +10,19 @@ const supabase = createClient(
 );
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ✅ INV260001 格式
-async function generateInvoiceNumber() {
+// ✅ ORD260001 格式
+async function generateOrderNumber() {
   const year = String(new Date().getFullYear()).slice(2);
   const { count } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true });
   const num = String((count || 0) + 1).padStart(4, '0');
-  return `INV${year}${num}`;
+  return `ORD${year}${num}`;
 }
 
 // ✅ 生成 Invoice PDF
 async function generateInvoicePDF({
-  invoiceNumber, invoiceDate,
+  orderNumber, invoiceDate,
   customer, deliveryAddress,
   items, subtotal, shipping, gst, surcharge, total,
   paymentMethod, paymentStatus,
@@ -53,7 +53,7 @@ async function generateInvoicePDF({
 
   // INVOICE label
   page.drawText('INVOICE', { x: width - 130, y: height - 38, size: 28, font: fontBold, color: GOLD });
-  page.drawText(invoiceNumber, { x: width - 130, y: height - 52, size: 9, font: fontReg, color: WHITE });
+  page.drawText(orderNumber, { x: width - 130, y: height - 52, size: 9, font: fontReg, color: WHITE });
   page.drawText(`Date: ${invoiceDate}`, { x: width - 130, y: height - 64, size: 8, font: fontReg, color: rgb(0.7, 0.7, 0.7) });
 
   let y = height - 100;
@@ -164,7 +164,7 @@ async function generateInvoicePDF({
       ['Bank', 'ANZ'],
       ['BSB', '012-306'],
       ['Account Number', '192040129'],
-      ['Reference', invoiceNumber],
+      ['Reference', orderNumber],
     ];
     bank.forEach(([label, value], i) => {
       page.drawText(label, { x: 52, y: y - 22 - (i * 13), size: 8, font: fontReg, color: GREY });
@@ -203,7 +203,7 @@ export async function POST(req) {
       paymentStatus = 'paid';
     }
 
-    const invoiceNumber = await generateInvoiceNumber();
+    const orderNumber = await generateOrderNumber();
     const invoiceDate = new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
 
     const deliveryAddress = [
@@ -213,7 +213,7 @@ export async function POST(req) {
 
     // Save to Supabase
     const { error } = await supabase.from('orders').insert({
-      invoice_number: invoiceNumber,
+      invoice_number: orderNumber,
       customer_name: customer.name,
       customer_email: customer.email,
       customer_phone: customer.phone || '',
@@ -233,7 +233,7 @@ export async function POST(req) {
 
     // ✅ Generate Invoice PDF
     const pdfBuffer = await generateInvoicePDF({
-      invoiceNumber,
+      orderNumber,
       invoiceDate,
       customer,
       deliveryAddress,
@@ -269,7 +269,7 @@ export async function POST(req) {
           <tr><td style="color: #7A7570; padding: 4px 0;">Bank</td><td style="font-weight: 600; text-align: right;">ANZ</td></tr>
           <tr><td style="color: #7A7570; padding: 4px 0;">BSB</td><td style="font-weight: 600; text-align: right; font-family: monospace;">012-306</td></tr>
           <tr><td style="color: #7A7570; padding: 4px 0;">Account Number</td><td style="font-weight: 600; text-align: right; font-family: monospace;">192040129</td></tr>
-          <tr><td style="color: #7A7570; padding: 4px 0;">Reference</td><td style="font-weight: 600; text-align: right; color: #C9A96E;">${invoiceNumber}</td></tr>
+          <tr><td style="color: #7A7570; padding: 4px 0;">Reference</td><td style="font-weight: 600; text-align: right; color: #C9A96E;">${orderNumber}</td></tr>
         </table>
       </div>
     ` : '';
@@ -278,7 +278,7 @@ export async function POST(req) {
       <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; color: #1a1a1a;">
         <div style="background: #1B2A4A; padding: 28px 32px; border-radius: 12px 12px 0 0;">
           <h1 style="color: #C9A96E; font-family: Georgia, serif; font-size: 24px; margin: 0 0 4px;">QuirkyPromo</h1>
-          <p style="color: rgba(255,255,255,0.6); font-size: 14px; margin: 0;">Order Confirmation  |  ${invoiceNumber}</p>
+          <p style="color: rgba(255,255,255,0.6); font-size: 14px; margin: 0;">Order Confirmation  |  ${orderNumber}</p>
         </div>
         <div style="background: #fff; border: 1px solid #E0DDD7; border-top: none; padding: 28px 32px; border-radius: 0 0 12px 12px;">
           <p style="font-size: 15px; margin: 0 0 16px;">Hi ${customer.name},</p>
@@ -322,9 +322,9 @@ export async function POST(req) {
       from: 'QuirkyPromo <noreply@quirkypromo.com.au>',
       replyTo: 'hello@quirkypromo.com.au',
       to: [customer.email],
-      subject: `Order Confirmed — ${invoiceNumber}`,
+      subject: `Order Confirmed — ${orderNumber}`,
       html: emailHtml,
-      attachments: [{ filename: `${invoiceNumber}.pdf`, content: pdfBase64 }],
+      attachments: [{ filename: `${orderNumber}.pdf`, content: pdfBase64 }],
     });
 
     // ✅ Email to you with PDF
@@ -332,12 +332,12 @@ export async function POST(req) {
       from: 'QuirkyPromo <noreply@quirkypromo.com.au>',
       replyTo: customer.email,
       to: ['hello@quirkypromo.com.au'],
-      subject: `New Order: ${invoiceNumber} — ${customer.name}`,
+      subject: `New Order: ${orderNumber} — ${customer.name}`,
       html: emailHtml,
-      attachments: [{ filename: `${invoiceNumber}.pdf`, content: pdfBase64 }],
+      attachments: [{ filename: `${orderNumber}.pdf`, content: pdfBase64 }],
     });
 
-    return Response.json({ success: true, invoiceNumber });
+    return Response.json({ success: true, orderNumber });
   } catch (error) {
     console.error('Order API error:', error);
     return Response.json({ error: 'Failed to process order' }, { status: 500 });

@@ -51,7 +51,7 @@ function StripePaymentForm({ orderData, onSuccess, onError }) {
         if (res.ok) {
           const data = await res.json();
           clearCart();
-          onSuccess(data.invoiceNumber);
+          onSuccess(data.orderNumber);
         } else {
           onError('Order could not be saved. Please contact us.');
         }
@@ -84,7 +84,7 @@ function StripePaymentForm({ orderData, onSuccess, onError }) {
   );
 }
 
-export default function CheckoutPage() {
+export default function PlaceOrderPage() {
   const [cart, setCart] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('eft');
@@ -142,7 +142,7 @@ export default function CheckoutPage() {
       if (res.ok) {
         const data = await res.json();
         clearCart();
-        router.push(`/order-confirmation?invoice=${data.invoiceNumber}&method=eft`);
+        router.push(`/order-confirmation?order=${data.orderNumber}&method=eft`);
       } else {
         setError('Something went wrong. Please try again or call us on 02 9477 4748.');
       }
@@ -178,8 +178,8 @@ export default function CheckoutPage() {
     }
   }
 
-  function handleStripeSuccess(invoiceNumber) {
-    router.push(`/order-confirmation?invoice=${invoiceNumber}&method=stripe`);
+  function handleStripeSuccess(orderNumber) {
+    router.push(`/order-confirmation?order=${orderNumber}&method=stripe`);
   }
 
   function handleStripeError(msg) {
@@ -216,12 +216,12 @@ export default function CheckoutPage() {
           <span style={{ margin: '0 8px' }}>›</span>
           <Link href="/cart" style={{ color: '#7A7570', textDecoration: 'none' }}>Shopping Cart</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <span style={{ color: NAVY, fontWeight: 600 }}>Checkout</span>
+          <span style={{ color: NAVY, fontWeight: 600 }}>Place Order</span>
         </div>
       </div>
 
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px 40px 80px' }}>
-        <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '36px', fontWeight: 600, color: NAVY, margin: '0 0 32px' }}>Checkout</h1>
+        <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '36px', fontWeight: 600, color: NAVY, margin: '0 0 32px' }}>Place Order</h1>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: '40px', alignItems: 'start' }}>
 
@@ -331,8 +331,8 @@ export default function CheckoutPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: paymentMethod === 'eft' ? '14px' : 0 }}>
                       <input type="radio" name="payment" value="eft" checked={paymentMethod === 'eft'} onChange={() => setPaymentMethod('eft')} style={{ accentColor: GOLD, width: '18px', height: '18px' }} />
                       <div>
-                        <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>🏦 Pay by EFT (Bank Transfer)</div>
-                        <div style={{ fontSize: '12px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Receive invoice, pay via bank transfer</div>
+                        <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>🏦 Pay by EFT (Bank Transfer) (Bank Transfer)</div>
+                        <div style={{ fontSize: '12px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Receive Order Confirmation, Invoice sent after artwork approval</div>
                       </div>
                     </div>
                     {paymentMethod === 'eft' && (
@@ -353,7 +353,7 @@ export default function CheckoutPage() {
                           ))}
                         </div>
                         <div style={{ marginTop: '10px', fontSize: '12px', color: '#9CA3AF', borderTop: '1px solid #E0DDD7', paddingTop: '10px' }}>
-                          Please use your invoice number as the payment reference.
+                          Please use your Order Number as the payment reference.
                         </div>
                       </div>
                     )}
@@ -418,7 +418,7 @@ export default function CheckoutPage() {
               >
                 {submitting ? '⏳ Processing...' : paymentMethod === 'stripe'
                   ? `Continue to Payment — $${orderTotalWithSurcharge.toFixed(2)}`
-                  : `Place Order & Pay by EFT — $${orderTotal.toFixed(2)}`}
+                  : `Place Order & Pay by EFT (Bank Transfer) — $${orderTotal.toFixed(2)}`}
               </button>
             )}
 

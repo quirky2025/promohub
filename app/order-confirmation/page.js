@@ -9,9 +9,10 @@ const GOLD = '#C9A96E';
 
 function OrderConfirmationContent() {
   const params = useSearchParams();
-  const invoiceNumber = params.get('invoice');
+  const orderNumber = params.get('order');
   const method = params.get('method');
   const isEFT = method === 'eft';
+  const isPaid = method === 'stripe';
 
   return (
     <div style={{ background: '#F8F7F4', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
@@ -30,10 +31,10 @@ function OrderConfirmationContent() {
           Thank you for your order.
         </p>
 
-        {invoiceNumber && (
+        {orderNumber && (
           <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '12px 20px', margin: '16px 0 24px', display: 'inline-block' }}>
-            <span style={{ fontSize: '13px', color: '#7A7570' }}>Invoice Number: </span>
-            <span style={{ fontSize: '16px', fontWeight: 700, color: NAVY, fontFamily: '"DM Mono", monospace' }}>{invoiceNumber}</span>
+            <span style={{ fontSize: '13px', color: '#7A7570' }}>Order Number: </span>
+            <span style={{ fontSize: '16px', fontWeight: 700, color: NAVY, fontFamily: '"DM Mono", monospace' }}>{orderNumber}</span>
           </div>
         )}
 
@@ -47,12 +48,12 @@ function OrderConfirmationContent() {
             </div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>2.</span>
-              <span>You approve the artwork (unlimited revisions)</span>
+              <span>You approve the artwork online (unlimited revisions)</span>
             </div>
             {isEFT && (
               <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
                 <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>3.</span>
-                <span>Pay your invoice via bank transfer (details below)</span>
+                <span>Once approved, we'll send your <strong>Invoice</strong> — pay via bank transfer</span>
               </div>
             )}
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
@@ -62,30 +63,12 @@ function OrderConfirmationContent() {
           </div>
         </div>
 
-        {/* EFT bank details */}
-        {isEFT && (
-          <div style={{ background: '#FDF8F0', border: '1px solid #E8D5A3', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', textAlign: 'left' }}>
-            <div style={{ fontWeight: 700, color: NAVY, marginBottom: '12px', fontSize: '15px' }}>🏦 Bank Transfer Details</div>
-            <table style={{ width: '100%', fontSize: '14px', borderCollapse: 'collapse' }}>
-              <tbody>
-                {[
-                  ['Account Name', 'Grow Your Marketing'],
-                  ['Bank', 'ANZ'],
-                  ['BSB', '012-306'],
-                  ['Account Number', '192040129'],
-                  ['Reference', invoiceNumber || ''],
-                  ['ABN', '95 656 714 270'],
-                ].map(([label, value]) => (
-                  <tr key={label}>
-                    <td style={{ padding: '6px 0', color: '#7A7570', width: '140px' }}>{label}</td>
-                    <td style={{ padding: '6px 0', fontWeight: 600, color: label === 'Reference' ? GOLD : NAVY, fontFamily: ['BSB','Account Number','ABN','Reference'].includes(label) ? '"DM Mono", monospace' : 'inherit' }}>{value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <div style={{ marginTop: '12px', fontSize: '12px', color: '#9CA3AF', borderTop: '1px solid #E8D5A3', paddingTop: '12px' }}>
-              Please use your invoice number as the payment reference.
-            </div>
+
+
+        {/* Stripe paid confirmation */}
+        {isPaid && (
+          <div style={{ background: '#F0FAF4', border: '1px solid #2D6A4F', borderRadius: '12px', padding: '16px 24px', marginBottom: '24px', textAlign: 'left' }}>
+            <div style={{ fontWeight: 700, color: '#2D6A4F', fontSize: '15px' }}>✅ Payment received — Invoice has been emailed to you</div>
           </div>
         )}
 
