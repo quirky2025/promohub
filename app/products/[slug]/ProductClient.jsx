@@ -193,6 +193,11 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
         {/* RIGHT */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <div>
+            {product.indent_type && (
+  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '8px', background: product.indent_type === 'indent_air' ? '#FFF8E7' : '#EFF6FF', color: product.indent_type === 'indent_air' ? '#92400E' : '#1E40AF', border: product.indent_type === 'indent_air' ? '1px solid #FCD34D' : '1px solid #93C5FD' }}>
+    {product.indent_type === 'indent_air' ? '✈️ INDENT AIR' : '🚢 INDENT SEA'}
+  </div>
+)}
             <div style={{ fontSize: '12px', color: '#B0AAA3', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku}</div>
             <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.name}</h1>
             <div style={{ fontSize: '14px', color: GOLD, fontWeight: 500, minHeight: '22px' }}>
@@ -486,7 +491,11 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                         {product.capacity && <SpecRow label="Capacity" value={product.capacity} />}
                         {product.packing && <SpecRow label="Packaging" value={product.packing} />}
                         {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
-                        {product.lead_time_days && <SpecRow label="Lead Time" value={`${product.lead_time_days} business days`} />}
+                        <SpecRow label="Lead Time" value={
+  product.indent_type === 'indent_air' ? '25 working days (Air Freight)' :
+  product.indent_type === 'indent_sea' ? '45 working days (Sea Freight)' :
+  product.lead_time_days ? `${product.lead_time_days} business days` : null
+} />
                         <SpecRow label="SKU" value={product.supplier_sku} />
                       </tbody>
                     </table>

@@ -293,6 +293,19 @@ export default function AdminProductsPage() {
                       </select>
                     </div>
                   </div>
+                  <div style={{ marginBottom: '16px' }}>
+                    <label style={labelStyle}>Indent Type</label>
+                    <select value={editing.indent_type || ''} onChange={e => updateField('indent_type', e.target.value || null)} style={inputStyle}>
+                      <option value="">Stock (Standard)</option>
+                      <option value="indent_air">✈️ Indent - Air</option>
+                      <option value="indent_sea">🚢 Indent - Sea</option>
+                    </select>
+                    {editing.indent_type && (
+                      <div style={{ marginTop: '8px', padding: '8px 12px', background: editing.indent_type === 'indent_air' ? '#FFF8E7' : '#EFF6FF', borderRadius: '6px', fontSize: '12px', color: editing.indent_type === 'indent_air' ? '#92400E' : '#1E40AF' }}>
+                        {editing.indent_type === 'indent_air' ? '✈️ Air freight — approx. 25 working days lead time' : '🚢 Sea freight — approx. 45 working days lead time'}
+                      </div>
+                    )}
+                  </div>
                   <div style={{ display: 'flex', gap: '24px', padding: '16px', background: '#F8F7F4', borderRadius: '10px' }}>
                     {[
                       { field: 'is_eco', label: '🌿 Eco Product' },
