@@ -16,7 +16,7 @@ export async function GET(req) {
     .select('id, name, slug, category, subcategory, brand, collection, is_eco, is_new_arrival, is_sale, status, meta_title, meta_description, alt_text, supplier_sku')
     .order('name');
 
-  if (search) query = query.or(`name.ilike.%${search}%,supplier_sku.ilike.%${search}%`);
+  if (search) query = query.ilike('name', `%${search}%`);
   if (category) query = query.ilike('category', category);
 
   const { data, error } = await query;
