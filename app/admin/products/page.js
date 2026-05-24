@@ -11,6 +11,23 @@ const CATEGORIES = [
   'Leisure', 'Packaging', 'Pens', 'Personal', 'Print', 'Promotion', 'Technology',
 ];
 
+const BRANDS = [
+  'Archer', 'Blunt', 'BrandCraft', 'CamelBak', 'Cross', 'Frontier',
+  'Impact Aware', 'Ingenio', 'Keepsake', 'Lamy', 'Luigi Bormioli',
+  'Moleskine', 'Natura', 'Ocean Bottle', 'Osprey', 'Pierre Cardin',
+  'Rollink', 'Skullcandy', "Sol's", 'Spice', 'Swiss Peak', 'Titleist',
+  'Trendswear', 'WNSDY', 'XD Design',
+];
+
+const COLLECTIONS = [
+  'Agriculture', 'Automotive', 'Children', 'Conference', 'Custom Shape',
+  'Festivals & Events', 'Full Custom', 'Fundraising', 'Golf',
+  'Health & Beauty', 'Hospitality', 'Logistics', 'Mailable Items',
+  'Natural', 'NZ Made', 'Price Buster', 'Real Estate', 'Recycled',
+  'Rest Homes', 'Safety', 'Sports & Fitness', 'Summer', 'Trades',
+  'Tradeshows', 'Travel', 'Winter',
+];
+
 export default function AdminProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -263,11 +280,17 @@ export default function AdminProductsPage() {
                     </div>
                     <div>
                       <label style={labelStyle}>Brand</label>
-                      <input type="text" value={editing.brand || ''} onChange={e => updateField('brand', e.target.value)} placeholder="e.g. Titleist" style={inputStyle} />
+                      <select value={editing.brand || ''} onChange={e => updateField('brand', e.target.value)} style={inputStyle}>
+                        <option value="">No Brand</option>
+                        {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+                      </select>
                     </div>
                     <div>
                       <label style={labelStyle}>Collection</label>
-                      <input type="text" value={editing.collection || ''} onChange={e => updateField('collection', e.target.value)} placeholder="e.g. Winter Essentials" style={inputStyle} />
+                      <select value={editing.collection || ''} onChange={e => updateField('collection', e.target.value)} style={inputStyle}>
+                        <option value="">No Collection</option>
+                        {COLLECTIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '24px', padding: '16px', background: '#F8F7F4', borderRadius: '10px' }}>
