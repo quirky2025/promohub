@@ -24,6 +24,8 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [cartAdded, setCartAdded] = useState(false);
   const router = useRouter();
+const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
+  const addonDecorations = (decorations || []).filter(d => d.type === 'addon');
   const [addonState, setAddonState] = useState(() => {
     const s = {};
     decorations.forEach(d => {
@@ -259,7 +261,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           )}
 
-          {decorations.length > 0 && (
+          {brandingDecorations.length > 0 && (
             <div>
               <StepLabel num={colours.length > 0 ? 3 : 2} text="Add Branding Options" />
               <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
@@ -276,7 +278,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                     </tr>
                   </thead>
                   <tbody>
-                    {decorations.map(d => {
+                    {brandingDecorations.map(d => {
                       const st = addonState[d.id] || { on: false, setupQty: 1 };
                       return (
                         <tr key={d.id} style={{ borderBottom: '1px solid #F0EEED' }}>
@@ -305,7 +307,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                     <tr>
                       <td style={{ padding: '10px 14px' }}>
                         <div style={{ fontSize: '13px', fontWeight: 500, color: NAVY }}>Shipping & Handling</div>
-                        <div style={{ fontSize: '11px', color: '#7A7570' }}>Flat rate per order</div>
+                        <div style={{ fontSize: '11px', color: '#7A7570' }}>Per domestic address</div>
                       </td>
                       <td /><td /><td />
                       <td style={{ ...tdStyle, fontWeight: 500, color: NAVY }}>${SHIPPING.toFixed(2)}</td>
@@ -313,6 +315,36 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                     </tr>
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {addonDecorations.length > 0 && (
+            <div>
+              <StepLabel num={colours.length > 0 ? (brandingDecorations.length > 0 ? 4 : 3) : (brandingDecorations.length > 0 ? 3 : 2)} text="Select Add-on Options" />
+              <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
+                <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Add-ons & Extras</div>
+                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                  {addonDecorations.map(d => {
+                    const st = addonState[d.id] || { on: false, setupQty: 1 };
+                    return (
+                      <div key={d.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderBottom: '1px solid #F0EEED' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                          <label style={{ position: 'relative', width: '44px', height: '24px', cursor: 'pointer', display: 'inline-block', flexShrink: 0 }}>
+                            <input type="checkbox" checked={st.on} onChange={e => toggleAddon(d.id, e.target.checked)} style={{ opacity: 0, width: 0, height: 0, position: 'absolute' }} />
+                            <span style={{ position: 'absolute', inset: 0, background: st.on ? GOLD : '#C8C4BC', borderRadius: '12px', transition: 'background .2s' }} />
+                            <span style={{ position: 'absolute', top: '3px', left: st.on ? '23px' : '3px', width: '18px', height: '18px', background: '#fff', borderRadius: '50%', transition: 'left .2s', boxShadow: '0 1px 3px rgba(0,0,0,.2)' }} />
+                          </label>
+                          <div>
+                            <div style={{ fontSize: '13px', fontWeight: 500, color: NAVY }}>{d.name}</div>
+                            {d.detail && d.detail !== 'EMPTY' && <div style={{ fontSize: '11px', color: '#7A7570', marginTop: '2px' }}>{d.detail}</div>}
+                          </div>
+                        </div>
+                        <div style={{ fontSize: '13px', fontWeight: 500, color: NAVY, marginLeft: '16px' }}>+${(d.per_unit * MARGIN).toFixed(2)}/unit</div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}
