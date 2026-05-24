@@ -12,7 +12,7 @@ const MARGIN = 1.40;
 const GST = 0.10;
 const SHIPPING = 30;
 const SETUP_FEE = 40;
-const TABS = ['Description', 'Specifications', 'Decoration', 'Packaging', 'How to Order', 'Returns', 'Shipping'];
+const TABS = ['Description', 'Mockups', 'Returns', 'Shipping', 'Ordering Process'];
 
 export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations }) {
   const [selectedColour, setSelectedColour] = useState(null);
@@ -198,6 +198,11 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
             <div style={{ fontSize: '14px', color: GOLD, fontWeight: 500, minHeight: '22px' }}>
               {selectedColour !== null ? `Colour: ${colours[selectedColour]?.name}` : ''}
             </div>
+            {product.seo_description && (
+              <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.7, margin: '12px 0 0', fontFamily: '"DM Sans", sans-serif' }}>
+                {product.seo_description}
+              </p>
+            )}
           </div>
 
           {colours.length > 0 && (
@@ -445,13 +450,105 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
               ))}
             </div>
             <div style={{ padding: '24px', fontSize: '14px', lineHeight: '1.8', color: '#3D3A36', fontFamily: '"DM Sans", sans-serif' }}>
-              {activeTab === 'Description' && (<>{product.description ? <p style={{ margin: '0 0 12px' }}>{product.description}</p> : <p style={{ margin: 0, color: '#B0AAA3' }}>No description available.</p>}{product.short_desc && <p style={{ margin: 0, color: '#7A7570' }}>{product.short_desc}</p>}</>)}
-              {activeTab === 'Specifications' && (<><SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />{product.lead_time_days && <SpecRow label="Lead Time" value={`${product.lead_time_days} days`} />}{product.packing && <SpecRow label="Packing" value={product.packing} />}<SpecRow label="SKU" value={product.supplier_sku} /></>)}
-              {activeTab === 'Decoration' && (<>{decorations.length > 0 ? decorations.map(d => (<div key={d.id} style={{ marginBottom: '12px', paddingBottom: '12px', borderBottom: '1px solid #F0EEED' }}><div style={{ fontWeight: 700, color: NAVY, marginBottom: '2px' }}>{d.name}</div>{d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#7A7570', fontSize: '13px' }}>{d.detail}</div>}</div>)) : <p style={{ margin: 0, color: '#B0AAA3' }}>No decoration options available.</p>}</>)}
-              {activeTab === 'Packaging' && <p style={{ margin: 0 }}>{product.packing || 'Packaging information not available.'}</p>}
-              {activeTab === 'How to Order' && (<ol style={{ margin: 0, paddingLeft: '20px' }}><li style={{ marginBottom: '8px' }}>Select your colour and enter your required quantity above.</li><li style={{ marginBottom: '8px' }}>Choose any branding options you need.</li><li style={{ marginBottom: '8px' }}>Click <strong>Place Order</strong> or <strong>Get a Quote</strong> for custom arrangements.</li><li style={{ marginBottom: '8px' }}>Our team will send you a free digital proof before production.</li><li>Approve the proof and we'll get your order into production.</li></ol>)}
-              {activeTab === 'Returns' && (<><p style={{ margin: '0 0 10px' }}>We stand behind every order. If there's a quality issue, we'll make it right.</p><p style={{ margin: 0, color: '#7A7570' }}>Custom branded products cannot be returned unless there is a manufacturing defect. Contact us within 14 days of receiving your order.</p></>)}
-              {activeTab === 'Shipping' && (<><p style={{ margin: '0 0 10px' }}><strong>$30 flat rate</strong> shipping on all orders Australia-wide.</p><p style={{ margin: '0 0 10px' }}>Standard production time is 7–10 business days after proof approval.</p><p style={{ margin: 0, color: '#7A7570' }}>Delivery typically takes 2–5 business days after dispatch.</p></>)}
+              {activeTab === 'Description' && (
+                <div>
+                  {/* SEO Description */}
+                  {product.seo_description && (
+                    <p style={{ margin: '0 0 20px', fontSize: '15px', color: '#5A5550', lineHeight: 1.7 }}>{product.seo_description}</p>
+                  )}
+
+                  {/* Features */}
+                  {product.features && Array.isArray(product.features) && product.features.length > 0 && (
+                    <div style={{ marginBottom: '24px' }}>
+                      <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 12px' }}>Features</h3>
+                      <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                        {product.features.filter(f => f).map((f, i) => (
+                          <li key={i} style={{ marginBottom: '6px', color: '#3D3A36' }}>{f}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Full description */}
+                  {product.description && (
+                    <div style={{ marginBottom: '24px' }}>
+                      <p style={{ margin: 0, color: '#5A5550', lineHeight: 1.7 }}>{product.description}</p>
+                    </div>
+                  )}
+
+                  {/* Specifications */}
+                  <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '20px' }}>
+                    <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 16px' }}>Specifications</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <tbody>
+                        {product.materials && <SpecRow label="Materials" value={product.materials} />}
+                        {product.dimensions && <SpecRow label="Dimensions" value={product.dimensions} />}
+                        {product.capacity && <SpecRow label="Capacity" value={product.capacity} />}
+                        {product.packing && <SpecRow label="Packaging" value={product.packing} />}
+                        {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
+                        {product.lead_time_days && <SpecRow label="Lead Time" value={`${product.lead_time_days} business days`} />}
+                        <SpecRow label="SKU" value={product.supplier_sku} />
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Decoration */}
+                  {decorations.length > 0 && (
+                    <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '20px', marginTop: '20px' }}>
+                      <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 16px' }}>Decoration Options</h3>
+                      {decorations.map(d => (
+                        <div key={d.id} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #F0EEED' }}>
+                          <div style={{ fontWeight: 600, color: NAVY }}>{d.name}</div>
+                          {d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#7A7570', fontSize: '13px' }}>{d.detail}</div>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'Mockups' && (
+                <div>
+                  <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 16px' }}>Artwork & Mockup Requirements</h3>
+                  <p style={{ margin: '0 0 12px' }}>Once your order is confirmed, our team will create a digital mockup showing your logo on the product.</p>
+                  <ul style={{ margin: '0 0 16px', paddingLeft: '20px' }}>
+                    <li style={{ marginBottom: '8px' }}>Preferred formats: <strong>AI, EPS, PDF</strong> (vector files)</li>
+                    <li style={{ marginBottom: '8px' }}>Also accepted: PNG or JPG at minimum <strong>300dpi</strong></li>
+                    <li style={{ marginBottom: '8px' }}>Please provide your logo in the correct <strong>PMS colours</strong> if colour matching is required</li>
+                    <li style={{ marginBottom: '8px' }}>Our team will send you a digital proof for approval before production begins</li>
+                    <li>Production starts only after your <strong>written approval</strong> of the mockup</li>
+                  </ul>
+                  <p style={{ margin: 0, color: '#7A7570', fontSize: '13px' }}>Need help with your artwork? Contact us at <strong>hello@quirkypromo.com.au</strong> or call <strong>02 9477 4748</strong></p>
+                </div>
+              )}
+
+              {activeTab === 'Returns' && (
+                <div>
+                  <p style={{ margin: '0 0 10px' }}>We stand behind every order. If there's a quality issue, we'll make it right.</p>
+                  <p style={{ margin: 0, color: '#7A7570' }}>Custom branded products cannot be returned unless there is a manufacturing defect. Contact us within 14 days of receiving your order.</p>
+                </div>
+              )}
+
+              {activeTab === 'Shipping' && (
+                <div>
+                  <p style={{ margin: '0 0 10px' }}><strong>$30 flat rate</strong> per domestic address, Australia-wide.</p>
+                  <p style={{ margin: '0 0 10px' }}>Standard production time is 7–10 business days after proof approval.</p>
+                  <p style={{ margin: 0, color: '#7A7570' }}>Delivery typically takes 2–5 business days after dispatch.</p>
+                </div>
+              )}
+
+              {activeTab === 'Ordering Process' && (
+                <div>
+                  <ol style={{ margin: 0, paddingLeft: '20px' }}>
+                    <li style={{ marginBottom: '10px' }}>Select your colour and enter your required quantity above.</li>
+                    <li style={{ marginBottom: '10px' }}>Choose any branding options and add-ons you need.</li>
+                    <li style={{ marginBottom: '10px' }}>Click <strong>Place Order</strong> or <strong>Get a Quote</strong> for custom arrangements.</li>
+                    <li style={{ marginBottom: '10px' }}>Upload your logo — our team will create a free digital mockup for your approval.</li>
+                    <li style={{ marginBottom: '10px' }}>Approve the proof and we'll get your order into production.</li>
+                    <li>Your branded products will be delivered to your door.</li>
+                  </ol>
+                </div>
+              )}
             </div>
           </div>
         </div>
