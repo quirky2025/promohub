@@ -340,7 +340,10 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                             {d.detail && d.detail !== 'EMPTY' && <div style={{ fontSize: '11px', color: '#7A7570', marginTop: '2px' }}>{d.detail}</div>}
                           </div>
                         </div>
-                        <div style={{ fontSize: '13px', fontWeight: 500, color: NAVY, marginLeft: '16px' }}>+${(d.per_unit * MARGIN).toFixed(2)}/unit</div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontSize: '13px', fontWeight: 500, color: NAVY }}>+${(d.per_unit * MARGIN).toFixed(2)}/unit</div>
+                          {d.has_setup && <div style={{ fontSize: '11px', color: '#7A7570', marginTop: '2px' }}>Setup: ${(SETUP_FEE * MARGIN).toFixed(2)}</div>}
+                        </div>
                       </div>
                     );
                   })}
