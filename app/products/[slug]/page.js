@@ -20,7 +20,7 @@ export default async function ProductPage({ params }) {
       *,
       product_colours(id, name, hex, images, sort_order),
       pricing_tiers(id, min_qty, max_qty, base_price, sort_order),
-      decoration_options(id, name, detail, per_unit, has_setup, default_setup_qty, setup_qty_editable, sort_order)
+      decoration_options(id, name, detail, per_unit, has_setup, default_setup_qty, setup_qty_editable, sort_order, type)
     `)
     .eq('slug', slug)
     .single();
@@ -33,11 +33,12 @@ export default async function ProductPage({ params }) {
   );
 
   const pricingTiers = [...(product.pricing_tiers || [])].sort((a, b) => a.sort_order - b.sort_order);
-  const decorations = [...(product.decoration_options || [])].sort((a, b) => a.sort_order - b.sort_order);
+  const allDecorations = [...(product.decoration_options || [])].sort((a, b) => a.sort_order - b.sort_order);
 
-  // ── GET COLOUR NAMES ──
-  // Try products.colours jsonb field first
-  // Format: [{"name": "Navy", "hex": "#000080"}, {"name": "Black", "hex": "#000000"}]
+  // Split decorations by type
+  const brandingDecorations = allDecorations.filter(d => d.type !== 'addon');
+  const addonDecorations = allDecorations.filter(d => d.type === 'addon');
+
   let colourData = [];
   if (product.colours) {
     if (Array.isArray(product.colours)) {
@@ -47,7 +48,6 @@ export default async function ProductPage({ params }) {
     }
   }
 
-  // Fallback: use product_colours table records (if multiple and not all "Default")
   if (colourData.length === 0) {
     const pcRecords = [...(product.product_colours || [])].sort((a, b) => a.sort_order - b.sort_order);
     const nonDefault = pcRecords.filter(pc => pc.name && pc.name !== 'Default');
@@ -58,7 +58,6 @@ export default async function ProductPage({ params }) {
 
   const colourCount = colourData.length;
 
-  // ── GET ALL IMAGES sorted by number in URL ──
   const rawColours = [...(product.product_colours || [])].sort((a, b) => a.sort_order - b.sort_order);
   const firstColour = rawColours[0];
   const rawImages = firstColour?.images
@@ -66,15 +65,10 @@ export default async function ProductPage({ params }) {
     : [];
   const sortedImages = [...rawImages].sort((a, b) => extractImgNum(a) - extractImgNum(b));
 
-  // ── SPLIT IMAGES ──
-  // [0] = main hero image
-  // [1..colourCount] = one image per colour
-  // [colourCount+1..] = packaging/feature images
   const mainImage = sortedImages[0] || null;
   const colourImages = sortedImages.slice(1, colourCount + 1);
   const extraImages = sortedImages.slice(colourCount + 1);
 
-  // ── BUILD COLOUR OBJECTS ──
   const colours = colourCount > 0
     ? colourData.map((c, i) => ({
         id: i,
@@ -83,7 +77,7 @@ export default async function ProductPage({ params }) {
         image: colourImages[i] || null,
         images: colourImages[i] ? [colourImages[i]] : [],
       }))
-    : []; // no colours = just show images in thumbnails
+    : [];
 
   return (
     <ProductClient
@@ -92,7 +86,8 @@ export default async function ProductPage({ params }) {
       extraImages={colourCount > 0 ? extraImages : sortedImages.slice(1)}
       colours={colours}
       pricingTiers={pricingTiers}
-      decorations={decorations}
+      brandingDecorations={brandingDecorations}
+      addonDecorations={addonDecorations}
     />
   );
 }
