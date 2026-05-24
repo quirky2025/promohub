@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 
 const NAVY = '#1B2A4A';
@@ -15,7 +14,6 @@ const STATUS_COLORS = {
   approved: { bg: '#D1FAE5', text: '#065F46', label: 'Approved' },
 };
 
-// Convert Cloudinary PDF URL to displayable JPG using pg_1 transformation
 function toDisplayUrl(url) {
   if (!url) return url;
   if (!url.toLowerCase().includes('.pdf')) return url;
@@ -23,11 +21,6 @@ function toDisplayUrl(url) {
     .replace('/upload/', '/upload/pg_1/')
     .replace(/\.pdf$/, '.jpg');
 }
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 export default function AdminArtworksPage() {
   const [artworks, setArtworks] = useState([]);
@@ -59,29 +52,26 @@ export default function AdminArtworksPage() {
     const isPdf = mockupFile.name.toLowerCase().endsWith('.pdf');
 
     if (isPdf) {
-      // PDF → Supabase Storage (public bucket, direct access)
-      const fileName = `${selected.order_number}_${Date.now()}.pdf`;
-      const { data, error } = await supabase.storage
-        .from('mockups')
-        .upload(fileName, mockupFile, { contentType: 'application/pdf', upsert: true });
-
-      if (error) {
-        alert('Upload failed: ' + error.message);
+      // PDF → backend API (uses SUPABASE_SERVICE_KEY to bypass RLS)
+      const pdfForm = new FormData();
+      pdfForm.append('file', mockupFile);
+      pdfForm.append('orderNumber', selected.order_number);
+      const pdfRes = await fetch('/api/admin/artworks/upload-pdf', {
+        method: 'POST',
+        body: pdfForm,
+      });
+      const pdfData = await pdfRes.json();
+      if (!pdfRes.ok) {
+        alert('Upload failed: ' + pdfData.error);
         setUploading(false);
         return;
       }
-
-      const { data: publicData } = supabase.storage
-        .from('mockups')
-        .getPublicUrl(fileName);
-
-      mockupUrl = publicData.publicUrl;
+      mockupUrl = pdfData.url;
     } else {
       // Image → Cloudinary
       const formData = new FormData();
       formData.append('file', mockupFile);
       formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
-
       const cloudRes = await fetch(
         `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
         { method: 'POST', body: formData }
