@@ -298,7 +298,7 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                           <td style={tdStyle}>{d.has_setup ? `$${(SETUP_FEE * MARGIN).toFixed(2)}` : '—'}</td>
                           <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                             {d.has_setup
-                              ? <input type="number" value={st.setupQty} min="1" disabled={!st.on || !d.setup_qty_editable} onChange={e => setSetupQty(d.id, e.target.value)} style={{ width: '54px', border: '1.5px solid #C8C4BC', borderRadius: '6px', padding: '5px 6px', fontSize: '13px', fontWeight: 600, textAlign: 'center', fontFamily: '"DM Sans", sans-serif', background: (!st.on || !d.setup_qty_editable) ? '#F4F2EE' : '#fff', color: (!st.on || !d.setup_qty_editable) ? '#B0AAA3' : NAVY, outline: 'none' }} />
+                              ? <input type="number" value={st.setupQty} min="1" disabled={!st.on}onChange={e => setSetupQty(d.id, e.target.value)} style={{ width: '54px', border: '1.5px solid #C8C4BC', borderRadius: '6px', padding: '5px 6px', fontSize: '13px', fontWeight: 600, textAlign: 'center', fontFamily: '"DM Sans", sans-serif', background: (!st.on || !d.setup_qty_editable) ? '#F4F2EE' : '#fff', color: (!st.on || !d.setup_qty_editable) ? '#B0AAA3' : NAVY, outline: 'none' }} />
                               : <span style={{ color: '#B0AAA3' }}>—</span>}
                           </td>
                         </tr>
