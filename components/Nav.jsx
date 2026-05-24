@@ -15,7 +15,7 @@ const ALL_PRODUCTS = {
   'Business': ['Highlighters', 'ID Holders', 'Lanyards', 'Note Pads', 'Notebooks', 'Stationery', 'Sticky Notes'],
   'Drinkware': ['Ceramic Mugs', 'Coffee Cups', 'Cups & Tumblers', 'Drink Bottles - Glass', 'Drink Bottles - Metal', 'Drink Bottles - Plastic', 'Drinkware Presentation', 'Flasks', 'Travel Mugs'],
   'Headwear': ['Beanies', 'Bucket Hats', 'Caps', 'Headwear Accessories', 'Headwear Express'],
-  'Leisure': ['Camping & Outdoors', 'Chairs', 'Coasters', 'Games & Puzzles', 'Home & Living', 'Picnic & BBQ', 'Sport', 'Sunglasses', 'Tools', 'Towels', 'Umbrellas'],
+  'Leisure': ['Camping & Outdoors', 'Chairs', 'Coasters', 'Games & Puzzles', 'Home & Living', 'Picnic & BBQ', 'Sport', 'Sunglasses', 'Tools', 'Towels', 'Travel', 'Umbrellas'],
   'Packaging': ['Gift Boxes', 'Packaging Accessories', 'Ribbons'],
   'Pens': ['Black Refill', 'Metal', 'Novelty', 'Paper', 'Plastic', 'Presentation', 'Refills'],
   'Personal': ['Candles & Diffusers', 'Hand Sanitiser', 'Lip Balms', 'Lotions & Sunscreens', 'Personal Care'],
@@ -62,7 +62,22 @@ export default function Nav() {
   const timeoutRef = useRef(null);
   const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
+
+  function handleSearch(e) {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  }
+
+  function handleSearchClick() {
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  }
 
   useEffect(() => {
     // Get current user
@@ -122,8 +137,11 @@ export default function Nav() {
           </Link>
           <div style={{ flex: 1, maxWidth: '640px', position: 'relative' }}>
             <input type="text" placeholder="Search products, brands, categories..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
               style={{ width: '100%', padding: '16px 52px 16px 22px', borderRadius: '10px', border: '1px solid rgba(255,255,255,.25)', background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: '15px', outline: 'none', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
-            <span style={{ position: 'absolute', right: '18px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.6)', fontSize: '20px' }}>🔍</span>
+            <span onClick={handleSearchClick} style={{ position: 'absolute', right: '18px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.6)', fontSize: '20px', cursor: 'pointer' }}>🔍</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '32px', flexShrink: 0 }}>
             <a href="tel:0294774748" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', gap: '3px' }}>
