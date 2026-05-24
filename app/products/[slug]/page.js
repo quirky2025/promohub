@@ -20,7 +20,7 @@ export default async function ProductPage({ params }) {
       *,
       product_colours(id, name, hex, images, sort_order),
       pricing_tiers(id, min_qty, max_qty, base_price, sort_order),
-      decoration_options(id, name, detail, per_unit, has_setup, default_setup_qty, setup_qty_editable, sort_order)
+      decoration_options(id, name, detail, per_unit, has_setup, default_setup_qty, setup_qty_editable, sort_order, type)
     `)
     .eq('slug', slug)
     .single();
