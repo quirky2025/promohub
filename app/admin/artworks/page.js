@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 
 const NAVY = '#1B2A4A';
@@ -22,6 +23,11 @@ function toDisplayUrl(url) {
     .replace('/upload/', '/upload/pg_1/')
     .replace(/\.pdf$/, '.jpg');
 }
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 export default function AdminArtworksPage() {
   const [artworks, setArtworks] = useState([]);
@@ -49,17 +55,42 @@ export default function AdminArtworksPage() {
     if (!mockupFile || !selected) return;
     setUploading(true);
 
-    const formData = new FormData();
-    formData.append('file', mockupFile);
-    formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
+    let mockupUrl = '';
+    const isPdf = mockupFile.name.toLowerCase().endsWith('.pdf');
 
-    const cloudRes = await fetch(
-      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-      { method: 'POST', body: formData }
-    );
-    const cloudData = await cloudRes.json();
-    const mockupUrl = cloudData.secure_url;
+    if (isPdf) {
+      // PDF → Supabase Storage (public bucket, direct access)
+      const fileName = `${selected.order_number}_${Date.now()}.pdf`;
+      const { data, error } = await supabase.storage
+        .from('mockups')
+        .upload(fileName, mockupFile, { contentType: 'application/pdf', upsert: true });
 
+      if (error) {
+        alert('Upload failed: ' + error.message);
+        setUploading(false);
+        return;
+      }
+
+      const { data: publicData } = supabase.storage
+        .from('mockups')
+        .getPublicUrl(fileName);
+
+      mockupUrl = publicData.publicUrl;
+    } else {
+      // Image → Cloudinary
+      const formData = new FormData();
+      formData.append('file', mockupFile);
+      formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
+
+      const cloudRes = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        { method: 'POST', body: formData }
+      );
+      const cloudData = await cloudRes.json();
+      mockupUrl = cloudData.secure_url;
+    }
+
+    // Save and send to customer
     const res = await fetch('/api/admin/artworks/send-mockup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -265,7 +296,7 @@ export default function AdminArtworksPage() {
             <div style={{ display: 'flex', gap: '12px' }}>
               <button onClick={uploadMockup} disabled={!mockupFile || uploading}
                 style={{ flex: 1, background: !mockupFile ? '#C8C4BC' : GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '14px', fontWeight: 700, cursor: !mockupFile ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
-                {uploading ? 'Sending...' : 'Send to Customer →'}
+                {uploading ? 'Uploading...' : 'Send to Customer →'}
               </button>
               <button onClick={() => setSelected(null)}
                 style={{ background: '#fff', color: '#7A7570', border: '1.5px solid #E0DDD7', borderRadius: '8px', padding: '12px 20px', fontSize: '14px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
