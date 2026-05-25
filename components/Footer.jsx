@@ -38,7 +38,6 @@ export default function Footer() {
             { label: 'Contact Us', href: '/contact' },
             { label: 'Testimonials', href: '/testimonials' },
             { label: 'Google Reviews', href: '/reviews' },
-            { label: 'Digital Catalog', href: '/catalog' },
           ].map(item => (
             <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: '13px', color: '#ffffff', textDecoration: 'none', marginBottom: '10px', lineHeight: '1.4', fontFamily: '"DM Sans", sans-serif' }}>
               {item.label}
@@ -119,7 +118,7 @@ export default function Footer() {
             <span style={{ color: 'rgba(255,255,255,.3)' }}>|</span>
             <Link href="/sales-terms" style={{ color: '#ffffff', textDecoration: 'none', fontSize: '12px', fontFamily: '"DM Sans", sans-serif' }}>Sales Terms & Conditions</Link>
             <span style={{ color: 'rgba(255,255,255,.3)' }}>|</span>
-            <Link href="/terms" style={{ color: '#ffffff', textDecoration: 'none', fontSize: '12px', fontFamily: '"DM Sans", sans-serif' }}>Website Terms & Conditions</Link>
+            <Link href="/website-terms" style={{ color: '#ffffff', textDecoration: 'none', fontSize: '12px', fontFamily: '"DM Sans", sans-serif' }}>Website Terms & Conditions</Link>
           </div>
         </div>
       </div>
