@@ -53,9 +53,12 @@ export default function AdminProductsPage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState('classification');
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 50;
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
+    setCurrentPage(1);
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (categoryFilter) params.set('category', categoryFilter);
@@ -208,7 +211,7 @@ export default function AdminProductsPage() {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product, i) => (
+                {products.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((product, i) => (
                   <tr key={product.id} style={{ borderBottom: '1px solid #F0EEED', background: i % 2 === 0 ? '#fff' : '#FAFAF9' }}>
                     <td style={{ padding: '12px 16px', textAlign: 'center' }}>
                       <span title={product.is_published ? 'Published' : 'Not published'} style={{ fontSize: '16px' }}>
@@ -236,6 +239,22 @@ export default function AdminProductsPage() {
               </tbody>
             </table>
             {products.length === 0 && <div style={{ textAlign: 'center', padding: '40px', color: '#7A7570' }}>No products found</div>}
+            {/* Pagination */}
+            {products.length > PAGE_SIZE && (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '24px', borderTop: '1px solid #E0DDD7' }}>
+                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
+                  style={{ padding: '8px 16px', border: '1.5px solid #E0DDD7', borderRadius: '6px', background: currentPage === 1 ? '#F8F7F4' : '#fff', color: currentPage === 1 ? '#B0AAA3' : NAVY, cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 600 }}>
+                  ← Prev
+                </button>
+                <span style={{ fontSize: '13px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>
+                  Page {currentPage} of {Math.ceil(products.length / PAGE_SIZE)} ({products.length} products)
+                </span>
+                <button onClick={() => setCurrentPage(p => Math.min(Math.ceil(products.length / PAGE_SIZE), p + 1))} disabled={currentPage === Math.ceil(products.length / PAGE_SIZE)}
+                  style={{ padding: '8px 16px', border: '1.5px solid #E0DDD7', borderRadius: '6px', background: currentPage === Math.ceil(products.length / PAGE_SIZE) ? '#F8F7F4' : '#fff', color: currentPage === Math.ceil(products.length / PAGE_SIZE) ? '#B0AAA3' : NAVY, cursor: currentPage === Math.ceil(products.length / PAGE_SIZE) ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 600 }}>
+                  Next →
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
