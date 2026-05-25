@@ -32,21 +32,9 @@ export async function PATCH(req) {
   const { id, ...updates } = body;
   if (!id) return Response.json({ error: 'No id' }, { status: 400 });
 
-  // Only update allowed fields
-  const allowedFields = [
-    'name', 'category', 'subcategory', 'brand', 'collection',
-    'is_eco', 'is_new_arrival', 'is_sale', 'is_published', 'indent_type',
-    'meta_title', 'meta_description', 'alt_text', 'seo_description',
-    'features', 'dimensions', 'materials', 'capacity', 'packing', 'description',
-  ];
-
-  const filtered = Object.fromEntries(
-    Object.entries(updates).filter(([k]) => allowedFields.includes(k))
-  );
-
   const { error } = await supabase
     .from('products')
-    .update(filtered)
+    .update(updates)
     .eq('id', id);
 
   if (error) return Response.json({ error: error.message }, { status: 500 });
