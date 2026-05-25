@@ -13,7 +13,7 @@ export async function GET(req) {
 
   let query = supabase
     .from('products')
-    .select('id, name, slug, category, subcategory, brand, collection, is_eco, is_new_arrival, is_sale, is_published, status, meta_title, meta_description, alt_text, supplier_sku, seo_description, features, dimensions, materials, capacity, packing, description')
+    .select('id, name, slug, category, subcategory, brand, collection, is_eco, is_new_arrival, is_sale, is_published, indent_type, status, meta_title, meta_description, alt_text, supplier_sku, seo_description, features, dimensions, materials, capacity, packing, description')
     .order('name')
     .limit(3000);
 
@@ -32,9 +32,21 @@ export async function PATCH(req) {
   const { id, ...updates } = body;
   if (!id) return Response.json({ error: 'No id' }, { status: 400 });
 
+  // Only update allowed fields
+  const allowedFields = [
+    'name', 'category', 'subcategory', 'brand', 'collection',
+    'is_eco', 'is_new_arrival', 'is_sale', 'is_published', 'indent_type',
+    'meta_title', 'meta_description', 'alt_text', 'seo_description',
+    'features', 'dimensions', 'materials', 'capacity', 'packing', 'description',
+  ];
+
+  const filtered = Object.fromEntries(
+    Object.entries(updates).filter(([k]) => allowedFields.includes(k))
+  );
+
   const { error } = await supabase
     .from('products')
-    .update(updates)
+    .update(filtered)
     .eq('id', id);
 
   if (error) return Response.json({ error: error.message }, { status: 500 });
