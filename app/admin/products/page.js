@@ -11,6 +11,21 @@ const CATEGORIES = [
   'Leisure', 'Packaging', 'Pens', 'Personal', 'Print', 'Promotion', 'Technology',
 ];
 
+const ALL_SUBCATEGORIES = {
+  'Apparel': ['Apparel Accessories', 'Jackets', 'Socks & Footwear', 'Sweatshirts'],
+  'Bags': ['Backpacks', 'Cooler Bags', 'Crossbody & Belt Bags', 'Drawstring Bags', 'Duffle Bags', 'Jute Bags', 'Laptop Bags', 'Paper Bags', 'Satchel Bags', 'Tote Bags'],
+  'Business': ['Highlighters', 'ID Holders', 'Lanyards', 'Note Pads', 'Notebooks', 'Stationery', 'Sticky Notes'],
+  'Drinkware': ['Ceramic Mugs', 'Coffee Cups', 'Cups & Tumblers', 'Drink Bottles - Glass', 'Drink Bottles - Metal', 'Drink Bottles - Plastic', 'Drinkware Presentation', 'Flasks', 'Travel Mugs'],
+  'Headwear': ['Beanies', 'Bucket Hats', 'Caps', 'Headwear Accessories', 'Headwear Express'],
+  'Leisure': ['Camping & Outdoors', 'Chairs', 'Coasters', 'Games & Puzzles', 'Home & Living', 'Picnic & BBQ', 'Sport', 'Sunglasses', 'Tools', 'Towels', 'Travel', 'Umbrellas'],
+  'Packaging': ['Gift Boxes', 'Packaging Accessories', 'Ribbons'],
+  'Pens': ['Black Refill', 'Metal', 'Novelty', 'Paper', 'Plastic', 'Presentation', 'Refills'],
+  'Personal': ['Candles & Diffusers', 'Hand Sanitiser', 'Lip Balms', 'Lotions & Sunscreens', 'Personal Care'],
+  'Print': ['Pads & Planners', 'Signage'],
+  'Promotion': ['Badges', 'Bottle Openers', 'Fidget Items', 'Key Rings', 'Pet Accessories', 'Promotional', 'Stress Items', 'Stubby & Can Holders', 'Wristbands'],
+  'Technology': ['Charging Cables', 'Earbuds', 'Flash Drives', 'Headphones', 'Mouse Mats', 'Phone Wallets', 'Power Banks', 'Screen Cleaners', 'Sleeves & Cases', 'Speakers', 'Tech Accessories', 'USB Hubs', 'Wireless Chargers'],
+};
+
 const BRANDS = [
   'Archer', 'Blunt', 'BrandCraft', 'CamelBak', 'Cross', 'Frontier',
   'Impact Aware', 'Ingenio', 'Keepsake', 'Lamy', 'Luigi Bormioli',
@@ -276,7 +291,12 @@ export default function AdminProductsPage() {
                     </div>
                     <div>
                       <label style={labelStyle}>Subcategory</label>
-                      <input type="text" value={editing.subcategory || ''} onChange={e => updateField('subcategory', e.target.value)} placeholder="e.g. Backpacks" style={inputStyle} />
+                      <select value={editing.subcategory || ''} onChange={e => updateField('subcategory', e.target.value)} style={inputStyle}>
+                        <option value="">Select subcategory...</option>
+                        {(ALL_SUBCATEGORIES[editing.category] || []).map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label style={labelStyle}>Brand</label>
