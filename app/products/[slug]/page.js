@@ -23,6 +23,7 @@ export default async function ProductPage({ params }) {
       decoration_options(id, name, detail, per_unit, has_setup, default_setup_qty, setup_qty_editable, sort_order, type)
     `)
     .eq('slug', slug)
+    .eq('is_published', true)
     .single();
 
   if (error) console.error('Product fetch error:', error);
