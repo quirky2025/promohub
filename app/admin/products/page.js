@@ -325,11 +325,35 @@ export default function AdminProductsPage() {
                       </select>
                     </div>
                     <div>
-                      <label style={labelStyle}>Collection</label>
-                      <select value={editing.collection || ''} onChange={e => updateField('collection', e.target.value)} style={inputStyle}>
-                        <option value="">No Collection</option>
-                        {COLLECTIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
+                      <label style={labelStyle}>Collections (multi-select)</label>
+                      <div style={{ border: '1.5px solid #E0DDD7', borderRadius: '8px', padding: '12px', background: '#fff', maxHeight: '200px', overflowY: 'auto' }}>
+                        {COLLECTIONS.map(c => {
+                          const selected = Array.isArray(editing.collection) ? editing.collection : [];
+                          const isChecked = selected.includes(c);
+                          return (
+                            <label key={c} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0', cursor: 'pointer', fontSize: '13px', color: '#1B2A4A' }}>
+                              <input type="checkbox" checked={isChecked}
+                                onChange={e => {
+                                  const current = Array.isArray(editing.collection) ? editing.collection : [];
+                                  const updated = e.target.checked
+                                    ? [...current, c]
+                                    : current.filter(x => x !== c);
+                                  updateField('collection', updated);
+                                }}
+                                style={{ width: '14px', height: '14px', cursor: 'pointer' }}
+                              />
+                              {c}
+                            </label>
+                          );
+                        })}
+                      </div>
+                      {Array.isArray(editing.collection) && editing.collection.length > 0 && (
+                        <div style={{ marginTop: '6px', display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                          {editing.collection.map(c => (
+                            <span key={c} style={{ background: '#1B2A4A', color: '#fff', fontSize: '11px', padding: '2px 8px', borderRadius: '12px' }}>{c}</span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div style={{ marginBottom: '16px' }}>

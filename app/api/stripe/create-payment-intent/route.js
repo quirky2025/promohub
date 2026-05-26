@@ -22,7 +22,6 @@ export async function POST(req) {
       clientSecret: paymentIntent.client_secret,
     });
   } catch (error) {
-    console.error('Stripe error:', error);
     return Response.json({ error: error.message }, { status: 500 });
   }
 }

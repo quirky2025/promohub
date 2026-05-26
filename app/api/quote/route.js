@@ -398,7 +398,6 @@ export async function POST(req) {
 
     return Response.json({ success: true, quoteNumber });
   } catch (error) {
-    console.error('Quote API error:', error);
     return Response.json({ error: 'Failed to process quote' }, { status: 500 });
   }
 }

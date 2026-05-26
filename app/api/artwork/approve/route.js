@@ -224,7 +224,6 @@ export async function POST(req) {
 
     return Response.json({ success: true });
   } catch (error) {
-    console.error('Artwork approve error:', error);
     return Response.json({ error: 'Failed to process approval' }, { status: 500 });
   }
 }

@@ -129,7 +129,6 @@ export async function POST(req) {
 
     return Response.json({ success: true, token });
   } catch (error) {
-    console.error('Artwork upload error:', error);
     return Response.json({ error: 'Failed to process artwork' }, { status: 500 });
   }
 }

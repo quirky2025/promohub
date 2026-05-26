@@ -16,7 +16,6 @@ async function uploadImages() {
     /\.(jpg|jpeg|png|webp)$/i.test(f)
   );
 
-  console.log(`找到 ${files.length} 张图片，开始上传...`);
   const results = [];
 
   for (let i = 0; i < files.length; i++) {
@@ -33,14 +32,11 @@ async function uploadImages() {
       });
 
       results.push({ fileName: file, url: result.secure_url });
-      console.log(`[${i + 1}/${files.length}] ✓ ${file}`);
     } catch (err) {
-      console.error(`✗ ${file}: ${err.message}`);
     }
   }
 
   fs.writeFileSync('scripts/upload-results.json', JSON.stringify(results, null, 2));
-  console.log('\n完成！结果已保存到 scripts/upload-results.json');
 }
 
 uploadImages();

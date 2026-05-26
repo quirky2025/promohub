@@ -21,7 +21,6 @@ async function getAllProducts() {
     if (!data || data.length === 0) break;
 
     allProducts = allProducts.concat(data);
-    console.log(`已获取 ${allProducts.length} 个产品...`);
 
     if (data.length < pageSize) break;
     page++;
@@ -47,10 +46,7 @@ async function updateImages() {
     grouped[sku].sort((a, b) => a.index - b.index);
   });
 
-  console.log(`找到 ${Object.keys(grouped).length} 个产品的图片`);
-
   const products = await getAllProducts();
-  console.log(`数据库中共有 ${products.length} 个产品`);
 
   let updated = 0;
   let notFound = 0;
@@ -77,9 +73,7 @@ async function updateImages() {
         .update({ images: imageUrls })
         .eq('id', colours[0].id);
 
-      if (updateError) {
-        console.error(`✗ SKU ${sku}: ${updateError.message}`);
-      } else {
+      if (!updateError) {
         updated++;
       }
     } else {
@@ -92,19 +86,15 @@ async function updateImages() {
           sort_order: 0
         });
 
-      if (insertError) {
-        console.error(`✗ SKU ${sku} (insert): ${insertError.message}`);
-      } else {
+      if (!insertError) {
         updated++;
       }
     }
 
     if (updated % 100 === 0 && updated > 0) {
-      console.log(`进度：已更新 ${updated} 个产品...`);
     }
   }
 
-  console.log(`\n完成！更新了 ${updated} 个产品，${notFound} 个产品没有找到图片`);
 }
 
 updateImages();

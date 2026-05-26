@@ -20,7 +20,6 @@ export default async function ProductPage({ params }) {
     .eq('slug', slug)
     .single();
 
-  if (error) console.error('Product fetch error:', error);
   if (!product) return (
     <div style={{ padding: '4rem', textAlign: 'center', fontFamily: '"DM Sans", sans-serif', color: '#1B2A4A' }}>
       Product not found

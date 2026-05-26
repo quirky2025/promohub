@@ -59,6 +59,7 @@ const dropdownLinkStyle = {
 
 export default function Nav() {
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [productsOpen, setProductsOpen] = useState(false);
   const timeoutRef = useRef(null);
   const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
@@ -109,7 +110,7 @@ export default function Nav() {
   }
 
   function handleMouseLeave() {
-    timeoutRef.current = setTimeout(() => setActiveDropdown(null), 150);
+    timeoutRef.current = setTimeout(() => setActiveDropdown(null), 300);
   }
 
   useEffect(() => {
@@ -177,8 +178,19 @@ export default function Nav() {
       <nav style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,.06)' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px', display: 'flex', alignItems: 'center', height: '56px', gap: '4px' }}>
 
-          <NavItem label="All Products" active={activeDropdown === 'products'}
-            onEnter={() => handleMouseEnter('products')} onLeave={handleMouseLeave} />
+          <button
+            onClick={() => setProductsOpen(p => !p)}
+            onBlur={() => setTimeout(() => setProductsOpen(false), 200)}
+            style={{
+              padding: '0 16px', height: '56px', background: 'none', border: 'none',
+              fontSize: '15px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif',
+              color: productsOpen ? NAVY : '#1a1a1a', cursor: 'pointer',
+              borderBottom: productsOpen ? `2px solid ${GOLD}` : '2px solid transparent',
+              display: 'flex', alignItems: 'center', gap: '4px',
+              letterSpacing: '0.3px', whiteSpace: 'nowrap',
+            }}>
+            All Products <span style={{ fontSize: '11px', color: productsOpen ? GOLD : '#B0AAA3' }}>▾</span>
+          </button>
 
           <div style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center' }}
             onMouseEnter={() => handleMouseEnter('collections')}
@@ -230,10 +242,10 @@ export default function Nav() {
         </div>
 
         {/* ALL PRODUCTS MEGA DROPDOWN */}
-        {activeDropdown === 'products' && (
+        {productsOpen && (
           <div
-            onMouseEnter={() => handleMouseEnter('products')}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={() => { if (timeoutRef.current) clearTimeout(timeoutRef.current); }}
+            onMouseLeave={() => {}}
             style={{ position: 'absolute', top: '56px', left: 0, right: 0, background: '#fff', borderTop: `2px solid ${GOLD}`, borderBottom: '1px solid #E0DDD7', boxShadow: '0 8px 32px rgba(0,0,0,.12)', zIndex: 200, padding: '28px 40px' }}
           >
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
@@ -241,14 +253,14 @@ export default function Nav() {
                 {Object.entries(ALL_PRODUCTS).map(([cat, subs]) => (
                   <div key={cat} style={{ marginBottom: '20px' }}>
                     <Link href={`/category/${toSlug(cat)}`}
-                      onClick={() => setActiveDropdown(null)}
+                      onClick={() => { setActiveDropdown(null); setProductsOpen(false); }}
                       style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', fontWeight: 700, color: NAVY, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '8px', borderBottom: `1px solid ${GOLD}`, paddingBottom: '4px' }}>
                       {cat}
                     </Link>
                     {subs.map(sub => (
                       <Link key={sub}
                         href={`/category/${toSlug(cat)}/${toSlug(sub)}`}
-                        onClick={() => setActiveDropdown(null)}
+                        onClick={() => { setActiveDropdown(null); setProductsOpen(false); }}
                         style={dropdownLinkStyle}
                         onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; }}

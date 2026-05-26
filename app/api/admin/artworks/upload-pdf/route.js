@@ -25,7 +25,6 @@ export async function POST(req) {
       });
 
     if (error) {
-      console.error('Supabase upload error:', error);
       return Response.json({ error: error.message }, { status: 500 });
     }
 
@@ -35,7 +34,6 @@ export async function POST(req) {
 
     return Response.json({ url: data.publicUrl });
   } catch (err) {
-    console.error('Upload PDF error:', err);
     return Response.json({ error: 'Failed' }, { status: 500 });
   }
 }

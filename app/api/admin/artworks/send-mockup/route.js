@@ -86,7 +86,6 @@ export async function POST(req) {
 
     return Response.json({ success: true });
   } catch (error) {
-    console.error('Send mockup error:', error);
     return Response.json({ error: 'Failed' }, { status: 500 });
   }
 }

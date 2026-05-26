@@ -74,7 +74,6 @@ export async function POST(req) {
 
     return Response.json({ success: true, token });
   } catch (error) {
-    console.error('Request logo error:', error);
     return Response.json({ error: 'Failed' }, { status: 500 });
   }
 }

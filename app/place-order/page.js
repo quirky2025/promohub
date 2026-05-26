@@ -154,17 +154,13 @@ export default function PlaceOrderPage() {
 
   // Trigger artwork mockup after order placed
   async function triggerArtwork({ orderNumber, customerName, customerEmail, paymentMethod, uploadedLogoUrl, savedCartItems }) {
-    console.log('triggerArtwork called:', { orderNumber, customerName, paymentMethod, uploadedLogoUrl });
     const cartItems = savedCartItems || getCart();
-    console.log('cartItems:', cartItems?.length, cartItems?.[0]?.productName);
     const firstItem = cartItems[0];
     if (!firstItem) {
-      console.log('No cart items found!');
       return;
     }
 
     const logoToUse = uploadedLogoUrl || logoUrl;
-    console.log('logoToUse:', logoToUse);
 
     if (logoToUse) {
       // Logo available - generate mockup automatically
@@ -200,7 +196,6 @@ export default function PlaceOrderPage() {
   }
 
   async function handleEFTSubmit() {
-    console.log('EFT submit - canSubmit:', canSubmit, 'form:', form);
     if (!canSubmit) return;
     setSubmitting(true);
     setError('');
@@ -222,7 +217,6 @@ export default function PlaceOrderPage() {
         const savedItems = getCart();
         clearCart();
         // Trigger artwork workflow
-        console.log('About to call triggerArtwork, savedItems:', savedItems?.length);
         await triggerArtwork({
           orderNumber: data.orderNumber,
           customerName: form.name,

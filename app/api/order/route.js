@@ -341,7 +341,6 @@ export async function POST(req) {
 
     return Response.json({ success: true, orderNumber });
   } catch (error) {
-    console.error('Order API error:', error);
     return Response.json({ error: 'Failed to process order' }, { status: 500 });
   }
 }
