@@ -78,6 +78,9 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
   const grand = subtotal + SHIPPING + gstAmt;
   const firstRetailPrice = pricingTiers[0] ? pricingTiers[0].base_price * MARGIN : 0;
   const isValidQty = qty >= (product.min_qty || 1);
+  const collectionLabel = product.collection
+    ? (Array.isArray(product.collection) ? product.collection.join(', ') : product.collection)
+    : null;
 
   function handleQtyChange(val) {
     setQtyInput(val);
@@ -488,6 +491,7 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                       <tbody>
                         {product.materials && <SpecRow label="Materials" value={product.materials} />}
                         {product.dimensions && <SpecRow label="Dimensions" value={product.dimensions} />}
+                        {collectionLabel && <SpecRow label="Collection" value={collectionLabel} />}
                         {product.capacity && <SpecRow label="Capacity" value={product.capacity} />}
                         {product.packing && <SpecRow label="Packaging" value={product.packing} />}
                         {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
