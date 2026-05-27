@@ -1,100 +1,139 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
+const MARGIN = 1.40;
+const PAGE_SIZE = 24;
 
 function fromSlug(slug) {
-  return decodeURIComponent(slug)
+  return decodeURIComponent(slug || '')
     .replace(/-and-/g, ' & ')
     .replace(/-/g, ' ')
     .replace(/\b\w/g, c => c.toUpperCase());
 }
 
 function toSlug(name) {
-  return name.toLowerCase()
+  return (name || '').toLowerCase()
     .replace(/ & /g, '-and-')
     .replace(/&/g, 'and')
     .replace(/ /g, '-');
 }
 
+// SEO blurbs per subcategory
+const SUB_SEO = {
+  'backpacks': 'Custom printed backpacks are a premium corporate gift and a practical everyday item for staff, students, and event attendees. With large decoration areas and a wide range of styles — from roll-top commuter packs to foldable daypacks — branded backpacks deliver exceptional brand exposure wherever they go.',
+  'tote-bags': 'Branded tote bags are one of the most cost-effective promotional items available. Lightweight, reusable, and available in cotton, jute, and non-woven materials, custom printed tote bags are ideal for conferences, retail environments, and eco-conscious campaigns across Australia.',
+  'cooler-bags': 'Promotional cooler bags are a practical branded gift perfect for corporate events, team gifts, and outdoor activations. With insulated linings and a range of sizes from lunch bags to large trolley coolers, your logo stays front-of-mind from the office kitchen to the weekend barbecue.',
+  'laptop-bags': 'Custom branded laptop bags and sleeves are an executive-level corporate gift that clients and staff will use daily. Our range includes padded briefcases, slim sleeves, and anti-theft backpacks — all with generous decoration areas and professional finishes suited to premium corporate branding.',
+  'jute-bags': 'Jute promotional bags are the eco-friendly choice for brands with sustainability commitments. Natural, biodegradable, and incredibly durable, custom printed jute bags deliver an authentic eco message for retail, grocery, gifting, and corporate campaigns.',
+  'duffle-bags': 'Branded duffle bags are a versatile corporate gift for staff, sports clubs, and travel-focused campaigns. From compact foldaway weekenders to full-size gym bags with separate shoe compartments, our custom duffle bags offer generous print areas and long-lasting brand exposure.',
+  'paper-bags': 'Custom printed paper bags add a premium touch to retail, gifting, and event experiences. Available in a range of sizes with ribbon or rope handles, gloss laminated paper bags turn every purchase or gift into a branded moment that your recipients will remember.',
+  'drawstring-bags': 'Promotional drawstring bags are a lightweight, affordable option for events, schools, gyms, and charity campaigns. Custom printed in your brand colours, drawstring bags in cotton, fleece, or mesh materials are a practical giveaway that gets regular use.',
+  'satchel-bags': 'Custom branded satchel and messenger bags are a smart corporate gift for office workers, conference delegates, and frequent travellers. With document compartments, water bottle holders, and large decoration areas, branded satchels combine function with professional style.',
+  'crossbody-and-belt-bags': 'Promotional crossbody and belt bags are compact, hands-free solutions ideal for events, tourism activations, and youth-focused campaigns. Lightweight and practical, custom printed crossbody bags offer a modern branded gifting option.',
+};
+
 export default function SubcategoryPage() {
   const { category, subcategory } = useParams();
   const categoryName = fromSlug(category);
   const subcategoryName = fromSlug(subcategory);
+  const subcategoryKey = (subcategory || '').toLowerCase();
 
-  const [products, setProducts] = useState([]);
-  const [filtered, setFiltered] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const [displayed, setDisplayed] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [hoveredId, setHoveredId] = useState(null);
-  const [minQty, setMinQty] = useState('');
-  const [hasRush, setHasRush] = useState(false);
+  const [page, setPage] = useState(0);
+
+  // Filters
+  const [isEco, setIsEco] = useState(false);
+  const [minQtyFilter, setMinQtyFilter] = useState('');
   const [sortBy, setSortBy] = useState('name');
 
   useEffect(() => {
     async function fetchProducts() {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('products')
         .select(`
           id, name, slug, category, subcategory,
-          short_desc, min_qty, lead_time_days, has_rush, status,
+          min_qty, is_eco, is_published,
           product_colours ( id, name, hex, images, sort_order ),
-          pricing_tiers ( min_qty, max_qty, base_price, sort_order )
+          pricing_tiers ( min_qty, base_price )
         `)
         .ilike('subcategory', subcategoryName)
-        .eq('status', 'active')
+        .eq('is_published', true)
         .order('name');
-      if (!error && data) { setProducts(data); setFiltered(data); }
+      if (data) setAllProducts(data);
       setLoading(false);
     }
     fetchProducts();
   }, [subcategory]);
 
-  useEffect(() => {
-    let result = [...products];
-    if (minQty) result = result.filter(p => p.min_qty <= parseInt(minQty));
-    if (hasRush) result = result.filter(p => p.has_rush === true);
+  const getFiltered = useCallback(() => {
+    let result = [...allProducts];
+    if (isEco) result = result.filter(p => p.is_eco === true);
+    if (minQtyFilter) result = result.filter(p => p.min_qty <= parseInt(minQtyFilter));
     if (sortBy === 'name') result.sort((a, b) => a.name.localeCompare(b.name));
-    if (sortBy === 'min_qty') result.sort((a, b) => a.min_qty - b.min_qty);
     if (sortBy === 'price') result.sort((a, b) => getLowestPrice(a) - getLowestPrice(b));
-    setFiltered(result);
-  }, [minQty, hasRush, sortBy, products]);
+    if (sortBy === 'min_qty') result.sort((a, b) => a.min_qty - b.min_qty);
+    return result;
+  }, [allProducts, isEco, minQtyFilter, sortBy]);
 
-  function getFirstImage(product) {
-    if (!product.product_colours?.length) return null;
-    const sorted = [...product.product_colours].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-    const imgs = sorted[0]?.images;
-    if (!imgs) return null;
-    const arr = Array.isArray(imgs) ? imgs : Object.values(imgs);
-    return arr[0] || null;
+  useEffect(() => {
+    setDisplayed(getFiltered().slice(0, PAGE_SIZE));
+    setPage(0);
+  }, [getFiltered]);
+
+  function loadMore() {
+    setLoadingMore(true);
+    const nextPage = page + 1;
+    setDisplayed(getFiltered().slice(0, (nextPage + 1) * PAGE_SIZE));
+    setPage(nextPage);
+    setLoadingMore(false);
   }
 
   function getLowestPrice(product) {
     if (!product.pricing_tiers?.length) return 0;
-    return Math.min(...product.pricing_tiers.map(t => parseFloat(t.base_price))) * 1.40;
+    return Math.min(...product.pricing_tiers.map(t => parseFloat(t.base_price))) * MARGIN;
+  }
+
+  function getFirstImage(product) {
+    const sorted = [...(product.product_colours || [])].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    const imgs = sorted[0]?.images;
+    const arr = Array.isArray(imgs) ? imgs : imgs ? Object.values(imgs) : [];
+    return arr[0] || null;
   }
 
   function getColours(product) {
-    if (!product.product_colours?.length) return [];
-    return [...product.product_colours]
+    return [...(product.product_colours || [])]
       .filter(c => c.hex && c.name !== 'Default')
       .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
-      .slice(0, 12);
+      .slice(0, 10);
   }
 
-  function clearFilters() { setMinQty(''); setHasRush(false); setSortBy('name'); }
+  function clearFilters() {
+    setIsEco(false);
+    setMinQtyFilter('');
+    setSortBy('name');
+  }
+
+  const filtered = getFiltered();
+  const hasMore = displayed.length < filtered.length;
+  const seoBlurb = SUB_SEO[subcategoryKey] || null;
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F8F7F4' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#F8F7F4' }}>
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
           <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <Link href={`/category/${toSlug(categoryName)}`} style={{ color: '#7A7570', textDecoration: 'none' }}>{categoryName}</Link>
@@ -103,25 +142,42 @@ export default function SubcategoryPage() {
         </div>
       </div>
 
+      {/* HEADER */}
+      <div style={{ background: NAVY, padding: '36px 40px 44px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', fontWeight: 600, margin: '0 0 10px', color: '#fff' }}>
+            Custom {subcategoryName}
+          </h1>
+          {seoBlurb && (
+            <p style={{ color: 'rgba(255,255,255,.65)', margin: '0', fontSize: '14px', maxWidth: '720px', lineHeight: 1.7 }}>
+              {seoBlurb.slice(0, 160)}...
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* MAIN */}
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 40px', display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
 
-        {/* FILTER PANEL */}
+        {/* FILTER SIDEBAR */}
         <div style={{ width: '220px', flexShrink: 0, background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,.06)', position: 'sticky', top: '72px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '15px', fontWeight: 700, color: NAVY }}>Filters</span>
-            <button onClick={clearFilters} style={{ fontSize: '12px', color: GOLD, background: 'none', border: 'none', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}>Clear all</button>
+            <span style={{ fontSize: '15px', fontWeight: 700, color: NAVY }}>Filters</span>
+            <button onClick={clearFilters} style={{ fontSize: '12px', color: GOLD, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Clear all</button>
           </div>
+
           <div style={{ marginBottom: '20px' }}>
-            <div style={filterLabel}>Sort By</div>
+            <div style={labelStyle}>Sort By</div>
             <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle}>
               <option value="name">Name A–Z</option>
               <option value="price">Price: Low to High</option>
               <option value="min_qty">Min Quantity</option>
             </select>
           </div>
+
           <div style={{ marginBottom: '20px' }}>
-            <div style={filterLabel}>Max Min. Quantity</div>
-            <select value={minQty} onChange={e => setMinQty(e.target.value)} style={selectStyle}>
+            <div style={labelStyle}>Max Min. Quantity</div>
+            <select value={minQtyFilter} onChange={e => setMinQtyFilter(e.target.value)} style={selectStyle}>
               <option value="">Any</option>
               <option value="25">Up to 25</option>
               <option value="50">Up to 50</option>
@@ -130,87 +186,133 @@ export default function SubcategoryPage() {
               <option value="500">Up to 500</option>
             </select>
           </div>
+
           <div style={{ marginBottom: '20px' }}>
+            <div style={labelStyle}>Sustainability</div>
             <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-              <input type="checkbox" checked={hasRush} onChange={e => setHasRush(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: GOLD }} />
-              <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', color: '#1a1a1a' }}>Rush available</span>
+              <input type="checkbox" checked={isEco} onChange={e => setIsEco(e.target.checked)}
+                style={{ width: '16px', height: '16px', accentColor: GOLD }} />
+              <span style={{ fontSize: '14px', color: '#1a1a1a' }}>🌿 Eco-Friendly only</span>
             </label>
           </div>
-          <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '16px', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#7A7570' }}>
+
+          <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '16px', fontSize: '13px', color: '#7A7570' }}>
             {filtered.length} product{filtered.length !== 1 ? 's' : ''} found
           </div>
         </div>
 
         {/* PRODUCT GRID */}
         <div style={{ flex: 1 }}>
-          <div style={{ marginBottom: '24px' }}>
-            <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: 0, fontWeight: 600 }}>{subcategoryName}</h1>
-            <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', color: '#7A7570', margin: '6px 0 0' }}>{filtered.length} products</p>
+          <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '26px', color: NAVY, margin: 0, fontWeight: 600 }}>
+              {subcategoryName}
+            </h2>
+            <span style={{ fontSize: '13px', color: '#7A7570' }}>Showing {displayed.length} of {filtered.length}</span>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '80px', fontFamily: '"DM Sans", sans-serif', color: '#7A7570' }}>Loading products...</div>
+            <div style={{ textAlign: 'center', padding: '80px', color: '#7A7570' }}>Loading products...</div>
           ) : filtered.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '80px', fontFamily: '"DM Sans", sans-serif', color: '#7A7570' }}>
+            <div style={{ textAlign: 'center', padding: '80px' }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
               <div style={{ fontSize: '16px', fontWeight: 600, color: NAVY, marginBottom: '8px' }}>No products found</div>
-              <button onClick={clearFilters} style={{ marginTop: '8px', background: GOLD, color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}>Clear Filters</button>
+              <button onClick={clearFilters} style={{ background: GOLD, color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Clear Filters</button>
             </div>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px' }}>
-              {filtered.map(product => {
-                const img = getFirstImage(product);
-                const lowestPrice = getLowestPrice(product);
-                const colours = getColours(product);
-                const totalColours = product.product_colours?.filter(c => c.hex && c.name !== 'Default').length || 0;
-                const extraColours = totalColours - 12;
-                const isHovered = hoveredId === product.id;
-                return (
-                  <Link key={product.id} href={`/products/${product.slug}`} style={{ textDecoration: 'none' }}>
-                    <div
-                      onMouseEnter={() => setHoveredId(product.id)}
-                      onMouseLeave={() => setHoveredId(null)}
-                      style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: isHovered ? '0 8px 24px rgba(0,0,0,.12)' : '0 2px 8px rgba(0,0,0,.06)', transform: isHovered ? 'translateY(-2px)' : 'translateY(0)', transition: 'box-shadow .2s, transform .2s', cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' }}
-                    >
-                      <div style={{ height: '200px', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
-                        {img ? <img src={img} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} />
-                          : <div style={{ fontSize: '40px', color: '#D0CCC8' }}>📦</div>}
-                        {product.has_rush && <span style={{ position: 'absolute', top: '10px', right: '10px', fontSize: '11px', background: GOLD, color: '#fff', padding: '3px 8px', borderRadius: '20px', fontFamily: '"DM Sans", sans-serif', fontWeight: 700 }}>RUSH</span>}
-                      </div>
-                      <div style={{ padding: '16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                        <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '15px', fontWeight: 600, lineHeight: '1.4', textAlign: 'center', color: NAVY, textDecoration: isHovered ? 'underline' : 'none', textUnderlineOffset: '3px', textDecorationColor: GOLD }}>
-                          {product.name}
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '20px' }}>
+                {displayed.map(product => {
+                  const img = getFirstImage(product);
+                  const price = getLowestPrice(product);
+                  const colours = getColours(product);
+                  const totalColours = product.product_colours?.filter(c => c.hex && c.name !== 'Default').length || 0;
+                  const extraColours = totalColours - 10;
+                  const isHovered = hoveredId === product.id;
+
+                  return (
+                    <Link key={product.id} href={`/products/${product.slug}`} style={{ textDecoration: 'none' }}>
+                      <div
+                        onMouseEnter={() => setHoveredId(product.id)}
+                        onMouseLeave={() => setHoveredId(null)}
+                        style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', boxShadow: isHovered ? '0 8px 24px rgba(0,0,0,.1)' : '0 2px 6px rgba(0,0,0,.05)', transform: isHovered ? 'translateY(-2px)' : 'none', transition: 'box-shadow .2s, transform .2s', height: '100%', display: 'flex', flexDirection: 'column' }}
+                      >
+                        <div style={{ height: '190px', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+                          {img
+                            ? <img src={img} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} />
+                            : <div style={{ fontSize: '40px', color: '#D0CCC8' }}>📦</div>}
+                          {product.is_eco && (
+                            <div style={{ position: 'absolute', top: '10px', left: '10px', background: '#2D6A4F', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px' }}>🌿 ECO</div>
+                          )}
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', alignItems: 'flex-end' }}>
-                          {lowestPrice > 0 && (
+                        <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          <div style={{ fontSize: '14px', fontWeight: 600, color: NAVY, lineHeight: 1.4, textAlign: 'center' }}>{product.name}</div>
+                          <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: 'auto' }}>
+                            {price > 0 && (
+                              <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '2px' }}>As low as</div>
+                                <div style={{ fontSize: '18px', color: GOLD }}>${price.toFixed(2)}</div>
+                              </div>
+                            )}
                             <div style={{ textAlign: 'center' }}>
-                              <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', color: '#7A7570', marginBottom: '2px' }}>As low as</div>
-                              <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '19px', fontWeight: 400, color: GOLD }}>${lowestPrice.toFixed(2)}</div>
+                              <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '2px' }}>Min Qty</div>
+                              <div style={{ fontSize: '18px', color: NAVY }}>{product.min_qty}</div>
+                            </div>
+                          </div>
+                          {colours.length > 0 && (
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                              {colours.map(c => (
+                                <div key={c.id} title={c.name} style={{ width: '16px', height: '16px', borderRadius: '50%', background: c.hex, border: '1.5px solid rgba(0,0,0,.1)', flexShrink: 0 }} />
+                              ))}
+                              {extraColours > 0 && <span style={{ fontSize: '11px', color: '#7A7570' }}>+{extraColours}</span>}
                             </div>
                           )}
-                          <div style={{ textAlign: 'center' }}>
-                            <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', color: '#7A7570', marginBottom: '2px' }}>Min Qty</div>
-                            <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '19px', fontWeight: 400, color: NAVY }}>{product.min_qty}</div>
-                          </div>
                         </div>
-                        {colours.length > 0 && (
-                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', flexWrap: 'wrap' }}>
-                            {colours.map(c => <div key={c.id} title={c.name} style={{ width: '18px', height: '18px', borderRadius: '50%', background: c.hex || '#ccc', border: '1.5px solid rgba(0,0,0,.1)', flexShrink: 0 }} />)}
-                            {extraColours > 0 && <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', color: '#7A7570', marginLeft: '2px' }}>+{extraColours}</span>}
-                          </div>
-                        )}
                       </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+                    </Link>
+                  );
+                })}
+              </div>
+
+              {/* LOAD MORE */}
+              {hasMore && (
+                <div style={{ textAlign: 'center', marginTop: '40px' }}>
+                  <button
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                    style={{ background: NAVY, color: '#fff', border: 'none', borderRadius: '10px', padding: '14px 40px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', transition: 'background .2s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = GOLD}
+                    onMouseLeave={e => e.currentTarget.style.background = NAVY}
+                  >
+                    {loadingMore ? 'Loading...' : `Load More (${filtered.length - displayed.length} remaining)`}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
+
+      {/* SEO CONTENT */}
+      {seoBlurb && (
+        <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '56px 40px' }}>
+          <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 16px', fontWeight: 600 }}>
+              About Custom Printed {subcategoryName}
+            </h2>
+            <p style={{ fontSize: '15px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 28px' }}>{seoBlurb}</p>
+            <div style={{ padding: '20px 24px', background: '#F8F7F4', borderRadius: '12px', borderLeft: `4px solid ${GOLD}` }}>
+              <p style={{ margin: 0, fontSize: '14px', color: '#3D3A36', lineHeight: 1.8 }}>
+                <strong>Need help choosing?</strong> Contact our team at{' '}
+                <a href="mailto:hello@quirkypromo.com.au" style={{ color: GOLD, fontWeight: 600 }}>hello@quirkypromo.com.au</a>{' '}
+                or call <strong>02 9477 4748</strong> — we'll find the right product for your brand and budget.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-const filterLabel = { fontFamily: '"DM Sans", sans-serif', fontSize: '11px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' };
+const labelStyle = { fontSize: '11px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' };
 const selectStyle = { width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #E0DDD7', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#1a1a1a', background: '#fff', outline: 'none', cursor: 'pointer' };
