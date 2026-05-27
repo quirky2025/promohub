@@ -12,7 +12,7 @@ const MARGIN = 1.40;
 const GST = 0.10;
 const SHIPPING = 30;
 const SETUP_FEE = 40;
-const TABS = ['Description', 'Mockups', 'Returns', 'Shipping', 'Ordering Process'];
+const TABS = ['Description', 'Sample Policy', 'Mockups & Artwork', 'Shipping & Delivery', 'Ordering Process'];
 
 export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations }) {
   const [selectedColour, setSelectedColour] = useState(null);
@@ -441,18 +441,23 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
           </button>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-            {[{ icon: '🎨', text: 'Free digital proof' }, { icon: '🚚', text: '$30 flat shipping' }, { icon: '✅', text: 'Quality guarantee' }].map(b => (
-              <div key={b.text} style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '10px', padding: '14px 10px', textAlign: 'center' }}>
-                <div style={{ fontSize: '22px', marginBottom: '6px' }}>{b.icon}</div>
-                <div style={{ fontSize: '12px', color: NAVY, fontWeight: 500 }}>{b.text}</div>
+            {[
+              { icon: '🎨', title: 'Free Digital Proof', sub: 'See it before we make it' },
+              { icon: '🚚', title: '$30 Flat Shipping', sub: 'Australia-wide, no surprises' },
+              { icon: '✅', title: 'Quality Guarantee', sub: 'We stand behind every order' },
+            ].map(b => (
+              <div key={b.title} style={{ background: '#fff', border: `1.5px solid ${GOLD}40`, borderRadius: '12px', padding: '16px 10px', textAlign: 'center', borderTop: `3px solid ${GOLD}` }}>
+                <div style={{ fontSize: '26px', marginBottom: '8px' }}>{b.icon}</div>
+                <div style={{ fontSize: '13px', color: NAVY, fontWeight: 700, marginBottom: '4px', fontFamily: '"DM Sans", sans-serif' }}>{b.title}</div>
+                <div style={{ fontSize: '11px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif', lineHeight: 1.4 }}>{b.sub}</div>
               </div>
             ))}
           </div>
 
           <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', background: '#fff' }}>
-            <div style={{ display: 'flex', overflowX: 'auto', borderBottom: '1px solid #E0DDD7' }}>
+            <div style={{ display: 'flex', borderBottom: '1px solid #E0DDD7' }}>
               {TABS.map(tab => (
-                <button key={tab} onClick={() => setActiveTab(tab)} style={{ flexShrink: 0, padding: '14px 18px', fontSize: '15px', fontWeight: 700, color: activeTab === tab ? NAVY : '#B0AAA3', background: activeTab === tab ? '#FDF8F0' : 'none', border: 'none', borderBottom: activeTab === tab ? `3px solid ${GOLD}` : '3px solid transparent', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap' }}>
+                <button key={tab} onClick={() => setActiveTab(tab)} style={{ flex: 1, padding: '14px 8px', fontSize: '13px', fontWeight: 700, color: activeTab === tab ? NAVY : '#B0AAA3', background: activeTab === tab ? '#FDF8F0' : 'none', border: 'none', borderBottom: activeTab === tab ? `3px solid ${GOLD}` : '3px solid transparent', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap', textAlign: 'center' }}>
                   {tab}
                 </button>
               ))}
@@ -460,12 +465,9 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
             <div style={{ padding: '24px', fontSize: '14px', lineHeight: '1.8', color: '#3D3A36', fontFamily: '"DM Sans", sans-serif' }}>
               {activeTab === 'Description' && (
                 <div>
-                  {/* SEO Description */}
                   {product.seo_description && (
                     <p style={{ margin: '0 0 20px', fontSize: '15px', color: '#5A5550', lineHeight: 1.7 }}>{product.seo_description}</p>
                   )}
-
-                  {/* Features */}
                   {product.features && Array.isArray(product.features) && product.features.length > 0 && (
                     <div style={{ marginBottom: '24px' }}>
                       <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 12px' }}>Features</h3>
@@ -476,15 +478,11 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                       </ul>
                     </div>
                   )}
-
-                  {/* Full description */}
                   {product.description && (
                     <div style={{ marginBottom: '24px' }}>
                       <p style={{ margin: 0, color: '#5A5550', lineHeight: 1.7 }}>{product.description}</p>
                     </div>
                   )}
-
-                  {/* Specifications */}
                   <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '20px' }}>
                     <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 16px' }}>Specifications</h3>
                     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -496,16 +494,14 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                         {product.packing && <SpecRow label="Packaging" value={product.packing} />}
                         {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
                         <SpecRow label="Lead Time" value={
-  product.indent_type === 'indent_air' ? '25 working days (Air Freight)' :
-  product.indent_type === 'indent_sea' ? '45 working days (Sea Freight)' :
-  product.lead_time_days ? `${product.lead_time_days} business days` : null
-} />
+                          product.indent_type === 'indent_air' ? '20 business days (Air Freight)' :
+                          product.indent_type === 'indent_sea' ? '45 business days (Sea Freight)' :
+                          product.lead_time_days ? `${product.lead_time_days} business days` : '7–10 business days after proof approval'
+                        } />
                         <SpecRow label="SKU" value={product.supplier_sku} />
                       </tbody>
                     </table>
                   </div>
-
-                  {/* Decoration */}
                   {decorations.length > 0 && (
                     <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '20px', marginTop: '20px' }}>
                       <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 16px' }}>Decoration Options</h3>
@@ -520,46 +516,188 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                 </div>
               )}
 
-              {activeTab === 'Mockups' && (
+              {activeTab === 'Sample Policy' && (
                 <div>
-                  <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 16px' }}>Artwork & Mockup Requirements</h3>
-                  <p style={{ margin: '0 0 12px' }}>Once your order is confirmed, our team will create a digital mockup showing your logo on the product.</p>
-                  <ul style={{ margin: '0 0 16px', paddingLeft: '20px' }}>
-                    <li style={{ marginBottom: '8px' }}>Preferred formats: <strong>AI, EPS, PDF</strong> (vector files)</li>
-                    <li style={{ marginBottom: '8px' }}>Also accepted: PNG or JPG at minimum <strong>300dpi</strong></li>
-                    <li style={{ marginBottom: '8px' }}>Please provide your logo in the correct <strong>PMS colours</strong> if colour matching is required</li>
-                    <li style={{ marginBottom: '8px' }}>Our team will send you a digital proof for approval before production begins</li>
-                    <li>Production starts only after your <strong>written approval</strong> of the mockup</li>
-                  </ul>
-                  <p style={{ margin: 0, color: '#7A7570', fontSize: '13px' }}>Need help with your artwork? Contact us at <strong>hello@quirkypromo.com.au</strong> or call <strong>02 9477 4748</strong></p>
+                  <p style={{ margin: '0 0 16px', fontSize: '15px', color: '#3D3A36', lineHeight: 1.7 }}>
+                    Before committing to a bulk order, we offer several ways to help you verify quality, colour, and branding — so you can order with complete confidence.
+                  </p>
+                  {[
+                    {
+                      num: '1', title: 'Undecorated Physical Sample',
+                      desc: 'Receive an actual product to check material quality and colour in person.',
+                      points: [
+                        'Sample cost + shipping fee applies',
+                        'Sample cost is refunded upon placing a bulk order',
+                        'Shipping fee is non-refundable',
+                      ]
+                    },
+                    {
+                      num: '2', title: 'Branded Sample (Custom Logo)',
+                      desc: 'See exactly how your logo looks on the product before full production.',
+                      points: [
+                        'Charged at unit price + setup charge + shipping fee',
+                        'Sample cost is refunded upon placing a bulk order',
+                        'Setup charge and shipping fee are non-refundable',
+                      ]
+                    },
+                    {
+                      num: '3', title: 'Indent Custom Sample',
+                      desc: 'For large volume factory-direct orders, fully customised samples are available.',
+                      points: [
+                        'Pricing and lead times vary by project and supplier',
+                        'Refund policy is determined by order quantity and supplier terms',
+                        'Contact us to discuss your specific requirements',
+                      ]
+                    },
+                  ].map(s => (
+                    <div key={s.num} style={{ marginBottom: '20px', padding: '16px', background: '#F8F7F4', borderRadius: '10px', borderLeft: `3px solid ${GOLD}` }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                        <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: NAVY, color: '#fff', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{s.num}</div>
+                        <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"Cormorant Garamond", serif' }}>{s.title}</div>
+                      </div>
+                      <p style={{ margin: '0 0 10px', color: '#5A5550', fontSize: '13px' }}>{s.desc}</p>
+                      <ul style={{ margin: 0, paddingLeft: '18px' }}>
+                        {s.points.map((p, i) => <li key={i} style={{ marginBottom: '4px', fontSize: '13px', color: '#3D3A36' }}>{p}</li>)}
+                      </ul>
+                    </div>
+                  ))}
+                  <div style={{ marginTop: '20px', padding: '14px 16px', background: `${GOLD}15`, borderRadius: '10px', border: `1px solid ${GOLD}40`, display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                    <span style={{ fontSize: '20px', flexShrink: 0 }}>💡</span>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#3D3A36', lineHeight: 1.6 }}>
+                      <strong>Not ready for a physical sample?</strong> Every order includes a free digital mockup created by our design team — showing exactly how your logo will appear on the final product. You must approve this mockup before production begins. <button onClick={() => setActiveTab('Mockups & Artwork')} style={{ background: 'none', border: 'none', color: GOLD, fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: '13px', textDecoration: 'underline' }}>See Mockups & Artwork →</button>
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {activeTab === 'Returns' && (
+              {activeTab === 'Mockups & Artwork' && (
                 <div>
-                  <p style={{ margin: '0 0 10px' }}>We stand behind every order. If there's a quality issue, we'll make it right.</p>
-                  <p style={{ margin: 0, color: '#7A7570' }}>Custom branded products cannot be returned unless there is a manufacturing defect. Contact us within 14 days of receiving your order.</p>
+                  <div style={{ marginBottom: '20px' }}>
+                    <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 10px' }}>Wondering what your logo will look like on the product?</h3>
+                    <p style={{ margin: '0 0 10px', color: '#5A5550', lineHeight: 1.7 }}>
+                      Ordering branded merchandise without seeing the final result can feel like a leap of faith. That's why every order includes a <strong>free digital mockup</strong> created by our in-house design team, so you can see exactly how your brand will look before a single item is produced.
+                    </p>
+                    <p style={{ margin: 0, fontWeight: 700, color: NAVY }}>No surprises. No guesswork. Just confidence.</p>
+                  </div>
+                  <div style={{ padding: '16px', background: '#F8F7F4', borderRadius: '10px', borderLeft: `3px solid ${NAVY}`, marginBottom: '20px' }}>
+                    <h4 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '17px', color: NAVY, margin: '0 0 10px' }}>How It Works</h4>
+                    <p style={{ margin: 0, color: '#5A5550', fontSize: '13px', lineHeight: 1.7 }}>
+                      Once your order is confirmed, our design team creates a digital mockup showing your logo on the product and sends it to you for approval. <strong>Production only begins after you give us the green light in writing.</strong>
+                    </p>
+                  </div>
+                  <div style={{ marginBottom: '20px' }}>
+                    <h4 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '17px', color: NAVY, margin: '0 0 12px' }}>Artwork Requirements</h4>
+                    <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                      <li style={{ marginBottom: '8px' }}>Preferred formats: <strong>AI, EPS, PDF</strong> (vector files)</li>
+                      <li style={{ marginBottom: '8px' }}>Also accepted: <strong>PNG or JPG</strong> at minimum 300dpi</li>
+                      <li style={{ marginBottom: '8px' }}>Please provide <strong>PMS colour codes</strong> if colour matching is required</li>
+                      <li>Our team will advise if any artwork adjustments are needed before production</li>
+                    </ul>
+                  </div>
+                  <div style={{ padding: '14px 16px', background: `${GOLD}15`, borderRadius: '10px', border: `1px solid ${GOLD}40`, display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <span style={{ fontSize: '20px', flexShrink: 0 }}>🎨</span>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#3D3A36', lineHeight: 1.6 }}>
+                      <strong>Need help with your artwork?</strong> Don't have a vector file? No problem — our design team can assist. Contact us at <strong>hello@quirkypromo.com.au</strong> or call <strong>02 9477 4748</strong>.
+                    </p>
+                  </div>
                 </div>
               )}
 
-              {activeTab === 'Shipping' && (
+              {activeTab === 'Shipping & Delivery' && (
                 <div>
-                  <p style={{ margin: '0 0 10px' }}><strong>$30 flat rate</strong> per domestic address, Australia-wide.</p>
-                  <p style={{ margin: '0 0 10px' }}>Standard production time is 7–10 business days after proof approval.</p>
-                  <p style={{ margin: 0, color: '#7A7570' }}>Delivery typically takes 2–5 business days after dispatch.</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+                    {[
+                      { icon: '🚚', title: 'Flat Rate Shipping', value: '$30 per domestic address, Australia-wide' },
+                      { icon: '🏭', title: 'Production Time', value: '7–10 business days after proof approval' },
+                    ].map(c => (
+                      <div key={c.title} style={{ padding: '14px', background: '#F8F7F4', borderRadius: '10px', borderTop: `3px solid ${GOLD}` }}>
+                        <div style={{ fontSize: '22px', marginBottom: '6px' }}>{c.icon}</div>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>{c.title}</div>
+                        <div style={{ fontSize: '13px', color: '#5A5550' }}>{c.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ marginBottom: '20px' }}>
+                    <h4 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '17px', color: NAVY, margin: '0 0 12px' }}>Delivery Times After Dispatch</h4>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                      <tbody>
+                        {[
+                          { region: '🏙 Brisbane / Sydney / Melbourne', time: '2–5 business days' },
+                          { region: '🏙 Adelaide', time: '3–5 business days' },
+                          { region: '🏙 Perth', time: '5–7 business days' },
+                          { region: '🌾 Rural Regions', time: '5–15 business days' },
+                        ].map((r, i) => (
+                          <tr key={i} style={{ background: i % 2 === 0 ? '#F8F7F4' : '#fff' }}>
+                            <td style={{ padding: '10px 14px', color: '#3D3A36' }}>{r.region}</td>
+                            <td style={{ padding: '10px 14px', fontWeight: 600, color: NAVY, textAlign: 'right' }}>{r.time}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                    <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#9CA3AF' }}>Delivery times are estimates only. For up-to-date tracking, refer to your dispatch notification email.</p>
+                  </div>
+                  <div style={{ padding: '14px 16px', background: '#F0F4FF', borderRadius: '10px', borderLeft: `3px solid ${NAVY}`, marginBottom: '12px' }}>
+                    <h4 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '16px', color: NAVY, margin: '0 0 8px' }}>Indent Orders</h4>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <div style={{ flex: 1, background: '#FFF8E7', borderRadius: '8px', padding: '10px 12px', border: '1px solid #FCD34D' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#92400E', marginBottom: '2px' }}>✈️ Indent Air</div>
+                        <div style={{ fontSize: '13px', color: '#92400E' }}>Approx. 20 business days</div>
+                      </div>
+                      <div style={{ flex: 1, background: '#EFF6FF', borderRadius: '8px', padding: '10px 12px', border: '1px solid #93C5FD' }}>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#1E40AF', marginBottom: '2px' }}>🚢 Indent Sea</div>
+                        <div style={{ fontSize: '13px', color: '#1E40AF' }}>Approx. 45 business days</div>
+                      </div>
+                    </div>
+                    <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#5A5550' }}>Indent orders are factory-direct and ideal for large volume orders with significant cost savings. Lead times commence after artwork proof approval.</p>
+                  </div>
+                  <div style={{ padding: '14px 16px', background: `${GOLD}15`, borderRadius: '10px', border: `1px solid ${GOLD}40`, display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <span style={{ fontSize: '20px', flexShrink: 0 }}>⚡</span>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#3D3A36', lineHeight: 1.6 }}>
+                      <strong>Urgent deadline?</strong> Contact us as soon as possible at <strong>hello@quirkypromo.com.au</strong> or call <strong>02 9477 4748</strong> and we'll do our best to accommodate your timeline.
+                    </p>
+                  </div>
                 </div>
               )}
 
               {activeTab === 'Ordering Process' && (
                 <div>
-                  <ol style={{ margin: 0, paddingLeft: '20px' }}>
-                    <li style={{ marginBottom: '10px' }}>Select your colour and enter your required quantity above.</li>
-                    <li style={{ marginBottom: '10px' }}>Choose any branding options and add-ons you need.</li>
-                    <li style={{ marginBottom: '10px' }}>Click <strong>Place Order</strong> or <strong>Get a Quote</strong> for custom arrangements.</li>
-                    <li style={{ marginBottom: '10px' }}>Upload your logo — our team will create a free digital mockup for your approval.</li>
-                    <li style={{ marginBottom: '10px' }}>Approve the proof and we'll get your order into production.</li>
-                    <li>Your branded products will be delivered to your door.</li>
-                  </ol>
+                  <p style={{ margin: '0 0 20px', color: '#5A5550', fontSize: '14px' }}>Four simple steps from quote to delivery — your branded products, done right.</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
+                    {[
+                      {
+                        num: 1, icon: '🛒', title: 'Place Your Order',
+                        content: (
+                          <div>
+                            <div style={{ background: '#F8F7F4', borderRadius: '6px', padding: '8px 10px', marginBottom: '6px', border: '1px solid #E0DDD7' }}>
+                              <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '2px' }}>Add to Cart</div>
+                              <div style={{ fontSize: '11px', color: '#5A5550' }}>Select colour & qty, pay by EFT or credit card</div>
+                            </div>
+                            <div style={{ textAlign: 'center', fontSize: '11px', color: '#B0AAA3', margin: '4px 0' }}>— or —</div>
+                            <div style={{ background: '#F8F7F4', borderRadius: '6px', padding: '8px 10px', border: '1px solid #E0DDD7' }}>
+                              <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '2px' }}>Get a Quote</div>
+                              <div style={{ fontSize: '11px', color: '#5A5550' }}>For custom requirements or large orders</div>
+                            </div>
+                          </div>
+                        )
+                      },
+                      { num: 2, icon: '🎨', title: 'Artwork & Mockup', desc: 'Upload your logo. Our design team creates a free digital mockup for your approval.' },
+                      { num: 3, icon: '⚙️', title: 'Approve & Produce', desc: 'Review and approve your proof. Once confirmed in writing, production begins immediately.' },
+                      { num: 4, icon: '📦', title: 'Delivery', desc: 'Your branded products are dispatched Australia-wide. $30 flat rate, tracked to your door.' },
+                    ].map(s => (
+                      <div key={s.num} style={{ background: '#F8F7F4', borderRadius: '10px', padding: '14px', border: '1px solid #E0DDD7', borderTop: `3px solid ${GOLD}`, position: 'relative' }}>
+                        <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: GOLD, color: '#fff', fontSize: '10px', fontWeight: 700, borderRadius: '20px', padding: '2px 10px' }}>Step {s.num}</div>
+                        <div style={{ fontSize: '22px', textAlign: 'center', margin: '8px 0 6px' }}>{s.icon}</div>
+                        <div style={{ fontWeight: 700, color: NAVY, fontSize: '13px', textAlign: 'center', marginBottom: '8px', fontFamily: '"DM Sans", sans-serif' }}>{s.title}</div>
+                        {s.content || <p style={{ margin: 0, fontSize: '12px', color: '#5A5550', lineHeight: 1.5, textAlign: 'center' }}>{s.desc}</p>}
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ padding: '14px 16px', background: `${GOLD}15`, borderRadius: '10px', border: `1px solid ${GOLD}40`, display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <span style={{ fontSize: '18px', flexShrink: 0 }}>💬</span>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#3D3A36', lineHeight: 1.6 }}>
+                      Need help? Contact our team at <strong>hello@quirkypromo.com.au</strong> or call <strong>02 9477 4748</strong> — we're here to make the process seamless.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
