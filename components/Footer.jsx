@@ -64,8 +64,6 @@ export default function Footer() {
           <div style={{ color: GOLD, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '16px', fontFamily: '"DM Sans", sans-serif' }}>Support</div>
           {[
             { label: 'FAQ', href: '/faq' },
-            { label: 'Sample Policy', href: '/sample-policy' },
-            { label: 'Shipping', href: '/shipping' },
             { label: 'Refund & Return', href: '/refund-return' },
             { label: 'Track Your Order', href: '/track-order' },
             { label: 'PMS Colour Match', href: '/resources/pms-chart' },
