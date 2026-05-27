@@ -47,11 +47,13 @@ export default function Footer() {
  
         {/* COL 2 - SERVICES */}
         <div>
-          <div style={{ color: GOLD, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '16px', fontFamily: '"DM Sans", sans-serif' }}>Services</div>
+          <div style={{ color: GOLD, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '16px', fontFamily: '"DM Sans", sans-serif' }}>Supply Chain</div>
           {[
-            { label: 'Sourcing & Manufacturing', href: '/services/sourcing' },
-            { label: 'International Logistics', href: '/services/logistics' },
-            { label: 'Made to Order Merch', href: '/services/made-to-order' },
+            { label: 'Sourcing & Manufacturing', href: '/supply-chain/sourcing' },
+            { label: 'Freight & Logistics', href: '/supply-chain/logistics' },
+            { label: 'Quality Inspection', href: '/supply-chain/inspection' },
+            { label: 'Warehousing & Fulfilment', href: '/supply-chain/warehousing' },
+            { label: 'Compliance & Safety', href: '/supply-chain/compliance' },
           ].map(item => (
             <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: '13px', color: '#ffffff', textDecoration: 'none', marginBottom: '10px', lineHeight: '1.4', fontFamily: '"DM Sans", sans-serif' }}>
               {item.label}
