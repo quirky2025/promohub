@@ -30,24 +30,19 @@ const CATEGORIES = [
 
 const WHY_US = [
   {
-    icon: '🏭',
-    title: 'Factory Direct',
-    desc: 'Direct relationships with 200+ factories across Asia. No middlemen — better prices, faster turnaround.',
+    icon: '💰',
+    title: 'Affordable & Transparent',
+    desc: 'No hidden fees. Unit price, GST, and $30 flat shipping are all shown upfront. The more you order, the less you pay — tiered pricing on every product.',
   },
   {
-    icon: '✈️',
-    title: 'Save Up to 50% on Freight',
-    desc: 'First-tier freight partnerships give you significantly better rates on Express, Air and Sea shipping.',
+    icon: '⚡',
+    title: 'Quick & Responsive',
+    desc: 'We reply within 1 hour. Free digital mockup delivered within 2 hours. Standard production 7–10 business days, with rush options available.',
   },
   {
-    icon: '🛡️',
-    title: 'ACCC Compliant',
-    desc: 'All products meet Australian safety standards. Full compliance documentation available on request.',
-  },
-  {
-    icon: '🎨',
-    title: 'Free Digital Proof',
-    desc: 'Every order includes a free mockup from our design team. Production only starts after your approval.',
+    icon: '✅',
+    title: 'Reliable & Trusted',
+    desc: 'Trusted by Mazda, Netflix, NSW Government and more. ACCC compliant products, quality guarantee on every order, and production only starts after your written approval.',
   },
 ];
 
