@@ -50,6 +50,7 @@ export default function AdminDashboard() {
               { label: 'Orders', href: '/admin/orders' },
               { label: 'Quotes', href: '/admin/quotes' },
               { label: 'Products', href: '/admin/products' },
+              { label: 'Sourcing', href: '/admin/sourcing' },
             ].map(item => (
               <Link key={item.href} href={item.href} style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: 500 }}>
                 {item.label}
@@ -82,6 +83,7 @@ export default function AdminDashboard() {
               { label: '📦 View Orders', href: '/admin/orders', color: NAVY },
               { label: '💬 View Quotes', href: '/admin/quotes', color: NAVY },
               { label: '🛍️ Edit Products', href: '/admin/products', color: NAVY },
+              { label: '🏭 Sourcing Requests', href: '/admin/sourcing', color: NAVY },
             ].map(a => (
               <Link key={a.href} href={a.href} style={{ background: a.color, color: '#fff', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: 600 }}>
                 {a.label}
