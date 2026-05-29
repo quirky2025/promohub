@@ -16,7 +16,6 @@ const TABS = ['Description', 'Sample Policy', 'Mockups & Artwork', 'Shipping & D
 
 export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations }) {
   const [selectedColour, setSelectedColour] = useState(null);
-  const [selectedPenColour, setSelectedPenColour] = useState(null);
   const [leftIdx, setLeftIdx] = useState(0);
   const [qty, setQty] = useState(product.min_qty || 48);
   const [qtyInput, setQtyInput] = useState(String(product.min_qty || 48));
@@ -214,79 +213,26 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
             )}
           </div>
 
-          {colours.length > 0 && (() => {
-            // Check if this is a gift set with typed colours
-            const hasTypedColours = colours.some(c => c.type);
-            const notebookColours = hasTypedColours ? colours.filter(c => c.type === 'notebook') : colours;
-            const penColours = hasTypedColours ? colours.filter(c => c.type === 'pen') : [];
-            const isMatchedSet = product.notebook_type === 'gift_set_matched';
-            const isIndependentSet = product.notebook_type === 'gift_set_independent';
-
-            // For matched sets: find matching pen colour by name
-            const selectedNotebookName = selectedColour !== null ? notebookColours[selectedColour]?.name : null;
-            const matchedPenColour = selectedNotebookName
-              ? penColours.find(p => p.name.toLowerCase() === selectedNotebookName.toLowerCase())
-              : null;
-
-            return (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-
-                {/* NOTEBOOK COLOUR */}
-                <div>
-                  <StepLabel num={1} text={isMatchedSet || isIndependentSet ? 'Choose Notebook Colour' : 'Choose Product Colour'} />
-                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
-                    {notebookColours.map((c, i) => (
-                      <div key={i} onClick={() => handleSelectColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
-                        <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
-                          {c.image ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
-                            : c.hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: c.hex }} />
-                            : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
-                        </div>
-                        <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#7A7570', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
-                      </div>
-                    ))}
+          {colours.length > 0 && (
+            <div>
+              <StepLabel num={1} text="Choose Product Colour" />
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
+                {colours.map((c, i) => (
+                  <div key={i} onClick={() => handleSelectColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
+                    <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
+                      {c.image ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                        : c.hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: c.hex }} />
+                        : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
+                    </div>
+                    <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#7A7570', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
                   </div>
-
-                  {/* Matched set: show auto-matched pen colour */}
-                  {isMatchedSet && selectedColour !== null && (
-                    <div style={{ marginTop: '10px', padding: '8px 14px', background: '#F8F7F4', borderRadius: '8px', fontSize: '13px', color: '#5A5550', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span>🖊️</span>
-                      <span>Matching pen colour: <strong style={{ color: NAVY }}>{matchedPenColour?.name || selectedNotebookName}</strong> — automatically paired</span>
-                    </div>
-                  )}
-                  {isMatchedSet && selectedColour === null && penColours.length > 0 && (
-                    <div style={{ marginTop: '10px', fontSize: '12px', color: '#B0AAA3', fontFamily: '"DM Sans", sans-serif' }}>
-                      Pen colour will automatically match your notebook selection.
-                    </div>
-                  )}
-                </div>
-
-                {/* INDEPENDENT SET: separate pen colour selector */}
-                {isIndependentSet && penColours.length > 0 && (
-                  <div>
-                    <StepLabel num={2} text="Choose Pen Colour" />
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
-                      {penColours.map((c, i) => (
-                        <div key={i} onClick={() => setSelectedPenColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
-                          <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedPenColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedPenColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
-                            {c.image ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
-                              : c.hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: c.hex }} />
-                              : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
-                          </div>
-                          <div style={{ fontSize: '10px', color: selectedPenColour === i ? GOLD : '#7A7570', fontWeight: selectedPenColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
+                ))}
               </div>
-            );
-          })()}
-
+            </div>
+          )}
 
           <div>
-            <StepLabel num={colours.length > 0 ? (product.notebook_type === 'gift_set_independent' ? 3 : 2) : 1} text="Enter Quantity" />
+            <StepLabel num={colours.length > 0 ? 2 : 1} text="Enter Quantity" />
             <div style={{ fontSize: '13px', color: '#7A7570', margin: '6px 0 12px' }}>Minimum order: <strong style={{ color: NAVY }}>{product.min_qty} units</strong></div>
             <input
               type="number"
@@ -540,7 +486,7 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                   <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '20px' }}>
                     <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 16px' }}>Specifications</h3>
 
-                    {/* Materials — always shown at top, highlighted */}
+                    {/* Materials highlighted at top */}
                     {product.materials && (
                       <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#F8F7F4', borderRadius: '8px', borderLeft: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Materials</div>
@@ -548,61 +494,12 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                       </div>
                     )}
 
-                    {product.subcategory === 'Notebooks' || product.cover_type || product.ruling ? (
-                      /* ── NOTEBOOKS: grouped collapsible ── */
-                      <>
-                        <SpecGroup title="📓 Notebook" defaultOpen={true}>
-                          {product.capacity && <SpecRow label="Capacity" value={product.capacity} />}
-                          {product.cover_type && <SpecRow label="Cover Type" value={product.cover_type} />}
-                          {product.cover_material && <SpecRow label="Cover Material" value={product.cover_material} />}
-                          {product.page_size && <SpecRow label="Size" value={product.page_size} />}
-                          {product.page_count && <SpecRow label="Pages" value={String(product.page_count)} />}
-                          {product.ruling && <SpecRow label="Ruling" value={product.ruling} />}
-                          {product.paper_material && <SpecRow label="Paper Material" value={product.paper_material} />}
-                          {product.paper_weight && <SpecRow label="Paper Weight" value={product.paper_weight} />}
-                          {product.page_colour && <SpecRow label="Page Colour" value={product.page_colour} />}
-                          {product.page_edges && <SpecRow label="Page Edges" value={product.page_edges} />}
-                          {product.binding && <SpecRow label="Binding" value={product.binding} />}
-                          {product.closure && <SpecRow label="Closure" value={product.closure} />}
-                          {product.ribbon === true && <SpecRow label="Ribbon Marker" value="✓ Included" />}
-                          {product.pen_loop === true && <SpecRow label="Pen Loop" value="✓ Included" />}
-                          {product.accordion_pocket === true && <SpecRow label="Accordion Pocket" value="✓ Included" />}
-                          {product.belly_band === true && <SpecRow label="Belly Band" value="✓ Available" />}
-                          {product.debossing === true && <SpecRow label="Debossing" value="✓ Available" />}
-                        </SpecGroup>
-
-                        {product.includes_pen === true && (
-                          <SpecGroup title="🖊️ Pen" defaultOpen={true}>
-                            {product.pen_type && <SpecRow label="Pen Type" value={product.pen_type} />}
-                            {product.pen_mechanism && <SpecRow label="Mechanism" value={product.pen_mechanism} />}
-                            {product.pen_barrel_finish && <SpecRow label="Barrel Finish" value={product.pen_barrel_finish} />}
-                            {product.pen_trim && <SpecRow label="Trim" value={product.pen_trim} />}
-                            {product.pen_nib_size && <SpecRow label="Nib Size" value={product.pen_nib_size} />}
-                            {product.pen_ink_colour && <SpecRow label="Ink Colour" value={product.pen_ink_colour} />}
-                            {product.pen_refill_colour && <SpecRow label="Refill Colour" value={product.pen_refill_colour} />}
-                            {product.pen_writing_distance && <SpecRow label="Writing Distance" value={product.pen_writing_distance} />}
-                            {product.pen_laser_finish && <SpecRow label="Laser Engrave Finish" value={product.pen_laser_finish} />}
-                            {product.pen_refillable === true && <SpecRow label="Refillable" value="✓ Yes" />}
-                          </SpecGroup>
-                        )}
-
-                        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
-                          {product.includes_gift_box === true && <SpecRow label="Gift Box" value={product.gift_box ? `✓ Included (${product.gift_box})` : '✓ Included'} />}
-                          {product.notebook_includes && <SpecRow label="Includes" value={product.notebook_includes} />}
-                          {product.packing && <SpecRow label="Packaging" value={product.packing} />}
-                          {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
-                          <SpecRow label="Lead Time" value={
-                            product.indent_type === 'indent_air' ? '20 business days (Air Freight)' :
-                            product.indent_type === 'indent_sea' ? '45 business days (Sea Freight)' :
-                            product.lead_time_days ? `${product.lead_time_days} business days` : '7–10 business days after proof approval'
-                          } />
-                          <SpecRow label="SKU" value={product.supplier_sku} />
-                        </SpecGroup>
-                      </>
+                    {product.cover_type || product.ruling ? (
+                      <NotebookSpecs product={product} />
                     ) : (
-                      /* ── ALL OTHER CATEGORIES: flat table with Show More/Less ── */
                       <FlatSpecTable product={product} />
                     )}
+                  </div>
                   {decorations.length > 0 && (
                     <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '20px', marginTop: '20px' }}>
                       <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 16px' }}>Decoration Options</h3>
@@ -1374,11 +1271,82 @@ function PriceRow({ label, value, bold }) {
   );
 }
 
+function SpecGroup({ title, children, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
+  const hasContent = Array.isArray(children) ? children.some(Boolean) : Boolean(children);
+  if (!hasContent) return null;
+  return (
+    <div style={{ marginBottom: '8px', border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
+      <button onClick={() => setOpen(o => !o)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: '#F8F7F4', border: 'none', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: '13px', color: NAVY, textAlign: 'left' }}>
+        <span>{title}</span>
+        <span style={{ fontSize: '16px', color: '#B0AAA3', transition: 'transform .2s', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
+      </button>
+      {open && (
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <tbody>{children}</tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
+function NotebookSpecs({ product }) {
+  const leadTime = product.indent_type === 'indent_air' ? '20 business days (Air Freight)' :
+    product.indent_type === 'indent_sea' ? '45 business days (Sea Freight)' :
+    product.lead_time_days ? `${product.lead_time_days} business days` : '7–10 business days after proof approval';
+  return (
+    <div>
+      <SpecGroup title="📓 Notebook" defaultOpen={true}>
+        {product.cover_type && <SpecRow label="Cover Type" value={product.cover_type} />}
+        {product.cover_material && <SpecRow label="Cover Material" value={product.cover_material} />}
+        {product.page_size && <SpecRow label="Size" value={product.page_size} />}
+        {product.page_count && <SpecRow label="Pages" value={String(product.page_count)} />}
+        {product.ruling && <SpecRow label="Ruling" value={product.ruling} />}
+        {product.paper_material && <SpecRow label="Paper Material" value={product.paper_material} />}
+        {product.paper_weight && <SpecRow label="Paper Weight" value={product.paper_weight} />}
+        {product.page_colour && <SpecRow label="Page Colour" value={product.page_colour} />}
+        {product.page_edges && <SpecRow label="Page Edges" value={product.page_edges} />}
+        {product.binding && <SpecRow label="Binding" value={product.binding} />}
+        {product.closure && <SpecRow label="Closure" value={product.closure} />}
+        {product.ribbon === true && <SpecRow label="Ribbon Marker" value="✓ Included" />}
+        {product.pen_loop === true && <SpecRow label="Pen Loop" value="✓ Included" />}
+        {product.accordion_pocket === true && <SpecRow label="Accordion Pocket" value="✓ Included" />}
+        {product.belly_band === true && <SpecRow label="Belly Band" value="✓ Available" />}
+        {product.debossing === true && <SpecRow label="Debossing" value="✓ Available" />}
+      </SpecGroup>
+      {product.includes_pen === true && (
+        <SpecGroup title="🖊️ Pen" defaultOpen={true}>
+          {product.pen_type && <SpecRow label="Pen Type" value={product.pen_type} />}
+          {product.pen_mechanism && <SpecRow label="Mechanism" value={product.pen_mechanism} />}
+          {product.pen_barrel_finish && <SpecRow label="Barrel Finish" value={product.pen_barrel_finish} />}
+          {product.pen_trim && <SpecRow label="Trim" value={product.pen_trim} />}
+          {product.pen_nib_size && <SpecRow label="Nib Size" value={product.pen_nib_size} />}
+          {product.pen_ink_colour && <SpecRow label="Ink Colour" value={product.pen_ink_colour} />}
+          {product.pen_refill_colour && <SpecRow label="Refill Colour" value={product.pen_refill_colour} />}
+          {product.pen_writing_distance && <SpecRow label="Writing Distance" value={product.pen_writing_distance} />}
+          {product.pen_laser_finish && <SpecRow label="Laser Engrave Finish" value={product.pen_laser_finish} />}
+          {product.pen_refillable === true && <SpecRow label="Refillable" value="✓ Yes" />}
+        </SpecGroup>
+      )}
+      <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+        {product.includes_gift_box === true && <SpecRow label="Gift Box" value={product.gift_box ? `✓ Included (${product.gift_box})` : '✓ Included'} />}
+        {product.notebook_includes && <SpecRow label="Includes" value={product.notebook_includes} />}
+        {product.packing && <SpecRow label="Packaging" value={product.packing} />}
+        {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
+        <SpecRow label="Lead Time" value={leadTime} />
+        <SpecRow label="SKU" value={product.supplier_sku} />
+      </SpecGroup>
+    </div>
+  );
+}
+
 function FlatSpecTable({ product }) {
   const [expanded, setExpanded] = useState(false);
-  const PREVIEW_COUNT = 5;
-
-  const allRows = [
+  const PREVIEW = 5;
+  const leadTime = product.indent_type === 'indent_air' ? '20 business days (Air Freight)' :
+    product.indent_type === 'indent_sea' ? '45 business days (Sea Freight)' :
+    product.lead_time_days ? `${product.lead_time_days} business days` : '7–10 business days after proof approval';
+  const rows = [
     product.dimensions && { label: 'Dimensions', value: product.dimensions },
     product.capacity && { label: 'Capacity', value: product.capacity },
     product.insulation && { label: 'Insulation', value: product.insulation },
@@ -1395,70 +1363,19 @@ function FlatSpecTable({ product }) {
     product.gift_box && product.gift_box !== 'None' && { label: 'Gift Box', value: product.gift_box },
     product.packing && { label: 'Packaging', value: product.packing },
     product.min_qty && { label: 'Min. Order Qty', value: `${product.min_qty} units` },
-    {
-      label: 'Lead Time', value:
-        product.indent_type === 'indent_air' ? '20 business days (Air Freight)' :
-        product.indent_type === 'indent_sea' ? '45 business days (Sea Freight)' :
-        product.lead_time_days ? `${product.lead_time_days} business days` : '7–10 business days after proof approval'
-    },
+    { label: 'Lead Time', value: leadTime },
     { label: 'SKU', value: product.supplier_sku },
   ].filter(Boolean);
-
-  const visibleRows = expanded ? allRows : allRows.slice(0, PREVIEW_COUNT);
-  const hasMore = allRows.length > PREVIEW_COUNT;
-
+  const visible = expanded ? rows : rows.slice(0, PREVIEW);
   return (
     <div>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <tbody>
-          {visibleRows.map((row, i) => (
-            <SpecRow key={i} label={row.label} value={row.value} />
-          ))}
-        </tbody>
+        <tbody>{visible.map((r, i) => <SpecRow key={i} label={r.label} value={r.value} />)}</tbody>
       </table>
-      {hasMore && (
-        <button
-          onClick={() => setExpanded(e => !e)}
-          style={{
-            marginTop: '10px', width: '100%', padding: '9px',
-            background: 'none', border: `1.5px solid #E0DDD7`,
-            borderRadius: '8px', cursor: 'pointer',
-            fontSize: '13px', fontWeight: 600, color: NAVY,
-            fontFamily: '"DM Sans", sans-serif',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-          }}
-        >
-          {expanded ? '▲ Show Less' : `▼ Show More (${allRows.length - PREVIEW_COUNT} more)`}
+      {rows.length > PREVIEW && (
+        <button onClick={() => setExpanded(e => !e)} style={{ marginTop: '10px', width: '100%', padding: '9px', background: 'none', border: '1.5px solid #E0DDD7', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: NAVY, fontFamily: '"DM Sans", sans-serif' }}>
+          {expanded ? '▲ Show Less' : `▼ Show More (${rows.length - PREVIEW} more)`}
         </button>
-      )}
-    </div>
-  );
-}
-
-function SpecGroup({ title, children, defaultOpen = true }) {
-  const [open, setOpen] = useState(defaultOpen);
-  const hasContent = Array.isArray(children)
-    ? children.some(Boolean)
-    : Boolean(children);
-  if (!hasContent) return null;
-  return (
-    <div style={{ marginBottom: '8px', border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-          padding: '10px 16px', background: '#F8F7F4', border: 'none', cursor: 'pointer',
-          fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: '13px', color: NAVY,
-          textAlign: 'left',
-        }}
-      >
-        <span>{title}</span>
-        <span style={{ fontSize: '16px', color: '#B0AAA3', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
-      </button>
-      {open && (
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <tbody>{children}</tbody>
-        </table>
       )}
     </div>
   );
