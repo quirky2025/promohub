@@ -489,8 +489,27 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                       <tbody>
                         {product.materials && <SpecRow label="Materials" value={product.materials} />}
                         {product.dimensions && <SpecRow label="Dimensions" value={product.dimensions} />}
-                        {collectionLabel && <SpecRow label="Collection" value={collectionLabel} />}
+
                         {product.capacity && <SpecRow label="Capacity" value={product.capacity} />}
+                        {/* Notebook specs — only show if data exists */}
+                        {product.cover_type && <SpecRow label="Cover Type" value={product.cover_type} />}
+                        {product.cover_material && <SpecRow label="Cover Material" value={product.cover_material} />}
+                        {product.page_size && <SpecRow label="Size" value={product.page_size} />}
+                        {product.page_count && <SpecRow label="Pages" value={String(product.page_count)} />}
+                        {product.ruling && <SpecRow label="Ruling" value={product.ruling} />}
+                        {product.paper_material && <SpecRow label="Paper Material" value={product.paper_material} />}
+                        {product.paper_weight && <SpecRow label="Paper Weight" value={product.paper_weight} />}
+                        {product.page_colour && <SpecRow label="Page Colour" value={product.page_colour} />}
+                        {product.page_edges && <SpecRow label="Page Edges" value={product.page_edges} />}
+                        {product.binding && <SpecRow label="Binding" value={product.binding} />}
+                        {product.closure && <SpecRow label="Closure" value={product.closure} />}
+                        {product.ribbon === true && <SpecRow label="Ribbon Marker" value="✓ Included" />}
+                        {product.pen_loop === true && <SpecRow label="Pen Loop" value="✓ Included" />}
+                        {product.accordion_pocket === true && <SpecRow label="Accordion Pocket" value="✓ Included" />}
+                        {product.belly_band === true && <SpecRow label="Belly Band" value="✓ Available" />}
+                        {product.debossing === true && <SpecRow label="Debossing" value="✓ Available" />}
+                        {product.includes_pen === true && <SpecRow label="Pen Included" value={[product.pen_type, product.pen_ink_colour ? `${product.pen_ink_colour} ink` : null, product.pen_refillable ? 'Refillable' : null].filter(Boolean).join(' · ') || '✓ Included'} />}
+                        {product.includes_gift_box === true && <SpecRow label="Gift Box" value="✓ Included" />}
                         {product.packing && <SpecRow label="Packaging" value={product.packing} />}
                         {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
                         <SpecRow label="Lead Time" value={
