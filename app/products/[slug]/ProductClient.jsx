@@ -485,42 +485,70 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                   )}
                   <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '20px' }}>
                     <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 16px' }}>Specifications</h3>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                      <tbody>
-                        {product.materials && <SpecRow label="Materials" value={product.materials} />}
-                        {product.dimensions && <SpecRow label="Dimensions" value={product.dimensions} />}
 
-                        {product.capacity && <SpecRow label="Capacity" value={product.capacity} />}
-                        {/* Notebook specs — only show if data exists */}
-                        {product.cover_type && <SpecRow label="Cover Type" value={product.cover_type} />}
-                        {product.cover_material && <SpecRow label="Cover Material" value={product.cover_material} />}
-                        {product.page_size && <SpecRow label="Size" value={product.page_size} />}
-                        {product.page_count && <SpecRow label="Pages" value={String(product.page_count)} />}
-                        {product.ruling && <SpecRow label="Ruling" value={product.ruling} />}
-                        {product.paper_material && <SpecRow label="Paper Material" value={product.paper_material} />}
-                        {product.paper_weight && <SpecRow label="Paper Weight" value={product.paper_weight} />}
-                        {product.page_colour && <SpecRow label="Page Colour" value={product.page_colour} />}
-                        {product.page_edges && <SpecRow label="Page Edges" value={product.page_edges} />}
-                        {product.binding && <SpecRow label="Binding" value={product.binding} />}
-                        {product.closure && <SpecRow label="Closure" value={product.closure} />}
-                        {product.ribbon === true && <SpecRow label="Ribbon Marker" value="✓ Included" />}
-                        {product.pen_loop === true && <SpecRow label="Pen Loop" value="✓ Included" />}
-                        {product.accordion_pocket === true && <SpecRow label="Accordion Pocket" value="✓ Included" />}
-                        {product.belly_band === true && <SpecRow label="Belly Band" value="✓ Available" />}
-                        {product.debossing === true && <SpecRow label="Debossing" value="✓ Available" />}
-                        {product.includes_pen === true && <SpecRow label="Pen Included" value={[product.pen_type, product.pen_ink_colour ? `${product.pen_ink_colour} ink` : null, product.pen_refillable ? 'Refillable' : null].filter(Boolean).join(' · ') || '✓ Included'} />}
-                        {product.includes_gift_box === true && <SpecRow label="Gift Box" value="✓ Included" />}
-                        {product.packing && <SpecRow label="Packaging" value={product.packing} />}
-                        {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
-                        <SpecRow label="Lead Time" value={
-                          product.indent_type === 'indent_air' ? '20 business days (Air Freight)' :
-                          product.indent_type === 'indent_sea' ? '45 business days (Sea Freight)' :
-                          product.lead_time_days ? `${product.lead_time_days} business days` : '7–10 business days after proof approval'
-                        } />
-                        <SpecRow label="SKU" value={product.supplier_sku} />
-                      </tbody>
-                    </table>
-                  </div>
+                    {/* Materials — always shown at top, highlighted */}
+                    {product.materials && (
+                      <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#F8F7F4', borderRadius: '8px', borderLeft: `3px solid ${GOLD}` }}>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Materials</div>
+                        <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{product.materials}</div>
+                      </div>
+                    )}
+
+                    {product.subcategory === 'Notebooks' || product.cover_type || product.ruling ? (
+                      /* ── NOTEBOOKS: grouped collapsible ── */
+                      <>
+                        <SpecGroup title="📓 Notebook" defaultOpen={true}>
+                          {product.capacity && <SpecRow label="Capacity" value={product.capacity} />}
+                          {product.cover_type && <SpecRow label="Cover Type" value={product.cover_type} />}
+                          {product.cover_material && <SpecRow label="Cover Material" value={product.cover_material} />}
+                          {product.page_size && <SpecRow label="Size" value={product.page_size} />}
+                          {product.page_count && <SpecRow label="Pages" value={String(product.page_count)} />}
+                          {product.ruling && <SpecRow label="Ruling" value={product.ruling} />}
+                          {product.paper_material && <SpecRow label="Paper Material" value={product.paper_material} />}
+                          {product.paper_weight && <SpecRow label="Paper Weight" value={product.paper_weight} />}
+                          {product.page_colour && <SpecRow label="Page Colour" value={product.page_colour} />}
+                          {product.page_edges && <SpecRow label="Page Edges" value={product.page_edges} />}
+                          {product.binding && <SpecRow label="Binding" value={product.binding} />}
+                          {product.closure && <SpecRow label="Closure" value={product.closure} />}
+                          {product.ribbon === true && <SpecRow label="Ribbon Marker" value="✓ Included" />}
+                          {product.pen_loop === true && <SpecRow label="Pen Loop" value="✓ Included" />}
+                          {product.accordion_pocket === true && <SpecRow label="Accordion Pocket" value="✓ Included" />}
+                          {product.belly_band === true && <SpecRow label="Belly Band" value="✓ Available" />}
+                          {product.debossing === true && <SpecRow label="Debossing" value="✓ Available" />}
+                        </SpecGroup>
+
+                        {product.includes_pen === true && (
+                          <SpecGroup title="🖊️ Pen" defaultOpen={true}>
+                            {product.pen_type && <SpecRow label="Pen Type" value={product.pen_type} />}
+                            {product.pen_mechanism && <SpecRow label="Mechanism" value={product.pen_mechanism} />}
+                            {product.pen_barrel_finish && <SpecRow label="Barrel Finish" value={product.pen_barrel_finish} />}
+                            {product.pen_trim && <SpecRow label="Trim" value={product.pen_trim} />}
+                            {product.pen_nib_size && <SpecRow label="Nib Size" value={product.pen_nib_size} />}
+                            {product.pen_ink_colour && <SpecRow label="Ink Colour" value={product.pen_ink_colour} />}
+                            {product.pen_refill_colour && <SpecRow label="Refill Colour" value={product.pen_refill_colour} />}
+                            {product.pen_writing_distance && <SpecRow label="Writing Distance" value={product.pen_writing_distance} />}
+                            {product.pen_laser_finish && <SpecRow label="Laser Engrave Finish" value={product.pen_laser_finish} />}
+                            {product.pen_refillable === true && <SpecRow label="Refillable" value="✓ Yes" />}
+                          </SpecGroup>
+                        )}
+
+                        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+                          {product.includes_gift_box === true && <SpecRow label="Gift Box" value={product.gift_box ? `✓ Included (${product.gift_box})` : '✓ Included'} />}
+                          {product.notebook_includes && <SpecRow label="Includes" value={product.notebook_includes} />}
+                          {product.packing && <SpecRow label="Packaging" value={product.packing} />}
+                          {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
+                          <SpecRow label="Lead Time" value={
+                            product.indent_type === 'indent_air' ? '20 business days (Air Freight)' :
+                            product.indent_type === 'indent_sea' ? '45 business days (Sea Freight)' :
+                            product.lead_time_days ? `${product.lead_time_days} business days` : '7–10 business days after proof approval'
+                          } />
+                          <SpecRow label="SKU" value={product.supplier_sku} />
+                        </SpecGroup>
+                      </>
+                    ) : (
+                      /* ── ALL OTHER CATEGORIES: flat table with Show More/Less ── */
+                      <FlatSpecTable product={product} />
+                    )}
                   {decorations.length > 0 && (
                     <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '20px', marginTop: '20px' }}>
                       <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 16px' }}>Decoration Options</h3>
@@ -1288,6 +1316,96 @@ function PriceRow({ label, value, bold }) {
     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: bold ? '14px' : '13px', fontWeight: bold ? 700 : 400, marginBottom: '8px', fontFamily: '"DM Sans", sans-serif' }}>
       <span style={{ color: bold ? 'rgba(255,255,255,.9)' : 'rgba(255,255,255,.5)' }}>{label}</span>
       <span style={{ color: bold ? GOLD : '#fff' }}>{value}</span>
+    </div>
+  );
+}
+
+function FlatSpecTable({ product }) {
+  const [expanded, setExpanded] = useState(false);
+  const PREVIEW_COUNT = 5;
+
+  const allRows = [
+    product.dimensions && { label: 'Dimensions', value: product.dimensions },
+    product.capacity && { label: 'Capacity', value: product.capacity },
+    product.insulation && { label: 'Insulation', value: product.insulation },
+    product.lid_style && { label: 'Lid Style', value: product.lid_style },
+    product.lid_attachment && { label: 'Lid Attachment', value: product.lid_attachment },
+    product.finish && { label: 'Finish', value: product.finish },
+    product.is_bpa_free === true && { label: 'BPA Free', value: '✓ Yes' },
+    product.is_dishwasher_safe === true && { label: 'Dishwasher Safe', value: '✓ Yes' },
+    product.is_hot_suitable === true && { label: 'Hot Drinks', value: '✓ Suitable' },
+    product.keep_hot_hours && { label: 'Keep Hot', value: `${product.keep_hot_hours} hours` },
+    product.keep_cold_hours && { label: 'Keep Cold', value: `${product.keep_cold_hours} hours` },
+    product.carry_handle === true && { label: 'Carry Handle', value: '✓ Included' },
+    product.straw_included === true && { label: 'Straw', value: '✓ Included' },
+    product.gift_box && product.gift_box !== 'None' && { label: 'Gift Box', value: product.gift_box },
+    product.packing && { label: 'Packaging', value: product.packing },
+    product.min_qty && { label: 'Min. Order Qty', value: `${product.min_qty} units` },
+    {
+      label: 'Lead Time', value:
+        product.indent_type === 'indent_air' ? '20 business days (Air Freight)' :
+        product.indent_type === 'indent_sea' ? '45 business days (Sea Freight)' :
+        product.lead_time_days ? `${product.lead_time_days} business days` : '7–10 business days after proof approval'
+    },
+    { label: 'SKU', value: product.supplier_sku },
+  ].filter(Boolean);
+
+  const visibleRows = expanded ? allRows : allRows.slice(0, PREVIEW_COUNT);
+  const hasMore = allRows.length > PREVIEW_COUNT;
+
+  return (
+    <div>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <tbody>
+          {visibleRows.map((row, i) => (
+            <SpecRow key={i} label={row.label} value={row.value} />
+          ))}
+        </tbody>
+      </table>
+      {hasMore && (
+        <button
+          onClick={() => setExpanded(e => !e)}
+          style={{
+            marginTop: '10px', width: '100%', padding: '9px',
+            background: 'none', border: `1.5px solid #E0DDD7`,
+            borderRadius: '8px', cursor: 'pointer',
+            fontSize: '13px', fontWeight: 600, color: NAVY,
+            fontFamily: '"DM Sans", sans-serif',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+          }}
+        >
+          {expanded ? '▲ Show Less' : `▼ Show More (${allRows.length - PREVIEW_COUNT} more)`}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function SpecGroup({ title, children, defaultOpen = true }) {
+  const [open, setOpen] = useState(defaultOpen);
+  const hasContent = Array.isArray(children)
+    ? children.some(Boolean)
+    : Boolean(children);
+  if (!hasContent) return null;
+  return (
+    <div style={{ marginBottom: '8px', border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          padding: '10px 16px', background: '#F8F7F4', border: 'none', cursor: 'pointer',
+          fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: '13px', color: NAVY,
+          textAlign: 'left',
+        }}
+      >
+        <span>{title}</span>
+        <span style={{ fontSize: '16px', color: '#B0AAA3', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
+      </button>
+      {open && (
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <tbody>{children}</tbody>
+        </table>
+      )}
     </div>
   );
 }
