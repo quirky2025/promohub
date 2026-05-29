@@ -494,6 +494,14 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                       </div>
                     )}
 
+                    {/* Dimensions below materials */}
+                    {product.dimensions && (
+                      <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#F8F7F4', borderRadius: '8px', borderLeft: `3px solid #E0DDD7` }}>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Dimensions</div>
+                        <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{product.dimensions}</div>
+                      </div>
+                    )}
+
                     {product.cover_type || product.ruling ? (
                       <NotebookSpecs product={product} />
                     ) : (
@@ -1347,7 +1355,6 @@ function FlatSpecTable({ product }) {
     product.indent_type === 'indent_sea' ? '45 business days (Sea Freight)' :
     product.lead_time_days ? `${product.lead_time_days} business days` : '7–10 business days after proof approval';
   const rows = [
-    product.dimensions && { label: 'Dimensions', value: product.dimensions },
     product.capacity && { label: 'Capacity', value: product.capacity },
     product.insulation && { label: 'Insulation', value: product.insulation },
     product.lid_style && { label: 'Lid Style', value: product.lid_style },
