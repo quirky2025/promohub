@@ -16,6 +16,7 @@ const TABS = ['Description', 'Sample Policy', 'Mockups & Artwork', 'Shipping & D
 
 export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations }) {
   const [selectedColour, setSelectedColour] = useState(null);
+  const [selectedPenColour, setSelectedPenColour] = useState(null);
   const [leftIdx, setLeftIdx] = useState(0);
   const [qty, setQty] = useState(product.min_qty || 48);
   const [qtyInput, setQtyInput] = useState(String(product.min_qty || 48));
@@ -213,26 +214,79 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
             )}
           </div>
 
-          {colours.length > 0 && (
-            <div>
-              <StepLabel num={1} text="Choose Product Colour" />
-              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
-                {colours.map((c, i) => (
-                  <div key={i} onClick={() => handleSelectColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
-                    <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
-                      {c.image ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
-                        : c.hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: c.hex }} />
-                        : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
-                    </div>
-                    <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#7A7570', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
+          {colours.length > 0 && (() => {
+            // Check if this is a gift set with typed colours
+            const hasTypedColours = colours.some(c => c.type);
+            const notebookColours = hasTypedColours ? colours.filter(c => c.type === 'notebook') : colours;
+            const penColours = hasTypedColours ? colours.filter(c => c.type === 'pen') : [];
+            const isMatchedSet = product.notebook_type === 'gift_set_matched';
+            const isIndependentSet = product.notebook_type === 'gift_set_independent';
+
+            // For matched sets: find matching pen colour by name
+            const selectedNotebookName = selectedColour !== null ? notebookColours[selectedColour]?.name : null;
+            const matchedPenColour = selectedNotebookName
+              ? penColours.find(p => p.name.toLowerCase() === selectedNotebookName.toLowerCase())
+              : null;
+
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+                {/* NOTEBOOK COLOUR */}
+                <div>
+                  <StepLabel num={1} text={isMatchedSet || isIndependentSet ? 'Choose Notebook Colour' : 'Choose Product Colour'} />
+                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
+                    {notebookColours.map((c, i) => (
+                      <div key={i} onClick={() => handleSelectColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
+                        <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
+                          {c.image ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                            : c.hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: c.hex }} />
+                            : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
+                        </div>
+                        <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#7A7570', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+
+                  {/* Matched set: show auto-matched pen colour */}
+                  {isMatchedSet && selectedColour !== null && (
+                    <div style={{ marginTop: '10px', padding: '8px 14px', background: '#F8F7F4', borderRadius: '8px', fontSize: '13px', color: '#5A5550', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>🖊️</span>
+                      <span>Matching pen colour: <strong style={{ color: NAVY }}>{matchedPenColour?.name || selectedNotebookName}</strong> — automatically paired</span>
+                    </div>
+                  )}
+                  {isMatchedSet && selectedColour === null && penColours.length > 0 && (
+                    <div style={{ marginTop: '10px', fontSize: '12px', color: '#B0AAA3', fontFamily: '"DM Sans", sans-serif' }}>
+                      Pen colour will automatically match your notebook selection.
+                    </div>
+                  )}
+                </div>
+
+                {/* INDEPENDENT SET: separate pen colour selector */}
+                {isIndependentSet && penColours.length > 0 && (
+                  <div>
+                    <StepLabel num={2} text="Choose Pen Colour" />
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
+                      {penColours.map((c, i) => (
+                        <div key={i} onClick={() => setSelectedPenColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
+                          <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedPenColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedPenColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
+                            {c.image ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                              : c.hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: c.hex }} />
+                              : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
+                          </div>
+                          <div style={{ fontSize: '10px', color: selectedPenColour === i ? GOLD : '#7A7570', fontWeight: selectedPenColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
               </div>
-            </div>
-          )}
+            );
+          })()}
+
 
           <div>
-            <StepLabel num={colours.length > 0 ? 2 : 1} text="Enter Quantity" />
+            <StepLabel num={colours.length > 0 ? (product.notebook_type === 'gift_set_independent' ? 3 : 2) : 1} text="Enter Quantity" />
             <div style={{ fontSize: '13px', color: '#7A7570', margin: '6px 0 12px' }}>Minimum order: <strong style={{ color: NAVY }}>{product.min_qty} units</strong></div>
             <input
               type="number"
