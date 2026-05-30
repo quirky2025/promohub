@@ -75,13 +75,29 @@ const TESTIMONIALS = [
   },
 ];
 
+const CLOUD = 'https://res.cloudinary.com/dyz9r0fm7/image/upload';
+// e_colorize 把 logo 统一染成 NAVY；h_88 统一高度(2x 清晰)
+const TINT = 'e_colorize,co_rgb:1B2A4A,h_88';
+const logoUrl = (vId) => `${CLOUD}/${TINT}/${vId}`;
+ 
 const BRANDS = [
-  'Graceville School', 'ASX Refinitiv', 'Mazda', 'HAO Movement',
-  'Kintsugi Heroes', 'The Marketing Academy', 'Newcastle Grammar',
-  'Ultra Violette', 'Netflix', 'NSW Government', 'Parcelle',
-  'Topshop Topman', 'Daily Press Group',
+  { name: 'Newcastle Grammar School', src: logoUrl('v1780103113/NGS_Logo_formal_horizontal_rev_-_Copy_-_Copy_xnhqwc.webp') },
+  { name: 'NSW Government',            src: logoUrl('v1780103113/nsw-gov-logo_tfwp9l.png') },
+  { name: 'Kintsugi Heroes',          src: logoUrl('v1780103111/KintsugiHeroes_Primary_black_cmmnoe.png') },
+  { name: 'Core Success',             src: logoUrl('v1780102504/CORE_SUCCESS_T_Shirt_drxlq0.svg') },
+  { name: 'Ultra Violette',           src: logoUrl('v1780102503/UV_Master_Logo_440x_-_Copy_ofyma5.svg') },
+  { name: 'Netflix',                  src: logoUrl('v1780102502/Netflix_Logo_PMS_copy_kgit7s.svg') },
+  { name: 'Northern Beaches Council', src: logoUrl('v1780102502/logo-nbc_gasvok.svg') },
+  { name: 'Mazda',                    src: logoUrl('v1780102501/mazda_lvip9m.svg') },
+  { name: 'Hyegrove Willoughby',      src: logoUrl('v1780102498/Hyegrove_Willoughby_Logo_sv8z7n.svg') },
+  { name: 'Foxtel',                   src: logoUrl('v1780102498/foxtel-logo-2020_-_Copy_-_Copy_pwfskq.svg') },
+  { name: 'Barker College',           src: logoUrl('v1780102496/barker-logo-tagline-red_s5paps.svg') },
+  // ⬇️ 文件名无法辨认,确认品牌后改 name；不要就删掉该行
+  { name: '待确认-1', src: logoUrl('v1780103111/Image_20250822153602_83_z2v86l.png') },
+  { name: '待确认-2', src: logoUrl('v1780103113/sitelogo_-_Copy_-_Copy_xsyiod.png') },
+  { name: '待确认-4', src: logoUrl('v1780103111/Image_20250822153700_85_lvahlx.png') },
+  { name: '待确认-6', src: logoUrl('v1780103024/1631335438386_ywn42e.png') },
 ];
-
 function toSlug(name) {
   return name.toLowerCase().replace(/ & /g, '-and-').replace(/&/g, 'and').replace(/ /g, '-');
 }
@@ -304,22 +320,39 @@ export default function Home() {
         </div>
       </div>
 
-      {/* BRANDS */}
-      <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '56px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', textAlign: 'center' }}>
+          {/* BRANDS */}
+      <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '56px 0', overflow: 'hidden' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', textAlign: 'center', padding: '0 40px' }}>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 8px', fontWeight: 600 }}>Trusted By Leading Australian Brands</h2>
           <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 36px' }}>From ASX-listed companies to government departments and fast-growing startups</p>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', justifyContent: 'center', alignItems: 'center' }}>
-            {BRANDS.map(brand => (
-              <div key={brand} style={{ background: BG, border: '1px solid #E0DDD7', borderRadius: '10px', padding: '14px 24px', fontSize: '14px', fontWeight: 600, color: '#5A5550', letterSpacing: '0.3px' }}>
-                {brand}
+        </div>
+ 
+        {/* 横向无限滚动跑马灯 */}
+        <div className="qp-logo-marquee">
+          <div className="qp-logo-track">
+            {[...BRANDS, ...BRANDS].map((brand, i) => (
+              <div key={i} className="qp-logo-item">
+                <img src={brand.src} alt={brand.name}
+                  style={{ height: '40px', width: 'auto', objectFit: 'contain', opacity: 0.85 }} />
               </div>
             ))}
           </div>
-          <p style={{ fontSize: '12px', color: '#B0AAA3', margin: '24px 0 0' }}>
-            + many more Australian businesses, government departments, and education institutions
-          </p>
         </div>
+ 
+        <p style={{ fontSize: '12px', color: '#B0AAA3', margin: '36px 0 0', textAlign: 'center' }}>
+          + many more Australian businesses, government departments, and education institutions
+        </p>
+ 
+        <style>{`
+          .qp-logo-marquee { width:100%; overflow:hidden;
+            -webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);
+            mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent); }
+          .qp-logo-track { display:flex; width:max-content; animation:qp-scroll 45s linear infinite; }
+          .qp-logo-item { flex:0 0 auto; display:flex; align-items:center; justify-content:center; padding:0 44px; }
+          .qp-logo-track:hover { animation-play-state:paused; }
+          @keyframes qp-scroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+          @media (prefers-reduced-motion:reduce){ .qp-logo-track{animation:none;flex-wrap:wrap;justify-content:center;gap:24px} }
+        `}</style>
       </div>
 
       {/* BOTTOM CTA */}
