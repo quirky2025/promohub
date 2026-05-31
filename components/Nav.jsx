@@ -126,7 +126,7 @@ export default function Nav() {
   };
 
   return (
-    <>
+    <div style={{ position: 'sticky', top: 0, zIndex: 100 }}>
       {/* TOP BAR */}
       <div style={{ background: NAVY }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px', height: '128px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '32px' }}>
@@ -172,7 +172,7 @@ export default function Nav() {
       </div>
 
       {/* NAV BAR */}
-      <nav ref={navRef} style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', position: 'sticky', top: 0, zIndex: 100, boxShadow: '0 2px 8px rgba(0,0,0,.06)' }}>
+      <nav ref={navRef} style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', boxShadow: '0 2px 8px rgba(0,0,0,.06)' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 40px', display: 'flex', alignItems: 'center', height: '56px', gap: '4px' }}>
 
           {/* ALL PRODUCTS - Click */}
@@ -298,7 +298,7 @@ export default function Nav() {
           </div>
         )}
       </nav>
-    </>
+    </div>
   );
 }
 
