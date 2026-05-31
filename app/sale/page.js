@@ -26,7 +26,7 @@ function toSlug(name) {
     .replace(/ /g, '-');
 }
 
-export default function EcoPage() {
+export default function SalePage() {
   const [allProducts, setAllProducts] = useState([]);
   const [displayed, setDisplayed] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +45,7 @@ export default function EcoPage() {
       const { data } = await supabase
         .from('products')
         .select('id, name, category, subcategory, is_eco, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
-        .eq('is_eco', true)
+        .eq('is_sale', true)
         .eq('is_published', true);
       if (data) setAllProducts(data);
       setLoading(false);
@@ -124,19 +124,19 @@ export default function EcoPage() {
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
           <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>/</span>
-          <span style={{ color: NAVY, fontWeight: 600 }}>Eco-Friendly</span>
+          <span style={{ color: NAVY, fontWeight: 600 }}>Sale</span>
         </div>
       </div>
 
       {/* HEADER */}
       <div style={{ background: NAVY, padding: '56px 40px', textAlign: 'center' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <div style={{ display: 'inline-block', background: '#2D6A4F', color: '#fff', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '5px 14px', borderRadius: '20px', marginBottom: '18px' }}>🌿 Sustainable Choices</div>
+          <div style={{ display: 'inline-block', background: '#C0392B', color: '#fff', fontSize: '11px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '5px 14px', borderRadius: '20px', marginBottom: '18px' }}>🔥 On Sale Now</div>
           <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '46px', fontWeight: 600, color: '#fff', margin: '0 0 14px', lineHeight: 1.1 }}>
-            Eco-Friendly Promotional Products
+            Sale
           </h1>
           <p style={{ fontSize: '16px', color: 'rgba(255,255,255,.75)', lineHeight: 1.7, margin: 0 }}>
-            Branded merchandise made from recycled, natural, and sustainable materials — perfect for businesses with ESG commitments.
+            Special pricing on selected promotional products — grab these deals while they last.
           </p>
         </div>
       </div>
@@ -146,7 +146,7 @@ export default function EcoPage() {
         {/* FILTER BAR */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', color: NAVY, margin: 0, fontWeight: 600 }}>
-            Eco Products {!loading && <span style={{ fontSize: '15px', color: '#7A7570', fontWeight: 400 }}>({filtered.length})</span>}
+            On Sale {!loading && <span style={{ fontSize: '15px', color: '#7A7570', fontWeight: 400 }}>({filtered.length})</span>}
           </h2>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
             {/* Category 下拉 */}
@@ -174,11 +174,11 @@ export default function EcoPage() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: '#7A7570' }}>Loading eco products…</div>
+          <div style={{ textAlign: 'center', padding: '80px 0', color: '#7A7570' }}>Loading sale products…</div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>🌱</div>
-            <div style={{ fontSize: '16px', fontWeight: 600, color: NAVY, marginBottom: '8px' }}>No products match these filters</div>
+            <div style={{ fontSize: '16px', fontWeight: 600, color: NAVY, marginBottom: '8px' }}>No sale products match these filters</div>
             <button onClick={clearFilters} style={{ background: GOLD, color: '#fff', border: 'none', padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginTop: '8px' }}>Clear Filters</button>
           </div>
         ) : (
