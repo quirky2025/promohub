@@ -31,10 +31,9 @@ const COLLECTIONS = [
 ];
 
 const BRANDS = [
-  'ARCHER', 'BRANDCRAFT', 'CamelBak', 'Impact Aware', 'Keepsake',
-  'LAMY', 'Luigi Bormioli', 'Moleskine', 'NATURA', 'Osprey',
-  'Pierre Cardin', 'Skullcandy', "SOL'S", 'Swiss Peak', 'Titleist',
-  'TRENDSWEAR', 'WNSDY', 'XD Design',
+  'ARCHER', 'CamelBak', 'Frontier', 'Keepsake', 'Luigi Bormioli',
+  'Moleskine', 'NATURA', 'Ocean Bottle', 'Osprey', 'Pierre Cardin',
+  'SPICE', 'Swiss Peak', 'XD Design',
 ];
 
 function toSlug(name) {

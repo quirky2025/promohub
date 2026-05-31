@@ -75,15 +75,33 @@ export default async function ProductPage({ params }) {
   const extraImages = sortedImages.slice(colourCount + 1);
 
   // ── BUILD COLOUR OBJECTS ──
-  const colours = colourCount > 0
-    ? colourData.map((c, i) => ({
-        id: i,
-        name: c.name || `Colour ${i + 1}`,
-        hex: c.hex || null,
-        image: colourImages[i] || null,
-        images: colourImages[i] ? [colourImages[i]] : [],
-      }))
-    : []; // no colours = just show images in thumbnails
+  // If products.colours has image field → use it directly
+  // Otherwise → fall back to product_colours table image order (legacy)
+  const hasInlineImages = colourCount > 0 && colourData.some(c => c.image);
+
+  let colours = [];
+
+  if (hasInlineImages) {
+    // NEW: use image URLs directly from products.colours jsonb
+    colours = colourData.map((c, i) => ({
+      id: i,
+      name: c.name || `Colour ${i + 1}`,
+      hex: c.hex || null,
+      image: c.image || null,
+      images: c.image ? [c.image] : [],
+    }));
+  } else {
+    // LEGACY: derive images from product_colours table sorted images
+    colours = colourCount > 0
+      ? colourData.map((c, i) => ({
+          id: i,
+          name: c.name || `Colour ${i + 1}`,
+          hex: c.hex || null,
+          image: colourImages[i] || null,
+          images: colourImages[i] ? [colourImages[i]] : [],
+        }))
+      : [];
+  }
 
   return (
     <ProductClient
