@@ -25,11 +25,9 @@ const ALL_PRODUCTS = {
 };
 
 const COLLECTIONS = [
-  'Agriculture', 'Automotive', 'Children', 'Conference', 'Custom Shape',
-  'Festivals & Events', 'Full Custom', 'Fundraising', 'Golf', 'Health & Beauty',
-  'Hospitality', 'Logistics', 'Mailable Items', 'Natural', 'Price Buster',
-  'Real Estate', 'Recycled', 'Rest Homes', 'Safety', 'Sports & Fitness',
-  'Summer', 'Trades', 'Tradeshows', 'Travel', 'Winter',
+  'Children', 'Corporate & Business', 'Food & Beverage', 'Fundraising',
+  'Gifts & Promotions', 'Health & Beauty', 'Natural', 'Price Buster',
+  'Sports & Fitness', 'Summer', 'Tradeshow & Events', 'Travel & Outdoor',
 ];
 
 const BRANDS = [
