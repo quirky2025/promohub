@@ -1262,7 +1262,7 @@ function StepLabel({ num, text }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
       <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: GOLD, color: '#fff', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{num}</div>
-      <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', fontWeight: 600, color: NAVY }}>{text}</div>
+      <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', fontWeight: 600, color: NAVY }}>{`Choose ${text}`}</div>
     </div>
   );
 }
