@@ -215,7 +215,7 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
 
           {colours.length > 0 && (
             <div>
-              <StepLabel num={1} text="Choose Product Colour" />
+              <StepLabel num={1} text={product.colour_label || 'Choose Product Colour'} />
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
                 {colours.map((c, i) => (
                   <div key={i} onClick={() => handleSelectColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
