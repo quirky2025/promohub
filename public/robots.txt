@@ -1,2 +1,4 @@
 ﻿User-agent: *
-Disallow: /
+Allow: /
+
+Sitemap: https://quirkypromo.com.au/sitemap.xml
