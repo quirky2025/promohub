@@ -1354,6 +1354,43 @@ function FlatSpecTable({ product }) {
   const leadTime = product.indent_type === 'indent_air' ? '20 business days (Air Freight)' :
     product.indent_type === 'indent_sea' ? '45 business days (Sea Freight)' :
     product.lead_time_days ? `${product.lead_time_days} business days` : '7–10 business days after proof approval';
+
+  // Check if this is Drinkware
+  if (product.category === 'Drinkware' || product.capacity) {
+    return (
+      <div>
+        <SpecGroup title="📊 Product Specs" defaultOpen={true}>
+          {product.capacity && <SpecRow label="Capacity" value={product.capacity} />}
+          {product.insulation && <SpecRow label="Insulation" value={product.insulation} />}
+          {product.finish && <SpecRow label="Finish" value={product.finish} />}
+          {product.is_bpa_free === true && <SpecRow label="BPA Free" value="✓ Yes" />}
+          {product.is_hot_suitable === true && <SpecRow label="Hot Drinks" value="✓ Suitable" />}
+          {product.keep_hot_hours && <SpecRow label="Keep Hot" value={`${product.keep_hot_hours} hours`} />}
+          {product.keep_cold_hours && <SpecRow label="Keep Cold" value={`${product.keep_cold_hours} hours`} />}
+          {product.is_dishwasher_safe === true && <SpecRow label="Dishwasher Safe" value="✓ Yes" />}
+          {product.is_dishwasher_safe === false && <SpecRow label="Dishwasher Safe" value="✗ Hand Wash Only" />}
+          {product.is_carbonated_suitable === true && <SpecRow label="Carbonated Liquids" value="✓ Suitable" />}
+        </SpecGroup>
+
+        <SpecGroup title="🔒 Lid & Handle" defaultOpen={true}>
+          {product.lid_style && <SpecRow label="Lid Style" value={product.lid_style} />}
+          {product.lid_attachment && <SpecRow label="Lid Attachment" value={product.lid_attachment} />}
+          {product.carry_handle === true && <SpecRow label="Carry Handle" value="✓ Included" />}
+          {product.straw_included === true && <SpecRow label="Straw" value="✓ Included" />}
+        </SpecGroup>
+
+        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+          {product.gift_box && product.gift_box !== 'None' && <SpecRow label="Gift Box" value={product.includes_gift_box ? `✓ Included (${product.gift_box})` : `Optional (${product.gift_box})`} />}
+          {product.packing && <SpecRow label="Packaging" value={product.packing} />}
+          {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
+          <SpecRow label="Lead Time" value={leadTime} />
+          <SpecRow label="SKU" value={product.supplier_sku} />
+        </SpecGroup>
+      </div>
+    );
+  }
+
+  // Original flat table for other categories
   const rows = [
     product.capacity && { label: 'Capacity', value: product.capacity },
     product.insulation && { label: 'Insulation', value: product.insulation },
@@ -1373,6 +1410,7 @@ function FlatSpecTable({ product }) {
     { label: 'Lead Time', value: leadTime },
     { label: 'SKU', value: product.supplier_sku },
   ].filter(Boolean);
+
   const visible = expanded ? rows : rows.slice(0, PREVIEW);
   return (
     <div>
@@ -1380,7 +1418,7 @@ function FlatSpecTable({ product }) {
         <tbody>{visible.map((r, i) => <SpecRow key={i} label={r.label} value={r.value} />)}</tbody>
       </table>
       {rows.length > PREVIEW && (
-        <button onClick={() => setExpanded(e => !e)} style={{ marginTop: '10px', width: '100%', padding: '9px', background: 'none', border: '1.5px solid #E0DDD7', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: NAVY, fontFamily: '"DM Sans", sans-serif' }}>
+        <button onClick={() => setExpanded(e => !e)} style={{ marginTop: '10px', width: '100%', padding: '9px', background: 'none', border: '1.5px solid #E0DDD7', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, color: '#1B2A4A', fontFamily: '"DM Sans", sans-serif' }}>
           {expanded ? '▲ Show Less' : `▼ Show More (${rows.length - PREVIEW} more)`}
         </button>
       )}
