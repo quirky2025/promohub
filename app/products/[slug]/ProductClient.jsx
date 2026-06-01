@@ -215,7 +215,7 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
 
           {colours.length > 0 && (
             <div>
-              <StepLabel num={1} text={product.colour_label || 'Choose Product Colour'} />
+              <StepLabel num={1} text={`Choose ${product.colour_label || 'Product Colour'}`} />
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
                 {colours.map((c, i) => (
                   <div key={i} onClick={() => handleSelectColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
@@ -1262,7 +1262,7 @@ function StepLabel({ num, text }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
       <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: GOLD, color: '#fff', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{num}</div>
-      <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', fontWeight: 600, color: NAVY }}>{`Choose ${text}`}</div>
+      <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', fontWeight: 600, color: NAVY }}>{text}</div>
     </div>
   );
 }
