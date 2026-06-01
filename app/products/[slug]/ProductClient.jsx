@@ -464,11 +464,8 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
             </div>
             <div style={{ padding: '24px', fontSize: '14px', lineHeight: '1.8', color: '#3D3A36', fontFamily: '"DM Sans", sans-serif' }}>
               {activeTab === 'Description' && (
-                <div>
-                  {product.seo_description && (
-                    <p style={{ margin: '0 0 20px', fontSize: '15px', color: '#5A5550', lineHeight: 1.7 }}>{product.seo_description}</p>
-                  )}
-                  {product.features && Array.isArray(product.features) && product.features.length > 0 && (
+  <div>
+    {product.features && Array.isArray(product.features) && product.features.length > 0 && (
                     <div style={{ marginBottom: '24px' }}>
                       <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 12px' }}>Features</h3>
                       <ul style={{ margin: 0, paddingLeft: '20px' }}>
