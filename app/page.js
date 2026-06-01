@@ -74,10 +74,10 @@ const TESTIMONIALS = [
     initials: 'M',
   },
    {
-    quote: 'PLACEHOLDER — Adam 的正式文案待邮件回来后替换。Lily and the Quirky team have been fantastic to work with — responsive, reliable, and always delivering quality branded merchandise on time.',
+    quote: 'Hornsby Mazda always receives fantastic service from Lily. She is very quick, efficient, and professional with every order we place. We are consistently impressed by her attention to detail and responsiveness. I would be happy to recommend this company to anyone looking for excellent service.',
     name: 'Adam',
     title: 'Retail Sales Manager',
-    company: 'Mazda',
+    company: ' Hornsby Mazda',
     initials: 'A',
   },
 ];
