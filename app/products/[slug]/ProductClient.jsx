@@ -1365,7 +1365,7 @@ function FlatSpecTable({ product }) {
           {product.keep_hot_hours && <SpecRow label="Keep Hot" value={`${product.keep_hot_hours} hours`} />}
           {product.keep_cold_hours && <SpecRow label="Keep Cold" value={`${product.keep_cold_hours} hours`} />}
           {product.is_dishwasher_safe === true && <SpecRow label="Dishwasher Safe" value="✓ Yes" />}
-{product.is_dishwasher_safe === false && <SpecRow label="Wash Instructions" value="✗ Hand Wash Only" />}
+{product.is_dishwasher_safe === false && <SpecRow label="Wash Instructions" value="✗ Hand Wash Recommended" />}
 {product.is_carbonated_suitable === true && <SpecRow label="Carbonated Liquids" value="✓ Suitable" />}
 {product.is_carbonated_suitable === false && <SpecRow label="Carbonated Liquids" value="✗ Not Suitable" />}
         </SpecGroup>
