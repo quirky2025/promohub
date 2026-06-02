@@ -611,7 +611,7 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
                     {[
                       { icon: '🚚', title: 'Flat Rate Shipping', value: '$30 per domestic address, Australia-wide' },
-                      { icon: '🏭', title: 'Production Time', value: '7–10 business days after proof approval' },
+                      { icon: '🏭', title: 'Production Time', value: '3-7 business days after proof approval' },
                     ].map(c => (
                       <div key={c.title} style={{ padding: '14px', background: '#F8F7F4', borderRadius: '10px', borderTop: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '22px', marginBottom: '6px' }}>{c.icon}</div>
@@ -644,11 +644,11 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                     <div style={{ display: 'flex', gap: '12px' }}>
                       <div style={{ flex: 1, background: '#FFF8E7', borderRadius: '8px', padding: '10px 12px', border: '1px solid #FCD34D' }}>
                         <div style={{ fontSize: '12px', fontWeight: 700, color: '#92400E', marginBottom: '2px' }}>✈️ Indent Air</div>
-                        <div style={{ fontSize: '13px', color: '#92400E' }}>Approx. 20 business days</div>
+                        <div style={{ fontSize: '13px', color: '#92400E' }}>Made to order — enquire for lead time</div>
                       </div>
                       <div style={{ flex: 1, background: '#EFF6FF', borderRadius: '8px', padding: '10px 12px', border: '1px solid #93C5FD' }}>
                         <div style={{ fontSize: '12px', fontWeight: 700, color: '#1E40AF', marginBottom: '2px' }}>🚢 Indent Sea</div>
-                        <div style={{ fontSize: '13px', color: '#1E40AF' }}>Approx. 45 business days</div>
+                        <div style={{ fontSize: '13px', color: '#1E40AF' }}>Made to order — enquire for lead time</div>
                       </div>
                     </div>
                     <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#5A5550' }}>Indent orders are factory-direct and ideal for large volume orders with significant cost savings. Lead times commence after artwork proof approval.</p>
@@ -1296,9 +1296,11 @@ function SpecGroup({ title, children, defaultOpen = true }) {
 }
 
 function NotebookSpecs({ product }) {
-  const leadTime = product.indent_type === 'indent_air' ? '20 business days (Air Freight)' :
-    product.indent_type === 'indent_sea' ? '45 business days (Sea Freight)' :
-    product.lead_time_days ? `${product.lead_time_days} business days` : '7–10 business days after proof approval';
+  const leadTime = product.indent_type === 'indent_air'
+    ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Air Freight, after artwork approval)` : 'Indent order (Air Freight) — enquire for lead time')
+    : product.indent_type === 'indent_sea'
+    ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
+    : 'Production: 3-7 business days (after artwork approval)';
   return (
     <div>
       <SpecGroup title="📓 Notebook" defaultOpen={true}>
@@ -1348,9 +1350,11 @@ function NotebookSpecs({ product }) {
 function FlatSpecTable({ product }) {
   const [expanded, setExpanded] = useState(false);
   const PREVIEW = 5;
-  const leadTime = product.indent_type === 'indent_air' ? '20 business days (Air Freight)' :
-    product.indent_type === 'indent_sea' ? '45 business days (Sea Freight)' :
-    product.lead_time_days ? `${product.lead_time_days} business days` : '7–10 business days after proof approval';
+  const leadTime = product.indent_type === 'indent_air'
+    ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Air Freight, after artwork approval)` : 'Indent order (Air Freight) — enquire for lead time')
+    : product.indent_type === 'indent_sea'
+    ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
+    : 'Production: 3-7 business days (after artwork approval)';
 
   // Check if this is Drinkware
   if (product.category === 'Drinkware' || product.capacity) {
