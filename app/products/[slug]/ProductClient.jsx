@@ -1387,7 +1387,31 @@ function FlatSpecTable({ product }) {
       </div>
     );
   }
+   if (product.category === 'Pens' || product.pen_type || product.pen_mechanism) {
+    return (
+      <div>
+        <SpecGroup title="🖊️ Product Specs" defaultOpen={true}>
+          {product.pen_type && <SpecRow label="Pen Type" value={product.pen_type} />}
+          {product.pen_mechanism && <SpecRow label="Mechanism" value={product.pen_mechanism} />}
+          {product.pen_nib_size && <SpecRow label="Nib Size" value={product.pen_nib_size} />}
+          {product.pen_writing_distance && <SpecRow label="Writing Distance" value={product.pen_writing_distance} />}
+          {product.pen_barrel_finish && <SpecRow label="Barrel Finish" value={product.pen_barrel_finish} />}
+          {product.pen_trim && <SpecRow label="Trim" value={product.pen_trim} />}
+          {product.pen_ink_colour && <SpecRow label="Refill Colour" value={product.pen_ink_colour} />}
+          {product.pen_laser_finish && <SpecRow label="Laser Engrave Finish" value={product.pen_laser_finish} />}
+          {product.pen_refillable === true && <SpecRow label="Refillable" value="✓ Yes" />}
+        </SpecGroup>
 
+        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+          {product.gift_box && product.gift_box !== 'None' && <SpecRow label="Gift Box" value={product.includes_gift_box ? `✓ Included (${product.gift_box})` : `Optional (${product.gift_box})`} />}
+          {product.packing && <SpecRow label="Packaging" value={product.packing} />}
+          {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
+          <SpecRow label="Lead Time" value={leadTime} />
+          <SpecRow label="SKU" value={product.supplier_sku} />
+        </SpecGroup>
+      </div>
+    );
+  }
   // Original flat table for other categories
   const rows = [
     product.capacity && { label: 'Capacity', value: product.capacity },
