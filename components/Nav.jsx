@@ -249,7 +249,7 @@ export default function Nav() {
                   <span style={{ fontSize: '20px' }}>✈️</span>
                   <div>
                     <div style={{ fontWeight: 700, color: NAVY, fontSize: '14px' }}>Indent Air</div>
-                    <div style={{ fontSize: '11px', color: '#7A7570' }}>~25 working days</div>
+                    <div style={{ fontSize: '11px', color: '#7A7570' }}>Made to order</div>
                   </div>
                 </Link>
                 <Link href="/indent/sea"
@@ -261,7 +261,7 @@ export default function Nav() {
                   <span style={{ fontSize: '20px' }}>🚢</span>
                   <div>
                     <div style={{ fontWeight: 700, color: NAVY, fontSize: '14px' }}>Indent Sea</div>
-                    <div style={{ fontSize: '11px', color: '#7A7570' }}>~45 working days</div>
+                    <div style={{ fontSize: '11px', color: '#7A7570' }}>Made to order</div>
                   </div>
                 </Link>
               </div>
