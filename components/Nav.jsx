@@ -10,18 +10,18 @@ const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 
 const ALL_PRODUCTS = {
-  'Apparel': ['Apparel Accessories', 'Jackets', 'Socks & Footwear', 'Sweatshirts'],
-  'Bags': ['Backpacks', 'Cooler Bags', 'Crossbody & Belt Bags', 'Drawstring Bags', 'Duffle Bags', 'Jute Bags', 'Laptop Bags', 'Paper Bags', 'Satchel Bags', 'Tote Bags'],
-  'Business': ['Highlighters', 'ID Holders', 'Lanyards', 'Note Pads', 'Notebooks', 'Stationery', 'Sticky Notes'],
-  'Drinkware': ['Ceramic Mugs', 'Coffee Cups', 'Cups & Tumblers', 'Drink Bottles - Glass', 'Drink Bottles - Metal', 'Drink Bottles - Plastic', 'Drinkware Presentation', 'Flasks', 'Travel Mugs'],
-  'Headwear': ['Beanies', 'Bucket Hats', 'Caps', 'Headwear Accessories', 'Headwear Express'],
-  'Leisure': ['Camping & Outdoors', 'Chairs', 'Coasters', 'Games & Puzzles', 'Home & Living', 'Picnic & BBQ', 'Sport', 'Sunglasses', 'Tools', 'Towels', 'Travel', 'Umbrellas'],
-  'Packaging': ['Gift Boxes', 'Packaging Accessories', 'Ribbons'],
-  'Pens': ['Bamboo', 'Deluxe', 'Highlighter', 'Metal', 'Novelty', 'Paper', 'Plastic', 'Presentation', 'Refills', 'Stylus', 'Wood'],
-  'Personal': ['Candles & Diffusers', 'Hand Sanitiser', 'Lip Balms', 'Lotions & Sunscreens', 'Personal Care'],
-  'Print': ['Pads & Planners', 'Signage'],
-  'Promotion': ['Badges', 'Bottle Openers', 'Fidget Items', 'Key Rings', 'Pet Accessories', 'Promotional', 'Stress Items', 'Stubby & Can Holders', 'Wristbands'],
-  'Technology': ['Charging Cables', 'Earbuds', 'Flash Drives', 'Headphones', 'Mouse Mats', 'Phone Wallets', 'Power Banks', 'Screen Cleaners', 'Sleeves & Cases', 'Speakers', 'Tech Accessories', 'USB Hubs', 'Wireless Chargers'],
+  'Apparel': ['Apparel Accessories', 'Aprons', 'Jackets', 'Polos', 'Shirts', 'Socks & Footwear', 'Sweatpants', 'Sweatshirts', 'T-Shirts', 'Teamwear'],
+  'Bags': ['Backpacks', 'Conference Bags', 'Cooler Bags', 'Cotton Bags', 'Crossbody & Belt Bags', 'Drawstring Bags', 'Dry Bags', 'Duffle Bags', 'Gift Bags', 'Jute Bags', 'Laptop Bags', 'Lunch Bags', 'Paper Bags', 'Satchel Bags', 'Shopping Bags', 'Sport Bags', 'Suitcases', 'Toiletry Bags', 'Tote Bags', 'Wine Carriers'],
+  'Business': ['Colouring Sets', 'Desk Items', 'Highlighters', 'ID Holders', 'Lanyards', 'Note Pads', 'Notebooks', 'Pencil Cases', 'Portfolios', 'Rulers', 'Stationery', 'Sticky Notes'],
+  'Drinkware': ['Ceramic Mugs', 'Coffee Cups', 'Cups & Tumblers', 'Drink Bottles - Glass', 'Drink Bottles - Metal', 'Drink Bottles - Plastic', 'Drinkware Presentation', 'Flasks', 'Glassware', 'Sports Shakers', 'Teaware', 'Travel Mugs'],
+  'Headwear': ['Accessory Sets', 'Beanies', 'Bucket Hats', 'Caps', 'Headwear Accessories', 'Headwear Express', 'Scarves', 'School Headwear', 'Sports Headwear', 'Straw Hats', 'Visors', 'Wide Brims'],
+  'Leisure': ['Blankets', 'Camping & Outdoors', 'Chairs', 'Cheese & Serving Boards', 'Coasters', 'Games & Puzzles', 'Golf', 'Home & Living', 'Models', 'Picnic & BBQ', 'Sport', 'Sports Balls', 'Sunglasses', 'Tools', 'Torches & Lights', 'Towels', 'Travel', 'Umbrellas'],
+  'Packaging': ['Gift Bags', 'Gift Boxes', 'Gift Tubes', 'Packaging Accessories', 'Paper Bags', 'Pouches', 'Ribbons', 'Wine Boxes'],
+  'Pens': ['Bamboo', 'Deluxe', 'Highlighter', 'Metal', 'Novelty', 'Paper', 'Pencil', 'Plastic', 'Presentation', 'Refills', 'Stylus', 'Wood'],
+  'Personal': ['Candles & Diffusers', 'Face Masks', 'First Aid', 'Hand Sanitiser', 'Lip Balms', 'Lotions & Sunscreens', 'Personal Care'],
+  'Print': ['Ad Labels', 'Business Cards', 'Magnets', 'Pads & Planners', 'Resin Labels', 'Ribbons & Accessories', 'Signage'],
+  'Promotion': ['Badges', 'Bar Mats', 'Beach Balls', 'Bottle Openers', 'Confectionery', 'Fidget Items', 'Key Rings', 'Pet Accessories', 'Plush Toys', 'Promotional', 'Stress Items', 'Stubby & Can Holders', 'Temporary Tattoos', 'Wristbands'],
+  'Technology': ['Car USB Chargers', 'Charging Cables', 'Earbuds', 'Flash Drives', 'Headphones', 'Laptop Bags', 'Mouse Mats', 'Phone Wallets', 'Power Banks', 'Screen Cleaners', 'Sleeves & Cases', 'Speakers', 'Stands & Holders', 'Tech Accessories', 'USB Hubs', 'Wireless Chargers'],
 };
 
 const COLLECTIONS = [
