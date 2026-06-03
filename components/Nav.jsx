@@ -17,7 +17,7 @@ const ALL_PRODUCTS = {
   'Headwear': ['Beanies', 'Bucket Hats', 'Caps', 'Headwear Accessories', 'Headwear Express'],
   'Leisure': ['Camping & Outdoors', 'Chairs', 'Coasters', 'Games & Puzzles', 'Home & Living', 'Picnic & BBQ', 'Sport', 'Sunglasses', 'Tools', 'Towels', 'Travel', 'Umbrellas'],
   'Packaging': ['Gift Boxes', 'Packaging Accessories', 'Ribbons'],
-  'Pens': ['Black Refill', 'Metal', 'Novelty', 'Paper', 'Plastic', 'Presentation', 'Refills'],
+  'Pens': ['Bamboo', 'Deluxe', 'Highlighter', 'Metal', 'Novelty', 'Paper', 'Plastic', 'Presentation', 'Refills', 'Stylus', 'Wood'],
   'Personal': ['Candles & Diffusers', 'Hand Sanitiser', 'Lip Balms', 'Lotions & Sunscreens', 'Personal Care'],
   'Print': ['Pads & Planners', 'Signage'],
   'Promotion': ['Badges', 'Bottle Openers', 'Fidget Items', 'Key Rings', 'Pet Accessories', 'Promotional', 'Stress Items', 'Stubby & Can Holders', 'Wristbands'],
