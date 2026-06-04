@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { getCartCount } from '@/lib/cart';
+import QuoteModal from '@/components/QuoteModal';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -56,6 +57,7 @@ const dropdownLinkStyle = {
 
 export default function Nav() {
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -268,6 +270,12 @@ export default function Nav() {
             )}
           </div>
 
+          {/* GET A QUOTE - 金色按钮,右端,打开弹窗 */}
+          <button onClick={() => { setActiveDropdown(null); setQuoteOpen(true); }}
+            style={{ marginLeft: 'auto', background: GOLD, color: '#fff', border: 'none', padding: '10px 22px', borderRadius: '8px', fontSize: '14px', fontWeight: 700, fontFamily: '"DM Sans", sans-serif', cursor: 'pointer', letterSpacing: '0.5px', whiteSpace: 'nowrap', boxShadow: '0 2px 10px rgba(201,169,110,.35)' }}>
+            GET A QUOTE
+          </button>
+
         </div>
 
         {/* ALL PRODUCTS MEGA DROPDOWN */}
@@ -298,6 +306,9 @@ export default function Nav() {
           </div>
         )}
       </nav>
+
+      {/* GET A QUOTE 弹窗 */}
+      <QuoteModal open={quoteOpen} onClose={() => setQuoteOpen(false)} source="nav" />
     </div>
   );
 }
