@@ -1355,7 +1355,31 @@ function FlatSpecTable({ product }) {
     : product.indent_type === 'indent_sea'
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
     : 'Production: 3-7 business days (after artwork approval)';
+// 通用 specs 表(Technology 起所有抓了 specs 的产品)— 必须放在 Drinkware 判断之前
+  const specRows = Array.isArray(product.specs) ? product.specs.filter(s => s && s.name && s.value) : [];
+  if (specRows.length > 0) {
+    return (
+      <div>
+        <SpecGroup title="📊 Product Specs" defaultOpen={true}>
+          {specRows.map((s, i) => (
+            <SpecRow
+              key={i}
+              label={s.name}
+              value={s.value === 'Yes' ? '✓ Yes' : s.value === 'No' ? '✗ No' : s.value}
+            />
+          ))}
+        </SpecGroup>
 
+        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+          {product.gift_box && product.gift_box !== 'None' && <SpecRow label="Gift Box" value={product.includes_gift_box ? `✓ Included (${product.gift_box})` : `Optional (${product.gift_box})`} />}
+          {product.packing && <SpecRow label="Packaging" value={product.packing} />}
+          {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
+          <SpecRow label="Lead Time" value={leadTime} />
+          <SpecRow label="SKU" value={product.supplier_sku} />
+        </SpecGroup>
+      </div>
+    );
+  }
   // Check if this is Drinkware
   if (product.category === 'Drinkware' || product.capacity) {
     return (
