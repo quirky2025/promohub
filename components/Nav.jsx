@@ -5,24 +5,24 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { getCartCount } from '@/lib/cart';
+import { slugify } from '@/lib/slug';
 import QuoteModal from '@/components/QuoteModal';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 
-const ALL_PRODUCTS = {
-  'Apparel': ['Apparel Accessories', 'Aprons', 'Jackets', 'Polos', 'Shirts', 'Socks & Footwear', 'Sweatpants', 'Sweatshirts', 'T-Shirts', 'Teamwear'],
-  'Bags': ['Backpacks', 'Cooler Bags', 'Cotton Bags', 'Crossbody & Belt Bags', 'Drawstring Bags', 'Dry Bags', 'Duffle Bags', 'Gift Bags', 'Jute Bags', 'Laptop Bags', 'Lunch Bags', 'Paper Bags', 'Satchel Bags', 'Shopping Bags', 'Sport Bags', 'Suitcases', 'Toiletry Bags', 'Tote Bags', 'Wine Carriers'],
-  'Business': ['Colouring Sets', 'Desk Items', 'Highlighters', 'ID Holders', 'Lanyards', 'Note Pads', 'Notebooks', 'Pencil Cases', 'Portfolios', 'Rulers', 'Stationery', 'Sticky Notes'],
-  'Drinkware': ['Ceramic Mugs', 'Coffee Cups', 'Cups & Tumblers', 'Drink Bottles - Glass', 'Drink Bottles - Metal', 'Drink Bottles - Plastic', 'Drinkware Presentation', 'Flasks', 'Glassware', 'Sports Shakers', 'Teaware', 'Travel Mugs'],
-  'Headwear': ['Accessory Sets', 'Beanies', 'Bucket Hats', 'Caps', 'Headwear Accessories', 'Headwear Express', 'Scarves', 'School Headwear', 'Sports Headwear', 'Straw Hats', 'Visors', 'Wide Brims'],
-  'Leisure': ['Blankets', 'Camping & Outdoors', 'Chairs', 'Cheese & Serving Boards', 'Coasters', 'Games & Puzzles', 'Golf', 'Home & Living', 'Models', 'Picnic & BBQ', 'Sport', 'Sports Balls', 'Sunglasses', 'Tools', 'Torches & Lights', 'Towels', 'Travel', 'Umbrellas'],
-  'Packaging': ['Gift Bags', 'Gift Boxes', 'Gift Tubes', 'Packaging Accessories', 'Paper Bags', 'Pouches', 'Ribbons', 'Wine Boxes'],
-  'Pens': ['Bamboo', 'Deluxe', 'Highlighter', 'Metal', 'Novelty', 'Paper', 'Pencil', 'Plastic', 'Presentation', 'Refills', 'Stylus', 'Wood'],
-  'Personal': ['Candles & Diffusers', 'Face Masks', 'First Aid', 'Hand Sanitiser', 'Lip Balms', 'Lotions & Sunscreens', 'Personal Care'],
-  'Print': ['Ad Labels', 'Business Cards', 'Magnets', 'Pads & Planners', 'Resin Labels', 'Ribbons & Accessories', 'Signage'],
-  'Promotion': ['Badges', 'Bar Mats', 'Beach Balls', 'Bottle Openers', 'Confectionery', 'Fidget Items', 'Key Rings', 'Pet Accessories', 'Plush Toys', 'Promotional', 'Stress Items', 'Stubby & Can Holders', 'Temporary Tattoos', 'Wristbands'],
-  'Technology': ['Car USB Chargers', 'Charging Cables', 'Earbuds', 'Flash Drives', 'Headphones', 'Laptop Bags', 'Mouse Mats', 'Phone Wallets', 'Power Banks', 'Screen Cleaners', 'Sleeves & Cases', 'Speakers', 'Stands & Holders', 'Tech Accessories', 'USB Hubs', 'Wireless Chargers'],
+// 类目展示顺序(库里查不到的类目按字母序排在后面)
+const CATEGORY_ORDER = [
+  'Bags', 'Drinkware', 'Headwear', 'Pens', 'Technology', 'Business',
+  'Print', 'Personal', 'Packaging', 'Promotion', 'Leisure', 'Apparel',
+];
+
+// 后备清单:仅在数据库视图查询失败时使用,正常情况下菜单完全由库内数据驱动
+const FALLBACK_PRODUCTS = {
+  'Bags': ['Backpacks', 'Cooler Bags', 'Crossbody & Belt Bags', 'Drawstring Bags', 'Dry Bags', 'Duffle Bags', 'Jute Bags', 'Laptop Bags', 'Paper Bags', 'Satchel Bags', 'Toiletry Bags', 'Tote Bags'],
+  'Drinkware': ['Ceramic Mugs', 'Coffee Cups', 'Cups & Tumblers', 'Drink Bottles - Glass', 'Drink Bottles - Metal', 'Drink Bottles - Plastic', 'Flasks', 'Glassware', 'Sports Shakers', 'Travel Mugs'],
+  'Headwear': ['Beanies', 'Bucket Hats', 'Caps', 'Headwear Accessories', 'Headwear Express', 'Scarves', 'Straw Hats', 'Wide Brims'],
+  'Pens': ['Bamboo', 'Deluxe', 'Metal', 'Novelty', 'Paper', 'Plastic', 'Stylus', 'Wood'],
 };
 
 const COLLECTIONS = [
@@ -37,7 +37,8 @@ const BRANDS = [
   'SPICE', 'Swiss Peak', 'XD Design',
 ];
 
-function toSlug(name) {
+// 仅 Collections / Brands 仍用旧式转换(它们的页面按 -and- 往返,且无 " - " 名称,不受本次 bug 影响)
+function legacySlug(name) {
   return name.toLowerCase()
     .replace(/ & /g, '-and-')
     .replace(/&/g, 'and')
@@ -61,8 +62,38 @@ export default function Nav() {
   const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [navProducts, setNavProducts] = useState(FALLBACK_PRODUCTS);
   const router = useRouter();
   const navRef = useRef(null);
+
+  // 动态拉取已发布产品的 category/subcategory,菜单与库内永远同步
+  useEffect(() => {
+    async function fetchNav() {
+      const { data, error } = await supabase
+        .from('nav_subcategories')
+        .select('category, subcategory');
+      if (error || !data || data.length === 0) return; // 失败时保留后备清单
+      const map = {};
+      data.forEach(({ category, subcategory }) => {
+        if (!map[category]) map[category] = new Set();
+        map[category].add(subcategory);
+      });
+      const ordered = {};
+      const cats = Object.keys(map).sort((a, b) => {
+        const ia = CATEGORY_ORDER.indexOf(a);
+        const ib = CATEGORY_ORDER.indexOf(b);
+        if (ia === -1 && ib === -1) return a.localeCompare(b);
+        if (ia === -1) return 1;
+        if (ib === -1) return -1;
+        return ia - ib;
+      });
+      cats.forEach(cat => {
+        ordered[cat] = [...map[cat]].sort((a, b) => a.localeCompare(b));
+      });
+      setNavProducts(ordered);
+    }
+    fetchNav();
+  }, []);
 
   function handleSearch(e) {
     if (e.key === 'Enter' && searchQuery.trim()) {
@@ -194,7 +225,7 @@ export default function Nav() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 24px' }}>
                   {COLLECTIONS.map(col => (
                     <Link key={col}
-                      href={`/collections/${toSlug(col)}`}
+                      href={`/collections/${legacySlug(col)}`}
                       onClick={() => setActiveDropdown(null)}
                       style={dropdownLinkStyle}
                       onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}
@@ -216,7 +247,7 @@ export default function Nav() {
               <div style={{ ...dropPanel, left: 0, minWidth: '220px' }}>
                 {BRANDS.map(brand => (
                   <Link key={brand}
-                    href={`/brands/${toSlug(brand)}`}
+                    href={`/brands/${legacySlug(brand)}`}
                     onClick={() => setActiveDropdown(null)}
                     style={{ ...dropdownLinkStyle, borderBottom: '1px solid #F0EEED' }}
                     onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}
@@ -278,21 +309,21 @@ export default function Nav() {
 
         </div>
 
-        {/* ALL PRODUCTS MEGA DROPDOWN */}
+        {/* ALL PRODUCTS MEGA DROPDOWN — 子类来自数据库,只显示已发布有货的 */}
         {activeDropdown === 'products' && (
           <div style={{ position: 'absolute', top: '56px', left: 0, right: 0, background: '#fff', borderTop: `2px solid ${GOLD}`, borderBottom: '1px solid #E0DDD7', boxShadow: '0 8px 32px rgba(0,0,0,.12)', zIndex: 200, padding: '28px 40px' }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px 40px' }}>
-                {Object.entries(ALL_PRODUCTS).map(([cat, subs]) => (
+                {Object.entries(navProducts).map(([cat, subs]) => (
                   <div key={cat} style={{ marginBottom: '20px' }}>
-                    <Link href={`/category/${toSlug(cat)}`}
+                    <Link href={`/category/${slugify(cat)}`}
                       onClick={() => setActiveDropdown(null)}
                       style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', fontWeight: 700, color: NAVY, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '8px', borderBottom: `1px solid ${GOLD}`, paddingBottom: '4px' }}>
                       {cat}
                     </Link>
                     {subs.map(sub => (
                       <Link key={sub}
-                        href={`/category/${toSlug(cat)}/${toSlug(sub)}`}
+                        href={`/category/${slugify(cat)}/${slugify(sub)}`}
                         onClick={() => setActiveDropdown(null)}
                         style={dropdownLinkStyle}
                         onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}

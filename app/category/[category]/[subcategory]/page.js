@@ -4,27 +4,14 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { findNameBySlug, normalizeSlug, titleFromSlug } from '@/lib/slug';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 const MARGIN = 1.40;
 const PAGE_SIZE = 24;
 
-function fromSlug(slug) {
-  return decodeURIComponent(slug || '')
-    .replace(/-and-/g, ' & ')
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase());
-}
-
-function toSlug(name) {
-  return (name || '').toLowerCase()
-    .replace(/ & /g, '-and-')
-    .replace(/&/g, 'and')
-    .replace(/ /g, '-');
-}
-
-// SEO blurbs per subcategory
+// SEO blurbs per subcategory(键为 normalizeSlug 后的标准形)
 const SUB_SEO = {
   'backpacks': 'Custom printed backpacks are a premium corporate gift and a practical everyday item for staff, students, and event attendees. With large decoration areas and a wide range of styles — from roll-top commuter packs to foldable daypacks — branded backpacks deliver exceptional brand exposure wherever they go.',
   'tote-bags': 'Branded tote bags are one of the most cost-effective promotional items available. Lightweight, reusable, and available in cotton, jute, and non-woven materials, custom printed tote bags are ideal for conferences, retail environments, and eco-conscious campaigns across Australia.',
@@ -35,15 +22,16 @@ const SUB_SEO = {
   'paper-bags': 'Custom printed paper bags add a premium touch to retail, gifting, and event experiences. Available in a range of sizes with ribbon or rope handles, gloss laminated paper bags turn every purchase or gift into a branded moment that your recipients will remember.',
   'drawstring-bags': 'Promotional drawstring bags are a lightweight, affordable option for events, schools, gyms, and charity campaigns. Custom printed in your brand colours, drawstring bags in cotton, fleece, or mesh materials are a practical giveaway that gets regular use.',
   'satchel-bags': 'Custom branded satchel and messenger bags are a smart corporate gift for office workers, conference delegates, and frequent travellers. With document compartments, water bottle holders, and large decoration areas, branded satchels combine function with professional style.',
-  'crossbody-and-belt-bags': 'Promotional crossbody and belt bags are compact, hands-free solutions ideal for events, tourism activations, and youth-focused campaigns. Lightweight and practical, custom printed crossbody bags offer a modern branded gifting option.',
+  'crossbody-belt-bags': 'Promotional crossbody and belt bags are compact, hands-free solutions ideal for events, tourism activations, and youth-focused campaigns. Lightweight and practical, custom printed crossbody bags offer a modern branded gifting option.',
 };
 
 export default function SubcategoryPage() {
   const { category, subcategory } = useParams();
-  const categoryName = fromSlug(category);
-  const subcategoryName = fromSlug(subcategory);
-  const subcategoryKey = (subcategory || '').toLowerCase();
+  const categoryName = titleFromSlug(category);
+  const subcategoryKey = normalizeSlug(subcategory);
 
+  // 显示名:先用 URL 还原的临时名,解析出库内原名后替换(保证 "Drink Bottles - Metal" 原样显示)
+  const [subName, setSubName] = useState(titleFromSlug(subcategory));
   const [allProducts, setAllProducts] = useState([]);
   const [displayed, setDisplayed] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,7 +47,21 @@ export default function SubcategoryPage() {
   useEffect(() => {
     async function fetchProducts() {
       setLoading(true);
-      const { data } = await supabase
+
+      // 第一步:从该类目的库内子类名中,按 slug 匹配出真正的 subcategory 原名
+      // (兼容新链接 drink-bottles-metal 和旧链接 drink-bottles---metal / cups-and-tumblers)
+      let realSub = null;
+      const { data: subs } = await supabase
+        .from('nav_subcategories')
+        .select('subcategory')
+        .ilike('category', categoryName);
+      if (subs && subs.length) {
+        realSub = findNameBySlug(subs.map(s => s.subcategory), subcategory);
+      }
+      if (realSub) setSubName(realSub);
+
+      // 第二步:用解析出的原名精确查询;视图不可用时退回旧式还原(简单名仍可工作)
+      let query = supabase
         .from('products')
         .select(`
           id, name, slug, category, subcategory,
@@ -67,14 +69,20 @@ export default function SubcategoryPage() {
           product_colours ( id, name, hex, images, sort_order ),
           pricing_tiers ( min_qty, base_price )
         `)
-        .ilike('subcategory', subcategoryName)
+        .ilike('category', categoryName)
         .eq('is_published', true)
         .order('name');
+
+      query = realSub
+        ? query.eq('subcategory', realSub)
+        : query.ilike('subcategory', titleFromSlug(subcategory));
+
+      const { data } = await query;
       if (data) setAllProducts(data);
       setLoading(false);
     }
     fetchProducts();
-  }, [subcategory]);
+  }, [category, subcategory]);
 
   const getFiltered = useCallback(() => {
     let result = [...allProducts];
@@ -136,9 +144,9 @@ export default function SubcategoryPage() {
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
           <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href={`/category/${toSlug(categoryName)}`} style={{ color: '#7A7570', textDecoration: 'none' }}>{categoryName}</Link>
+          <Link href={`/category/${category}`} style={{ color: '#7A7570', textDecoration: 'none' }}>{categoryName}</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <span style={{ color: NAVY, fontWeight: 600 }}>{subcategoryName}</span>
+          <span style={{ color: NAVY, fontWeight: 600 }}>{subName}</span>
         </div>
       </div>
 
@@ -146,7 +154,7 @@ export default function SubcategoryPage() {
       <div style={{ background: NAVY, padding: '36px 40px 44px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', fontWeight: 600, margin: '0 0 10px', color: '#fff' }}>
-            Custom {subcategoryName}
+            Custom {subName}
           </h1>
           {seoBlurb && (
             <p style={{ color: 'rgba(255,255,255,.65)', margin: '0', fontSize: '14px', maxWidth: '720px', lineHeight: 1.7 }}>
@@ -205,7 +213,7 @@ export default function SubcategoryPage() {
         <div style={{ flex: 1 }}>
           <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '26px', color: NAVY, margin: 0, fontWeight: 600 }}>
-              {subcategoryName}
+              {subName}
             </h2>
             <span style={{ fontSize: '13px', color: '#7A7570' }}>Showing {displayed.length} of {filtered.length}</span>
           </div>
@@ -297,7 +305,7 @@ export default function SubcategoryPage() {
         <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '56px 40px' }}>
           <div style={{ maxWidth: '900px', margin: '0 auto' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 16px', fontWeight: 600 }}>
-              About Custom Printed {subcategoryName}
+              About Custom Printed {subName}
             </h2>
             <p style={{ fontSize: '15px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 28px' }}>{seoBlurb}</p>
             <div style={{ padding: '20px 24px', background: '#F8F7F4', borderRadius: '12px', borderLeft: `4px solid ${GOLD}` }}>

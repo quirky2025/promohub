@@ -4,25 +4,12 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { slugify, titleFromSlug } from '@/lib/slug';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 const MARGIN = 1.40;
 const PAGE_SIZE = 24;
-
-function toSlug(name) {
-  return (name || '').toLowerCase()
-    .replace(/ & /g, '-and-')
-    .replace(/&/g, 'and')
-    .replace(/ /g, '-');
-}
-
-function fromSlug(slug) {
-  return decodeURIComponent(slug || '')
-    .replace(/-and-/g, ' & ')
-    .replace(/-/g, ' ')
-    .replace(/\b\w/g, c => c.toUpperCase());
-}
 
 // SEO content per category
 const SEO_CONTENT = {
@@ -51,7 +38,7 @@ const SEO_CONTENT = {
 
 export default function CategoryPage() {
   const { category } = useParams();
-  const categoryName = fromSlug(category);
+  const categoryName = titleFromSlug(category);
   const categoryKey = (category || '').toLowerCase();
 
   const [subcategories, setSubcategories] = useState([]);
@@ -76,7 +63,7 @@ export default function CategoryPage() {
       // All products for subcategory grouping
       const { data: allData } = await supabase
         .from('products')
-        .select('id, name, subcategory, is_eco, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
+        .select('id, name, slug, subcategory, is_eco, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
         .ilike('category', categoryName)
         .eq('is_published', true);
 
@@ -185,7 +172,7 @@ export default function CategoryPage() {
           </h2>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px' }}>
             {subcategories.map(sub => (
-              <Link key={sub.name} href={`/category/${toSlug(categoryName)}/${toSlug(sub.name)}`} style={{ textDecoration: 'none' }}>
+              <Link key={sub.name} href={`/category/${category}/${slugify(sub.name)}`} style={{ textDecoration: 'none' }}>
                 <div style={{ background: '#F8F7F4', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', cursor: 'pointer', transition: 'box-shadow .2s, transform .2s' }}
                   onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,.1)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                   onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
@@ -279,7 +266,7 @@ export default function CategoryPage() {
                   const price = getLowestPrice(product);
                   const isHovered = hoveredId === product.id;
                   return (
-                    <Link key={product.id} href={`/products/${toSlug(product.name)}`} style={{ textDecoration: 'none' }}>
+                    <Link key={product.id} href={`/products/${product.slug}`} style={{ textDecoration: 'none' }}>
                       <div
                         onMouseEnter={() => setHoveredId(product.id)}
                         onMouseLeave={() => setHoveredId(null)}
