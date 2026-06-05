@@ -12,7 +12,7 @@ const GOLD = '#C9A96E';
 
 const ALL_PRODUCTS = {
   'Apparel': ['Apparel Accessories', 'Aprons', 'Jackets', 'Polos', 'Shirts', 'Socks & Footwear', 'Sweatpants', 'Sweatshirts', 'T-Shirts', 'Teamwear'],
-  'Bags': ['Backpacks', 'Conference Bags', 'Cooler Bags', 'Cotton Bags', 'Crossbody & Belt Bags', 'Drawstring Bags', 'Dry Bags', 'Duffle Bags', 'Gift Bags', 'Jute Bags', 'Laptop Bags', 'Lunch Bags', 'Paper Bags', 'Satchel Bags', 'Shopping Bags', 'Sport Bags', 'Suitcases', 'Toiletry Bags', 'Tote Bags', 'Wine Carriers'],
+  'Bags': ['Backpacks', 'Cooler Bags', 'Cotton Bags', 'Crossbody & Belt Bags', 'Drawstring Bags', 'Dry Bags', 'Duffle Bags', 'Gift Bags', 'Jute Bags', 'Laptop Bags', 'Lunch Bags', 'Paper Bags', 'Satchel Bags', 'Shopping Bags', 'Sport Bags', 'Suitcases', 'Toiletry Bags', 'Tote Bags', 'Wine Carriers'],
   'Business': ['Colouring Sets', 'Desk Items', 'Highlighters', 'ID Holders', 'Lanyards', 'Note Pads', 'Notebooks', 'Pencil Cases', 'Portfolios', 'Rulers', 'Stationery', 'Sticky Notes'],
   'Drinkware': ['Ceramic Mugs', 'Coffee Cups', 'Cups & Tumblers', 'Drink Bottles - Glass', 'Drink Bottles - Metal', 'Drink Bottles - Plastic', 'Drinkware Presentation', 'Flasks', 'Glassware', 'Sports Shakers', 'Teaware', 'Travel Mugs'],
   'Headwear': ['Accessory Sets', 'Beanies', 'Bucket Hats', 'Caps', 'Headwear Accessories', 'Headwear Express', 'Scarves', 'School Headwear', 'Sports Headwear', 'Straw Hats', 'Visors', 'Wide Brims'],

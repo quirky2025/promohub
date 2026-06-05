@@ -1,0 +1,206 @@
+/* app/admin/sourcing/sourcing.css
+   Sourcing 模块专用样式 · 深蓝 #1B2A4A + 金 #C9A45C
+   类名全部带 srcx- 前缀,不会影响你现有页面 */
+
+.srcx-wrap {
+  --navy: #1b2a4a;
+  --navy-2: #25365c;
+  --gold: #c9a45c;
+  --gold-soft: #f3e8d3;
+  --bg: #faf8f4;
+  --line: #e6e1d8;
+  --ink: #2b2b2b;
+  --muted: #8a8577;
+  --green: #2e7d52;
+  --red: #b4413e;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* 子导航 */
+.srcx-subnav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 22px;
+  padding-bottom: 0;
+}
+.srcx-subnav .srcx-subnav-title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 20px;
+  color: var(--navy);
+  margin-right: 18px;
+  padding-bottom: 10px;
+}
+.srcx-subnav a {
+  display: inline-block;
+  padding: 8px 14px 10px;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 600;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+}
+.srcx-subnav a:hover { color: var(--navy); }
+.srcx-subnav a.active {
+  color: var(--navy);
+  border-bottom-color: var(--gold);
+}
+
+/* 卡片 / 区块 */
+.srcx-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+.srcx-card h2 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 17px;
+  color: var(--navy);
+  margin: 0 0 12px;
+}
+.srcx-h1 {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 24px;
+  color: var(--navy);
+  margin: 0 0 16px;
+}
+
+/* 表格 */
+.srcx-table { width: 100%; border-collapse: collapse; }
+.srcx-table th {
+  text-align: left;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 600;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line);
+}
+.srcx-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid #f1ede5;
+  vertical-align: top;
+}
+.srcx-table tr:hover td { background: #fcfaf6; }
+.srcx-num { font-variant-numeric: tabular-nums; }
+
+/* 表单 */
+.srcx-grid { display: grid; gap: 12px; }
+.srcx-grid-2 { grid-template-columns: 1fr 1fr; }
+.srcx-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+@media (max-width: 700px) {
+  .srcx-grid-2, .srcx-grid-3 { grid-template-columns: 1fr; }
+}
+.srcx-field label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.srcx-field input,
+.srcx-field select,
+.srcx-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d8d2c6;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  background: #fff;
+  color: var(--ink);
+}
+.srcx-field input:focus,
+.srcx-field select:focus,
+.srcx-field textarea:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(201, 164, 92, 0.25);
+}
+
+/* 按钮 */
+.srcx-btn {
+  display: inline-block;
+  border: none;
+  border-radius: 7px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--navy);
+  color: #fff;
+  text-decoration: none;
+}
+.srcx-btn:hover { background: var(--navy-2); }
+.srcx-btn:disabled { opacity: 0.5; cursor: default; }
+.srcx-btn-gold { background: var(--gold); color: #fff; }
+.srcx-btn-gold:hover { background: #b8924b; }
+.srcx-btn-ghost {
+  background: #fff;
+  color: var(--navy);
+  border: 1px solid #d8d2c6;
+}
+.srcx-btn-ghost:hover { background: #f7f4ee; }
+.srcx-btn-sm { padding: 5px 12px; font-size: 13px; }
+.srcx-link {
+  color: var(--gold);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+.srcx-link:hover { text-decoration: underline; }
+.srcx-link-danger { color: var(--red); }
+
+/* 徽章 */
+.srcx-badge {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--gold-soft);
+  color: #8a6d34;
+}
+.srcx-badge-navy { background: #e3e8f2; color: var(--navy); }
+.srcx-badge-green { background: #e2efe7; color: var(--green); }
+
+/* 其它 */
+.srcx-muted { color: var(--muted); font-size: 13px; }
+.srcx-error { color: var(--red); font-size: 13px; margin: 8px 0; }
+.srcx-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.srcx-empty {
+  border: 1px dashed #d8d2c6;
+  border-radius: 10px;
+  padding: 36px;
+  text-align: center;
+  color: var(--muted);
+}
+.srcx-best { background: #e9f5ee !important; font-weight: 700; }
+.srcx-divider { border: none; border-top: 1px solid var(--line); margin: 16px 0; }
+.srcx-tag-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.srcx-landed {
+  background: #f7f4ee;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-top: 10px;
+}
+.srcx-landed table td, .srcx-landed table th { padding: 5px 10px; }

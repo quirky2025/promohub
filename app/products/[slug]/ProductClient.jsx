@@ -1419,6 +1419,9 @@ function FlatSpecTable({ product }) {
   // Original flat table for other categories
   const rows = [
     product.capacity && { label: 'Capacity', value: product.capacity },
+    product.closure && { label: 'Closure', value: product.closure },
+    product.brand && { label: 'Brand', value: product.brand },
+    product.is_eco === true && { label: 'Eco-Friendly', value: '✓ Yes' },
     product.insulation && { label: 'Insulation', value: product.insulation },
     product.lid_style && { label: 'Lid Style', value: product.lid_style },
     product.lid_attachment && { label: 'Lid Attachment', value: product.lid_attachment },
