@@ -1,9 +1,10 @@
 // app/api/admin/sourcing/freight/route.js
 import { NextResponse } from 'next/server';
-import { sourcingDb, isAdmin, unauthorized } from '@/lib/sourcingDb';
+import { sourcingDb } from '@/lib/sourcingDb';
+import { isAdmin, unauthorized } from '@/lib/adminAuth';
 
 export async function GET(request) {
-  if (!isAdmin(request)) return unauthorized();
+  if (!(await isAdmin(request))) return unauthorized();
   const db = sourcingDb();
   const { data, error } = await db
     .from('freight_rates')
@@ -21,7 +22,7 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  if (!isAdmin(request)) return unauthorized();
+  if (!(await isAdmin(request))) return unauthorized();
   const body = await request.json();
   if (!body.channel) return NextResponse.json({ error: '缺少渠道' }, { status: 400 });
   if (!body.rate_per_kg)
@@ -46,7 +47,7 @@ export async function POST(request) {
 }
 
 export async function DELETE(request) {
-  if (!isAdmin(request)) return unauthorized();
+  if (!(await isAdmin(request))) return unauthorized();
   const { searchParams } = new URL(request.url);
   const id = searchParams.get('id');
   if (!id) return NextResponse.json({ error: '缺少 id' }, { status: 400 });
