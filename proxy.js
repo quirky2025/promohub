@@ -1,8 +1,7 @@
-// proxy.js —— 整体替换根目录现有文件(升级:加管理员身份校验)
-// 规则:进 /admin 和 /api/admin 必须满足两个条件——
-//   ① 已通过 Supabase 登录(session 真实有效)
-//   ② 登录邮箱 === 环境变量 ADMIN_EMAIL(管理员白名单,只有你)
-// 以后客户注册的任何账号,即使登录了也进不了后台。
+// proxy.js —— 整体替换(升级:强制两步验证)
+// 放行条件:① Supabase 登录有效 ② 邮箱 === ADMIN_EMAIL
+//          ③ 若账号已绑定验证器,本次会话必须完成 6 位码验证(AAL2)
+// 例外:/admin/mfa-setup 允许 ①+② 即可进入(否则第一次没法绑定)。
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
@@ -36,17 +35,30 @@ export default async function proxy(request) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // 管理员判定:已登录 且 邮箱在白名单
   const adminEmail = (process.env.ADMIN_EMAIL || '').trim().toLowerCase();
   const isAdminUser =
     !!user && !!adminEmail && (user.email || '').toLowerCase() === adminEmail;
+
+  // 两步验证状态:nextLevel=aal2 表示账号绑了验证器;current 不到 aal2 = 还没输码
+  let mfaPending = false;
+  if (isAdminUser) {
+    const { data: aal } =
+      await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    mfaPending =
+      !!aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2';
+  }
 
   const isLoginPage = pathname.startsWith('/admin/login');
   const isLogoutApi = pathname.startsWith('/api/admin/logout');
   const isAdminApi = pathname.startsWith('/api/admin');
 
-  // 不是管理员(未登录,或登录的是普通客户账号):API 给 401,页面送去登录页
-  if (!isAdminUser && !isLoginPage && !isLogoutApi) {
+  // 完整管理员 = 白名单 + (没绑验证器,或已输码)
+  // 说明:第一次绑定不需要例外——还没绑验证器时 mfaPending 为 false,
+  // 管理员可正常进入 /admin/mfa-setup 完成绑定;
+  // 绑定之后,密码对了但没输码(mfaPending=true)则任何后台页都进不去。
+  const fullyAuthed = isAdminUser && !mfaPending;
+
+  if (!fullyAuthed && !isLoginPage && !isLogoutApi) {
     if (isAdminApi) {
       return new Response(JSON.stringify({ error: 'unauthorized' }), {
         status: 401,
@@ -56,8 +68,7 @@ export default async function proxy(request) {
     return NextResponse.redirect(new URL('/admin/login', request.url));
   }
 
-  // 管理员已登录还访问登录页:直接送进后台
-  if (isAdminUser && isLoginPage) {
+  if (fullyAuthed && isLoginPage) {
     return NextResponse.redirect(new URL('/admin', request.url));
   }
 

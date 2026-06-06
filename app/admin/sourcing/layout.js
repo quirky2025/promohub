@@ -20,6 +20,7 @@ export default function SourcingLayout({ children }) {
   return (
     <div className="srcx-wrap">
       <nav className="srcx-subnav">
+        <Link href="/admin" style={{ color: 'var(--gold)', fontWeight: 700, textDecoration: 'none', paddingBottom: 10, marginRight: 4 }}>← 后台首页</Link>
         <span className="srcx-subnav-title">Sourcing</span>
         {TABS.map((t) => {
           const active = t.exact
