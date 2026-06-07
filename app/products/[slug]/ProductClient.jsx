@@ -23,6 +23,20 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   const [similarProducts, setSimilarProducts] = useState([]);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [cartAdded, setCartAdded] = useState(false);
+  // ===== Apparel size matrix =====
+  const sizeList = Array.isArray(product.size_chart?.sizes) ? product.size_chart.sizes : [];
+  const hasSizes = sizeList.length > 0;
+  const [sizeQty, setSizeQty] = useState({});
+  const sizeTotal = sizeList.reduce((sum, s) => sum + (parseInt(sizeQty[s]) || 0), 0);
+
+  function handleSizeQty(size, val) {
+    const n = Math.max(0, parseInt(val) || 0);
+    setSizeQty(prev => ({ ...prev, [size]: n }));
+  }
+
+  useEffect(() => {
+    if (hasSizes) { setQty(sizeTotal); setQtyInput(String(sizeTotal)); }
+  }, [sizeTotal, hasSizes]);
   const router = useRouter();
 const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
   const addonDecorations = (decorations || []).filter(d => d.type === 'addon');
@@ -140,6 +154,7 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
       image: bigImage || mainImage,
       colour: selectedColour !== null ? colours[selectedColour]?.name : '',
       qty,
+      sizeBreakdown: hasSizes ? Object.fromEntries(sizeList.filter(s => (sizeQty[s] || 0) > 0).map(s => [s, sizeQty[s]])) : null,
       unitPrice,
       subtotal: Math.round(unitPrice * qty * 100) / 100,
       shipping: SHIPPING,
@@ -231,23 +246,46 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
             </div>
           )}
 
-          <div>
-            <StepLabel num={colours.length > 0 ? 2 : 1} text="Enter Quantity" />
-            <div style={{ fontSize: '13px', color: '#7A7570', margin: '6px 0 12px' }}>Minimum order: <strong style={{ color: NAVY }}>{product.min_qty} units</strong></div>
-            <input
-              type="number"
-              value={qtyInput}
-              onChange={e => handleQtyChange(e.target.value)}
-              min={product.min_qty}
-              placeholder={`Min. ${product.min_qty}`}
-              style={{
-                width: '160px', padding: '10px 16px', border: '1.5px solid #C8C4BC',
-                borderRadius: '8px', fontSize: '18px', fontWeight: 600,
-                fontFamily: '"DM Sans", sans-serif', color: NAVY, outline: 'none',
-                boxSizing: 'border-box',
-              }}
-            />
-            {!isValidQty && <div style={{ fontSize: '12px', color: '#C0392B', marginTop: '8px' }}>Minimum order quantity is {product.min_qty} units.</div>}
+      <div>
+            <StepLabel num={colours.length > 0 ? 2 : 1} text={hasSizes ? 'Enter Quantity per Size' : 'Enter Quantity'} />
+            {hasSizes ? (
+              <div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', margin: '12px 0 10px' }}>
+                  {sizeList.map(s => (
+                    <div key={s} style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '4px', fontFamily: '"DM Sans", sans-serif' }}>{s}</div>
+                      <input type="number" min="0" value={sizeQty[s] ?? ''} placeholder="0"
+                        onChange={e => handleSizeQty(s, e.target.value)}
+                        style={{ width: '58px', padding: '8px 4px', border: '1.5px solid #C8C4BC', borderRadius: '8px', fontSize: '15px', fontWeight: 600, textAlign: 'center', fontFamily: '"DM Sans", sans-serif', outline: 'none', background: '#fff', color: NAVY, boxSizing: 'border-box' }} />
+                    </div>
+                  ))}
+                </div>
+                <div style={{ fontSize: '13px', color: '#7A7570' }}>
+                  Total: <strong style={{ color: sizeTotal >= (product.min_qty || 1) ? NAVY : '#C0392B', fontSize: '16px' }}>{sizeTotal} units</strong>
+                  <span style={{ marginLeft: '10px' }}>(Minimum order: {product.min_qty} units)</span>
+                </div>
+                {!isValidQty && <div style={{ fontSize: '12px', color: '#C0392B', marginTop: '8px' }}>Minimum order quantity is {product.min_qty} units across all sizes.</div>}
+                <SizeChartTable sizeChart={product.size_chart} />
+              </div>
+            ) : (
+              <>
+                <div style={{ fontSize: '13px', color: '#7A7570', margin: '6px 0 12px' }}>Minimum order: <strong style={{ color: NAVY }}>{product.min_qty} units</strong></div>
+                <input
+                  type="number"
+                  value={qtyInput}
+                  onChange={e => handleQtyChange(e.target.value)}
+                  min={product.min_qty}
+                  placeholder={`Min. ${product.min_qty}`}
+                  style={{
+                    width: '160px', padding: '10px 16px', border: '1.5px solid #C8C4BC',
+                    borderRadius: '8px', fontSize: '18px', fontWeight: 600,
+                    fontFamily: '"DM Sans", sans-serif', color: NAVY, outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                />
+                {!isValidQty && <div style={{ fontSize: '12px', color: '#C0392B', marginTop: '8px' }}>Minimum order quantity is {product.min_qty} units.</div>}
+              </>
+            )}
           </div>
 
           {pricingTiers.length > 0 && (
@@ -1492,3 +1530,27 @@ const qtyBtnStyle = { width: '38px', height: '42px', background: '#F8F7F4', bord
 const thStyle = { fontSize: '11px', fontWeight: 600, padding: '8px 10px', textAlign: 'center', color: '#7A7570', borderBottom: '1px solid #E0DDD7', fontFamily: '"DM Sans", sans-serif' };
 const tdStyle = { padding: '8px 10px', fontSize: '13px', textAlign: 'center', fontFamily: '"DM Sans", sans-serif' };
 const tdLabelStyle = { padding: '8px 12px', fontSize: '12px', color: '#7A7570', fontWeight: 500, background: '#FAFAF8', fontFamily: '"DM Sans", sans-serif' };
+function SizeChartTable({ sizeChart }) {
+  if (!sizeChart || !Array.isArray(sizeChart.sizes) || !sizeChart.sizes.length) return null;
+  return (
+    <div style={{ border: '1.5px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '14px' }}>
+      <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+        Size Chart {sizeChart.unit ? `(${sizeChart.unit})` : ''}
+      </div>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead><tr>
+          <th style={{ ...thStyle, textAlign: 'left' }}>Measurement</th>
+          {sizeChart.sizes.map(s => <th key={s} style={thStyle}>{s}</th>)}
+        </tr></thead>
+        <tbody>
+          {(sizeChart.measurements || []).map((m, i) => (
+            <tr key={i} style={{ background: i % 2 ? '#FAFAF8' : '#fff' }}>
+              <td style={tdLabelStyle}>{m.name}</td>
+              {(m.values || []).map((v, j) => <td key={j} style={tdStyle}>{v}</td>)}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
