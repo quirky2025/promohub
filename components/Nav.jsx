@@ -311,7 +311,7 @@ export default function Nav() {
 
         {/* ALL PRODUCTS MEGA DROPDOWN — 子类来自数据库,只显示已发布有货的 */}
         {activeDropdown === 'products' && (
-          <div style={{ position: 'absolute', top: '56px', left: 0, right: 0, background: '#fff', borderTop: `2px solid ${GOLD}`, borderBottom: '1px solid #E0DDD7', boxShadow: '0 8px 32px rgba(0,0,0,.12)', zIndex: 200, padding: '28px 40px' }}>
+          <div style={{ position: 'absolute', top: '56px', left: 0, right: 0, background: '#fff', borderTop: `2px solid ${GOLD}`, borderBottom: '1px solid #E0DDD7', boxShadow: '0 8px 32px rgba(0,0,0,.12)', zIndex: 200, padding: '28px 40px', maxHeight: 'calc(100vh - 72px)', overflowY: 'auto' }}>
             <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px 40px' }}>
                 {Object.entries(navProducts).map(([cat, subs]) => (
