@@ -32,7 +32,7 @@ const COLLECTIONS = [
 ];
 
 const BRANDS = [
-  'ARCHER', 'CamelBak', 'Frontier', 'Keepsake', 'Luigi Bormioli',
+  'ARCHER', 'BRANDCRAFT', 'CamelBak', 'Frontier', 'Keepsake', 'Luigi Bormioli',
   'Moleskine', 'NATURA', 'Ocean Bottle', 'Osprey', 'Pierre Cardin',
   'SPICE', 'Swiss Peak', 'XD Design',
 ];
