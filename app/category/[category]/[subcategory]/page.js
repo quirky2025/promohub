@@ -78,7 +78,28 @@ export default function SubcategoryPage() {
         : query.ilike('subcategory', titleFromSlug(subcategory));
 
       const { data } = await query;
-      if (data) setAllProducts(data);
+
+      // 第三步:副牌命中(extra_subcategories 含本子类名;跨类目生效,主户口在别处的产品也能在此货架出现)
+      const subForExtra = realSub || titleFromSlug(subcategory);
+      const { data: extraData } = await supabase
+        .from('products')
+        .select(`
+          id, name, slug, category, subcategory,
+          min_qty, is_eco, is_published,
+          product_colours ( id, name, hex, images, sort_order ),
+          pricing_tiers ( min_qty, base_price )
+        `)
+        .contains('extra_subcategories', JSON.stringify([subForExtra]))
+        .eq('is_published', true)
+        .order('name');
+
+      // 合并去重(主归属优先,副牌补充)
+      const merged = [...(data || [])];
+      const seen = new Set(merged.map(p => p.id));
+      (extraData || []).forEach(p => { if (!seen.has(p.id)) merged.push(p); });
+      merged.sort((a, b) => a.name.localeCompare(b.name));
+
+      setAllProducts(merged);
       setLoading(false);
     }
     fetchProducts();
