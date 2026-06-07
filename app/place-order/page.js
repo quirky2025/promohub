@@ -300,7 +300,7 @@ export default function PlaceOrderPage() {
   if (!loaded) return null;
 
   return (
-    <div style={{ background: '#F8F7F4', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
+    <div style={{ background: '#fff', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
 
       {/* Breadcrumb */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>

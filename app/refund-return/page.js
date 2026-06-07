@@ -73,7 +73,7 @@ const sections = [
 
 export default function RefundReturnPage() {
   return (
-    <div style={{ background: BG, fontFamily: '"DM Sans", sans-serif', minHeight: '100vh' }}>
+    <div style={{ background: '#fff', fontFamily: '"DM Sans", sans-serif', minHeight: '100vh' }}>
 
       {/* HERO */}
       <div style={{ background: NAVY, padding: '80px 40px', textAlign: 'center' }}>

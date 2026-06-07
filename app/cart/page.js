@@ -43,7 +43,7 @@ export default function CartPage() {
 
   if (cart.length === 0) {
     return (
-      <div style={{ fontFamily: '"DM Sans", sans-serif', background: BG, minHeight: '100vh' }}>
+      <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', minHeight: '100vh' }}>
         <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
           <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
             <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
@@ -66,7 +66,7 @@ export default function CartPage() {
   }
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', background: BG, minHeight: '100vh' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', minHeight: '100vh' }}>
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>

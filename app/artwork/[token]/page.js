@@ -110,7 +110,7 @@ export default function ArtworkPage() {
   );
 
   if (done === true) return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#F8F7F4', fontFamily: '"DM Sans", sans-serif', padding: '40px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#fff', fontFamily: '"DM Sans", sans-serif', padding: '40px' }}>
       <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '500px', width: '100%', textAlign: 'center' }}>
         <div style={{ fontSize: '64px', marginBottom: '16px' }}>✅</div>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 12px' }}>Artwork Approved!</h1>
@@ -127,7 +127,7 @@ export default function ArtworkPage() {
   );
 
   if (done === 'changes') return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#F8F7F4', fontFamily: '"DM Sans", sans-serif', padding: '40px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#fff', fontFamily: '"DM Sans", sans-serif', padding: '40px' }}>
       <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '500px', width: '100%', textAlign: 'center' }}>
         <div style={{ fontSize: '64px', marginBottom: '16px' }}>📝</div>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 12px' }}>Changes Requested</h1>
@@ -142,7 +142,7 @@ export default function ArtworkPage() {
   );
 
   if (artwork?.status === 'approved') return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#F8F7F4', fontFamily: '"DM Sans", sans-serif', padding: '40px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', background: '#fff', fontFamily: '"DM Sans", sans-serif', padding: '40px' }}>
       <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '500px', width: '100%', textAlign: 'center' }}>
         <div style={{ fontSize: '64px', marginBottom: '16px' }}>✅</div>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 12px' }}>Already Approved</h1>
@@ -156,7 +156,7 @@ export default function ArtworkPage() {
   const isChangesRequested = artwork?.status === 'changes_requested';
 
   return (
-    <div style={{ background: '#F8F7F4', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
+    <div style={{ background: '#fff', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
       <div style={{ background: NAVY, padding: '20px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', fontWeight: 600, color: '#fff', letterSpacing: '2px' }}>
           QUIRKY<span style={{ color: GOLD }}>PROMO</span>

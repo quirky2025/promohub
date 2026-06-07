@@ -50,7 +50,7 @@ export default function AccountPage() {
 
   if (loading) {
     return (
-      <div style={{ background: '#F8F7F4', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ background: '#fff', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ fontFamily: '"DM Sans", sans-serif', color: '#7A7570' }}>Loading...</div>
       </div>
     );
@@ -60,7 +60,7 @@ export default function AccountPage() {
   const userCompany = user?.user_metadata?.company || '';
 
   return (
-    <div style={{ background: '#F8F7F4', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
+<div style={{ background: '#fff', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
 
       {/* Breadcrumb */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>

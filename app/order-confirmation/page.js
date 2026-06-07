@@ -15,7 +15,7 @@ function OrderConfirmationContent() {
   const isPaid = method === 'stripe';
 
   return (
-    <div style={{ background: '#F8F7F4', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+    <div style={{ background: '#fff', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
       <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '600px', width: '100%', textAlign: 'center', boxShadow: '0 8px 32px rgba(27,42,74,0.08)' }}>
 
         {/* Success icon */}

@@ -57,7 +57,7 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <div style={{ background: '#F8F7F4', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+      <div style={{ background: '#fff', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
         <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '440px', width: '100%', textAlign: 'center', boxShadow: '0 8px 32px rgba(27,42,74,0.08)' }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 12px' }}>Check your email!</h2>
@@ -73,7 +73,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div style={{ background: '#F8F7F4', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', fontFamily: '"DM Sans", sans-serif' }}>
+    <div style={{ background: '#fff', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', fontFamily: '"DM Sans", sans-serif' }}>
       <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '440px', width: '100%', boxShadow: '0 8px 32px rgba(27,42,74,0.08)' }}>
 
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>

@@ -63,7 +63,7 @@ export default function AdminQuotesPage() {
   const fmt = v => v != null ? `$${Number(v).toFixed(2)}` : '—';
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', background: BG, minHeight: '100vh' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', minHeight: '100vh' }}>
 
       {/* HEADER */}
       <div style={{ background: NAVY, padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

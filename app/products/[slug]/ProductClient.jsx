@@ -169,7 +169,7 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
   }
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#F8F7F4', color: '#1a1a1a' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', color: '#1a1a1a' }}>
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
@@ -236,7 +236,7 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
                   <div key={i} onClick={() => handleSelectColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
                     <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
                       {c.image ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
-                        : c.hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: c.hex }} />
+                        : c.hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: c.hex, border: '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
                         : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
                     </div>
                     <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#7A7570', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>

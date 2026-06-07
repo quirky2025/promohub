@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
       <body style={{
         margin: 0,
         fontFamily: '"DM Sans", -apple-system, BlinkMacSystemFont, sans-serif',
-        background: '#F8F7F4',
+        background: '#fff',
         color: '#1B2A4A',
         WebkitFontSmoothing: 'antialiased',
         MozOsxFontSmoothing: 'grayscale',

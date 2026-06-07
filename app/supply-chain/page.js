@@ -67,7 +67,7 @@ const STEPS = [
 
 export default function SupplyChainPage() {
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', background: BG, color: '#1a1a1a' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', color: '#1a1a1a' }}>
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>

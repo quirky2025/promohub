@@ -131,7 +131,7 @@ function SearchResults() {
 
 export default function SearchPage() {
   return (
-    <div style={{ background: '#F8F7F4', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
+    <div style={{ background: '#fff', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
       <Suspense fallback={
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px', textAlign: 'center', color: '#7A7570' }}>
           <p style={{ fontSize: '16px' }}>Loading...</p>

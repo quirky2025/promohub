@@ -298,7 +298,7 @@ export default function PMSColourMatchPage() {
   }
 
   return (
-    <div style={{ background: BG, fontFamily: '"DM Sans", sans-serif', minHeight: '100vh' }}>
+    <div style={{ background: '#fff', fontFamily: '"DM Sans", sans-serif', minHeight: '100vh' }}>
       <div style={{ background: NAVY, padding: '80px 40px', textAlign: 'center' }}>
         <div style={{ maxWidth: '700px', margin: '0 auto' }}>
           <div style={{ width: '48px', height: '2px', background: GOLD, margin: '0 auto 32px' }} />

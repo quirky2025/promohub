@@ -223,7 +223,7 @@ export default function Home() {
   }
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', background: BG, color: '#1a1a1a' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', color: '#1a1a1a' }}>
 
       {/* ============ HERO (新版: 浅色背景图 + 左侧文案) ============ */}
       <div className="qp-hero" style={{

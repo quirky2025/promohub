@@ -7,7 +7,7 @@ const BG = '#F8F7F4';
 
 export default function CompliancePage() {
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', background: BG }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff' }}>
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>

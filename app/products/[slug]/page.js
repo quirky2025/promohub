@@ -6,6 +6,16 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
+const COLOUR_SWATCH = {
+  'White': '#FFFFFF', 'Black': '#1A1A1A', 'Yellow': '#FFD400', 'Orange': '#FF7A00',
+  'Red': '#D62828', 'Bright Green': '#3DBE29', 'Dark Green': '#1B5E20',
+  'Light Blue': '#7EC8E3', 'Dark Blue': '#1F4E9C', 'Navy': '#1B2A4A',
+  'Grey': '#9E9E9E', 'Heather Grey': '#B8B8B8', 'Burgundy': '#7B1E3B',
+  'Olive': '#6B6B2A', 'Bottle Green': '#0B5345', 'Teal': '#0F7E7E',
+  'Slate Blue': '#5C6BC0', 'Royal Blue': '#2E5BFF', 'French Navy': '#22356F',
+  'Carbon': '#3C3C3C', 'Purple': '#7B2CBF', 'Pink': '#F06292', 'Green': '#2E8B57',
+};
+
 function extractImgNum(url) {
   const match = url.match(/-(\d+)\.\w+$/);
   return match ? parseInt(match[1]) : 999;
@@ -36,9 +46,8 @@ export default async function ProductPage({ params }) {
   const decorations = [...(product.decoration_options || [])].sort((a, b) => a.sort_order - b.sort_order);
 
   // ── GET COLOUR NAMES ──
-  // Try products.colours jsonb field first
-  // Format: [{"name": "Navy", "hex": "#000080"}, {"name": "Black", "hex": "#000000"}]
   let colourData = [];
+  let fromColoursField = false;
   if (product.colours) {
     if (Array.isArray(product.colours)) {
       colourData = product.colours;
@@ -46,8 +55,9 @@ export default async function ProductPage({ params }) {
       try { colourData = JSON.parse(product.colours); } catch (e) {}
     }
   }
+  fromColoursField = colourData.length > 0;
+  colourData = colourData.map(c => ({ ...c, hex: c.hex || COLOUR_SWATCH[c.name] || '' }));
 
-  // Fallback: use product_colours table records (if multiple and not all "Default")
   if (colourData.length === 0) {
     const pcRecords = [...(product.product_colours || [])].sort((a, b) => a.sort_order - b.sort_order);
     const nonDefault = pcRecords.filter(pc => pc.name && pc.name !== 'Default');
@@ -67,41 +77,17 @@ export default async function ProductPage({ params }) {
   const sortedImages = [...rawImages].sort((a, b) => extractImgNum(a) - extractImgNum(b));
 
   // ── SPLIT IMAGES ──
-  // [0] = main hero image
-  // [1..colourCount] = one image per colour
-  // [colourCount+1..] = packaging/feature images
+  // [0] = main hero image; [1..colourCount] = per-colour pool; rest = extras
   const mainImage = sortedImages[0] || null;
   const colourImages = sortedImages.slice(1, colourCount + 1);
   const extraImages = sortedImages.slice(colourCount + 1);
 
   // ── BUILD COLOUR OBJECTS ──
-  // If products.colours has image field → use it directly
-  // Otherwise → fall back to product_colours table image order (legacy)
-  const hasInlineImages = colourCount > 0 && colourData.some(c => c.image);
-
-  let colours = [];
-
-  if (hasInlineImages) {
-    // NEW: use image URLs directly from products.colours jsonb
-    colours = colourData.map((c, i) => ({
-      id: i,
-      name: c.name || `Colour ${i + 1}`,
-      hex: c.hex || null,
-      image: c.image || null,
-      images: c.image ? [c.image] : [],
-    }));
-  } else {
-    // LEGACY: derive images from product_colours table sorted images
-    colours = colourCount > 0
-      ? colourData.map((c, i) => ({
-          id: i,
-          name: c.name || `Colour ${i + 1}`,
-          hex: c.hex || null,
-          image: colourImages[i] || null,
-          images: colourImages[i] ? [colourImages[i]] : [],
-        }))
-      : [];
-  }
+  // priority: inline image on colour entry > image pool slice > none (swatch fallback in UI)
+  let colours = colourData.map((c, i) => {
+    const img = colourImages[i] || c.image || (Array.isArray(c.images) && c.images[0]) || null;
+    return { id: i, name: c.name || `Colour ${i + 1}`, hex: c.hex || null, image: img, images: img ? [img] : [] };
+  });
 
   return (
     <ProductClient

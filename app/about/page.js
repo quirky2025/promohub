@@ -6,7 +6,7 @@ const BG = '#F8F7F4';
 
 export default function AboutPage() {
   return (
-    <div style={{ background: BG, fontFamily: '"DM Sans", sans-serif' }}>
+    <div style={{ background: '#fff', fontFamily: '"DM Sans", sans-serif' }}>
 
       {/* HERO */}
       <div style={{ background: NAVY, padding: '100px 40px', textAlign: 'center' }}>

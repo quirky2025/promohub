@@ -111,7 +111,7 @@ Neither party shall be liable for any default due to any act of God, war, terror
 
 export default function SalesTermsPage() {
   return (
-    <div style={{ background: BG, fontFamily: '"DM Sans", sans-serif', minHeight: '100vh' }}>
+    <div style={{ background: '#fff', fontFamily: '"DM Sans", sans-serif', minHeight: '100vh' }}>
 
       {/* HERO */}
       <div style={{ background: NAVY, padding: '80px 40px', textAlign: 'center' }}>

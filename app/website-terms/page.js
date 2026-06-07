@@ -87,7 +87,7 @@ Please review our Privacy Policy at quirkypromo.com.au/privacy for details on ho
 
 export default function WebsiteTermsPage() {
   return (
-    <div style={{ background: BG, fontFamily: '"DM Sans", sans-serif', minHeight: '100vh' }}>
+    <div style={{ background: '#fff', fontFamily: '"DM Sans", sans-serif', minHeight: '100vh' }}>
 
       {/* HERO */}
       <div style={{ background: NAVY, padding: '80px 40px', textAlign: 'center' }}>
