@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { addToCart } from '@/lib/cart';
+import { getColourHex } from '@/lib/colourSwatch';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -14,8 +15,9 @@ const SHIPPING = 30;
 const SETUP_FEE = 40;
 const TABS = ['Description', 'Sample Policy', 'Mockups & Artwork', 'Shipping & Delivery', 'Ordering Process'];
 
-export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations }) {
+export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations, secondaryColours }) {
   const [selectedColour, setSelectedColour] = useState(null);
+  const [selectedSecondary, setSelectedSecondary] = useState(0);
   const [leftIdx, setLeftIdx] = useState(0);
   const [qty, setQty] = useState(product.min_qty || 48);
   const [qtyInput, setQtyInput] = useState(String(product.min_qty || 48));
@@ -37,8 +39,12 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   useEffect(() => {
     if (hasSizes) { setQty(sizeTotal); setQtyInput(String(sizeTotal)); }
   }, [sizeTotal, hasSizes]);
+  useEffect(() => {
+    if (secondaryColours?.options?.length) setSelectedSecondary(0);
+  }, [secondaryColours]);
   const router = useRouter();
-const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
+  const hasSecondary = Boolean(secondaryColours?.options?.length);
+  const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
   const addonDecorations = (decorations || []).filter(d => d.type === 'addon');
   const [addonState, setAddonState] = useState(() => {
     const s = {};
@@ -95,6 +101,15 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
   const collectionLabel = product.collection
     ? (Array.isArray(product.collection) ? product.collection.join(', ') : product.collection)
     : null;
+  const mainColourStep = hasSecondary ? 2 : 1;
+  const qtyStep = (colours.length > 0 ? 2 : 1) + (hasSecondary ? 1 : 0);
+  const brandingStep = (colours.length > 0 ? 3 : 2) + (hasSecondary ? 1 : 0);
+  const addonStep = (colours.length > 0 ? (brandingDecorations.length > 0 ? 4 : 3) : (brandingDecorations.length > 0 ? 3 : 2)) + (hasSecondary ? 1 : 0);
+
+  function resolveColourHex(colour) {
+    if (!colour) return '';
+    return colour.hex || getColourHex(colour.name) || '';
+  }
 
   function handleQtyChange(val) {
     setQtyInput(val);
@@ -146,13 +161,23 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
         setupQty: addonState[d.id]?.setupQty || 1,
       }));
 
+    const selectedSecondaryOption = hasSecondary ? secondaryColours.options[selectedSecondary] : null;
+    const selectedPrimaryName = selectedColour !== null ? colours[selectedColour]?.name : '';
+    const colourText = selectedPrimaryName
+      ? selectedSecondaryOption
+        ? `${selectedPrimaryName} / ${secondaryColours.label}: ${selectedSecondaryOption.name}`
+        : selectedPrimaryName
+      : selectedSecondaryOption
+        ? `${secondaryColours.label}: ${selectedSecondaryOption.name}`
+        : '';
+
     const item = {
       productId: product.id,
       productName: product.name,
       productSlug: product.slug,
       sku: product.supplier_sku,
       image: bigImage || mainImage,
-      colour: selectedColour !== null ? colours[selectedColour]?.name : '',
+      colour: colourText,
       qty,
       sizeBreakdown: hasSizes ? Object.fromEntries(sizeList.filter(s => (sizeQty[s] || 0) > 0).map(s => [s, sizeQty[s]])) : null,
       unitPrice,
@@ -228,26 +253,49 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
             )}
           </div>
 
+          {hasSecondary && (
+            <div>
+              <StepLabel num={1} text={`Choose ${secondaryColours.label}`} />
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
+                {secondaryColours.options.map((c, i) => {
+                  const hex = resolveColourHex(c);
+                  return (
+                    <div key={i} onClick={() => setSelectedSecondary(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
+                      <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedSecondary === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedSecondary === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
+                        {(c.image || (Array.isArray(c.images) && c.images[0])) ? <img src={c.image || c.images[0]} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                          : hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: hex, border: hex === '#FFFFFF' ? '1px solid #E0DDD7' : '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
+                          : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
+                      </div>
+                      <div style={{ fontSize: '10px', color: selectedSecondary === i ? GOLD : '#7A7570', fontWeight: selectedSecondary === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {colours.length > 0 && (
             <div>
-              <StepLabel num={1} text={`Choose ${product.colour_label || 'Product Colour'}`} />
+              <StepLabel num={mainColourStep} text={`Choose ${product.colour_label || 'Product Colour'}`} />
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
-                {colours.map((c, i) => (
-                  <div key={i} onClick={() => handleSelectColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
-                    <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
-                      {c.image ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
-                        : c.hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: c.hex, border: '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
-                        : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
+                {colours.map((c, i) => {
+                  const hex = resolveColourHex(c);
+                  return (
+                    <div key={i} onClick={() => handleSelectColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
+                      <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
+                        {c.image ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                          : hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: hex, border: hex === '#FFFFFF' ? '1px solid #E0DDD7' : '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
+                          : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
+                      </div>
+                      <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#7A7570', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
                     </div>
-                    <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#7A7570', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
 
       <div>
-            <StepLabel num={colours.length > 0 ? 2 : 1} text={hasSizes ? 'Enter Quantity per Size' : 'Enter Quantity'} />
+            <StepLabel num={qtyStep} text={hasSizes ? 'Enter Quantity per Size' : 'Enter Quantity'} />
             {hasSizes ? (
               <div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', margin: '12px 0 10px' }}>
@@ -314,7 +362,7 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
 
           {brandingDecorations.length > 0 && (
             <div>
-              <StepLabel num={colours.length > 0 ? 3 : 2} text="Add Branding Options" />
+              <StepLabel num={brandingStep} text="Add Branding Options" />
               <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
                 <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Branding & Decoration</div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -372,7 +420,7 @@ const brandingDecorations = (decorations || []).filter(d => d.type !== 'addon');
 
           {addonDecorations.length > 0 && (
             <div>
-              <StepLabel num={colours.length > 0 ? (brandingDecorations.length > 0 ? 4 : 3) : (brandingDecorations.length > 0 ? 3 : 2)} text="Select Add-on Options" />
+              <StepLabel num={addonStep} text="Select Add-on Options" />
               <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
                 <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Add-ons & Extras</div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
