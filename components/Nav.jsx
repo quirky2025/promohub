@@ -47,7 +47,8 @@ function legacySlug(name) {
 
 const dropdownLinkStyle = {
   fontFamily: '"DM Sans", sans-serif',
-  fontSize: '14px',
+  fontSize: '16px',
+  fontWeight: 600,
   color: '#111',
   textDecoration: 'none',
   display: 'block',
@@ -229,7 +230,7 @@ export default function Nav() {
                       href={`/collections/${legacySlug(col)}`}
                       onClick={() => setActiveDropdown(null)}
                       style={dropdownLinkStyle}
-                      onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}
+                      onMouseEnter={e => { e.currentTarget.style.background = GOLD; e.currentTarget.style.color = NAVY; }}
                       onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; }}
                     >{col}</Link>
                   ))}
@@ -251,7 +252,7 @@ export default function Nav() {
                     href={`/brands/${legacySlug(brand)}`}
                     onClick={() => setActiveDropdown(null)}
                     style={{ ...dropdownLinkStyle, borderBottom: '1px solid #F0EEED' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}
+                    onMouseEnter={e => { e.currentTarget.style.background = GOLD; e.currentTarget.style.color = NAVY; }}
                     onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; }}
                   >{brand}</Link>
                 ))}
@@ -315,7 +316,7 @@ export default function Nav() {
           const cats = Object.keys(navProducts);
           const current = activeCat && navProducts[activeCat] ? activeCat : cats[0];
           return (
-            <div style={{ position: 'absolute', top: '56px', left: 0, right: 0, background: '#fff', borderTop: `2px solid ${GOLD}`, borderBottom: '1px solid #E0DDD7', boxShadow: '0 8px 32px rgba(0,0,0,.12)', zIndex: 200 }}>
+            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', borderTop: `2px solid ${GOLD}`, borderBottom: '1px solid #E0DDD7', boxShadow: '0 8px 32px rgba(0,0,0,.12)', zIndex: 200 }}>
               <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', height: '440px' }}>
 
               {/* 左栏:类目列表 */}
@@ -323,10 +324,10 @@ export default function Nav() {
                   {cats.map(cat => (
                     <div key={cat}
                       onMouseEnter={() => setActiveCat(cat)}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 24px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '16px', fontWeight: 700, color: current === cat ? GOLD : NAVY, background: current === cat ? '#fff' : 'transparent', borderLeft: current === cat ? `3px solid ${GOLD}` : '3px solid transparent', transition: 'all .12s' }}>
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 24px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '16px', fontWeight: 700, color: NAVY, background: current === cat ? GOLD : 'transparent', borderLeft: current === cat ? `3px solid ${NAVY}` : '3px solid transparent', transition: 'all .12s' }}>
                       <Link href={`/category/${slugify(cat)}`} onClick={() => setActiveDropdown(null)}
                         style={{ color: 'inherit', textDecoration: 'none', flex: 1 }}>{cat}</Link>
-                      <span style={{ color: GOLD, fontSize: '12px' }}>›</span>
+                      <span style={{ color: current === cat ? NAVY : GOLD, fontSize: '12px' }}>›</span>
                     </div>
                   ))}
                 </div>
@@ -346,8 +347,8 @@ export default function Nav() {
                         href={`/category/${slugify(current)}/${slugify(sub)}`}
                         onClick={() => setActiveDropdown(null)}
                         style={{ ...dropdownLinkStyle, padding: '9px 10px', borderRadius: '6px' }}
-                        onMouseEnter={e => { e.currentTarget.style.background = '#FDF8F0'; e.currentTarget.style.color = GOLD; e.currentTarget.style.fontWeight = '700'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; e.currentTarget.style.fontWeight = '400'; }}
+                        onMouseEnter={e => { e.currentTarget.style.background = GOLD; e.currentTarget.style.color = NAVY; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; }}
                       >{sub}</Link>
                     ))}
                   </div>
