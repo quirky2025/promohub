@@ -58,6 +58,7 @@ const dropdownLinkStyle = {
 
 export default function Nav() {
   const [activeDropdown, setActiveDropdown] = useState(null);
+  const [activeCat, setActiveCat] = useState(null);
   const [quoteOpen, setQuoteOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
@@ -310,34 +311,53 @@ export default function Nav() {
         </div>
 
         {/* ALL PRODUCTS MEGA DROPDOWN — 子类来自数据库,只显示已发布有货的 */}
-        {activeDropdown === 'products' && (
-          <div style={{ position: 'absolute', top: '56px', left: 0, right: 0, background: '#fff', borderTop: `2px solid ${GOLD}`, borderBottom: '1px solid #E0DDD7', boxShadow: '0 8px 32px rgba(0,0,0,.12)', zIndex: 200, padding: '28px 40px', maxHeight: 'calc(100vh - 72px)', overflowY: 'auto' }}>
-            <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px 40px' }}>
-                {Object.entries(navProducts).map(([cat, subs]) => (
-                  <div key={cat} style={{ marginBottom: '20px' }}>
-                    <Link href={`/category/${slugify(cat)}`}
-                      onClick={() => setActiveDropdown(null)}
-                      style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', fontWeight: 700, color: NAVY, textDecoration: 'none', textTransform: 'uppercase', letterSpacing: '1px', display: 'block', marginBottom: '8px', borderBottom: `1px solid ${GOLD}`, paddingBottom: '4px' }}>
-                      {cat}
+       {activeDropdown === 'products' && (() => {
+          const cats = Object.keys(navProducts);
+          const current = activeCat && navProducts[activeCat] ? activeCat : cats[0];
+          return (
+            <div style={{ position: 'absolute', top: '56px', left: 0, right: 0, background: '#fff', borderTop: `2px solid ${GOLD}`, borderBottom: '1px solid #E0DDD7', boxShadow: '0 8px 32px rgba(0,0,0,.12)', zIndex: 200 }}>
+              <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', height: '440px' }}>
+
+              {/* 左栏:类目列表 */}
+                <div style={{ width: '260px', flexShrink: 0, borderRight: '1px solid #E0DDD7', padding: '18px 0', overflowY: 'auto', background: '#FAFAF8' }}>
+                  {cats.map(cat => (
+                    <div key={cat}
+                      onMouseEnter={() => setActiveCat(cat)}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 24px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '16px', fontWeight: 700, color: current === cat ? GOLD : NAVY, background: current === cat ? '#fff' : 'transparent', borderLeft: current === cat ? `3px solid ${GOLD}` : '3px solid transparent', transition: 'all .12s' }}>
+                      <Link href={`/category/${slugify(cat)}`} onClick={() => setActiveDropdown(null)}
+                        style={{ color: 'inherit', textDecoration: 'none', flex: 1 }}>{cat}</Link>
+                      <span style={{ color: GOLD, fontSize: '12px' }}>›</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 右栏:当前类目的子类 */}
+                <div style={{ flex: 1, padding: '24px 36px', overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', borderBottom: `1px solid ${GOLD}`, paddingBottom: '8px', marginBottom: '16px' }}>
+                    <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '1px' }}>{current}</span>
+                    <Link href={`/category/${slugify(current)}`} onClick={() => setActiveDropdown(null)}
+                      style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', color: GOLD, textDecoration: 'none', fontWeight: 600 }}>
+                      View all {current} →
                     </Link>
-                    {subs.map(sub => (
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 32px' }}>
+                    {(navProducts[current] || []).map(sub => (
                       <Link key={sub}
-                        href={`/category/${slugify(cat)}/${slugify(sub)}`}
+                        href={`/category/${slugify(current)}/${slugify(sub)}`}
                         onClick={() => setActiveDropdown(null)}
-                        style={dropdownLinkStyle}
-                        onMouseEnter={e => { e.currentTarget.style.background = '#EEF2FF'; e.currentTarget.style.color = NAVY; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; }}
+                        style={{ ...dropdownLinkStyle, padding: '9px 10px', borderRadius: '6px' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#FDF8F0'; e.currentTarget.style.color = GOLD; e.currentTarget.style.fontWeight = '700'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; e.currentTarget.style.fontWeight = '400'; }}
                       >{sub}</Link>
                     ))}
                   </div>
-                ))}
+                </div>
+
               </div>
             </div>
-          </div>
-        )}
-      </nav>
-
+          );
+        })()}
+        </nav>
       {/* GET A QUOTE 弹窗 */}
       <QuoteModal open={quoteOpen} onClose={() => setQuoteOpen(false)} source="nav" />
     </div>
