@@ -70,8 +70,10 @@ export default async function ProductPage({ params }) {
   // ── SPLIT IMAGES ──
   // [0] = main hero image; [1..colourCount] = per-colour pool; rest = extras
   const mainImage = sortedImages[0] || null;
-  const colourImages = sortedImages.slice(1, colourCount + 1);
-  const extraImages = sortedImages.slice(colourCount + 1);
+  // 刻意色块系:colours 字段存在且全员无图 → 图池不发牌,除主图外全部进轮播
+  const allSwatch = fromColoursField && colourCount > 0 && colourData.every(c => !c.image && (!Array.isArray(c.images) || c.images.length === 0));
+  const colourImages = allSwatch ? [] : sortedImages.slice(1, colourCount + 1);
+  const extraImages = allSwatch ? sortedImages.slice(1) : sortedImages.slice(colourCount + 1);
 
   // ── BUILD COLOUR OBJECTS ──
   // priority: inline image on colour entry > image pool slice > none (swatch fallback in UI)
@@ -79,12 +81,15 @@ export default async function ProductPage({ params }) {
     const img = colourImages[i] || c.image || (Array.isArray(c.images) && c.images[0]) || null;
     return { id: i, name: c.name || `Colour ${i + 1}`, hex: c.hex || null, image: img, images: img ? [img] : [] };
   });
+  // 色块系产品(所有颜色都自带或都无图,不吃图池)→ 图池整体让位给主图轮播
+  const poolUsed = colours.some(c => c.image && colourImages.includes(c.image));
+  const finalExtras = poolUsed ? extraImages : sortedImages.slice(1);
 
   return (
     <ProductClient
       product={product}
       mainImage={mainImage}
-      extraImages={colourCount > 0 ? extraImages : sortedImages.slice(1)}
+      extraImages={finalExtras}
       colours={colours}
       pricingTiers={pricingTiers}
       decorations={decorations}
