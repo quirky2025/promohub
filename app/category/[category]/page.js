@@ -147,7 +147,7 @@ export default function CategoryPage() {
     <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#F8F7F4', color: '#1a1a1a' }}>
 
       {/* BREADCRUMB */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
+      <div className="qp-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
           <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
@@ -158,9 +158,9 @@ export default function CategoryPage() {
       </div>
 
       {/* HEADER */}
-      <div style={{ background: NAVY, padding: '40px 40px 48px' }}>
+      <div className="qp-padx" style={{ background: NAVY, padding: '40px 40px 48px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-          <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '42px', fontWeight: 600, margin: '0 0 10px', color: '#fff' }}>
+          <h1 className="qp-cat-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '42px', fontWeight: 600, margin: '0 0 10px', color: '#fff' }}>
             Custom Printed {categoryName}
           </h1>
           <p style={{ color: 'rgba(255,255,255,.65)', margin: '0', fontSize: '15px' }}>
@@ -170,12 +170,12 @@ export default function CategoryPage() {
       </div>
 
       {/* SUBCATEGORY CARDS */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '32px 40px' }}>
+      <div className="qp-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '32px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 20px', fontWeight: 600 }}>
             Browse by Subcategory
           </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px' }}>
+          <div className="qp-subcat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px' }}>
             {subcategories.map(sub => (
               <Link key={sub.name} href={`/category/${category}/${slugify(sub.name)}`} style={{ textDecoration: 'none' }}>
                 <div style={{ background: '#F8F7F4', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', cursor: 'pointer', transition: 'box-shadow .2s, transform .2s' }}
@@ -199,10 +199,10 @@ export default function CategoryPage() {
       </div>
 
       {/* MAIN — FILTERS + PRODUCTS */}
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 40px', display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
+      <div className="qp-cat-main" style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 40px', display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
 
         {/* FILTER SIDEBAR */}
-        <div style={{ width: '220px', flexShrink: 0, background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,.06)', position: 'sticky', top: '72px' }}>
+        <div className="qp-cat-sidebar" style={{ width: '220px', flexShrink: 0, background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,.06)', position: 'sticky', top: '72px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <span style={{ fontSize: '15px', fontWeight: 700, color: NAVY }}>Filters</span>
             <button onClick={clearFilters} style={{ fontSize: '12px', color: GOLD, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Clear all</button>
@@ -265,7 +265,7 @@ export default function CategoryPage() {
             </div>
           ) : (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '20px' }}>
+              <div className="qp-prod-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '20px' }}>
                 {displayed.map(product => {
                   const img = getFirstImage(product);
                   const price = getLowestPrice(product);
@@ -327,13 +327,13 @@ export default function CategoryPage() {
 
       {/* SEO CONTENT */}
       {seo && (
-        <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '56px 40px' }}>
+        <div className="qp-padx" style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '56px 40px' }}>
           <div style={{ maxWidth: '900px', margin: '0 auto' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 20px', fontWeight: 600 }}>
               Custom Printed {categoryName} for Australian Businesses
             </h2>
             <p style={{ fontSize: '16px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 36px' }}>{seo.intro}</p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+            <div className="qp-seo-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
               {seo.sections.map((s, i) => (
                 <div key={i}>
                   <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>{s.title}</h3>
@@ -351,6 +351,17 @@ export default function CategoryPage() {
           </div>
         </div>
       )}
+    <style>{`
+        @media (max-width: 768px) {
+          .qp-padx { padding-left: 16px !important; padding-right: 16px !important; }
+          .qp-cat-main { flex-direction: column !important; padding: 20px 16px !important; gap: 18px !important; }
+          .qp-cat-sidebar { width: 100% !important; position: static !important; box-sizing: border-box; }
+          .qp-cat-h1 { font-size: 30px !important; }
+          .qp-prod-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+          .qp-subcat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+          .qp-seo-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }
