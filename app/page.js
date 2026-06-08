@@ -268,7 +268,7 @@ export default function Home() {
       </div>
 
       {/* ============ TRUST BAR (新版 4 项) ============ */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '22px 40px' }}>
+      <div className="qp-pad" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '22px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'center', gap: '56px', flexWrap: 'wrap' }}>
           {TRUST_BAR.map(b => (
             <div key={b.title} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -283,12 +283,12 @@ export default function Home() {
       </div>
 
       {/* ============ CATEGORIES (保持原样) ============ */}
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '64px 40px' }}>
+      <div className="qp-sec" style={{ maxWidth: '1400px', margin: '0 auto', padding: '64px 40px' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>Promotional Product Categories</h2>
+          <h2 className="qp-h2" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>Promotional Product Categories</h2>
           <p style={{ fontSize: '15px', color: '#7A7570', margin: 0 }}>Browse our full range across 12 categories</p>
         </div>
-         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+         <div className="qp-cat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
           {(showAllCats ? CATEGORIES : CATEGORIES.slice(0, 8)).map(cat => (
             <Link key={cat.slug} href={`/category/${cat.slug}`} style={{ textDecoration: 'none' }}>
               <div
@@ -321,7 +321,7 @@ export default function Home() {
       </div>
 
       {/* ============ TWO WAYS TO BUILD YOUR BRAND (新增) ============ */}
-      <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '64px 40px' }}>
+      <div className="qp-pad" style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '64px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '44px' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>Two Ways to Build Your Brand</h2>
@@ -441,7 +441,7 @@ export default function Home() {
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>Why QuirkyPromo</h2>
             <p style={{ fontSize: '15px', color: '#7A7570', margin: 0 }}>Built for Australian businesses that demand quality, reliability, and value</p>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+          <div className="qp-why-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
             {WHY_US.map(w => (
               <div key={w.title} style={{ background: BG, borderRadius: '14px', padding: '32px 24px', border: '1px solid #E0DDD7' }}>
                 <div style={{ fontSize: '36px', marginBottom: '16px',textAlign: 'center' }}>{w.icon}</div>
@@ -468,7 +468,7 @@ export default function Home() {
             </div>
             <Link href="/category/bags" style={{ color: GOLD, fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View All Products →</Link>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+          <div className="qp-feat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
             {products.map(product => {
               const img = getFirstImage(product);
               const price = getLowestPrice(product);
@@ -533,10 +533,10 @@ export default function Home() {
       </div>
 
        {/* ============ TESTIMONIALS (保持原样) ============ */}
-      <div style={{ background: NAVY, padding: '80px 40px' }}>
+      <div className="qp-pad" style={{ background: NAVY, padding: '80px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '56px' }}>
-            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: '#fff', margin: '0 0 10px', fontWeight: 600 }}>What Our Clients Say</h2>
+            <h2 className="qp-h2" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: '#fff', margin: '0 0 10px', fontWeight: 600 }}>What Our Clients Say</h2>
             <p style={{ fontSize: '15px', color: 'rgba(255,255,255,.55)', margin: 0 }}>Trusted by leading Australian organisations</p>
           </div>
 
@@ -569,7 +569,7 @@ export default function Home() {
        {/* ============ BRANDS (保持原样) ============ */}
       <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '56px 0', overflow: 'hidden' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', textAlign: 'center', padding: '0 40px' }}>
-          <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 8px', fontWeight: 600 }}>Trusted By Leading Australian Brands</h2>
+          <h2 className="qp-h2" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 8px', fontWeight: 600 }}>Trusted By Leading Australian Brands</h2>
           <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 36px' }}>From ASX-listed companies to government departments and fast-growing startups</p>
         </div>
 
@@ -603,7 +603,7 @@ export default function Home() {
 
 
       {/* ============ 保障条 + BOTTOM CTA (新版) ============ */}
-      <div style={{ background: NAVY, padding: '56px 40px 72px' }}>
+      <div className="qp-pad" style={{ background: NAVY, padding: '56px 40px 72px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '56px', flexWrap: 'wrap', paddingBottom: '48px', borderBottom: '1px solid rgba(255,255,255,.12)', marginBottom: '48px' }}>
             {GUARANTEES.map(g => (
@@ -618,7 +618,7 @@ export default function Home() {
           </div>
 
           <div style={{ maxWidth: '640px', margin: '0 auto', textAlign: 'center' }}>
-            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '40px', color: '#fff', margin: '0 0 14px', fontWeight: 600 }}>
+            <h2 className="qp-h2" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '40px', color: '#fff', margin: '0 0 14px', fontWeight: 600 }}>
               Ready to Bring Your Brand to Life?
             </h2>
             <p style={{ fontSize: '15px', color: 'rgba(255,255,255,.7)', margin: '0 0 32px', lineHeight: 1.7 }}>
@@ -640,7 +640,7 @@ export default function Home() {
       {/* ============ SEO 文案区块 (新增, Footer 正上方) ============ */}
       <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '64px 40px' }}>
         <div style={{ maxWidth: '860px', margin: '0 auto' }}>
-          <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', color: NAVY, margin: '0 0 24px', fontWeight: 600, textAlign: 'center' }}>
+          <h2 className="qp-h2" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', color: NAVY, margin: '0 0 24px', fontWeight: 600, textAlign: 'center' }}>
             Promotional Products, Branded Merchandise & Corporate Gifts Australia
           </h2>
           {SEO_PARAGRAPHS.map((para, i) => (
@@ -657,6 +657,17 @@ export default function Home() {
         </div>
       </div>
 
+
+      <style>{`
+        @media (max-width: 768px) {
+          .qp-pad { padding-left: 18px !important; padding-right: 18px !important; }
+          .qp-sec { padding-left: 18px !important; padding-right: 18px !important; }
+          .qp-cat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+          .qp-h2 { font-size: 26px !important; }
+          .qp-why-grid { grid-template-columns: 1fr !important; gap: 14px !important; }
+          .qp-feat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+        }
+      `}</style>
       {/* GET A QUOTE 弹窗 */}
       <QuoteModal open={quoteOpen} onClose={() => setQuoteOpen(false)} source="homepage" />
     </div>

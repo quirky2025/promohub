@@ -14,10 +14,11 @@ export default function Footer() {
             <div style={{ color: '#fff', fontSize: '18px', fontFamily: '"Cormorant Garamond", serif', fontWeight: 500, marginBottom: '6px' }}>Stay in the loop</div>
             <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.7)', fontFamily: '"DM Sans", sans-serif' }}>Subscribe for new arrivals, promotions and industry tips.</div>
           </div>
-          <div style={{ display: 'flex', gap: '0', flexShrink: 0 }}>
+          <div className="qp-sub-box" style={{ display: 'flex', gap: '0', flexShrink: 0 }}>
             <input
               type="email"
               placeholder="Enter your email address"
+              className="qp-sub-input"
               style={{ padding: '12px 16px', border: 'none', background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: '13px', outline: 'none', fontFamily: '"DM Sans", sans-serif', borderRadius: '8px 0 0 8px', width: '280px' }}
             />
             <button style={{ background: GOLD, color: '#fff', border: 'none', padding: '12px 24px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', borderRadius: '0 8px 8px 0' }}>
@@ -28,7 +29,7 @@ export default function Footer() {
       </div>
  
       {/* MAIN FOOTER - 4 COLUMNS */}
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '48px 32px 32px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '40px' }}>
+      <div className="qp-footer-grid" style={{ maxWidth: '1400px', margin: '0 auto', padding: '48px 32px 32px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '40px' }}>
  
         {/* COL 1 - ABOUT US */}
         <div>
@@ -36,8 +37,7 @@ export default function Footer() {
           {[
             { label: 'About Us', href: '/about' },
             { label: 'Contact Us', href: '/contact' },
-            { label: 'Testimonials', href: '/testimonials' },
-            { label: 'Google Reviews', href: '/reviews' },
+            { label: 'Testimonials', href: '/reviews' },
           ].map(item => (
             <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: '13px', color: '#ffffff', textDecoration: 'none', marginBottom: '10px', lineHeight: '1.4', fontFamily: '"DM Sans", sans-serif' }}>
               {item.label}
@@ -84,7 +84,6 @@ export default function Footer() {
           <div style={{ color: GOLD, fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '16px', fontFamily: '"DM Sans", sans-serif' }}>Resources</div>
           {[
             { label: 'Digital Catalog', href: '/catalog' },
-            { label: 'Blog', href: '/blog' },
           ].map(item => (
             <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: '13px', color: '#ffffff', textDecoration: 'none', marginBottom: '10px', lineHeight: '1.4', fontFamily: '"DM Sans", sans-serif' }}>
               {item.label}
@@ -114,7 +113,7 @@ export default function Footer() {
             <span style={{ fontSize: '12px', color: 'rgba(255,255,255,.6)', fontFamily: '"DM Sans", sans-serif' }}>© {new Date().getFullYear()} QuirkyPromo. All rights reserved.</span>
           </div>
  
-          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+          <div className="qp-bottom-links" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
             <Link href="/privacy" style={{ color: '#ffffff', textDecoration: 'none', fontSize: '12px', fontFamily: '"DM Sans", sans-serif' }}>Privacy Policy</Link>
             <span style={{ color: 'rgba(255,255,255,.3)' }}>|</span>
             <Link href="/sales-terms" style={{ color: '#ffffff', textDecoration: 'none', fontSize: '12px', fontFamily: '"DM Sans", sans-serif' }}>Sales Terms & Conditions</Link>
@@ -123,6 +122,19 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .qp-footer-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 28px 20px !important;
+            padding: 36px 20px 24px !important;
+          }
+          .qp-sub-box { width: 100%; }
+          .qp-sub-input { width: 100% !important; flex: 1; }
+          .qp-bottom-links { gap: 10px 14px !important; }
+        }
+      `}</style>
     </footer>
   );
 }
