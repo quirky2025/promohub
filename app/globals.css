@@ -47,3 +47,63 @@ textarea::placeholder { color: #9CA3AF; }
   letter-spacing: 1px;
 }
 .nav-mega-cat:hover { color: #C9A96E; }
+
+/* ============================================================
+   移动端响应式 —— 追加到 app/globals.css 末尾
+   只在屏幕窄于 768px 时生效;电脑版完全不受影响。
+   ============================================================ */
+
+/* 全局防横向溢出兜底:任何内容都不许撑爆屏幕宽度 */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+*, *::before, *::after {
+  max-width: 100%;
+}
+/* 图片/视频等媒体永不超出容器 */
+img, video, iframe, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* 默认(桌面):汉堡和移动搜索条隐藏 */
+.qp-hamburger,
+.qp-mobile-search { display: none; }
+
+/* ===== 手机 / 小平板:≤ 768px ===== */
+@media (max-width: 768px) {
+
+  /* 顶部深蓝栏:压低高度、改小内边距 */
+  .qp-topbar {
+    height: 64px !important;
+    padding: 0 16px !important;
+    gap: 12px !important;
+  }
+
+  /* 显示汉堡 */
+  .qp-hamburger { display: block !important; }
+
+  /* logo 居中缩小 */
+  .qp-logo {
+    font-size: 22px !important;
+    letter-spacing: 2px !important;
+    margin: 0 auto;
+  }
+
+  /* 顶栏里的大搜索框 + 电话/账户/购物车 在手机隐藏
+     (搜索改用下方独立的 qp-mobile-search;账户购物车进抽屉) */
+  .qp-search,
+  .qp-topbar-right { display: none !important; }
+
+  /* 显示移动端搜索条 */
+  .qp-mobile-search { display: block !important; }
+
+  /* 白色横向菜单整条隐藏(它的功能进了抽屉) */
+  .qp-desktop-menu { display: none !important; }
+}
+
+/* ===== 进一步缩小:≤ 380px(iPhone SE 等) ===== */
+@media (max-width: 380px) {
+  .qp-logo { font-size: 19px !important; letter-spacing: 1.5px !important; }
+}
