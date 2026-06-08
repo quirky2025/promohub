@@ -63,15 +63,14 @@ export default function CategoryPage() {
       // All products for subcategory grouping
       const { data: allData } = await supabase
         .from('products')
-        .select('id, name, slug, subcategory, is_eco, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
+        .select('id, name, slug, subcategory, extra_subcategories, is_eco, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
         .ilike('category', categoryName)
         .eq('is_published', true);
 
       if (allData) {
         // Build subcategory map
         const subMap = {};
-        allData.forEach(p => {
-          const sub = p.subcategory || 'Other';
+        const addToSub = (sub, p) => {
           if (!subMap[sub]) subMap[sub] = { name: sub, count: 0, image: null };
           subMap[sub].count++;
           if (!subMap[sub].image) {
@@ -80,6 +79,12 @@ export default function CategoryPage() {
             const arr = Array.isArray(imgs) ? imgs : imgs ? Object.values(imgs) : [];
             if (arr[0]) subMap[sub].image = arr[0];
           }
+        };
+        allData.forEach(p => {
+          addToSub(p.subcategory || 'Other', p);            // 主户口
+          (Array.isArray(p.extra_subcategories) ? p.extra_subcategories : []).forEach(extraSub => {
+            if (extraSub && extraSub !== p.subcategory) addToSub(extraSub, p);  // 副牌货架
+          });
         });
         setSubcategories(Object.values(subMap).sort((a, b) => a.name.localeCompare(b.name)));
         setAllProducts(allData);

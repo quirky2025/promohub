@@ -81,6 +81,7 @@ export default async function ProductPage({ params }) {
     const img = colourImages[i] || c.image || (Array.isArray(c.images) && c.images[0]) || null;
     return { id: i, name: c.name || `Colour ${i + 1}`, hex: c.hex || null, image: img, images: img ? [img] : [] };
   });
+
   // 色块系产品(所有颜色都自带或都无图,不吃图池)→ 图池整体让位给主图轮播
   const poolUsed = colours.some(c => c.image && colourImages.includes(c.image));
   const finalExtras = poolUsed ? extraImages : sortedImages.slice(1);
