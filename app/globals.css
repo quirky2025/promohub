@@ -161,8 +161,6 @@ img, video, iframe, svg {
   div.qp-scroll-x { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
   div.qp-scroll-x table { min-width: 460px; }
 
-  div.qp-pdp-tabs { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
-  div.qp-pdp-tabs > button { flex: 0 0 auto !important; }
 
   div.qp-pdp-main button { max-width: 100% !important; white-space: normal !important; word-break: break-word; }
   div.qp-pdp-main td, div.qp-pdp-main th { white-space: normal !important; }
@@ -175,7 +173,8 @@ img, video, iframe, svg {
 }
 
 /* 全局兜底:整页不横向滚动 */
-html, body { overflow-x: hidden !important; max-width: 100% !important; }
+html { overflow-x: clip; max-width: 100%; }
+body { overflow-x: clip; max-width: 100%; }
 
 /* ============================================================
    产品列表页(subcategory)· 移动端适配
@@ -187,4 +186,59 @@ html, body { overflow-x: hidden !important; max-width: 100% !important; }
   div.qp-sub-sidebar{ width: 100% !important; position: static !important; box-sizing: border-box; }
   h1.qp-sub-h1      { font-size: 30px !important; }
   div.qp-sub-grid   { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+}
+
+ 
+/* ============================================================
+   移动端补丁 2:首页 trust bar 排齐 + 详情页 tab 下划线
+   追加到 globals.css 末尾。
+   ============================================================ */
+@media (max-width: 768px) {
+  /* 首页 trust bar:四项改 2×2 网格、左对齐,不再错位 */
+  div.qp-trust {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 18px 16px !important;
+    justify-content: stretch !important;
+  }
+}
+
+/* ============================================================
+   移动端补丁:详情页 tab 改"可换行平铺",选中态清晰可见
+   追加到 globals.css 末尾。
+   并把之前旧的两条 qp-pdp-tabs 规则删掉(见下方说明)。
+   ============================================================ */
+@media (max-width: 768px) {
+  /* tab 行:不横滑,改成自动换行平铺,每个 tab 都完整显示 */
+  div.qp-pdp-tabs {
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
+  }
+  /* 每个 tab:按内容宽度、可换行;选中态(米底+金线)就能正常显示 */
+  div.qp-pdp-tabs > button {
+    flex: 0 1 auto !important;
+    padding: 12px 16px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* ============================================================
+   移动端补丁:tab 间隔清晰 + Ordering Process 四步卡片不溢出
+   追加到 globals.css 末尾。
+   ============================================================ */
+@media (max-width: 768px) {
+  /* tab 之间加间隔 + 每个 tab 之间细分隔线,看得出区分 */
+  div.qp-pdp-tabs {
+    gap: 4px 2px !important;
+    padding: 4px !important;
+  }
+  div.qp-pdp-tabs > button {
+    border-radius: 6px !important;
+  }
+  /* 选中的 tab 用米色底块更明显(配合内联已有的金色下划线) */
+  /* Ordering Process 四步卡片:手机改单列,Step 4 不再跑出屏幕 */
+  div.qp-steps-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
 }

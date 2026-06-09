@@ -338,7 +338,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
           {pricingTiers.length > 0 && (
             <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
-              <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Unbranded Pricing (excl. GST)</div>
+              <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Unbranded Pricing (excl. GST)</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#FAFAF8' }}>
@@ -364,7 +364,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             <div>
               <StepLabel num={brandingStep} text="Add Branding Options" />
               <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
-                <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Branding & Decoration</div>
+                <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Branding & Decoration</div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ background: '#FAFAF8' }}>
@@ -422,7 +422,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             <div>
               <StepLabel num={addonStep} text="Select Add-on Options" />
               <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
-                <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Add-ons & Extras</div>
+                <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Add-ons & Extras</div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   {addonDecorations.map(d => {
                     const st = addonState[d.id] || { on: false, setupQty: 1 };
@@ -453,7 +453,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
           {pricingTiers.length > 0 && (
             <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
-              <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Price Summary</div>
+              <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Price Summary</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#FAFAF8' }}>
@@ -543,7 +543,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', background: '#fff' }}>
             <div className="qp-pdp-tabs" style={{ display: 'flex', borderBottom: '1px solid #E0DDD7' }}>
               {TABS.map(tab => (
-                <button key={tab} onClick={() => setActiveTab(tab)} style={{ flex: 1, padding: '14px 8px', fontSize: '13px', fontWeight: 700, color: activeTab === tab ? NAVY : '#B0AAA3', background: activeTab === tab ? '#FDF8F0' : 'none', border: 'none', borderBottom: activeTab === tab ? `3px solid ${GOLD}` : '3px solid transparent', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap', textAlign: 'center' }}>
+                <button key={tab} onClick={() => setActiveTab(tab)} style={{ flex: 1, padding: '14px 8px', fontSize: '13px', fontWeight: 700, color: activeTab === tab ? NAVY : '#000000', background: activeTab === tab ? '#FDF8F0' : 'none', border: 'none', borderBottom: activeTab === tab ? `3px solid ${GOLD}` : '3px solid transparent', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap', textAlign: 'center' }}>
                   {tab}
                 </button>
               ))}
@@ -751,7 +751,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               {activeTab === 'Ordering Process' && (
                 <div>
                   <p style={{ margin: '0 0 20px', color: '#5A5550', fontSize: '14px' }}>Four simple steps from quote to delivery — your branded products, done right.</p>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
+                  <div className="qp-steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
                     {[
                       {
                         num: 1, icon: '🛒', title: 'Place Your Order',
@@ -1582,7 +1582,7 @@ function SizeChartTable({ sizeChart }) {
   if (!sizeChart || !Array.isArray(sizeChart.sizes) || !sizeChart.sizes.length) return null;
   return (
     <div style={{ border: '1.5px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '14px' }}>
-      <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+      <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>
         Size Chart {sizeChart.unit ? `(${sizeChart.unit})` : ''}
       </div>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>

@@ -13,8 +13,8 @@ const GOLD = '#C9A96E';
 
 // 类目展示顺序(库里查不到的类目按字母序排在后面)
 const CATEGORY_ORDER = [
-  'Bags', 'Drinkware', 'Headwear', 'Pens', 'Technology', 'Business',
-  'Print', 'Personal', 'Packaging', 'Promotion', 'Leisure', 'Apparel',
+  'Apparel','Bags', 'Drinkware', 'Headwear', 'Pens', 'Technology', 'Business',
+  'Print', 'Personal', 'Packaging', 'Promotion', 'Leisure', 
 ];
 
 // 后备清单:仅在数据库视图查询失败时使用,正常情况下菜单完全由库内数据驱动
@@ -344,7 +344,7 @@ export default function Nav() {
           {/* GET A QUOTE - 金色按钮,右端,打开弹窗 */}
           <button onClick={() => { setActiveDropdown(null); setQuoteOpen(true); }}
             style={{ marginLeft: 'auto', background: GOLD, color: '#fff', border: 'none', padding: '10px 22px', borderRadius: '8px', fontSize: '14px', fontWeight: 700, fontFamily: '"DM Sans", sans-serif', cursor: 'pointer', letterSpacing: '0.5px', whiteSpace: 'nowrap', boxShadow: '0 2px 10px rgba(201,169,110,.35)' }}>
-            GET A QUOTE
+            Get a Quote
           </button>
 
         </div>
