@@ -161,7 +161,7 @@ export default function SubcategoryPage() {
     <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#F8F7F4' }}>
 
       {/* BREADCRUMB */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
+      <div className="qp-sub-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
           <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
@@ -172,9 +172,9 @@ export default function SubcategoryPage() {
       </div>
 
       {/* HEADER */}
-      <div style={{ background: NAVY, padding: '36px 40px 44px' }}>
+      <div className="qp-sub-padx" style={{ background: NAVY, padding: '36px 40px 44px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-          <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', fontWeight: 600, margin: '0 0 10px', color: '#fff' }}>
+          <h1 className="qp-sub-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', fontWeight: 600, margin: '0 0 10px', color: '#fff' }}>
             Custom {subName}
           </h1>
           {seoBlurb && (
@@ -186,10 +186,10 @@ export default function SubcategoryPage() {
       </div>
 
       {/* MAIN */}
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 40px', display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
+      <div className="qp-sub-main" style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 40px', display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
 
         {/* FILTER SIDEBAR */}
-        <div style={{ width: '220px', flexShrink: 0, background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,.06)', position: 'sticky', top: '72px' }}>
+        <div className="qp-sub-sidebar" style={{ width: '220px', flexShrink: 0, background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,.06)', position: 'sticky', top: '72px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <span style={{ fontSize: '15px', fontWeight: 700, color: NAVY }}>Filters</span>
             <button onClick={clearFilters} style={{ fontSize: '12px', color: GOLD, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Clear all</button>
@@ -249,7 +249,7 @@ export default function SubcategoryPage() {
             </div>
           ) : (
             <>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '20px' }}>
+              <div className="qp-sub-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))', gap: '20px' }}>
                 {displayed.map(product => {
                   const img = getFirstImage(product);
                   const price = getLowestPrice(product);
@@ -323,7 +323,7 @@ export default function SubcategoryPage() {
 
       {/* SEO CONTENT */}
       {seoBlurb && (
-        <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '56px 40px' }}>
+        <div className="qp-sub-padx" style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '56px 40px' }}>
           <div style={{ maxWidth: '900px', margin: '0 auto' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 16px', fontWeight: 600 }}>
               About Custom Printed {subName}

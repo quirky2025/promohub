@@ -176,3 +176,15 @@ img, video, iframe, svg {
 
 /* 全局兜底:整页不横向滚动 */
 html, body { overflow-x: hidden !important; max-width: 100% !important; }
+
+/* ============================================================
+   产品列表页(subcategory)· 移动端适配
+   追加到 globals.css 末尾即可(强优先级 div. 写法)。
+   ============================================================ */
+@media (max-width: 768px) {
+  div.qp-sub-padx   { padding-left: 16px !important; padding-right: 16px !important; }
+  div.qp-sub-main   { flex-direction: column !important; padding: 20px 16px !important; gap: 18px !important; }
+  div.qp-sub-sidebar{ width: 100% !important; position: static !important; box-sizing: border-box; }
+  h1.qp-sub-h1      { font-size: 30px !important; }
+  div.qp-sub-grid   { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+}
