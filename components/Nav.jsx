@@ -402,7 +402,7 @@ export default function Nav() {
         <div className="qp-drawer-overlay" onClick={() => setMobileOpen(false)}
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 1000 }}>
           <div onClick={e => e.stopPropagation()}
-            style={{ position: 'absolute', top: 0, right: 0, width: '84%', maxWidth: '360px', height: '100%', background: '#fff', boxShadow: '-8px 0 30px rgba(0,0,0,.25)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+            style={{ position: 'absolute', top: 0, right: 0, width: '100%', height: '100%', background: '#fff', boxShadow: '-8px 0 30px rgba(0,0,0,.25)', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
 
             {/* 抽屉头部 */}
             <div style={{ background: NAVY, padding: '18px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 2 }}>
@@ -448,7 +448,7 @@ export default function Nav() {
                 <div key={cat}>
                   <div style={{ display: 'flex', alignItems: 'stretch' }}>
                     <button onClick={() => go(`/category/${slugify(cat)}`)}
-                      style={{ ...mItem, flex: 1, borderBottom: 'none' }}>{cat}</button>
+                      style={{ ...mItem, flex: 1, width: 'auto', borderBottom: 'none', paddingLeft: '20px' }}>{cat}</button>
                     <button onClick={() => setMobileCat(mobileCat === cat ? null : cat)}
                       aria-label="Expand"
                       style={{ width: '52px', background: 'none', border: 'none', color: '#B0AAA3', fontSize: '13px', cursor: 'pointer' }}>

@@ -107,3 +107,72 @@ img, video, iframe, svg {
 @media (max-width: 380px) {
   .qp-logo { font-size: 19px !important; letter-spacing: 1.5px !important; }
 }
+
+/* ============================================================
+   移动端 · 页面级响应式(首页 / 分类页 / 产品详情页)
+   追加到 app/globals.css 最末尾即可。
+   说明:之前写在各组件 <style> 里的规则改集中到这里,确保稳定生效。
+   全部只在 ≤768px 生效,桌面端不受影响。
+   ============================================================ */
+@media (max-width: 768px) {
+
+  /* ---- 通用:大区块左右内边距收窄 ---- */
+  .qp-pad  { padding-left: 18px !important; padding-right: 18px !important; }
+  .qp-sec  { padding-left: 18px !important; padding-right: 18px !important; }
+  .qp-padx { padding-left: 16px !important; padding-right: 16px !important; }
+
+  /* ---- 首页 ---- */
+  .qp-cat-grid  { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+  .qp-why-grid  { grid-template-columns: 1fr !important; gap: 14px !important; }
+  .qp-feat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+  .qp-h2        { font-size: 26px !important; }
+
+  /* ---- 分类页 ---- */
+  .qp-cat-main    { flex-direction: column !important; padding: 20px 16px !important; gap: 18px !important; }
+  .qp-cat-sidebar { width: 100% !important; position: static !important; box-sizing: border-box; }
+  .qp-cat-h1      { font-size: 30px !important; }
+  .qp-prod-grid   { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+  .qp-subcat-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+  .qp-seo-grid    { grid-template-columns: 1fr !important; }
+
+  /* ---- 产品详情页 ---- */
+  .qp-pdp-main     { grid-template-columns: 1fr !important; gap: 24px !important; padding: 20px 16px 48px !important; }
+  .qp-pdp-left     { position: static !important; top: auto !important; }
+  .qp-pdp-h1       { font-size: 26px !important; }
+  .qp-pdp-benefits { grid-template-columns: 1fr !important; }
+  .qp-pdp-2col     { grid-template-columns: 1fr !important; }
+}
+
+/* ============================================================
+   产品详情页 · 移动端修复(强优先级版 div. 提权)
+   ============================================================ */
+@media (max-width: 768px) {
+
+  div.qp-pdp-main {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+    padding: 20px 16px 48px !important;
+  }
+  div.qp-pdp-left { position: static !important; top: auto !important; }
+  h1.qp-pdp-h1 { font-size: 26px !important; }
+  div.qp-pdp-benefits { grid-template-columns: 1fr !important; }
+  div.qp-pdp-2col     { grid-template-columns: 1fr !important; }
+
+  div.qp-scroll-x { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  div.qp-scroll-x table { min-width: 460px; }
+
+  div.qp-pdp-tabs { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  div.qp-pdp-tabs > button { flex: 0 0 auto !important; }
+
+  div.qp-pdp-main button { max-width: 100% !important; white-space: normal !important; word-break: break-word; }
+  div.qp-pdp-main td, div.qp-pdp-main th { white-space: normal !important; }
+  div.qp-pdp-benefits * { white-space: normal !important; }
+   div.qp-similar-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
+
+  /* ↓↓↓ 新加这两条 ↓↓↓ */
+  div.qp-pdp-main > div { min-width: 0 !important; max-width: 100% !important; }
+  div.qp-pdp-main button { width: 100% !important; box-sizing: border-box !important; }
+}
+
+/* 全局兜底:整页不横向滚动 */
+html, body { overflow-x: hidden !important; max-width: 100% !important; }

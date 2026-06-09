@@ -197,7 +197,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
     <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', color: '#1a1a1a' }}>
 
       {/* BREADCRUMB */}
-      <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
+      <div className="qp-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
           <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
@@ -210,10 +210,10 @@ export default function ProductClient({ product, mainImage, colours, extraImages
       </div>
 
       {/* MAIN LAYOUT */}
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 40px 60px', display: 'grid', gridTemplateColumns: '480px 1fr', gap: '48px', alignItems: 'start' }}>
+      <div className="qp-pdp-main" style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 40px 60px', display: 'grid', gridTemplateColumns: '480px 1fr', gap: '48px', alignItems: 'start' }}>
 
         {/* LEFT */}
-        <div style={{ position: 'sticky', top: '70px' }}>
+        <div className="qp-pdp-left" style={{ position: 'sticky', top: '70px' }}>
           <div style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '16px', width: '100%', aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '12px' }}>
             {bigImage
               ? <img src={bigImage} alt={product.name} style={{ width: '85%', height: '85%', objectFit: 'contain' }} />
@@ -242,7 +242,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   </div>
 )}
             <div style={{ fontSize: '12px', color: '#B0AAA3', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku}</div>
-            <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.name}</h1>
+            <h1 className="qp-pdp-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.name}</h1>
             <div style={{ fontSize: '14px', color: GOLD, fontWeight: 500, minHeight: '22px' }}>
               {selectedColour !== null ? `Colour: ${colours[selectedColour]?.name}` : ''}
             </div>
@@ -337,7 +337,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           </div>
 
           {pricingTiers.length > 0 && (
-            <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
+            <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
               <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Unbranded Pricing (excl. GST)</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
@@ -363,7 +363,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           {brandingDecorations.length > 0 && (
             <div>
               <StepLabel num={brandingStep} text="Add Branding Options" />
-              <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
+              <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
                 <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Branding & Decoration</div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
@@ -526,7 +526,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             <span style={{ fontSize: '20px' }}>💬</span> Get a Quote / Ask a Question
           </button>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+          <div className="qp-pdp-benefits" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
             {[
               { icon: '🎨', title: 'Free Digital Proof', sub: 'See it before we make it' },
               { icon: '🚚', title: '$30 Flat Shipping', sub: 'Australia-wide, no surprises' },
@@ -541,7 +541,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           </div>
 
           <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', background: '#fff' }}>
-            <div style={{ display: 'flex', borderBottom: '1px solid #E0DDD7' }}>
+            <div className="qp-pdp-tabs" style={{ display: 'flex', borderBottom: '1px solid #E0DDD7' }}>
               {TABS.map(tab => (
                 <button key={tab} onClick={() => setActiveTab(tab)} style={{ flex: 1, padding: '14px 8px', fontSize: '13px', fontWeight: 700, color: activeTab === tab ? NAVY : '#B0AAA3', background: activeTab === tab ? '#FDF8F0' : 'none', border: 'none', borderBottom: activeTab === tab ? `3px solid ${GOLD}` : '3px solid transparent', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap', textAlign: 'center' }}>
                   {tab}
@@ -694,7 +694,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
               {activeTab === 'Shipping & Delivery' && (
                 <div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+                  <div className="qp-pdp-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
                     {[
                       { icon: '🚚', title: 'Flat Rate Shipping', value: '$30 per domestic address, Australia-wide' },
                       { icon: '🏭', title: 'Production Time', value: '3-7 business days after proof approval' },
@@ -798,7 +798,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
         <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '48px 40px' }}>
           <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', fontWeight: 600, color: NAVY, margin: '0 0 24px' }}>Similar Products</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+            <div className="qp-similar-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
               {similarProducts.map(p => {
                 const img = getSimilarImage(p);
                 const price = getSimilarLowestPrice(p);
@@ -1599,6 +1599,20 @@ function SizeChartTable({ sizeChart }) {
           ))}
         </tbody>
       </table>
+    <style>{`
+        @media (max-width: 768px) {
+          .qp-padx { padding-left: 16px !important; padding-right: 16px !important; }
+          .qp-pdp-main {
+            grid-template-columns: 1fr !important;
+            gap: 24px !important;
+            padding: 20px 16px 48px !important;
+          }
+          .qp-pdp-h1 { font-size: 26px !important; }
+          .qp-pdp-benefits { grid-template-columns: 1fr !important; }
+          .qp-pdp-2col { grid-template-columns: 1fr !important; }
+          .qp-pdp-left { position: static !important; top: auto !important; }
+        }
+      `}</style>
     </div>
   );
 }
