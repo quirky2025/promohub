@@ -57,6 +57,22 @@ const dropdownLinkStyle = {
   transition: 'background .15s, color .15s',
 };
 
+const desktopDropdownItemStyle = {
+  fontFamily: '"DM Sans", sans-serif',
+  fontSize: '15px',
+  fontWeight: 700,
+  color: NAVY,
+  textDecoration: 'none',
+  display: 'block',
+  padding: '12px 16px',
+  borderBottom: '1px solid #E0DDD7',
+  transition: 'background .15s, color .15s',
+};
+const desktopDropdownSubItemStyle = {
+  ...desktopDropdownItemStyle,
+  fontWeight: 400,
+};
+
 export default function Nav() {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [activeCat, setActiveCat] = useState(null);
@@ -261,15 +277,15 @@ export default function Nav() {
               Collections <span style={{ fontSize: '11px', color: activeDropdown === 'collections' ? GOLD : '#B0AAA3' }}>▾</span>
             </button>
             {activeDropdown === 'collections' && (
-              <div style={{ ...dropPanel, left: 0, minWidth: '300px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 24px' }}>
+              <div style={{ ...dropPanel, left: 0, minWidth: '320px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0' }}>
                   {COLLECTIONS.map(col => (
                     <Link key={col}
                       href={`/collections/${legacySlug(col)}`}
                       onClick={() => setActiveDropdown(null)}
-                      style={dropdownLinkStyle}
+                      style={{ ...desktopDropdownItemStyle, whiteSpace: 'nowrap' }}
                       onMouseEnter={e => { e.currentTarget.style.background = GOLD; e.currentTarget.style.color = NAVY; }}
-                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = NAVY; }}
                     >{col}</Link>
                   ))}
                 </div>
@@ -284,16 +300,18 @@ export default function Nav() {
               Brands <span style={{ fontSize: '11px', color: activeDropdown === 'brands' ? GOLD : '#B0AAA3' }}>▾</span>
             </button>
             {activeDropdown === 'brands' && (
-              <div style={{ ...dropPanel, left: 0, minWidth: '220px' }}>
-                {BRANDS.map(brand => (
-                  <Link key={brand}
-                    href={`/brands/${legacySlug(brand)}`}
-                    onClick={() => setActiveDropdown(null)}
-                    style={{ ...dropdownLinkStyle, borderBottom: '1px solid #F0EEED' }}
-                    onMouseEnter={e => { e.currentTarget.style.background = GOLD; e.currentTarget.style.color = NAVY; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; }}
-                  >{brand}</Link>
-                ))}
+              <div style={{ ...dropPanel, left: 0, minWidth: '260px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0' }}>
+                  {BRANDS.map(brand => (
+                    <Link key={brand}
+                      href={`/brands/${legacySlug(brand)}`}
+                      onClick={() => setActiveDropdown(null)}
+                      style={{ ...desktopDropdownItemStyle }}
+                      onMouseEnter={e => { e.currentTarget.style.background = GOLD; e.currentTarget.style.color = NAVY; }}
+                      onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = NAVY; }}
+                    >{brand}</Link>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -362,7 +380,7 @@ export default function Nav() {
                   {cats.map(cat => (
                     <div key={cat}
                       onMouseEnter={() => setActiveCat(cat)}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 20px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '15px', fontWeight: 700, color: NAVY, background: current === cat ? GOLD : 'transparent', borderLeft: current === cat ? `3px solid ${NAVY}` : '3px solid transparent', transition: 'all .12s' }}>
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 20px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '15px', fontWeight: 700, color: NAVY, background: current === cat ? GOLD : 'transparent', borderLeft: current === cat ? `3px solid ${NAVY}` : '3px solid transparent', borderBottom: '1px solid #E0DDD7', transition: 'all .12s' }}>
                       <Link href={`/category/${slugify(cat)}`} onClick={() => setActiveDropdown(null)}
                         style={{ color: 'inherit', textDecoration: 'none', flex: 1 }}>{cat}</Link>
                       <span style={{ color: current === cat ? NAVY : GOLD, fontSize: '12px' }}>›</span>
@@ -384,9 +402,9 @@ export default function Nav() {
                       <Link key={sub}
                         href={`/category/${slugify(current)}/${slugify(sub)}`}
                         onClick={() => setActiveDropdown(null)}
-                        style={{ ...dropdownLinkStyle, padding: '9px 10px', borderRadius: '6px' }}
+                        style={{ ...desktopDropdownSubItemStyle, borderRadius: '0' }}
                         onMouseEnter={e => { e.currentTarget.style.background = GOLD; e.currentTarget.style.color = NAVY; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#111'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = NAVY; }}
                       >{sub}</Link>
                     ))}
                   </div>
