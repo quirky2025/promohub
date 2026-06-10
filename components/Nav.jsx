@@ -355,14 +355,14 @@ export default function Nav() {
           const current = activeCat && navProducts[activeCat] ? activeCat : cats[0];
           return (
             <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', borderTop: `2px solid ${GOLD}`, borderBottom: '1px solid #E0DDD7', boxShadow: '0 8px 32px rgba(0,0,0,.12)', zIndex: 200 }}>
-              <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', height: '440px' }}>
+              <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'stretch' }}>
 
               {/* 左栏:类目列表 */}
-                <div style={{ width: '260px', flexShrink: 0, borderRight: '1px solid #E0DDD7', padding: '18px 0', overflowY: 'auto', background: '#FAFAF8' }}>
+                <div style={{ width: '260px', flexShrink: 0, borderRight: '1px solid #E0DDD7', padding: '12px 0', background: '#FAFAF8', overflowY: 'visible' }}>
                   {cats.map(cat => (
                     <div key={cat}
                       onMouseEnter={() => setActiveCat(cat)}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 24px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '16px', fontWeight: 700, color: NAVY, background: current === cat ? GOLD : 'transparent', borderLeft: current === cat ? `3px solid ${NAVY}` : '3px solid transparent', transition: 'all .12s' }}>
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 20px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '15px', fontWeight: 700, color: NAVY, background: current === cat ? GOLD : 'transparent', borderLeft: current === cat ? `3px solid ${NAVY}` : '3px solid transparent', transition: 'all .12s' }}>
                       <Link href={`/category/${slugify(cat)}`} onClick={() => setActiveDropdown(null)}
                         style={{ color: 'inherit', textDecoration: 'none', flex: 1 }}>{cat}</Link>
                       <span style={{ color: current === cat ? NAVY : GOLD, fontSize: '12px' }}>›</span>
@@ -371,7 +371,7 @@ export default function Nav() {
                 </div>
 
                 {/* 右栏:当前类目的子类 */}
-                <div style={{ flex: 1, padding: '24px 36px', overflowY: 'auto' }}>
+                <div style={{ flex: 1, padding: '24px 36px', overflowY: 'visible' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', borderBottom: `1px solid ${GOLD}`, paddingBottom: '8px', marginBottom: '16px' }}>
                     <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '1px' }}>{current}</span>
                     <Link href={`/category/${slugify(current)}`} onClick={() => setActiveDropdown(null)}
