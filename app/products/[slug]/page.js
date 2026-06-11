@@ -89,7 +89,7 @@ export default async function ProductPage({ params }) {
   // ── BUILD COLOUR OBJECTS ──
   // priority: inline image on colour entry > image pool slice > none (swatch fallback in UI)
   let colours = colourData.map((c, i) => {
-    const img = colourImages[i] || c.image || (Array.isArray(c.images) && c.images[0]) || null;
+    const img = c.image || (Array.isArray(c.images) && c.images[0]) || colourImages[i] || null;
     return { id: i, name: c.name || `Colour ${i + 1}`, hex: c.hex || null, image: img, images: img ? [img] : [] };
   });
 
