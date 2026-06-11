@@ -57,7 +57,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   const bottomImages = [mainImage, ...(extraImages || [])].filter(Boolean);
 
   const bigImage = selectedColour !== null
-    ? (colours[selectedColour]?.image || mainImage)
+    ? (colours[selectedColour]?.image || bottomImages[0] || mainImage)
     : (bottomImages[leftIdx] || mainImage);
 
   useEffect(() => {
@@ -220,7 +220,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               : <div style={{ color: '#B0AAA3', fontSize: '14px' }}>No image available</div>
             }
           </div>
-          {bottomImages.length > 1 && (
+          {bottomImages.length >= 1 && (
             <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
               {bottomImages.map((src, i) => (
                 <div key={i} onClick={() => handleBottomThumb(i)} style={{ cursor: 'pointer', flexShrink: 0 }}>
