@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { addToCart } from '@/lib/cart';
 import { getColourHex } from '@/lib/colourSwatch';
+import { slugify } from '@/lib/slug';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -201,9 +202,9 @@ export default function ProductClient({ product, mainImage, colours, extraImages
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
           <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href={`/category/${encodeURIComponent((product.category || '').toLowerCase())}`} style={{ color: '#7A7570', textDecoration: 'none' }}>{product.category}</Link>
+          <Link href={`/category/${slugify(product.category)}`} style={{ color: '#7A7570', textDecoration: 'none' }}>{product.category}</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href={`/subcategory/${encodeURIComponent((product.subcategory || '').toLowerCase().replace(/ /g, '-'))}`} style={{ color: '#7A7570', textDecoration: 'none' }}>{product.subcategory}</Link>
+          <Link href={`/category/${slugify(product.category)}/${slugify(product.subcategory)}`} style={{ color: '#7A7570', textDecoration: 'none' }}>{product.subcategory}</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>{product.name}</span>
         </div>

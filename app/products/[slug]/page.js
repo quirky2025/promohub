@@ -61,12 +61,7 @@ export default async function ProductPage({ params }) {
 
   // ── GET ALL IMAGES sorted by number in URL ──
   const rawColours = [...(product.product_colours || [])].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
-  
-  // DEBUG: Log rawColours structure
-  if (product.id === 107573) {
-    console.log('[DEBUG 107573] rawColours:', JSON.stringify(rawColours.map(r => ({ name: r.name, images: r.images, images_type: typeof r.images, is_array: Array.isArray(r.images) })), null, 2));
-  }
-  
+
   // Find first product_colour with images, fallback to first record
   let imageSource = null;
   for (const pc of rawColours) {
@@ -76,32 +71,16 @@ export default async function ProductPage({ params }) {
     }
   }
   imageSource = imageSource || rawColours[0];
-  
-  if (product.id === 107573) {
-    console.log('[DEBUG 107573] imageSource.name:', imageSource?.name, 'imageSource.images:', imageSource?.images);
-  }
-  
+
   const rawImages = imageSource?.images
     ? (Array.isArray(imageSource.images) ? imageSource.images : Object.values(imageSource.images))
     : [];
-  
-  if (product.id === 107573) {
-    console.log('[DEBUG 107573] rawImages after extraction:', rawImages);
-  }
-  
-  const sortedImages = [...rawImages].sort((a, b) => extractImgNum(a) - extractImgNum(b));
 
-  if (product.id === 107573) {
-    console.log('[DEBUG 107573] sortedImages after sort:', sortedImages);
-  }
+  const sortedImages = [...rawImages].sort((a, b) => extractImgNum(a) - extractImgNum(b));
 
   // ── SPLIT IMAGES ──
   // [0] = main hero image; [1..colourCount] = per-colour pool; rest = extras
   const mainImage = sortedImages[0] || null;
-  
-  if (product.id === 107573) {
-    console.log('[DEBUG 107573] mainImage:', mainImage, 'colourCount:', colourCount);
-  }
   // 刻意色块系:colours 字段存在且全员无图 → 图池不发牌,除主图外全部进轮播
   const allSwatch = fromColoursField && colourCount > 0 && colourData.every(c => !c.image && (!Array.isArray(c.images) || c.images.length === 0));
   const colourImages = allSwatch ? [] : sortedImages.slice(1, colourCount + 1);
