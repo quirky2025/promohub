@@ -11,6 +11,8 @@ const GOLD = '#C9A96E';
 const MARGIN = 1.40;
 const PAGE_SIZE = 24;
 
+const CROSS_CATEGORY_ONLY = ['Note Pads', 'Promotional'];
+
 // SEO content per category
 const SEO_CONTENT = {
   bags: {
@@ -60,7 +62,6 @@ export default function CategoryPage() {
     async function fetchData() {
       setLoading(true);
 
-      // All products for subcategory grouping
       const { data: allData } = await supabase
         .from('products')
         .select('id, name, slug, subcategory, extra_subcategories, is_eco, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
@@ -83,7 +84,13 @@ export default function CategoryPage() {
         allData.forEach(p => {
           addToSub(p.subcategory || 'Other', p);            // 主户口
           (Array.isArray(p.extra_subcategories) ? p.extra_subcategories : []).forEach(extraSub => {
-            if (extraSub && extraSub !== p.subcategory) addToSub(extraSub, p);  // 副牌货架
+            if (
+              extraSub &&
+              extraSub !== p.subcategory &&
+              !CROSS_CATEGORY_ONLY.includes(extraSub)
+            ) {
+              addToSub(extraSub, p);  // 副牌货架
+            }
           });
         });
         setSubcategories(Object.values(subMap).sort((a, b) => a.name.localeCompare(b.name)));

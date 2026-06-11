@@ -25,6 +25,11 @@ const FALLBACK_PRODUCTS = {
   'Pens': ['Bamboo', 'Deluxe', 'Metal', 'Novelty', 'Paper', 'Plastic', 'Stylus', 'Wood'],
 };
 
+const CROSS_CATEGORY_HOME = {
+  'Note Pads': 'Business',
+  'Promotional': 'Promotion',
+};
+
 const COLLECTIONS = [
   'Children', 'Corporate & Business', 'Food & Beverage', 'Fundraising',
   'Gifts & Promotions', 'Health & Beauty', 'Natural', 'Price Buster',
@@ -95,6 +100,8 @@ export default function Nav() {
       if (error || !data || data.length === 0) return; // 失败时保留后备清单
       const map = {};
       data.forEach(({ category, subcategory }) => {
+        const homeCategory = CROSS_CATEGORY_HOME[subcategory];
+        if (homeCategory && homeCategory !== category) return;
         if (!map[category]) map[category] = new Set();
         map[category].add(subcategory);
       });
