@@ -1568,10 +1568,10 @@ function FlatSpecTable({ product }) {
 
 function SpecRow({ label, value }) {
   return (
-    <div style={{ display: 'flex', padding: '8px 0', borderBottom: '1px solid #F0EEED', fontFamily: '"DM Sans", sans-serif' }}>
-      <div style={{ width: '160px', flexShrink: 0, color: '#7A7570', fontSize: '13px' }}>{label}</div>
-      <div style={{ fontWeight: 500, color: NAVY }}>{value}</div>
-    </div>
+    <tr style={{ borderBottom: '1px solid #F0EEED', fontFamily: '"DM Sans", sans-serif' }}>
+      <td style={{ width: '160px', verticalAlign: 'top', padding: '8px 0', color: '#7A7570', fontSize: '13px' }}>{label}</td>
+      <td style={{ padding: '8px 0', fontWeight: 500, color: NAVY }}>{value}</td>
+    </tr>
   );
 }
 
