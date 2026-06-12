@@ -35,6 +35,30 @@ const COLLECTION_ALIASES = {
   },
 };
 
+// 已知的数据库 collection 值(取自当前 products.collection 实际去重值)。
+// 这是「暂时」的本地映射:等分类体系成熟后整体替换为读配置表时,只需替换
+// 下面 KNOWN_COLLECTION_VALUES + resolveCollectionValues 这两处,其余逻辑不动。
+const KNOWN_COLLECTION_VALUES = [
+  'Summer', 'Natural', 'Corporate & Business', 'Sports & Fitness', 'Children',
+  'Conference', 'Gifts & Promotions', 'Travel', 'Eco-Friendly', 'Health & Beauty',
+  'Festivals & Events', 'Travel & Outdoor', 'Food & Beverage', 'Fundraising',
+  'Cotton Bags', 'Tradeshows', 'New Arrivals', 'Price Buster',
+  'Events & Conferences', 'Promotion', 'Promotional',
+];
+
+// slug -> { label: 显示名, values: [需匹配的数据库 collection 值] }
+// 为了把过滤下推到数据库,得先知道一个 URL slug 对应哪些 DB collection 值:
+//   - 别名(一个 slug 合并多个 DB 值)走 COLLECTION_ALIASES;
+//   - 普通 slug 用 KNOWN_COLLECTION_VALUES 反查(toSlug 后相等,大小写无关);
+//   - 都没命中(未知 slug)返回空 values,调用方据此直接给空结果、不打 DB。
+function resolveCollectionValues(slug) {
+  const alias = COLLECTION_ALIASES[slug];
+  if (alias) return { label: alias.label, values: alias.values };
+  const matches = KNOWN_COLLECTION_VALUES.filter(v => toSlug(v) === slug);
+  if (matches.length) return { label: matches[0], values: matches };
+  return { label: (slug || '').replace(/-/g, ' '), values: [] };
+}
+
 export default function CollectionPage() {
   const { slug } = useParams();
 
@@ -42,6 +66,7 @@ export default function CollectionPage() {
   const [collectionName, setCollectionName] = useState('');
   const [displayed, setDisplayed] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hoveredId, setHoveredId] = useState(null);
   const [page, setPage] = useState(0);
@@ -53,31 +78,37 @@ export default function CollectionPage() {
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
-      // 拉所有有 collection 的已发布产品,前端按 slug 匹配
-      const { data } = await supabase
+      setLoadError(false);
+
+      const { label, values } = resolveCollectionValues(slug);
+      setCollectionName(label);
+
+      // 未知 slug:没有对应的 DB collection 值,直接给空结果,不去打 DB。
+      if (values.length === 0) {
+        setAllProducts([]);
+        setLoading(false);
+        return;
+      }
+
+      // 把 collection 过滤下推到数据库,只取该 collection 的产品(行数从全表 ~2600
+      // 降到几百),这样即便带 product_colours / pricing_tiers 两个 join 也不超时。
+      // collection 是 jsonb 数组,用 contains(@>);一个 slug 可能对应多个 DB 值
+      // (别名),用 OR 把每个值的 contains 条件拼起来。
+      // 注:当前 DB 值不含逗号/括号,可安全拼进 PostgREST 的 or() 过滤串。
+      const orFilter = values.map(v => `collection.cs.${JSON.stringify([v])}`).join(',');
+      const { data, error } = await supabase
         .from('products')
         .select('id, name, category, subcategory, is_eco, collection, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
         .eq('is_published', true)
-        .not('collection', 'is', null);
+        .or(orFilter);
 
-      if (data) {
-        const alias = COLLECTION_ALIASES[slug];
-        let matchedName = '';
-        const matched = data.filter(p => {
-          const colls = Array.isArray(p.collection) ? p.collection : [];
-          if (alias) {
-            // 别名: 匹配 values 里任意一个数据库值
-            const hit = colls.find(c => alias.values.includes(c));
-            if (hit) return true;
-            return false;
-          }
-          // 普通: collection 数组里 toSlug 后 === url slug
-          const hit = colls.find(c => toSlug(c) === slug);
-          if (hit) { matchedName = hit; return true; }
-          return false;
-        });
-        setCollectionName(alias ? alias.label : (matchedName || (slug || '').replace(/-/g, ' ')));
-        setAllProducts(matched);
+      if (error) {
+        // 不再静默吞掉:打日志 + 置错误态,让 UI 显示错误而不是假装「没有产品」。
+        console.error('[collections] query failed for slug:', slug, error);
+        setAllProducts([]);
+        setLoadError(true);
+      } else {
+        setAllProducts(data || []);
       }
       setLoading(false);
     }
@@ -191,6 +222,13 @@ export default function CollectionPage() {
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '80px 0', color: '#7A7570' }}>Loading…</div>
+        ) : loadError ? (
+          <div style={{ textAlign: 'center', padding: '80px 0' }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+            <div style={{ fontSize: '16px', fontWeight: 600, color: NAVY, marginBottom: '8px' }}>Couldn’t load this collection</div>
+            <div style={{ fontSize: '14px', color: '#7A7570', marginBottom: '8px' }}>Something went wrong. Please try again in a moment.</div>
+            <Link href="/" style={{ display: 'inline-block', marginTop: '8px', background: GOLD, color: '#fff', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: 600 }}>Browse All Products</Link>
+          </div>
         ) : filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>📦</div>
