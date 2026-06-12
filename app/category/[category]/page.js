@@ -11,7 +11,7 @@ const GOLD = '#C9A96E';
 const MARGIN = 1.40;
 const PAGE_SIZE = 24;
 
-const CROSS_CATEGORY_ONLY = ['Note Pads', 'Promotional', 'Personal Care'];
+const CROSS_CATEGORY_ONLY = ['Note Pads', 'Promotional', 'Personal Care', 'Travel'];
 
 // SEO content per category
 const SEO_CONTENT = {

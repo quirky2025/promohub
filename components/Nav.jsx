@@ -29,6 +29,7 @@ const CROSS_CATEGORY_HOME = {
   'Note Pads': 'Business',
   'Promotional': 'Promotion',
   'Personal Care': 'Personal',
+  'Travel': 'Leisure',
 };
 
 const COLLECTIONS = [
