@@ -28,6 +28,7 @@ const FALLBACK_PRODUCTS = {
 const CROSS_CATEGORY_HOME = {
   'Note Pads': 'Business',
   'Promotional': 'Promotion',
+  'Personal Care': 'Personal',
 };
 
 const COLLECTIONS = [

@@ -12,7 +12,7 @@ const env = fs.readFileSync(envPath, 'utf8').split(/\r?\n/).filter(Boolean).redu
 }, {});
 
 const supabase = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
-const CROSS_CATEGORY_ONLY = ['Note Pads', 'Promotional'];
+const CROSS_CATEGORY_ONLY = ['Note Pads', 'Promotional', 'Personal Care'];
 
 async function buildSubs(categoryName) {
   const res = await supabase.from('products').select('id,name,subcategory,extra_subcategories').ilike('category', categoryName).eq('is_published', true).limit(2000);
