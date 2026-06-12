@@ -30,6 +30,7 @@ const CROSS_CATEGORY_HOME = {
   'Promotional': 'Promotion',
   'Personal Care': 'Personal',
   'Travel': 'Leisure',
+  'Drinkware Presentation': 'Drinkware',
 };
 
 const COLLECTIONS = [
