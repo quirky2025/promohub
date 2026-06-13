@@ -1,0 +1,184 @@
+{
+  "inventory_rows": 534,
+  "unique_product_category_links": 4409,
+  "supplier_summaries": [
+    {
+      "supplier": "Gear For Life",
+      "source_rows": 472,
+      "unique_skus": 470,
+      "raw_category_paths": 50,
+      "candidate_product_paths": 50,
+      "review_paths": 0
+    },
+    {
+      "supplier": "Logoline",
+      "source_rows": 5226,
+      "unique_skus": 1054,
+      "raw_category_paths": 159,
+      "candidate_product_paths": 153,
+      "review_paths": 6
+    },
+    {
+      "supplier": "NIConcept",
+      "source_rows": 994,
+      "unique_skus": 975,
+      "raw_category_paths": 13,
+      "candidate_product_paths": 8,
+      "review_paths": 5
+    },
+    {
+      "supplier": "PromoBrands",
+      "source_rows": 863,
+      "unique_skus": 863,
+      "raw_category_paths": 312,
+      "candidate_product_paths": 268,
+      "review_paths": 44
+    }
+  ],
+  "uncategorized_or_blank_sku_count": 77,
+  "uncategorized_or_blank_sku_examples": [
+    {
+      "supplier": "Gear For Life",
+      "sku": "",
+      "name": "DELETIONS",
+      "reason": "blank sku",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "EGAS",
+      "name": "Merino Arctic Scarf",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "POFWGS",
+      "name": "Festa Wine Glass Set",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "VT",
+      "name": "Vantage Top",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "GJ",
+      "name": "Gravity Jacket",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "TSC",
+      "name": "The Soho Check Shirt - Mens",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "OAN(C)",
+      "name": "Contrast Basecamp Anorak",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "OASTOJ",
+      "name": "Agri Station Tundra Oilskin Jacket",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "BBYBS",
+      "name": "Backyard Badminton Set",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "OEGCP",
+      "name": "Merino Contoured Pullover - Mens",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "OEGMCI",
+      "name": "Merino Contrast Insert Pullover - Mens",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "OWEGCP",
+      "name": "Merino Contoured Pullover - Womens",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "OWEGMX",
+      "name": "Merino Crossover Top - Womens",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "PORHFP",
+      "name": "Roadhouse Fire Pit",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "TAX",
+      "name": "The Axiom Check Shirt - Mens",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "TTBL",
+      "name": "The Two Tone Shirt - Mens",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "BIO",
+      "name": "Identity Overnight Bag",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "PORT",
+      "name": "Roll Table",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "POAFP",
+      "name": "Ambi Flame Pit",
+      "reason": "blank category",
+      "category": ""
+    },
+    {
+      "supplier": "Gear For Life",
+      "sku": "WTFL",
+      "name": "The Farrell Shirt - Womens",
+      "reason": "blank category",
+      "category": ""
+    }
+  ],
+  "csv_path": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\supplier_inventory\\supplier_raw_category_inventory.csv",
+  "links_path": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\supplier_inventory\\supplier_product_category_links.csv",
+  "md_path": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\supplier_inventory\\supplier_raw_category_inventory_summary.md"
+}

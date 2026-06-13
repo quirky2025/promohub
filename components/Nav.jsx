@@ -25,6 +25,22 @@ const FALLBACK_PRODUCTS = {
   'Pens': ['Bamboo', 'Deluxe', 'Metal', 'Novelty', 'Paper', 'Plastic', 'Stylus', 'Wood'],
 };
 
+const FLAT_NAV_OVERRIDES = {
+  'Drinkware': {
+    href: '/custom-drinkware-australia',
+    subcategories: [
+      { label: 'Drink Bottles', href: '/custom-drink-bottles-australia' },
+      { label: 'Coffee Cups', href: '/custom-coffee-cups-australia' },
+      { label: 'Travel Mugs', href: '/custom-travel-mugs-australia' },
+      { label: 'Tumblers', href: '/custom-tumblers-australia' },
+      { label: 'Mugs', href: '/custom-mugs-australia' },
+      { label: 'Glassware', href: '/branded-glassware-australia' },
+      { label: 'Flasks', href: '/custom-flasks-australia' },
+      { label: 'Teaware', href: '/custom-teaware-australia' },
+    ],
+  },
+};
+
 const CROSS_CATEGORY_HOME = {
   'Note Pads': 'Business',
   'Promotional': 'Promotion',
@@ -51,6 +67,25 @@ function legacySlug(name) {
     .replace(/ & /g, '-and-')
     .replace(/&/g, 'and')
     .replace(/ /g, '-');
+}
+
+function applyFlatNavOverrides(productsMap) {
+  const merged = { ...productsMap };
+  Object.entries(FLAT_NAV_OVERRIDES).forEach(([category, config]) => {
+    merged[category] = config.subcategories.map((item) => item.label);
+  });
+  return merged;
+}
+
+function categoryHref(category) {
+  return FLAT_NAV_OVERRIDES[category]?.href || `/category/${slugify(category)}`;
+}
+
+function subcategoryHref(category, subcategory) {
+  const override = FLAT_NAV_OVERRIDES[category]?.subcategories.find(
+    (item) => item.label === subcategory
+  );
+  return override?.href || `/category/${slugify(category)}/${slugify(subcategory)}`;
 }
 
 const dropdownLinkStyle = {
@@ -91,6 +126,7 @@ export default function Nav() {
   const [cartCount, setCartCount] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [navProducts, setNavProducts] = useState(FALLBACK_PRODUCTS);
+  const visibleNavProducts = applyFlatNavOverrides(navProducts);
   const router = useRouter();
   const navRef = useRef(null);
 
@@ -163,10 +199,11 @@ export default function Nav() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
     });
-    setCartCount(getCartCount());
     function onCartUpdate() { setCartCount(getCartCount()); }
+    const cartTimer = window.setTimeout(onCartUpdate, 0);
     window.addEventListener('cart-updated', onCartUpdate);
     return () => {
+      window.clearTimeout(cartTimer);
       subscription.unsubscribe();
       window.removeEventListener('cart-updated', onCartUpdate);
     };
@@ -379,8 +416,8 @@ export default function Nav() {
 
         {/* ALL PRODUCTS MEGA DROPDOWN — 子类来自数据库,只显示已发布有货的 */}
        {activeDropdown === 'products' && (() => {
-          const cats = Object.keys(navProducts);
-          const current = activeCat && navProducts[activeCat] ? activeCat : cats[0];
+          const cats = Object.keys(visibleNavProducts);
+          const current = activeCat && visibleNavProducts[activeCat] ? activeCat : cats[0];
           return (
             <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', borderTop: `2px solid ${GOLD}`, borderBottom: '1px solid #E0DDD7', boxShadow: '0 8px 32px rgba(0,0,0,.12)', zIndex: 200 }}>
               <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'stretch' }}>
@@ -391,7 +428,7 @@ export default function Nav() {
                     <div key={cat}
                       onMouseEnter={() => setActiveCat(cat)}
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 20px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '15px', fontWeight: 700, color: NAVY, background: current === cat ? GOLD : 'transparent', borderLeft: current === cat ? `3px solid ${NAVY}` : '3px solid transparent', borderBottom: '1px solid #E0DDD7', transition: 'all .12s' }}>
-                      <Link href={`/category/${slugify(cat)}`} onClick={() => setActiveDropdown(null)}
+                      <Link href={categoryHref(cat)} onClick={() => setActiveDropdown(null)}
                         style={{ color: 'inherit', textDecoration: 'none', flex: 1 }}>{cat}</Link>
                       <span style={{ color: current === cat ? NAVY : GOLD, fontSize: '12px' }}>›</span>
                     </div>
@@ -402,15 +439,15 @@ export default function Nav() {
                 <div style={{ flex: 1, padding: '24px 36px', overflowY: 'visible' }}>
                   <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', borderBottom: `1px solid ${GOLD}`, paddingBottom: '8px', marginBottom: '16px' }}>
                     <span style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '1px' }}>{current}</span>
-                    <Link href={`/category/${slugify(current)}`} onClick={() => setActiveDropdown(null)}
+                    <Link href={categoryHref(current)} onClick={() => setActiveDropdown(null)}
                       style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '12px', color: GOLD, textDecoration: 'none', fontWeight: 600 }}>
                       View all {current} →
                     </Link>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2px 32px' }}>
-                    {(navProducts[current] || []).map(sub => (
+                    {(visibleNavProducts[current] || []).map(sub => (
                       <Link key={sub}
-                        href={`/category/${slugify(current)}/${slugify(sub)}`}
+                        href={subcategoryHref(current, sub)}
                         onClick={() => setActiveDropdown(null)}
                         style={{ ...desktopDropdownSubItemStyle, borderRadius: '0' }}
                         onMouseEnter={e => { e.currentTarget.style.background = GOLD; e.currentTarget.style.color = NAVY; }}
@@ -472,10 +509,10 @@ export default function Nav() {
 
               {/* Shop by Categories */}
               <div style={mSection}>Shop by Categories</div>
-              {Object.keys(navProducts).map(cat => (
+              {Object.keys(visibleNavProducts).map(cat => (
                 <div key={cat}>
                   <div style={{ display: 'flex', alignItems: 'stretch' }}>
-                    <button onClick={() => go(`/category/${slugify(cat)}`)}
+                    <button onClick={() => go(categoryHref(cat))}
                       style={{ ...mItem, flex: 1, width: 'auto', borderBottom: 'none', paddingLeft: '20px' }}>{cat}</button>
                     <button onClick={() => setMobileCat(mobileCat === cat ? null : cat)}
                       aria-label="Expand"
@@ -485,8 +522,8 @@ export default function Nav() {
                   </div>
                   {mobileCat === cat && (
                     <div style={{ paddingBottom: '6px' }}>
-                      {(navProducts[cat] || []).map(sub => (
-                        <button key={sub} onClick={() => go(`/category/${slugify(cat)}/${slugify(sub)}`)}
+                      {(visibleNavProducts[cat] || []).map(sub => (
+                        <button key={sub} onClick={() => go(subcategoryHref(cat, sub))}
                           style={mSub}>{sub}</button>
                       ))}
                     </div>

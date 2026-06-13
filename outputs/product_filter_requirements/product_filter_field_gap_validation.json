@@ -1,0 +1,54 @@
+{
+  "ready_seed_rows": 176,
+  "filter_type_counts": {
+    "category": 21,
+    "subcategory": 138,
+    "compound": 6,
+    "kit_collection": 10,
+    "kit_template": 1
+  },
+  "field_usage_counts": {
+    "category": 165,
+    "is_published": 176,
+    "subcategory": 138,
+    "material_tags": 3,
+    "tags": 2,
+    "is_eco": 1,
+    "kit_themes": 11,
+    "offer_type": 11,
+    "kit_components": 1,
+    "related_categories": 1
+  },
+  "missing_usage_counts": {
+    "material_tags": 3,
+    "tags": 2,
+    "kit_themes": 11,
+    "offer_type": 11,
+    "kit_components": 1,
+    "related_categories": 1
+  },
+  "missing_recommended_fields": [
+    "fulfillment",
+    "is_australian_made",
+    "kit_components",
+    "kit_themes",
+    "material_tags",
+    "offer_type",
+    "pack_size",
+    "related_categories",
+    "supplier",
+    "supplier_raw_category_path",
+    "tags"
+  ],
+  "required_missing_fields": [
+    "kit_themes",
+    "offer_type",
+    "tags"
+  ],
+  "outputs": {
+    "summary": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\product_filter_requirements\\product_filter_field_gap_summary.md",
+    "requirements_csv": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\product_filter_requirements\\product_filter_requirements.csv",
+    "gap_checklist_csv": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\product_filter_requirements\\products_field_gap_checklist.csv",
+    "draft_sql": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\product_filter_requirements\\products_filter_fields_DRAFT.sql"
+  }
+}

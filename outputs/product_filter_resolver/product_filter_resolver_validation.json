@@ -1,0 +1,26 @@
+{
+  "ready_rows": 176,
+  "matrix_rows": 176,
+  "filter_type_counts": {
+    "category": 21,
+    "compound": 6,
+    "kit_collection": 10,
+    "kit_template": 1,
+    "subcategory": 138
+  },
+  "handled_types": [
+    "category",
+    "compound",
+    "kit_collection",
+    "kit_template",
+    "subcategory"
+  ],
+  "unhandled_types": [],
+  "empty_page_policy_defined_for_all_seed_types": true,
+  "outputs": {
+    "spec": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\product_filter_resolver\\product_filter_resolver_spec.md",
+    "matrix": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\product_filter_resolver\\product_filter_type_matrix.csv",
+    "readonly_sql": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\product_filter_resolver\\product_filter_validation_READONLY.sql",
+    "pseudocode": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\product_filter_resolver\\product_filter_resolver_pseudocode.js"
+  }
+}

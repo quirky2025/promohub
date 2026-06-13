@@ -1,0 +1,36 @@
+{
+  "mapping_rows": 534,
+  "status_counts": {
+    "auto_mapped": 340,
+    "needs_review": 167,
+    "fulfillment_service": 10,
+    "collection_or_tag": 17
+  },
+  "by_supplier": {
+    "Gear For Life": {
+      "auto_mapped": 40,
+      "needs_review": 10
+    },
+    "Logoline": {
+      "auto_mapped": 115,
+      "needs_review": 37,
+      "fulfillment_service": 6,
+      "collection_or_tag": 1
+    },
+    "NIConcept": {
+      "needs_review": 9,
+      "auto_mapped": 4
+    },
+    "PromoBrands": {
+      "fulfillment_service": 4,
+      "collection_or_tag": 16,
+      "auto_mapped": 181,
+      "needs_review": 111
+    }
+  },
+  "auto_mapped_sku_path_count": 2319,
+  "non_auto_sku_path_count": 2090,
+  "invalid_auto_targets": [],
+  "csv_path": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\supplier_mapping\\supplier_category_mappings_DRAFT.csv",
+  "summary_path": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\supplier_mapping\\supplier_category_mappings_DRAFT_summary.md"
+}

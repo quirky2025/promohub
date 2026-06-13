@@ -1,0 +1,15 @@
+{
+  "dry_run_sql": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\product_filter_requirements\\products_filter_fields_dry_run.sql",
+  "final_sql": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\product_filter_requirements\\products_filter_fields_FINAL.sql",
+  "run_order": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\product_filter_requirements\\url_pages_and_products_run_order.md",
+  "dry_run_writes_data": false,
+  "final_has_begin_commit": true,
+  "final_destructive_tokens": [],
+  "final_adds_columns": 11,
+  "final_creates_indexes": 7,
+  "final_named_constraints": [
+    "products_fulfillment_check",
+    "products_offer_type_check",
+    "products_pack_size_check"
+  ]
+}

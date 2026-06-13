@@ -31,7 +31,7 @@ const CATEGORIES = [
   { name: 'Headwear',   slug: 'headwear',   img: `${CAT_CLOUD}/v1780122418/HEADWARE_fejzwv.jpg` },
   { name: 'Bags',       slug: 'bags',       img: `${CAT_CLOUD}/v1780122420/BAGS_pqfdyh.jpg` },
   { name: 'Pens',       slug: 'pens',       img: `${CAT_CLOUD}/v1780122421/PENS_dd7ppl.jpg` },
-  { name: 'Drinkware',  slug: 'drinkware',  img: `${CAT_CLOUD}/v1780122421/drinkware_hzczyq.jpg` },
+  { name: 'Drinkware',  slug: 'drinkware', href: '/custom-drinkware-australia', img: `${CAT_CLOUD}/v1780122421/drinkware_hzczyq.jpg` },
   { name: 'Print',      slug: 'print',      img: `${CAT_CLOUD}/v1780122423/PRINT_sli6wx.jpg` },
   { name: 'Business',   slug: 'business',   img: `${CAT_CLOUD}/v1780122425/BUSINESS_ic2scz.jpg` },
   { name: 'Promotion',  slug: 'promotion',  img: `${CAT_CLOUD}/v1780122426/PROMOTION_bzsbo8.jpg` },
@@ -290,7 +290,7 @@ export default function Home() {
         </div>
          <div className="qp-cat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
           {(showAllCats ? CATEGORIES : CATEGORIES.slice(0, 8)).map(cat => (
-            <Link key={cat.slug} href={`/category/${cat.slug}`} style={{ textDecoration: 'none' }}>
+            <Link key={cat.slug} href={cat.href || `/category/${cat.slug}`} style={{ textDecoration: 'none' }}>
               <div
                 onMouseEnter={() => setHoveredCat(cat.slug)}
                 onMouseLeave={() => setHoveredCat(null)}
