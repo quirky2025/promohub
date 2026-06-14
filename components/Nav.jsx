@@ -11,11 +11,24 @@ import QuoteModal from '@/components/QuoteModal';
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 
-// 类目展示顺序(库里查不到的类目按字母序排在后面)
-const CATEGORY_ORDER = [
-  'Apparel','Bags', 'Drinkware', 'Headwear', 'Pens', 'Technology', 'Business',
-  'Print', 'Personal', 'Packaging', 'Promotion', 'Leisure', 
-];
+// Category and subcategory labels are displayed alphabetically.
+const LABEL_COLLATOR = new Intl.Collator('en-AU', {
+  sensitivity: 'base',
+  numeric: true,
+});
+
+function compareLabels(a = '', b = '') {
+  return LABEL_COLLATOR.compare(a, b);
+}
+
+const HIDDEN_LEGACY_CATEGORIES = new Set([
+  'Business',
+  'Print',
+  'Personal',
+  'Promotion',
+  'Promotional',
+  'Leisure',
+]);
 
 // 后备清单:仅在数据库视图查询失败时使用,正常情况下菜单完全由库内数据驱动
 const FALLBACK_PRODUCTS = {
@@ -26,6 +39,54 @@ const FALLBACK_PRODUCTS = {
 };
 
 const FLAT_NAV_OVERRIDES = {
+  'Apparel': {
+    href: '/custom-branded-apparel-australia',
+    subcategories: [
+      { label: 'T-Shirts', href: '/custom-t-shirts-australia' },
+      { label: 'Polo Shirts', href: '/custom-polo-shirts-australia' },
+      { label: 'Hoodies', href: '/custom-hoodies-australia' },
+      { label: 'Sweatshirts', href: '/custom-sweatshirts-australia' },
+      { label: 'Jackets', href: '/custom-jackets-australia' },
+      { label: 'Shirts', href: '/custom-shirts-australia' },
+      { label: 'Vests', href: '/custom-vests-australia' },
+      { label: 'Pants & Shorts', href: '/workwear-pants-and-shorts-australia' },
+      { label: 'Workwear', href: '/branded-workwear-australia' },
+      { label: 'Teamwear', href: '/custom-teamwear-australia' },
+      { label: 'Aprons', href: '/custom-aprons-australia' },
+      { label: 'Socks', href: '/custom-socks-australia' },
+      { label: 'Scarves & Accessories', href: '/branded-scarves-and-accessories-australia' },
+      { label: 'Apparel Accessories', href: '/branded-apparel-accessories-australia' },
+    ],
+  },
+  'Bags': {
+    href: '/custom-bags-australia',
+    subcategories: [
+      { label: 'Tote Bags', href: '/custom-tote-bags-australia' },
+      { label: 'Cotton Tote Bags', href: '/custom-cotton-tote-bags-australia' },
+      { label: 'Cooler Bags', href: '/custom-cooler-bags-australia' },
+      { label: 'Backpacks', href: '/custom-backpacks-australia' },
+      { label: 'Paper Bags', href: '/custom-paper-bags-australia' },
+      { label: 'Drawstring Bags', href: '/custom-drawstring-bags-australia' },
+      { label: 'Travel & Duffle Bags', href: '/custom-duffle-bags-australia' },
+      { label: 'Toiletry Bags', href: '/custom-toiletry-bags-australia' },
+      { label: 'Jute Bags', href: '/jute-bags-australia' },
+      { label: 'Laptop Bags', href: '/custom-laptop-bags-australia' },
+      { label: 'Wine Carriers', href: '/wine-carriers-australia' },
+      { label: 'Crossbody & Belt Bags', href: '/crossbody-bags-australia' },
+      { label: 'Satchel Bags', href: '/satchel-bags-australia' },
+      { label: 'Dry Bags', href: '/dry-bags-australia' },
+    ],
+  },
+  'Travel': {
+    href: '/branded-travel-accessories-australia',
+    subcategories: [
+      { label: 'Luggage Tags', href: '/custom-luggage-tags-australia' },
+      { label: 'Passport Holders', href: '/passport-holders-australia' },
+      { label: 'Travel Wallets', href: '/travel-wallets-australia' },
+      { label: 'Travel Pillows & Comfort', href: '/travel-pillows-australia' },
+      { label: 'Travel Accessories', href: '/travel-accessories-australia' },
+    ],
+  },
   'Drinkware': {
     href: '/custom-drinkware-australia',
     subcategories: [
@@ -39,12 +100,195 @@ const FLAT_NAV_OVERRIDES = {
       { label: 'Teaware', href: '/custom-teaware-australia' },
     ],
   },
+  'Barware & Accessories': {
+    href: '/branded-barware-australia',
+    subcategories: [
+      { label: 'Coasters', href: '/custom-coasters-australia' },
+      { label: 'Bottle Openers', href: '/custom-bottle-openers-australia' },
+      { label: 'Stubby Holders', href: '/custom-stubby-holders-australia' },
+      { label: 'Bar Mats', href: '/custom-bar-mats-australia' },
+      { label: 'Wine Accessories', href: '/branded-wine-accessories-australia' },
+      { label: 'Bar Accessories', href: '/bar-accessories-australia' },
+    ],
+  },
+  'Flags & Displays': {
+    href: '/trade-show-displays-australia',
+    subcategories: [
+      { label: 'A-Frames & Signage', href: '/a-frame-signage-australia' },
+      { label: 'Feather & Teardrop Flags', href: '/custom-feather-flags-australia' },
+      { label: 'Marquees', href: '/custom-marquees-australia' },
+      { label: 'Media Walls', href: '/media-walls-australia' },
+      { label: 'Pull Up Banners', href: '/pull-up-banners-australia' },
+      { label: 'Table Covers', href: '/custom-table-covers-australia' },
+    ],
+  },
+  'Giveaways & Event Accessories': {
+    href: '/promotional-giveaways-australia',
+    subcategories: [
+      { label: 'Badges', href: '/custom-badges-australia' },
+      { label: 'Balloons', href: '/custom-balloons-australia' },
+      { label: 'ID Holders', href: '/id-card-holders-australia' },
+      { label: 'Lanyards', href: '/custom-lanyards-australia' },
+      { label: 'Magnets', href: '/custom-fridge-magnets-australia' },
+      { label: 'Novelty Giveaways', href: '/novelty-giveaways-australia' },
+      { label: 'Stickers & Patches', href: '/promotional-stickers-and-patches-australia' },
+      { label: 'Temporary Tattoos', href: '/temporary-tattoos-australia' },
+      { label: 'Wristbands', href: '/custom-wristbands-australia' },
+    ],
+  },
+  'Headwear': {
+    href: '/custom-headwear-australia',
+    subcategories: [
+      { label: 'Caps', href: '/custom-caps-australia' },
+      { label: 'Beanies', href: '/custom-beanies-australia' },
+      { label: 'Bucket Hats', href: '/custom-bucket-hats-australia' },
+      { label: 'Wide Brim Hats', href: '/custom-wide-brim-hats-australia' },
+      { label: 'Straw Hats', href: '/straw-hats-australia' },
+      { label: 'Visors', href: '/custom-visors-australia' },
+      { label: 'Novelty Headwear', href: '/novelty-headwear-australia' },
+    ],
+  },
+  'Pens': {
+    href: '/branded-pens-australia',
+    subcategories: [
+      { label: 'Ballpoint Pens', href: '/custom-ballpoint-pens-australia' },
+      { label: 'Metal Pens', href: '/custom-metal-pens-australia' },
+      { label: 'Plastic Pens', href: '/custom-plastic-pens-australia' },
+      { label: 'Stylus Pens', href: '/custom-stylus-pens-australia' },
+      { label: 'Highlighters', href: '/custom-highlighters-australia' },
+      { label: 'Eco Pens', href: '/eco-pens-australia' },
+      { label: 'Pencils', href: '/custom-pencils-australia' },
+    ],
+  },
+  'Technology': {
+    href: '/corporate-tech-gifts-australia',
+    subcategories: [
+      { label: 'Power Banks', href: '/custom-power-banks-australia' },
+      { label: 'Bluetooth Speakers', href: '/custom-bluetooth-speakers-australia' },
+      { label: 'Earbuds & Headphones', href: '/custom-earbuds-australia' },
+      { label: 'Charging Cables & Chargers', href: '/custom-charging-cables-australia' },
+      { label: 'Wireless Chargers', href: '/wireless-chargers-australia' },
+      { label: 'Phone Accessories', href: '/custom-phone-accessories-australia' },
+      { label: 'USB Flash Drives', href: '/custom-usb-drives-australia' },
+      { label: 'Tech Accessories', href: '/tech-accessories-australia' },
+    ],
+  },
+  'Tools & Auto': {
+    href: '/branded-tools-and-car-accessories-australia',
+    subcategories: [
+      { label: 'Multi-Tools', href: '/custom-multi-tools-australia' },
+      { label: 'Tape Measures', href: '/custom-tape-measures-australia' },
+      { label: 'Torches & Lights', href: '/custom-torches-australia' },
+      { label: 'Tool Sets & Screwdrivers', href: '/tool-sets-australia' },
+      { label: 'Car Accessories', href: '/car-accessories-australia' },
+    ],
+  },
+  'Office & Desk': {
+    href: '/branded-office-supplies-australia',
+    subcategories: [
+      { label: 'Notebooks', href: '/branded-notebooks-australia' },
+      { label: 'Note Pads', href: '/custom-note-pads-australia' },
+      { label: 'Pads & Planners', href: '/custom-planners-australia' },
+      { label: 'Sticky Notes', href: '/custom-sticky-notes-australia' },
+      { label: 'Stationery', href: '/custom-stationery-australia' },
+      { label: 'Desk Items', href: '/desk-accessories-australia' },
+      { label: 'Portfolios & Compendiums', href: '/custom-compendiums-australia' },
+      { label: 'Pencil Cases', href: '/custom-pencil-cases-australia' },
+      { label: 'Rulers', href: '/custom-rulers-australia' },
+    ],
+  },
+  'Packaging': {
+    href: '/custom-packaging-australia',
+    subcategories: [
+      { label: 'Gift Boxes', href: '/custom-gift-boxes-australia' },
+      { label: 'Gift Bags', href: '/custom-gift-bags-australia' },
+      { label: 'Gift Tubes', href: '/gift-tubes-australia' },
+      { label: 'Pouches', href: '/custom-pouches-australia' },
+      { label: 'Tissue & Wrapping', href: '/custom-tissue-paper-australia' },
+      { label: 'Ribbons & Gift Tags', href: '/ribbons-and-gift-tags-australia' },
+      { label: 'Greeting & Gift Cards', href: '/greeting-cards-australia' },
+    ],
+  },
+  'Home & Living': {
+    href: '/branded-homewares-australia',
+    subcategories: [
+      { label: 'Kitchen & Dining', href: '/custom-kitchenware-australia' },
+      { label: 'Cheese & Serving Boards', href: '/cheese-boards-australia' },
+      { label: 'Home Decor', href: '/promotional-home-decor-australia' },
+      { label: 'Candles & Diffusers', href: '/candles-and-diffusers-australia' },
+    ],
+  },
+  'Outdoor & Sports': {
+    href: '/outdoor-promotional-products-australia',
+    subcategories: [
+      { label: 'Sports Products', href: '/promotional-sports-products-australia' },
+      { label: 'Golf Products', href: '/custom-golf-products-australia' },
+      { label: 'Umbrellas', href: '/custom-umbrellas-australia' },
+      { label: 'Towels', href: '/custom-towels-australia' },
+      { label: 'Camping & Outdoors', href: '/camping-gear-australia' },
+      { label: 'Picnic & BBQ', href: '/picnic-and-bbq-australia' },
+      { label: 'Sunglasses', href: '/custom-sunglasses-australia' },
+      { label: 'Blankets', href: '/picnic-blankets-australia' },
+      { label: 'Supporter Gear', href: '/custom-supporter-gear-australia' },
+    ],
+  },
+  'Personal Care': {
+    href: '/branded-personal-care-products-australia',
+    subcategories: [
+      { label: 'Lip Balms', href: '/custom-lip-balm-australia' },
+      { label: 'Hand Sanitiser', href: '/custom-hand-sanitiser-australia' },
+      { label: 'Face Masks', href: '/custom-face-masks-australia' },
+      { label: 'Sunscreen & Lotions', href: '/sunscreen-australia' },
+      { label: 'First Aid', href: '/first-aid-kits-australia' },
+      { label: 'Manicure Sets', href: '/manicure-sets-australia' },
+      { label: 'Mirrors & Beauty Accessories', href: '/compact-mirrors-australia' },
+      { label: 'Bath & Body', href: '/bath-and-body-gifts-australia' },
+      { label: 'Grooming', href: '/grooming-products-australia' },
+    ],
+  },
+  'Marketing Materials': {
+    href: '/printed-marketing-materials-australia',
+    subcategories: [
+      { label: 'Business Cards', href: '/business-cards-australia' },
+      { label: 'Labels & Stickers', href: '/custom-stickers-australia' },
+      { label: 'Resin Labels', href: '/resin-labels-australia' },
+    ],
+  },
+  'Key Rings': {
+    href: '/custom-keyrings-australia',
+    subcategories: [
+      { label: 'Metal Keyrings', href: '/custom-metal-keyrings-australia' },
+      { label: 'Leather Keyrings', href: '/leather-keyrings-australia' },
+      { label: 'Silicone & PVC Keyrings', href: '/silicone-keyrings-australia' },
+      { label: 'Eco Keyrings', href: '/eco-keyrings-australia' },
+      { label: 'Functional Keyrings', href: '/functional-keyrings-australia' },
+      { label: 'Novelty Keyrings', href: '/novelty-keyrings-australia' },
+    ],
+  },
+  'Pet': {
+    href: '/branded-pet-products-australia',
+    subcategories: [
+      { label: 'Pet Accessories', href: '/custom-pet-accessories-australia' },
+    ],
+  },
+  'Toys & Games': {
+    href: '/promotional-toys-and-games-australia',
+    subcategories: [
+      { label: 'Colouring & Kids Sets', href: '/colouring-sets-australia' },
+      { label: 'Games & Puzzles', href: '/custom-games-and-puzzles-australia' },
+      { label: 'Novelty Toys', href: '/novelty-toys-australia' },
+      { label: 'Outdoor Toys', href: '/outdoor-toys-australia' },
+      { label: 'Plush Toys', href: '/custom-plush-toys-australia' },
+      { label: 'Stress Balls & Toys', href: '/custom-stress-balls-australia' },
+      { label: 'Wooden Toys & Models', href: '/wooden-toys-and-models-australia' },
+    ],
+  },
 };
 
 const CROSS_CATEGORY_HOME = {
-  'Note Pads': 'Business',
+  'Note Pads': 'Office & Desk',
   'Promotional': 'Promotion',
-  'Personal Care': 'Personal',
+  'Personal Care': 'Personal Care',
   'Travel': 'Leisure',
   'Drinkware Presentation': 'Drinkware',
 };
@@ -72,9 +316,13 @@ function legacySlug(name) {
 function applyFlatNavOverrides(productsMap) {
   const merged = { ...productsMap };
   Object.entries(FLAT_NAV_OVERRIDES).forEach(([category, config]) => {
-    merged[category] = config.subcategories.map((item) => item.label);
+    merged[category] = [...config.subcategories]
+      .sort((a, b) => compareLabels(a.label, b.label))
+      .map((item) => item.label);
   });
-  return merged;
+  return Object.fromEntries(
+    Object.entries(merged).sort(([a], [b]) => compareLabels(a, b))
+  );
 }
 
 function categoryHref(category) {
@@ -127,6 +375,7 @@ export default function Nav() {
   const [searchQuery, setSearchQuery] = useState('');
   const [navProducts, setNavProducts] = useState(FALLBACK_PRODUCTS);
   const visibleNavProducts = applyFlatNavOverrides(navProducts);
+  const visibleCategoryNames = Object.keys(visibleNavProducts);
   const router = useRouter();
   const navRef = useRef(null);
 
@@ -139,22 +388,16 @@ export default function Nav() {
       if (error || !data || data.length === 0) return; // 失败时保留后备清单
       const map = {};
       data.forEach(({ category, subcategory }) => {
+        if (HIDDEN_LEGACY_CATEGORIES.has(category)) return;
         const homeCategory = CROSS_CATEGORY_HOME[subcategory];
         if (homeCategory && homeCategory !== category) return;
         if (!map[category]) map[category] = new Set();
         map[category].add(subcategory);
       });
       const ordered = {};
-      const cats = Object.keys(map).sort((a, b) => {
-        const ia = CATEGORY_ORDER.indexOf(a);
-        const ib = CATEGORY_ORDER.indexOf(b);
-        if (ia === -1 && ib === -1) return a.localeCompare(b);
-        if (ia === -1) return 1;
-        if (ib === -1) return -1;
-        return ia - ib;
-      });
+      const cats = Object.keys(map).sort(compareLabels);
       cats.forEach(cat => {
-        ordered[cat] = [...map[cat]].sort((a, b) => a.localeCompare(b));
+        ordered[cat] = [...map[cat]].sort(compareLabels);
       });
       setNavProducts(ordered);
     }
@@ -416,7 +659,7 @@ export default function Nav() {
 
         {/* ALL PRODUCTS MEGA DROPDOWN — 子类来自数据库,只显示已发布有货的 */}
        {activeDropdown === 'products' && (() => {
-          const cats = Object.keys(visibleNavProducts);
+          const cats = visibleCategoryNames;
           const current = activeCat && visibleNavProducts[activeCat] ? activeCat : cats[0];
           return (
             <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', borderTop: `2px solid ${GOLD}`, borderBottom: '1px solid #E0DDD7', boxShadow: '0 8px 32px rgba(0,0,0,.12)', zIndex: 200 }}>
@@ -509,7 +752,7 @@ export default function Nav() {
 
               {/* Shop by Categories */}
               <div style={mSection}>Shop by Categories</div>
-              {Object.keys(visibleNavProducts).map(cat => (
+              {visibleCategoryNames.map(cat => (
                 <div key={cat}>
                   <div style={{ display: 'flex', alignItems: 'stretch' }}>
                     <button onClick={() => go(categoryHref(cat))}
