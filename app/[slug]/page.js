@@ -9,6 +9,7 @@ import {
   getLowestPrice,
   getProductsForUrlPage,
 } from '@/lib/urlPages';
+import { absoluteUrl } from '@/lib/siteUrl';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -28,7 +29,7 @@ export async function generateMetadata({ params }) {
     title: urlPage.title || `${urlPage.h1 || urlPage.nav_label} | QuirkyPromo`,
     description: urlPage.meta_description || undefined,
     alternates: {
-      canonical: urlPage.canonical_url || `/${urlPage.slug}`,
+      canonical: absoluteUrl(urlPage.canonical_url || `/${urlPage.slug}`),
     },
     robots: urlPage.noindex ? { index: false, follow: true } : undefined,
   };
