@@ -27,18 +27,26 @@ const IMG = {
 
 const CAT_CLOUD = 'https://res.cloudinary.com/dyz9r0fm7/image/upload/f_auto,q_auto,w_600';
 const CATEGORIES = [
-  { name: 'Apparel',    slug: 'apparel',    img: `${CAT_CLOUD}/v1780122413/APPAREL_mpga11.jpg` },
-  { name: 'Headwear',   slug: 'headwear',   img: `${CAT_CLOUD}/v1780122418/HEADWARE_fejzwv.jpg` },
-  { name: 'Bags',       slug: 'bags',       img: `${CAT_CLOUD}/v1780122420/BAGS_pqfdyh.jpg` },
-  { name: 'Pens',       slug: 'pens',       img: `${CAT_CLOUD}/v1780122421/PENS_dd7ppl.jpg` },
-  { name: 'Drinkware',  slug: 'drinkware',  img: `${CAT_CLOUD}/v1780122421/drinkware_hzczyq.jpg` },
-  { name: 'Print',      slug: 'print',      img: `${CAT_CLOUD}/v1780122423/PRINT_sli6wx.jpg` },
-  { name: 'Business',   slug: 'business',   img: `${CAT_CLOUD}/v1780122425/BUSINESS_ic2scz.jpg` },
-  { name: 'Promotion',  slug: 'promotion',  img: `${CAT_CLOUD}/v1780122426/PROMOTION_bzsbo8.jpg` },
-  { name: 'Technology', slug: 'technology', img: `${CAT_CLOUD}/v1780122429/TECHNOLOGY_n8iyvs.jpg` },
-  { name: 'Packaging',  slug: 'packaging',  img: `${CAT_CLOUD}/v1780122430/PACKAGING_yel57o.jpg` },
-  { name: 'Leisure',    slug: 'leisure',    img: `${CAT_CLOUD}/v1780123085/LEISURE_uzraay.jpg` },
-  { name: 'Personal',   slug: 'personal',   img: `${CAT_CLOUD}/v1780123091/PERSONAL_m0pz8z.jpg` },
+  { name: 'Apparel', slug: 'apparel', href: '/custom-branded-apparel-australia', img: `${CAT_CLOUD}/v1780122413/APPAREL_mpga11.jpg` },
+  { name: 'Bags', slug: 'bags', href: '/custom-bags-australia', img: `${CAT_CLOUD}/v1780122420/BAGS_pqfdyh.jpg` },
+  { name: 'Barware & Accessories', slug: 'barware', href: '/branded-barware-australia', img: `${CAT_CLOUD}/v1780122421/drinkware_hzczyq.jpg` },
+  { name: 'Drinkware', slug: 'drinkware', href: '/custom-drinkware-australia', img: `${CAT_CLOUD}/v1780122421/drinkware_hzczyq.jpg` },
+  { name: 'Flags & Displays', slug: 'flags-displays', href: '/trade-show-displays-australia', img: `${CAT_CLOUD}/v1780122423/PRINT_sli6wx.jpg` },
+  { name: 'Giveaways & Event Accessories', slug: 'giveaways-event-accessories', href: '/promotional-giveaways-australia', img: `${CAT_CLOUD}/v1780122426/PROMOTION_bzsbo8.jpg` },
+  { name: 'Headwear', slug: 'headwear', href: '/custom-headwear-australia', img: `${CAT_CLOUD}/v1780122418/HEADWARE_fejzwv.jpg` },
+  { name: 'Home & Living', slug: 'home-living', href: '/branded-homewares-australia', img: `${CAT_CLOUD}/v1780123085/LEISURE_uzraay.jpg` },
+  { name: 'Key Rings', slug: 'key-rings', href: '/custom-keyrings-australia', img: `${CAT_CLOUD}/v1780122426/PROMOTION_bzsbo8.jpg` },
+  { name: 'Marketing Materials', slug: 'marketing-materials', href: '/printed-marketing-materials-australia', img: `${CAT_CLOUD}/v1780122423/PRINT_sli6wx.jpg` },
+  { name: 'Office & Desk', slug: 'office-desk', href: '/branded-office-supplies-australia', img: `${CAT_CLOUD}/v1780122425/BUSINESS_ic2scz.jpg` },
+  { name: 'Outdoor & Sports', slug: 'outdoor-sports', href: '/outdoor-promotional-products-australia', img: `${CAT_CLOUD}/v1780123085/LEISURE_uzraay.jpg` },
+  { name: 'Packaging', slug: 'packaging', href: '/custom-packaging-australia', img: `${CAT_CLOUD}/v1780122430/PACKAGING_yel57o.jpg` },
+  { name: 'Pens', slug: 'pens', href: '/branded-pens-australia', img: `${CAT_CLOUD}/v1780122421/PENS_dd7ppl.jpg` },
+  { name: 'Personal Care', slug: 'personal-care', href: '/branded-personal-care-products-australia', img: `${CAT_CLOUD}/v1780123091/PERSONAL_m0pz8z.jpg` },
+  { name: 'Pet', slug: 'pet', href: '/branded-pet-products-australia', img: `${CAT_CLOUD}/v1780123085/LEISURE_uzraay.jpg` },
+  { name: 'Technology', slug: 'technology', href: '/corporate-tech-gifts-australia', img: `${CAT_CLOUD}/v1780122429/TECHNOLOGY_n8iyvs.jpg` },
+  { name: 'Tools & Auto', slug: 'tools-auto', href: '/branded-tools-and-car-accessories-australia', img: `${CAT_CLOUD}/v1780122429/TECHNOLOGY_n8iyvs.jpg` },
+  { name: 'Toys & Games', slug: 'toys-games', href: '/promotional-toys-and-games-australia', img: `${CAT_CLOUD}/v1780122426/PROMOTION_bzsbo8.jpg` },
+  { name: 'Travel', slug: 'travel', href: '/branded-travel-accessories-australia', img: `${CAT_CLOUD}/v1780123085/LEISURE_uzraay.jpg` },
 ];
 
 const TRUST_BAR = [
@@ -251,7 +259,7 @@ export default function Home() {
                 style={{ background: GOLD, color: '#fff', border: 'none', padding: '16px 34px', borderRadius: '10px', fontSize: '16px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 20px rgba(201,169,110,.45)' }}>
                 Get a Quote →
               </button>
-              <Link href="/category/bags"
+              <Link href="/custom-bags-australia"
                 style={{ background: 'rgba(255,255,255,.85)', color: NAVY, padding: '16px 34px', borderRadius: '10px', fontSize: '16px', fontWeight: 600, textDecoration: 'none', border: `1.5px solid ${NAVY}`, boxSizing: 'border-box' }}>
                 Browse Products
               </Link>
@@ -286,11 +294,11 @@ export default function Home() {
       <div className="qp-sec" style={{ maxWidth: '1400px', margin: '0 auto', padding: '64px 40px' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <h2 className="qp-h2" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>Promotional Product Categories</h2>
-          <p style={{ fontSize: '15px', color: '#7A7570', margin: 0 }}>Browse our full range across 12 categories</p>
+          <p style={{ fontSize: '15px', color: '#7A7570', margin: 0 }}>Browse our full range across 20 categories</p>
         </div>
          <div className="qp-cat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
           {(showAllCats ? CATEGORIES : CATEGORIES.slice(0, 8)).map(cat => (
-            <Link key={cat.slug} href={`/category/${cat.slug}`} style={{ textDecoration: 'none' }}>
+            <Link key={cat.slug} href={cat.href || `/category/${cat.slug}`} style={{ textDecoration: 'none' }}>
               <div
                 onMouseEnter={() => setHoveredCat(cat.slug)}
                 onMouseLeave={() => setHoveredCat(null)}
@@ -347,7 +355,7 @@ export default function Home() {
                       </li>
                     ))}
                   </ul>
-                  <Link href="/category/bags"
+                  <Link href="/custom-bags-australia"
                     style={{ background: GOLD, color: '#fff', padding: '14px 28px', borderRadius: '10px', fontSize: '15px', fontWeight: 700, textDecoration: 'none', display: 'inline-block', boxShadow: '0 4px 16px rgba(201,169,110,.4)' }}>
                     Browse Products →
                   </Link>
@@ -360,7 +368,7 @@ export default function Home() {
             {/* 右卡: CUSTOM MADE & GLOBAL SOURCING (light) */}
             <div style={{ background: BG, border: '1px solid #E0DDD7', borderRadius: '18px', padding: '36px 32px' }}>
               <div style={{ color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '12px' }}>
-                Can't find exactly what you need?
+                Can&apos;t find exactly what you need?
               </div>
               <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>
                 Custom Made & Global Sourcing
@@ -466,7 +474,7 @@ export default function Home() {
               <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: NAVY, margin: '0 0 6px', fontWeight: 600 }}>Featured Products</h2>
               <p style={{ fontSize: '14px', color: '#7A7570', margin: 0 }}>A selection from our range of 1,800+ products</p>
             </div>
-            <Link href="/category/bags" style={{ color: GOLD, fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View All Products →</Link>
+            <Link href="/custom-bags-australia" style={{ color: GOLD, fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View All Products →</Link>
           </div>
           <div className="qp-feat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
             {products.map(product => {
@@ -622,14 +630,14 @@ export default function Home() {
               Ready to Bring Your Brand to Life?
             </h2>
             <p style={{ fontSize: '15px', color: 'rgba(255,255,255,.7)', margin: '0 0 32px', lineHeight: 1.7 }}>
-              Whether you need fast promotional products or a completely custom solution, we're here to help.
+              Whether you need fast promotional products or a completely custom solution, we&apos;re here to help.
             </p>
             <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button onClick={() => setQuoteOpen(true)}
                 style={{ background: GOLD, color: '#fff', border: 'none', padding: '15px 34px', borderRadius: '10px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 16px rgba(201,169,110,.4)' }}>
                 Get Your Free Quote →
               </button>
-              <Link href="/category/bags" style={{ background: 'rgba(255,255,255,.1)', color: '#fff', padding: '15px 34px', borderRadius: '10px', fontSize: '15px', fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(255,255,255,.25)', boxSizing: 'border-box' }}>
+              <Link href="/custom-bags-australia" style={{ background: 'rgba(255,255,255,.1)', color: '#fff', padding: '15px 34px', borderRadius: '10px', fontSize: '15px', fontWeight: 600, textDecoration: 'none', border: '1px solid rgba(255,255,255,.25)', boxSizing: 'border-box' }}>
                 Browse Products
               </Link>
             </div>

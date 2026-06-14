@@ -1,0 +1,349 @@
+[
+  {
+    "slug": "custom-merch-kits-australia",
+    "page_type": "collection",
+    "source_type": "collection",
+    "source_label": "Custom Merch Kits",
+    "primary_keyword": "custom merch kits Australia",
+    "title": "Custom Merch Kits Australia | Branded Kits & Bundles",
+    "h1": "Custom Merch Kits Australia",
+    "meta_description": "Build branded merch kits, gift sets and event bundles using products from QuirkyPromo categories, with options for packaging and custom quote support.",
+    "status": "draft",
+    "priority": 100,
+    "show_in_home": false,
+    "show_in_nav": true,
+    "show_in_footer": true,
+    "breadcrumb_parent": null,
+    "related_urls": [],
+    "noindex": false,
+    "notes": "Hub page. It can show all kit candidates and custom kit templates.",
+    "product_filter": {
+      "type": "kit_collection",
+      "kit_themes": [
+        "employee_onboarding",
+        "conference_event",
+        "office_school",
+        "wellness_care",
+        "beach_outdoor",
+        "food_drink_gifting",
+        "eco_sustainable",
+        "tech_gift_set",
+        "premium_corporate_gift",
+        "general_corporate_gifting"
+      ],
+      "offer_types": [
+        "prebuilt_kit",
+        "prebuilt_bundle",
+        "gift_set",
+        "hamper",
+        "custom_kit_template"
+      ],
+      "include_all_kit_candidates": true
+    }
+  },
+  {
+    "slug": "employee-onboarding-kits-australia",
+    "page_type": "collection",
+    "source_type": "collection",
+    "source_label": "Employee Onboarding Kits",
+    "primary_keyword": "employee onboarding kits Australia",
+    "title": "Employee Onboarding Kits Australia | Branded Welcome Packs",
+    "h1": "Employee Onboarding Kits Australia",
+    "meta_description": "Create branded employee onboarding kits with notebooks, pens, drink bottles, bags, apparel, tech gifts and custom packaging.",
+    "status": "draft",
+    "priority": 95,
+    "show_in_home": false,
+    "show_in_nav": true,
+    "show_in_footer": true,
+    "breadcrumb_parent": "custom-merch-kits-australia",
+    "related_urls": [],
+    "noindex": false,
+    "notes": "Can include office_school candidates when the product is suitable as a welcome/work pack.",
+    "product_filter": {
+      "type": "kit_collection",
+      "kit_themes": [
+        "employee_onboarding",
+        "office_school"
+      ],
+      "offer_types": [
+        "prebuilt_kit",
+        "prebuilt_bundle",
+        "gift_set",
+        "custom_kit_template"
+      ]
+    }
+  },
+  {
+    "slug": "conference-event-kits-australia",
+    "page_type": "collection",
+    "source_type": "collection",
+    "source_label": "Conference & Event Kits",
+    "primary_keyword": "conference event kits Australia",
+    "title": "Conference Event Kits Australia | Branded Event Packs",
+    "h1": "Conference & Event Kits Australia",
+    "meta_description": "Plan branded conference kits and event packs with lanyards, tote bags, notebooks, pens, drink bottles and practical giveaway items.",
+    "status": "draft",
+    "priority": 90,
+    "show_in_home": false,
+    "show_in_nav": true,
+    "show_in_footer": true,
+    "breadcrumb_parent": "custom-merch-kits-australia",
+    "related_urls": [],
+    "noindex": false,
+    "notes": "Event-specific collection. Good internal links to lanyards, tote bags and notebooks.",
+    "product_filter": {
+      "type": "kit_collection",
+      "kit_themes": [
+        "conference_event"
+      ],
+      "offer_types": [
+        "prebuilt_kit",
+        "prebuilt_bundle",
+        "gift_set",
+        "custom_kit_template"
+      ]
+    }
+  },
+  {
+    "slug": "corporate-gift-sets-australia",
+    "page_type": "collection",
+    "source_type": "collection",
+    "source_label": "Corporate Gift Sets",
+    "primary_keyword": "corporate gift sets Australia",
+    "title": "Corporate Gift Sets Australia | Branded Gift Boxes & Hampers",
+    "h1": "Corporate Gift Sets Australia",
+    "meta_description": "Source branded corporate gift sets and hampers with drinkware, barware, homewares, confectionery and premium packaging options.",
+    "status": "draft",
+    "priority": 96,
+    "show_in_home": false,
+    "show_in_nav": true,
+    "show_in_footer": true,
+    "breadcrumb_parent": "custom-merch-kits-australia",
+    "related_urls": [],
+    "noindex": false,
+    "notes": "Primary home for supplier gift sets, hampers, food/drink gifting and premium gifting.",
+    "product_filter": {
+      "type": "kit_collection",
+      "kit_themes": [
+        "food_drink_gifting",
+        "general_corporate_gifting",
+        "premium_corporate_gift"
+      ],
+      "offer_types": [
+        "gift_set",
+        "hamper",
+        "prebuilt_kit",
+        "custom_kit_template"
+      ]
+    }
+  },
+  {
+    "slug": "wellness-gift-packs-australia",
+    "page_type": "collection",
+    "source_type": "collection",
+    "source_label": "Wellness Gift Packs",
+    "primary_keyword": "wellness gift packs Australia",
+    "title": "Wellness Gift Packs Australia | Branded Care Packs",
+    "h1": "Wellness Gift Packs Australia",
+    "meta_description": "Create branded wellness gift packs and care kits with personal care items, drinkware, packaging and practical promotional products.",
+    "status": "draft",
+    "priority": 82,
+    "show_in_home": false,
+    "show_in_nav": true,
+    "show_in_footer": true,
+    "breadcrumb_parent": "custom-merch-kits-australia",
+    "related_urls": [],
+    "noindex": false,
+    "notes": "Keep separate from medical claims; this is promotional wellness/care gifting.",
+    "product_filter": {
+      "type": "kit_collection",
+      "kit_themes": [
+        "wellness_care"
+      ],
+      "offer_types": [
+        "prebuilt_kit",
+        "gift_set",
+        "custom_kit_template"
+      ]
+    }
+  },
+  {
+    "slug": "eco-merch-kits-australia",
+    "page_type": "collection",
+    "source_type": "collection",
+    "source_label": "Eco Merch Kits",
+    "primary_keyword": "eco merch kits Australia",
+    "title": "Eco Merch Kits Australia | Sustainable Branded Bundles",
+    "h1": "Eco Merch Kits Australia",
+    "meta_description": "Build eco merch kits with reusable bags, drinkware, notebooks, pens, packaging and sustainable branded product options.",
+    "status": "draft",
+    "priority": 80,
+    "show_in_home": false,
+    "show_in_nav": true,
+    "show_in_footer": true,
+    "breadcrumb_parent": "custom-merch-kits-australia",
+    "related_urls": [],
+    "noindex": false,
+    "notes": "Works with eco filter pages and sustainability content, but remains a collection/kit page.",
+    "product_filter": {
+      "type": "kit_collection",
+      "kit_themes": [
+        "eco_sustainable"
+      ],
+      "offer_types": [
+        "prebuilt_kit",
+        "gift_set",
+        "custom_kit_template"
+      ]
+    }
+  },
+  {
+    "slug": "tech-gift-sets-australia",
+    "page_type": "collection",
+    "source_type": "collection",
+    "source_label": "Tech Gift Sets",
+    "primary_keyword": "tech gift sets Australia",
+    "title": "Tech Gift Sets Australia | Branded Technology Bundles",
+    "h1": "Tech Gift Sets Australia",
+    "meta_description": "Source branded tech gift sets with chargers, speakers, earbuds, power banks, office items and custom packaging options.",
+    "status": "draft",
+    "priority": 86,
+    "show_in_home": false,
+    "show_in_nav": true,
+    "show_in_footer": false,
+    "breadcrumb_parent": "custom-merch-kits-australia",
+    "related_urls": [],
+    "noindex": false,
+    "notes": "Supplier candidates are strong here. Internal link to Technology category.",
+    "product_filter": {
+      "type": "kit_collection",
+      "kit_themes": [
+        "tech_gift_set"
+      ],
+      "offer_types": [
+        "gift_set",
+        "prebuilt_kit",
+        "custom_kit_template"
+      ]
+    }
+  },
+  {
+    "slug": "outdoor-event-kits-australia",
+    "page_type": "collection",
+    "source_type": "collection",
+    "source_label": "Outdoor Event Kits",
+    "primary_keyword": "outdoor event kits Australia",
+    "title": "Outdoor Event Kits Australia | Beach & Summer Merch Packs",
+    "h1": "Outdoor Event Kits Australia",
+    "meta_description": "Create outdoor event kits and beach merch packs with bags, drinkware, towels, sunglasses, picnic gear and branded summer items.",
+    "status": "draft",
+    "priority": 78,
+    "show_in_home": false,
+    "show_in_nav": true,
+    "show_in_footer": false,
+    "breadcrumb_parent": "custom-merch-kits-australia",
+    "related_urls": [],
+    "noindex": false,
+    "notes": "Seasonal and event-heavy. Can support summer campaign pages later.",
+    "product_filter": {
+      "type": "kit_collection",
+      "kit_themes": [
+        "beach_outdoor"
+      ],
+      "offer_types": [
+        "prebuilt_kit",
+        "gift_set",
+        "custom_kit_template"
+      ]
+    }
+  },
+  {
+    "slug": "new-home-gift-kits-australia",
+    "page_type": "landing",
+    "source_type": "collection",
+    "source_label": "New Home Gift Kits",
+    "primary_keyword": "new home gift kits Australia",
+    "title": "New Home Gift Kits Australia | Settlement Gift Packs",
+    "h1": "New Home Gift Kits Australia",
+    "meta_description": "Create new home gift kits for property handovers with homewares, drinkware, barware, confectionery and branded packaging.",
+    "status": "draft",
+    "priority": 84,
+    "show_in_home": false,
+    "show_in_nav": true,
+    "show_in_footer": false,
+    "breadcrumb_parent": "custom-merch-kits-australia",
+    "related_urls": [],
+    "noindex": false,
+    "notes": "Strategic QuirkyPromo-created template. Source from category products, not necessarily supplier prebuilt kits.",
+    "product_filter": {
+      "type": "kit_template",
+      "kit_themes": [
+        "new_home"
+      ],
+      "offer_types": [
+        "custom_kit_template"
+      ],
+      "source": "manual_template_from_existing_categories"
+    }
+  },
+  {
+    "slug": "premium-corporate-gift-sets-australia",
+    "page_type": "collection",
+    "source_type": "collection",
+    "source_label": "Premium Corporate Gift Sets",
+    "primary_keyword": "premium corporate gift sets Australia",
+    "title": "Premium Corporate Gift Sets Australia | Executive Branded Gifts",
+    "h1": "Premium Corporate Gift Sets Australia",
+    "meta_description": "Plan premium corporate gift sets and executive branded gifts with quality drinkware, tech, barware, homewares and packaging.",
+    "status": "draft",
+    "priority": 76,
+    "show_in_home": false,
+    "show_in_nav": false,
+    "show_in_footer": true,
+    "breadcrumb_parent": "custom-merch-kits-australia",
+    "related_urls": [],
+    "noindex": false,
+    "notes": "Can be linked from corporate gift sets page instead of top nav until content is ready.",
+    "product_filter": {
+      "type": "kit_collection",
+      "kit_themes": [
+        "premium_corporate_gift"
+      ],
+      "offer_types": [
+        "gift_set",
+        "hamper",
+        "custom_kit_template"
+      ]
+    }
+  },
+  {
+    "slug": "office-and-school-kits-australia",
+    "page_type": "collection",
+    "source_type": "collection",
+    "source_label": "Office & School Kits",
+    "primary_keyword": "office kits Australia",
+    "title": "Office & School Kits Australia | Branded Stationery Packs",
+    "h1": "Office & School Kits Australia",
+    "meta_description": "Create branded office kits and school packs with notebooks, pens, bags, stationery and packaging options.",
+    "status": "draft",
+    "priority": 62,
+    "show_in_home": false,
+    "show_in_nav": false,
+    "show_in_footer": false,
+    "breadcrumb_parent": "custom-merch-kits-australia",
+    "related_urls": [],
+    "noindex": false,
+    "notes": "Support page. Many items can also appear in employee onboarding kits.",
+    "product_filter": {
+      "type": "kit_collection",
+      "kit_themes": [
+        "office_school"
+      ],
+      "offer_types": [
+        "prebuilt_kit",
+        "gift_set",
+        "custom_kit_template"
+      ]
+    }
+  }
+]

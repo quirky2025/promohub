@@ -1,0 +1,20 @@
+field,current_code_signal,recommendation_status,used_by_ready_seed_pages,reason,suggestion
+fulfillment,not_seen_in_code,missing_recommended,0,Supplier import plan needs local_stock / indent_air / indent_sea / custom_sourcing. Existing indent_type is narrower.,Add fulfillment text and optionally backfill from indent_type.
+is_australian_made,not_seen_in_code,missing_recommended,0,Australian Made is a valuable future filter/collection.,Add boolean default false.
+kit_components,not_seen_in_code,missing_recommended_for_kits,1,Needed to describe what a kit contains.,Add kit_components jsonb default [] for supplier prebuilt and custom kit templates.
+kit_themes,not_seen_in_code,missing_required_for_kits,11,Kits & Bundles product_filter uses kit_themes.,Add kit_themes text[] default empty array.
+material_tags,not_seen_in_code,missing_recommended,3,"Needed for Cotton Tote, Metal Pens, Plastic Pens and future material LPs.",Add text[] generated/normalized by import rules.
+offer_type,not_seen_in_code,missing_required_for_kits,11,Kits & Bundles product_filter uses offer_types.,Add offer_type text default single_product.
+pack_size,not_seen_in_code,missing_recommended,0,Single-product multi-packs like 4 Pack Face Masks are not kits.,Add pack_size int nullable for pack quantity.
+related_categories,not_seen_in_code,missing_recommended_for_kits,1,"Kits often combine Bags, Drinkware, Office, Packaging, etc.",Add related_categories text[] default empty array.
+supplier,not_seen_in_code,missing_recommended,0,Four supplier imports need traceability and duplicate handling.,Add supplier text or supplier_id depending on import model.
+supplier_raw_category_path,not_seen_in_code,missing_recommended,0,Useful for audit/debug after supplier import mapping.,Add text or store in supplier import raw/staging table.
+tags,not_seen_in_code,missing_required_for_filters,2,Workwear and Teamwear seo_filter_page use product_filter.tags.,Add tags text[] for merch attributes/use-cases.
+brand,referenced_in_code,exists,0,Used by brand pages.,Keep; later link to brands table through normalized brand_slug/brand_id.
+category,referenced_in_code,exists,165,Used by current category pages and category product_filter.,Keep as primary product category.
+collection,referenced_in_code,exists,0,Current collection pages use jsonb array contains.,Keep for legacy collections; do not rely on it alone for Kits & Bundles.
+is_eco,referenced_in_code,exists,1,Used by sustainability pages and eco-pens filter.,Keep for broad eco filter.
+is_published,referenced_in_code,exists,176,Used by public listing queries.,Keep as public visibility gate.
+materials,referenced_in_code,exists_text_only,0,"Admin has materials text field, but url_pages compound filters need reliable material matching.",Add material_tags text[]; keep materials as human-readable text.
+status,referenced_in_code,exists,0,Used by product/similar-product logic and admin.,Keep; standardize active/inactive if needed.
+subcategory,referenced_in_code,exists,138,Used by current subcategory pages and subcategory product_filter.,Keep as primary product subcategory.

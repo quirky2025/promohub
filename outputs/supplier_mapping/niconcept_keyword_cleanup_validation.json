@@ -1,0 +1,15 @@
+{
+  "niconcept_broad_products": 771,
+  "status_counts": {
+    "auto_mapped_by_keyword": 765,
+    "manual_mapped_by_user": 6
+  },
+  "needs_review_count": 0,
+  "manual_override_count": 6,
+  "overrides_path": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\supplier_mapping\\niconcept_manual_overrides.csv",
+  "results_path": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\supplier_mapping\\niconcept_keyword_cleanup_results.csv",
+  "needs_review_path": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\supplier_mapping\\needs_review_products.csv",
+  "summary_path": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\supplier_mapping\\niconcept_keyword_cleanup_summary.md",
+  "mapping_v2_path": "C:\\Users\\jilin\\Desktop\\promohub\\outputs\\supplier_mapping\\supplier_category_mappings_DRAFT_v2.csv",
+  "v2_synced_after_manual_overrides": true
+}
