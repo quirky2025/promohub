@@ -1,10 +1,15 @@
 import './globals.css';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
+import { SITE_URL } from '@/lib/siteUrl';
 
 export const metadata = {
+  metadataBase: new URL(SITE_URL),
   title: 'QuirkyPromo — Premium Promotional Products Australia',
   description: 'High-quality branded merchandise for Australian businesses.',
+  alternates: {
+    canonical: '/',
+  },
 };
 
 export default function RootLayout({ children }) {
