@@ -1,6 +1,7 @@
 -- Gear For Life RAW LOAD dry-run gate.
 -- READ ONLY. This file does not insert, update, delete, truncate, create or drop anything.
 -- Run after `supplier_staging_schema_DRAFT.sql` has been applied.
+-- If staging tables may not exist yet, run `gear_for_life_schema_gate_READONLY.sql` first.
 -- Purpose: check whether the staging area is safe for a true Gear For Life raw load.
 
 begin read only;
