@@ -43,6 +43,18 @@ image_rows as (
   join params x on x.target_supplier = i.supplier
   where x.target_batch_id is null or i.batch_id = x.target_batch_id
 ),
+decoration_rows as (
+  select d.*
+  from public.supplier_decoration_options d
+  join params x on x.target_supplier = d.supplier
+  where x.target_batch_id is null or d.batch_id = x.target_batch_id
+),
+decoration_price_rows as (
+  select p.*
+  from public.supplier_decoration_price_rows p
+  join params x on x.target_supplier = p.supplier
+  where x.target_batch_id is null or p.batch_id = x.target_batch_id
+),
 missing_sku as (
   select batch_id, source_row_number, raw_name
   from raw_rows
@@ -119,6 +131,57 @@ gallery_fallback_image_candidates as (
     image_url,
     'mismatch' as gallery_reason
   from image_colour_mismatches
+),
+branding_price_rows_without_product_sku as (
+  select p.batch_id, p.supplier_sku, p.decoration_method, p.decoration_area, p.artwork_size_label
+  from decoration_price_rows p
+  left join sku_rows s
+    on s.batch_id = p.batch_id
+   and s.supplier_sku = p.supplier_sku
+  where s.supplier_sku is null
+),
+decoration_options_without_price_rows as (
+  select
+    d.batch_id,
+    d.supplier_sku,
+    d.decoration_method,
+    d.decoration_area,
+    d.artwork_size_label,
+    d.price_status
+  from decoration_rows d
+  left join decoration_price_rows p
+    on p.batch_id = d.batch_id
+   and p.supplier_sku = d.supplier_sku
+   and (
+      p.supplier_decoration_option_id = d.id
+      or (
+        lower(coalesce(p.decoration_method, '')) = lower(coalesce(d.decoration_method, ''))
+        and lower(coalesce(p.decoration_area, '')) = lower(coalesce(d.decoration_area, ''))
+        and lower(coalesce(p.artwork_size_label, '')) = lower(coalesce(d.artwork_size_label, ''))
+      )
+   )
+  where p.id is null
+    and d.price_status not in ('poa','request_quote','included','unavailable')
+),
+invalid_decoration_price_rows as (
+  select batch_id, supplier_sku, decoration_method, decoration_area, artwork_size_label, min_qty, max_qty, unit_cost, price_status
+  from decoration_price_rows
+  where (min_qty is not null and min_qty <= 0)
+     or (max_qty is not null and max_qty <= 0)
+     or (unit_cost is not null and unit_cost < 0)
+     or (min_qty is not null and max_qty is not null and max_qty < min_qty)
+     or (price_status = 'priced' and unit_cost is null)
+),
+decoration_quote_required as (
+  select batch_id, supplier_sku, decoration_method, decoration_area, artwork_size_label, price_status
+  from decoration_rows
+  where price_status in ('poa','request_quote')
+
+  union all
+
+  select batch_id, supplier_sku, decoration_method, decoration_area, artwork_size_label, price_status
+  from decoration_price_rows
+  where price_status in ('poa','request_quote')
 ),
 known_manual_review as (
   select *
@@ -238,6 +301,42 @@ select
   count(*)::int as issue_count,
   coalesce(jsonb_agg(to_jsonb(gallery_fallback_image_candidates) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
 from gallery_fallback_image_candidates
+
+union all
+
+select
+  'branding_price_rows_without_product_sku' as check_name,
+  case when count(*) = 0 then 'ok' else 'issue' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(branding_price_rows_without_product_sku) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from branding_price_rows_without_product_sku
+
+union all
+
+select
+  'decoration_options_without_price_rows' as check_name,
+  case when count(*) = 0 then 'ok' else 'warning' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(decoration_options_without_price_rows) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from decoration_options_without_price_rows
+
+union all
+
+select
+  'invalid_decoration_price_rows' as check_name,
+  case when count(*) = 0 then 'ok' else 'issue' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(invalid_decoration_price_rows) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from invalid_decoration_price_rows
+
+union all
+
+select
+  'decoration_quote_required' as check_name,
+  case when count(*) = 0 then 'ok' else 'warning' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(decoration_quote_required) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from decoration_quote_required
 
 union all
 

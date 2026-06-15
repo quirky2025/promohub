@@ -49,10 +49,11 @@ Known mapping position:
 4. Store raw image rows in `supplier_raw_images`.
 5. Store normalized supplier price rows in `supplier_price_rows`.
 6. Store normalized supplier decoration choices in `supplier_decoration_options`.
-7. Generate `supplier_transform_preview` rows using mapping rules.
-8. Run READONLY health checks.
-9. Manually review blocked/mixed rows.
-10. Only then generate product upsert SQL or an import job.
+7. Store normalized decoration quantity price rows in `supplier_decoration_price_rows`.
+8. Generate `supplier_transform_preview` rows using mapping rules.
+9. Run READONLY health checks.
+10. Manually review blocked/mixed rows.
+11. Only then generate product upsert SQL or an import job.
 
 ## Data Protection Rules
 
@@ -82,6 +83,23 @@ Mapping handling:
 - Collection signals like `Sale`, `Trending`, `Eco+ Collection`, `Legendary Range` should become tags or collection signals, not primary categories.
 - Fulfillment signals like `Offshore Express` and `Indent` should become fulfillment flags, not categories.
 
+## Decoration Pricing Rules
+
+Supplier decoration data must keep method, location, artwork size, quantity tier and setup charges separate. Do not collapse product-specific decoration rows into a single generic method.
+
+Example: for one Gear For Life bottle, these are separate decoration options:
+
+- `Pad Print / Box Lid / 70x40mm`
+- `Pad Print / Bottle / 45x45mm`
+- `Pad Print / Silicone base / 20x60mm`
+- `Laser Engraving / Bottle / 35x40mm or 20x80mm`
+- `UVDTF Full Colour / Bottle / 100x120mm`
+- `UVDTF Full Colour / Bottle / 200x150mm`
+
+Each option can have its own setup cost, repeat setup cost, additional-colour policy and quantity-tier unit costs. `POA` or missing fixed branding prices should be preserved as `price_status = 'poa'` or `price_status = 'request_quote'`, not guessed.
+
+The supplier import layer stores supplier costs only. Margin and final quote calculations belong in the pricing/quote layer.
+
 ## Product Conversion Principles
 
 When transform preview is approved, product-level conversion should preserve:
@@ -100,6 +118,7 @@ When transform preview is approved, product-level conversion should preserve:
 - lead time
 - price rows
 - decoration options
+- decoration price rows
 - colours
 - colour-specific images
 - gallery fallback images in `product_images`

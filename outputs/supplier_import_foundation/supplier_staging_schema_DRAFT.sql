@@ -3,7 +3,7 @@
 -- Purpose: preserve raw supplier data before any products transform.
 -- Three-layer model:
 --   1) supplier_raw_* keeps original supplier rows and image/colour facts.
---   2) supplier_price_rows + supplier_decoration_options keep normalized supplier commercial rows.
+--   2) supplier_price_rows + supplier_decoration_options + supplier_decoration_price_rows keep normalized supplier commercial rows.
 --   3) products/product_colours/product_images are generated only after preview approval.
 
 begin;
@@ -99,12 +99,50 @@ create table if not exists public.supplier_decoration_options (
   batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
   supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
   supplier_sku text not null,
+  decoration_option_key text,
   decoration_method text,
   decoration_area text,
+  decoration_location text,
+  artwork_size_label text,
+  max_width_mm numeric(10,2),
+  max_height_mm numeric(10,2),
+  size_unit text default 'mm',
   max_colours int,
+  pricing_model text not null default 'option_qty_tier'
+    check (pricing_model in ('option_qty_tier','sku_location_qty','size_qty_matrix','stitch_count_qty','flat_unit','quote_required')),
+  price_status text not null default 'priced'
+    check (price_status in ('priced','poa','request_quote','included','unavailable')),
   setup_cost numeric(12,4),
+  repeat_setup_cost numeric(12,4),
+  setup_cost_label text,
   run_cost numeric(12,4),
+  additional_colour_policy text,
   lead_time text,
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.supplier_decoration_price_rows (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  supplier_sku text not null,
+  supplier_decoration_option_id uuid references public.supplier_decoration_options(id) on delete cascade,
+  decoration_option_key text,
+  decoration_method text,
+  decoration_area text,
+  decoration_location text,
+  artwork_size_label text,
+  currency text default 'AUD',
+  min_qty int,
+  max_qty int,
+  unit_cost numeric(12,4),
+  setup_cost numeric(12,4),
+  repeat_setup_cost numeric(12,4),
+  pricing_basis text not null default 'per_unit'
+    check (pricing_basis in ('per_unit','per_colour','per_position','per_colour_position','per_line','per_stitch_band','flat_setup','freight','other')),
+  price_status text not null default 'priced'
+    check (price_status in ('priced','poa','request_quote','included','unavailable')),
   raw_json jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
@@ -172,6 +210,12 @@ create index if not exists idx_supplier_price_rows_sku
 
 create index if not exists idx_supplier_decoration_options_sku
   on public.supplier_decoration_options(batch_id, supplier, supplier_sku);
+
+create index if not exists idx_supplier_decoration_price_rows_sku
+  on public.supplier_decoration_price_rows(batch_id, supplier, supplier_sku);
+
+create index if not exists idx_supplier_decoration_price_rows_option
+  on public.supplier_decoration_price_rows(supplier_decoration_option_id);
 
 create index if not exists idx_supplier_transform_preview_status
   on public.supplier_transform_preview(batch_id, mapping_status);
