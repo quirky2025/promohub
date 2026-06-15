@@ -83,6 +83,7 @@ Mapping handling:
 - Anything with mixed category signals remains manual review.
 - Collection signals like `Sale`, `Trending`, `Eco+ Collection`, `Legendary Range` should become tags or collection signals, not primary categories.
 - Fulfillment signals like `Offshore Express` and `Indent` should become fulfillment flags, not categories.
+- Fulfillment and lead time defaults are supplier-specific. Do not copy one supplier's default into another supplier.
 
 ## Decoration Pricing Rules
 
@@ -97,7 +98,9 @@ Example: for one Gear For Life bottle, these are separate decoration options:
 - `UVDTF Full Colour / Bottle / 100x120mm`
 - `UVDTF Full Colour / Bottle / 200x150mm`
 
-Each option can have its own setup cost, repeat setup cost, additional-colour policy and quantity-tier unit costs. `POA` or missing fixed branding prices should be preserved as `price_status = 'poa'` or `price_status = 'request_quote'`, not guessed.
+Each option can have its own setup cost, repeat setup cost, additional-colour policy and quantity-tier unit costs. `POA` or missing fixed branding prices should be preserved as `price_status = 'request_quote'` with `unit_cost = null`, not guessed or stored as zero. Keep the original `POA` text in the raw/source fields.
+
+Every product-specific decoration price row must keep a `decoration_option_key` that includes supplier SKU, method, location/area and artwork size. Quantity tiers such as `100+` must be attached to that specific option key, not only to a method name, because different methods can share the same quantity break with different prices or setup rules.
 
 General decoration matrices that are not tied to one SKU should not be forced into `supplier_decoration_price_rows`. For example, Gear For Life transfer printing for bags and embroidery by stitch count should use supplier-level rate cards:
 
@@ -106,7 +109,24 @@ General decoration matrices that are not tied to one SKU should not be forced in
 
 Some supplier-level rate cards are default fallbacks for a category. For Gear For Life, `transfer_printing_bags` applies to all Bags and should be used when a bag product has no product-specific decoration option. Product-specific decoration rows still take priority over the category fallback.
 
+Some supplier rate cards should be retained for audit but normalized for frontend quoting on that supplier only. For Gear For Life embroidery, keep the supplier stitch-count matrix, but quote/display using the Gear For Life-specific embroidery formula: base 5,000 stitches, then +0.50 per additional 1,000 stitches. Do not apply this formula to other suppliers unless explicitly approved as a global rule.
+
 The supplier import layer stores supplier costs only. Margin and final quote calculations belong in the pricing/quote layer.
+
+## Supplier-Specific Fulfillment And Lead Time
+
+Lead time must be stored in structured fields as well as raw text. The importer should distinguish business days from calendar days because the frontend delivery estimate cannot safely calculate them the same way.
+
+For Gear For Life:
+
+- `fulfillment = local_stock`
+- `lead_time_min_days = 10`
+- `lead_time_max_days = 12`
+- `lead_time_unit = business_days`
+- `lead_time_basis = decorated`
+- `lead_time_note = 10-12 business days after artwork approval`
+
+This is a Gear For Life supplier default, not a global lead-time rule. Other suppliers, including TRENDS and future apparel suppliers, can have different lead times, fulfillment models, setup fees and decoration pricing rules.
 
 ## Product Conversion Principles
 
@@ -122,6 +142,7 @@ When transform preview is approved, product-level conversion should preserve:
 - brand alias result
 - material/tags/eco/collection signals
 - fulfillment
+- structured lead time fields: min days, max days, unit, basis and note
 - MOQ
 - lead time
 - price rows

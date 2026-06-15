@@ -20,7 +20,7 @@ AUDIT_MD = OUT_DIR / "gear_for_life_branding_workbook_audit.md"
 def clean(value):
     if value is None:
         return ""
-    return str(value).strip()
+    return str(value).replace("â€“", "-").replace("–", "-").strip()
 
 
 def parse_money(value):
@@ -39,7 +39,7 @@ def price_status(value):
         return ""
     upper = text.upper()
     if upper == "POA":
-        return "poa"
+        return "request_quote"
     if "NOT APPLICABLE" in upper or "NOT AVAILABLE" in upper:
         return "unavailable"
     return "priced" if parse_money(text) else "request_quote"
@@ -163,7 +163,15 @@ def extract_product_specific_rows(ws):
         loc, size_label, width, height = parse_location_and_size(location)
         setup_cost, repeat_setup_cost = parse_setup(current_setup)
         statuses = [price_status(v) for v in values if v]
-        option_status = "priced" if "priced" in statuses else "poa" if "POA" in location.upper() or "poa" in statuses else "unavailable" if "unavailable" in statuses else "request_quote"
+        option_status = (
+            "priced"
+            if "priced" in statuses
+            else "request_quote"
+            if "POA" in location.upper() or "request_quote" in statuses
+            else "unavailable"
+            if "unavailable" in statuses
+            else "request_quote"
+        )
         key = option_key(current_sku, current_method, location)
         add_colour = "Additional colour print requirement POA" if "pad" in current_method.lower() else ""
 
@@ -243,6 +251,11 @@ def extract_general_rate_cards(ws):
             "is_default_for_scope": "true",
             "fallback_policy": "when_no_product_specific_option",
             "pricing_model": "size_qty_matrix",
+            "frontend_pricing_model": "source_rate_card",
+            "supplier_formula_base_stitches": "",
+            "supplier_formula_stitch_increment": "",
+            "supplier_formula_increment_unit_cost": "",
+            "supplier_formula_note": "",
             "setup_cost": "55.00",
             "repeat_setup_cost": "",
             "surcharge_cost": "",
@@ -259,6 +272,11 @@ def extract_general_rate_cards(ws):
             "is_default_for_scope": "false",
             "fallback_policy": "manual_review",
             "pricing_model": "stitch_count_qty",
+            "frontend_pricing_model": "supplier_embroidery_formula",
+            "supplier_formula_base_stitches": "5000",
+            "supplier_formula_stitch_increment": "1000",
+            "supplier_formula_increment_unit_cost": "0.50",
+            "supplier_formula_note": "Gear For Life embroidery rule only: start from 5,000 stitches; each additional 1,000 stitches adds $0.50 per unit. Supplier matrix retained for audit.",
             "setup_cost": "75.00",
             "repeat_setup_cost": "",
             "surcharge_cost": "1.90",
@@ -412,6 +430,11 @@ def main():
         "is_default_for_scope",
         "fallback_policy",
         "pricing_model",
+        "frontend_pricing_model",
+        "supplier_formula_base_stitches",
+        "supplier_formula_stitch_increment",
+        "supplier_formula_increment_unit_cost",
+        "supplier_formula_note",
         "setup_cost",
         "repeat_setup_cost",
         "surcharge_cost",
@@ -458,12 +481,13 @@ def main():
         "",
         "## Special Handling",
         "",
-        "- Rows with `POA` are preserved with `price_status = poa`; prices are not guessed.",
+        "- Rows with `POA` are preserved with `price_status = request_quote`; prices are not guessed and `unit_cost` stays blank.",
         "- Rows such as `Knife decoration is not applicable` are preserved with `price_status = unavailable`.",
         "- The Transfer Printing and Embroidery sections are general rate cards, not product-specific SKU rows.",
         "- Transfer Printing uses `rate_card_key = transfer_printing_bags` and applies to all Bags.",
         "- Transfer Printing is the default fallback for bag products when no product-specific decoration method is supplied.",
-        "- Embroidery uses `rate_card_key = embroidery_apparel_selected_bags` and `pricing_basis = per_stitch_band`.",
+        "- Embroidery source matrix is retained for audit.",
+        "- Embroidery frontend pricing rule is Gear For Life only: base 5,000 stitches, then +$0.50 per additional 1,000 stitches.",
         "- The import layer stores supplier cost only; margin belongs in the quote/pricing layer.",
         "",
         "## Output Preview Files",

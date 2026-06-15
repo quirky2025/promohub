@@ -11,25 +11,26 @@ Source workbook:
 - Product-specific decoration price rows: 1069
 - General rate cards: 2
 - General rate card rows: 160
-- Option status counts: `{'priced': 254, 'unavailable': 4, 'poa': 15}`
-- Price row status counts: `{'priced': 1037, 'unavailable': 4, 'poa': 28}`
-- General rate row status counts: `{'priced': 132, 'poa': 28}`
+- Option status counts: `{'priced': 254, 'unavailable': 4, 'request_quote': 15}`
+- Price row status counts: `{'priced': 1037, 'unavailable': 4, 'request_quote': 28}`
+- General rate row status counts: `{'priced': 132, 'request_quote': 28}`
 
 ## Method Counts
 
 - Pad Printing: 129
 - Laser Engraving: 91
-- UVDTF Full Colour – Small: 32
-- UVDTF Full Colour – Large: 21
+- UVDTF Full Colour - Small: 32
+- UVDTF Full Colour - Large: 21
 
 ## Special Handling
 
-- Rows with `POA` are preserved with `price_status = poa`; prices are not guessed.
+- Rows with `POA` are preserved with `price_status = request_quote`; prices are not guessed and `unit_cost` stays blank.
 - Rows such as `Knife decoration is not applicable` are preserved with `price_status = unavailable`.
 - The Transfer Printing and Embroidery sections are general rate cards, not product-specific SKU rows.
 - Transfer Printing uses `rate_card_key = transfer_printing_bags` and applies to all Bags.
 - Transfer Printing is the default fallback for bag products when no product-specific decoration method is supplied.
-- Embroidery uses `rate_card_key = embroidery_apparel_selected_bags` and `pricing_basis = per_stitch_band`.
+- Embroidery source matrix is retained for audit.
+- Embroidery frontend pricing rule is Gear For Life only: base 5,000 stitches, then +$0.50 per additional 1,000 stitches.
 - The import layer stores supplier cost only; margin belongs in the quote/pricing layer.
 
 ## Output Preview Files

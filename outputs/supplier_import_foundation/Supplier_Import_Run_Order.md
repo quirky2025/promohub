@@ -35,6 +35,7 @@ Gear For Life
 Load raw rows into staging tables:
 
 - `supplier_import_batches`
+- `supplier_commercial_defaults`
 - `supplier_raw_product_rows`
 - `supplier_raw_colour_options`
 - `supplier_raw_images`
@@ -50,6 +51,7 @@ Important:
 - Keep raw JSON payloads.
 - Do not delete repeated SKU rows.
 - Do not publish imported products.
+- Use supplier-specific fulfillment, lead time, setup and decoration rules. For Gear For Life, default fulfillment is `local_stock` and default decorated lead time is `10-12 business_days after artwork approval`.
 
 ## Phase 3 - Run READONLY Health Check
 
@@ -75,6 +77,9 @@ Warnings that need review:
 - decoration option without price rows
 - invalid decoration price rows
 - POA/request quote decoration rows
+- request quote rows with a non-null unit cost
+- decoration option key duplicates or price rows that cannot match a decoration option key
+- Gear For Life default fulfillment/lead time missing or mismatched
 - general decoration rate card issues
 - transform preview rows needing review
 
@@ -95,6 +100,7 @@ public.supplier_transform_preview
 ```
 
 The preview is the approval surface. It should include target category/subcategory, `page_role`, brand alias result, tags, fulfillment, offer type and warning flags.
+It should also carry structured lead time fields where the supplier default or product source provides them: min days, max days, unit, basis and note.
 
 ## Phase 5 - Manual Review
 
@@ -139,3 +145,7 @@ Decoration conversion must preserve supplier-specific method, location and artwo
 Supplier-level general rate cards, such as transfer printing by size or embroidery by stitch count, should stay separate from product-specific decoration rows until a product explicitly supports that method.
 
 Gear For Life `transfer_printing_bags` is a category fallback: apply it to Bags when a bag product has no product-specific decoration option. Do not use the fallback to override product-specific decoration data.
+
+Gear For Life embroidery should keep the supplier matrix for audit, but frontend quote normalization uses a Gear For Life-specific formula: base 5,000 stitches, then +0.50 per additional 1,000 stitches. This is not a global embroidery rule.
+
+POA rows should use `price_status = request_quote` and `unit_cost = null`. Keep the original POA text in the raw/source field so manual quoting still has the supplier evidence.

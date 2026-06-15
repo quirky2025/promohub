@@ -47,7 +47,7 @@ branding 数量阶梯单价
 - `max_width_mm` / `max_height_mm`：只有尺寸明确时才拆成数字。
 - `setup_cost`：例如 Pad/Laser setup `$75.00`，UVDTF setup `$55.00`。
 - `repeat_setup_cost`：如果供应商提供 repeat setup，要保留。
-- `price_status`：`priced`、`poa`、`request_quote`、`included`、`unavailable`。
+- `price_status`：`priced`、`request_quote`、`included`、`unavailable`。供应商原文 `POA` 统一转成 `request_quote`。
 - `additional_colour_policy`：例如 additional colour print requirement POA。
 
 ## 数量阶梯怎么存
@@ -77,13 +77,7 @@ UVDTF / Bottle / 200x150mm / 1+      -> 20.00
 price_status = request_quote
 ```
 
-或：
-
-```text
-price_status = poa
-```
-
-前台可以显示询价或不显示自动价格，但后台必须保留原始信息，方便人工报价。
+前台可以显示询价或不显示自动价格，但后台必须保留原始信息，方便人工报价。`POA` 行的 `unit_cost` 必须为空，不能填 0；原始 `POA` 文本保留在 `raw_price` / `raw_json` 里。
 
 ## 通用 Rate Card
 
@@ -137,7 +131,33 @@ Embroidery 是按 stitch count 和数量区间计价，例如：
 15001+ stitches / 700+ = POA
 ```
 
-这些行后面要由产品的可用 decoration method 决定是否套用。不能在 staging 阶段猜它属于哪个 SKU。
+这些 source matrix 行继续保留，用于审计和供应商原始依据。不能在 staging 阶段猜它属于哪个 SKU。
+
+但是 GFL 的前台 / 报价层不直接显示这张复杂矩阵。这个规则只适合 Gear For Life / The Source，不是全局 embroidery 规则：
+
+```text
+frontend_pricing_model = supplier_embroidery_formula
+supplier_formula_base_stitches = 5000
+supplier_formula_stitch_increment = 1000
+supplier_formula_increment_unit_cost = 0.50
+```
+
+业务解释：
+
+```text
+从 5,000 stitches 开始算；
+每多 1,000 stitches，单件价格 +0.50。
+```
+
+这条规则只用于 GFL 的前台展示和报价计算；supplier 原始 embroidery matrix 仍然保留在 `supplier_decoration_rate_card_rows`，不要删除。
+
+重要边界：
+
+```text
+GFL embroidery formula = supplier-specific
+不是全局规则
+不能套到其他供应商
+```
 
 ## 这份 xlsx 的初步检查结果
 
@@ -153,7 +173,7 @@ C:\Users\jilin\Desktop\supplier\gearforlife\The Source Branding Price List - Com
 - 产品专属 decoration options：273
 - 产品专属 decoration price rows：1069
 - 通用 rate card rows：160
-- `POA` 保留为 `price_status = poa`
+- `POA` 保留为 `raw_price = POA`，并转成 `price_status = request_quote`，`unit_cost` 为空
 - `Knife decoration is not applicable` 保留为 `price_status = unavailable`
 
 ## 和 TRENDS 的关系
@@ -185,6 +205,7 @@ GFL branding 导入后，READONLY 检查必须能发现：
 - area 或 size 缺失，需要人工确认是否能前台展示。
 - 通用 rate card 不应该被误当作产品 SKU。
 - unavailable 行不应该被当作价格。
+- 如果 rate card 使用 `supplier_embroidery_formula`，必须有 base stitches、increment stitches、increment unit cost。
 
 ## 重要提醒
 

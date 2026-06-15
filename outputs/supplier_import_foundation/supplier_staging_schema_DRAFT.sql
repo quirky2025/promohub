@@ -22,6 +22,29 @@ create table if not exists public.supplier_import_batches (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.supplier_commercial_defaults (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  applies_to_category text,
+  applies_to_subcategory text,
+  fulfillment text not null default 'local_stock'
+    check (fulfillment in ('local_stock','indent_air','indent_sea','custom_sourcing')),
+  lead_time_min_days int,
+  lead_time_max_days int,
+  lead_time_unit text
+    check (lead_time_unit in ('business_days','calendar_days','weeks','unknown')),
+  lead_time_basis text
+    check (lead_time_basis in ('decorated','undecorated','after_artwork_approval','dispatch','supplier_default','unknown')),
+  lead_time_note text,
+  source_note text,
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  check (lead_time_min_days is null or lead_time_min_days >= 0),
+  check (lead_time_max_days is null or lead_time_max_days >= 0),
+  check (lead_time_min_days is null or lead_time_max_days is null or lead_time_max_days >= lead_time_min_days)
+);
+
 create table if not exists public.supplier_raw_product_rows (
   id uuid primary key default gen_random_uuid(),
   batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
@@ -43,12 +66,22 @@ create table if not exists public.supplier_raw_product_rows (
   raw_material text,
   raw_moq text,
   raw_lead_time text,
+  lead_time_min_days int,
+  lead_time_max_days int,
+  lead_time_unit text
+    check (lead_time_unit in ('business_days','calendar_days','weeks','unknown')),
+  lead_time_basis text
+    check (lead_time_basis in ('decorated','undecorated','after_artwork_approval','dispatch','supplier_default','unknown')),
+  lead_time_note text,
   raw_fulfillment text,
   raw_is_new text,
   raw_is_sale text,
   raw_is_discontinued text,
   raw_json jsonb not null default '{}'::jsonb,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  check (lead_time_min_days is null or lead_time_min_days >= 0),
+  check (lead_time_max_days is null or lead_time_max_days >= 0),
+  check (lead_time_min_days is null or lead_time_max_days is null or lead_time_max_days >= lead_time_min_days)
 );
 
 create table if not exists public.supplier_raw_colour_options (
@@ -112,15 +145,25 @@ create table if not exists public.supplier_decoration_options (
   pricing_model text not null default 'option_qty_tier'
     check (pricing_model in ('option_qty_tier','sku_location_qty','size_qty_matrix','stitch_count_qty','flat_unit','quote_required')),
   price_status text not null default 'priced'
-    check (price_status in ('priced','poa','request_quote','included','unavailable')),
+    check (price_status in ('priced','request_quote','included','unavailable')),
   setup_cost numeric(12,4),
   repeat_setup_cost numeric(12,4),
   setup_cost_label text,
   run_cost numeric(12,4),
   additional_colour_policy text,
   lead_time text,
+  lead_time_min_days int,
+  lead_time_max_days int,
+  lead_time_unit text
+    check (lead_time_unit in ('business_days','calendar_days','weeks','unknown')),
+  lead_time_basis text
+    check (lead_time_basis in ('decorated','undecorated','after_artwork_approval','dispatch','supplier_default','unknown')),
+  lead_time_note text,
   raw_json jsonb not null default '{}'::jsonb,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  check (lead_time_min_days is null or lead_time_min_days >= 0),
+  check (lead_time_max_days is null or lead_time_max_days >= 0),
+  check (lead_time_min_days is null or lead_time_max_days is null or lead_time_max_days >= lead_time_min_days)
 );
 
 create table if not exists public.supplier_decoration_price_rows (
@@ -143,7 +186,7 @@ create table if not exists public.supplier_decoration_price_rows (
   pricing_basis text not null default 'per_unit'
     check (pricing_basis in ('per_unit','per_colour','per_position','per_colour_position','per_line','per_stitch_band','flat_setup','freight','other')),
   price_status text not null default 'priced'
-    check (price_status in ('priced','poa','request_quote','included','unavailable')),
+    check (price_status in ('priced','request_quote','included','unavailable')),
   raw_json jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
@@ -162,6 +205,12 @@ create table if not exists public.supplier_decoration_rate_cards (
     check (fallback_policy in ('none','when_no_product_specific_option','always_available_for_scope','manual_review')),
   pricing_model text not null
     check (pricing_model in ('size_qty_matrix','stitch_count_qty','category_qty_matrix','quote_required')),
+  frontend_pricing_model text not null default 'source_rate_card'
+    check (frontend_pricing_model in ('source_rate_card','supplier_embroidery_formula','manual_review')),
+  supplier_formula_base_stitches int,
+  supplier_formula_stitch_increment int,
+  supplier_formula_increment_unit_cost numeric(12,4),
+  supplier_formula_note text,
   setup_cost numeric(12,4),
   repeat_setup_cost numeric(12,4),
   surcharge_cost numeric(12,4),
@@ -193,7 +242,7 @@ create table if not exists public.supplier_decoration_rate_card_rows (
   pricing_basis text not null default 'per_unit'
     check (pricing_basis in ('per_unit','per_colour','per_position','per_colour_position','per_line','per_stitch_band','flat_setup','freight','other')),
   price_status text not null default 'priced'
-    check (price_status in ('priced','poa','request_quote','included','unavailable')),
+    check (price_status in ('priced','request_quote','included','unavailable')),
   raw_json jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
@@ -220,12 +269,22 @@ create table if not exists public.supplier_transform_preview (
   tags text[] not null default '{}'::text[],
   fulfillment text not null default 'local_stock'
     check (fulfillment in ('local_stock','indent_air','indent_sea','custom_sourcing')),
+  lead_time_min_days int,
+  lead_time_max_days int,
+  lead_time_unit text
+    check (lead_time_unit in ('business_days','calendar_days','weeks','unknown')),
+  lead_time_basis text
+    check (lead_time_basis in ('decorated','undecorated','after_artwork_approval','dispatch','supplier_default','unknown')),
+  lead_time_note text,
   offer_type text,
   kit_themes text[] not null default '{}'::text[],
   warning_flags text[] not null default '{}'::text[],
   review_notes text,
   preview_json jsonb not null default '{}'::jsonb,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  check (lead_time_min_days is null or lead_time_min_days >= 0),
+  check (lead_time_max_days is null or lead_time_max_days >= 0),
+  check (lead_time_min_days is null or lead_time_max_days is null or lead_time_max_days >= lead_time_min_days)
 );
 
 create table if not exists public.product_images (
@@ -247,6 +306,9 @@ create table if not exists public.product_images (
 create index if not exists idx_supplier_raw_product_rows_batch_sku
   on public.supplier_raw_product_rows(batch_id, supplier, supplier_sku);
 
+create index if not exists idx_supplier_commercial_defaults_supplier
+  on public.supplier_commercial_defaults(batch_id, supplier, applies_to_category, applies_to_subcategory);
+
 create index if not exists idx_supplier_raw_product_rows_category
   on public.supplier_raw_product_rows(supplier, raw_category_path);
 
@@ -262,11 +324,22 @@ create index if not exists idx_supplier_price_rows_sku
 create index if not exists idx_supplier_decoration_options_sku
   on public.supplier_decoration_options(batch_id, supplier, supplier_sku);
 
+create unique index if not exists idx_supplier_decoration_options_key_unique
+  on public.supplier_decoration_options(batch_id, supplier, supplier_sku, decoration_option_key)
+  where decoration_option_key is not null;
+
 create index if not exists idx_supplier_decoration_price_rows_sku
   on public.supplier_decoration_price_rows(batch_id, supplier, supplier_sku);
 
 create index if not exists idx_supplier_decoration_price_rows_option
   on public.supplier_decoration_price_rows(supplier_decoration_option_id);
+
+create index if not exists idx_supplier_decoration_price_rows_option_key
+  on public.supplier_decoration_price_rows(batch_id, supplier, supplier_sku, decoration_option_key);
+
+create unique index if not exists idx_supplier_decoration_price_rows_key_tier_unique
+  on public.supplier_decoration_price_rows(batch_id, supplier, supplier_sku, decoration_option_key, min_qty, coalesce(max_qty, 2147483647))
+  where decoration_option_key is not null and min_qty is not null;
 
 create index if not exists idx_supplier_decoration_rate_cards_key
   on public.supplier_decoration_rate_cards(batch_id, supplier, rate_card_key);
