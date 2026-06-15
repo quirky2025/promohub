@@ -99,6 +99,27 @@ supplier_decoration_rate_cards
   -> supplier_decoration_rate_card_rows
 ```
 
+Transfer Printing 这张价卡适用于所有 Bags。尤其是包类产品没有写专属印刷方式时，要把 Transfer Printing 作为默认可用的 decoration 方式。
+
+机器规则：
+
+```text
+rate_card_key = transfer_printing_bags
+applies_to_category = Bags
+is_default_for_scope = true
+fallback_policy = when_no_product_specific_option
+```
+
+优先级：
+
+```text
+产品专属 decoration options
+  优先于
+Bags 通用 Transfer Printing rate card
+```
+
+也就是说，如果某个包已经明确写了专属 Pad Printing / Embroidery / Transfer 等方式，先用专属记录；如果没有写，就用 Bags 的 Transfer Printing 通用价卡兜底。
+
 Transfer Printing 是按尺寸和数量区间计价，例如：
 
 ```text

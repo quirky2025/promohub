@@ -104,6 +104,8 @@ General decoration matrices that are not tied to one SKU should not be forced in
 - `supplier_decoration_rate_cards`
 - `supplier_decoration_rate_card_rows`
 
+Some supplier-level rate cards are default fallbacks for a category. For Gear For Life, `transfer_printing_bags` applies to all Bags and should be used when a bag product has no product-specific decoration option. Product-specific decoration rows still take priority over the category fallback.
+
 The supplier import layer stores supplier costs only. Margin and final quote calculations belong in the pricing/quote layer.
 
 ## Product Conversion Principles

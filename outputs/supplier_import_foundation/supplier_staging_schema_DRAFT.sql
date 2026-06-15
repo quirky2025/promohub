@@ -155,6 +155,11 @@ create table if not exists public.supplier_decoration_rate_cards (
   rate_card_key text not null,
   decoration_method text not null,
   applies_to text,
+  applies_to_category text,
+  applies_to_subcategory text,
+  is_default_for_scope boolean not null default false,
+  fallback_policy text not null default 'none'
+    check (fallback_policy in ('none','when_no_product_specific_option','always_available_for_scope','manual_review')),
   pricing_model text not null
     check (pricing_model in ('size_qty_matrix','stitch_count_qty','category_qty_matrix','quote_required')),
   setup_cost numeric(12,4),

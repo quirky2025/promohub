@@ -203,6 +203,14 @@ rate_cards_without_rows as (
    and r.rate_card_key = c.rate_card_key
   where r.id is null
 ),
+default_rate_cards_missing_scope as (
+  select batch_id, rate_card_key, decoration_method, applies_to, applies_to_category, applies_to_subcategory, fallback_policy
+  from decoration_rate_cards
+  where is_default_for_scope = true
+    and nullif(trim(coalesce(applies_to, '')), '') is null
+    and nullif(trim(coalesce(applies_to_category, '')), '') is null
+    and nullif(trim(coalesce(applies_to_subcategory, '')), '') is null
+),
 invalid_rate_card_rows as (
   select batch_id, rate_card_key, decoration_method, artwork_size_label, stitch_count_min, stitch_count_max, min_qty, max_qty, unit_cost, price_status
   from decoration_rate_card_rows
@@ -383,6 +391,15 @@ select
   count(*)::int as issue_count,
   coalesce(jsonb_agg(to_jsonb(rate_cards_without_rows) order by rate_card_key) filter (where rate_card_key is not null), '[]'::jsonb) as details
 from rate_cards_without_rows
+
+union all
+
+select
+  'default_rate_cards_missing_scope' as check_name,
+  case when count(*) = 0 then 'ok' else 'issue' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(default_rate_cards_missing_scope) order by rate_card_key) filter (where rate_card_key is not null), '[]'::jsonb) as details
+from default_rate_cards_missing_scope
 
 union all
 

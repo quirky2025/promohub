@@ -27,7 +27,8 @@ Source workbook:
 - Rows with `POA` are preserved with `price_status = poa`; prices are not guessed.
 - Rows such as `Knife decoration is not applicable` are preserved with `price_status = unavailable`.
 - The Transfer Printing and Embroidery sections are general rate cards, not product-specific SKU rows.
-- Transfer Printing uses `rate_card_key = transfer_printing_bags`.
+- Transfer Printing uses `rate_card_key = transfer_printing_bags` and applies to all Bags.
+- Transfer Printing is the default fallback for bag products when no product-specific decoration method is supplied.
 - Embroidery uses `rate_card_key = embroidery_apparel_selected_bags` and `pricing_basis = per_stitch_band`.
 - The import layer stores supplier cost only; margin belongs in the quote/pricing layer.
 

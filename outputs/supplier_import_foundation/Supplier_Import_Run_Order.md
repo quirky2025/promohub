@@ -137,3 +137,5 @@ Do not flatten colour images into product-level images. Colour-safe images belon
 Decoration conversion must preserve supplier-specific method, location and artwork size. For example, `Pad Print / Box Lid / 70x40mm` and `Pad Print / Bottle / 45x45mm` are different options even when their quantity prices happen to match.
 
 Supplier-level general rate cards, such as transfer printing by size or embroidery by stitch count, should stay separate from product-specific decoration rows until a product explicitly supports that method.
+
+Gear For Life `transfer_printing_bags` is a category fallback: apply it to Bags when a bag product has no product-specific decoration option. Do not use the fallback to override product-specific decoration data.

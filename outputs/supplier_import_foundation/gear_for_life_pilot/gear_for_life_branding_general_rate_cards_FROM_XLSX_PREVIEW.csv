@@ -1,3 +1,3 @@
-﻿supplier,rate_card_key,decoration_method,applies_to,pricing_model,setup_cost,repeat_setup_cost,surcharge_cost,surcharge_label,notes
-Gear For Life,transfer_printing_bags,Transfer Printing,Bags,size_qty_matrix,55.00,,,,"Transfer Printing - Bags (Full Colour Transfer, priced by size)."
-Gear For Life,embroidery_apparel_selected_bags,Embroidery,Apparel and selected bags,stitch_count_qty,75.00,,1.90,Some items +$1.90/unit,Embroidery by stitch count and quantity. Logo setup $75/logo.
+﻿supplier,rate_card_key,decoration_method,applies_to,applies_to_category,applies_to_subcategory,is_default_for_scope,fallback_policy,pricing_model,setup_cost,repeat_setup_cost,surcharge_cost,surcharge_label,notes
+Gear For Life,transfer_printing_bags,Transfer Printing,Bags,Bags,,true,when_no_product_specific_option,size_qty_matrix,55.00,,,,"Transfer Printing - Bags (Full Colour Transfer, priced by size). Default for bag products when no product-specific decoration method is supplied."
+Gear For Life,embroidery_apparel_selected_bags,Embroidery,Apparel and selected bags,,,false,manual_review,stitch_count_qty,75.00,,1.90,Some items +$1.90/unit,Embroidery by stitch count and quantity. Logo setup $75/logo.
