@@ -50,10 +50,11 @@ Known mapping position:
 5. Store normalized supplier price rows in `supplier_price_rows`.
 6. Store normalized supplier decoration choices in `supplier_decoration_options`.
 7. Store normalized decoration quantity price rows in `supplier_decoration_price_rows`.
-8. Generate `supplier_transform_preview` rows using mapping rules.
-9. Run READONLY health checks.
-10. Manually review blocked/mixed rows.
-11. Only then generate product upsert SQL or an import job.
+8. Store non-product-specific decoration matrices in `supplier_decoration_rate_cards` and `supplier_decoration_rate_card_rows`.
+9. Generate `supplier_transform_preview` rows using mapping rules.
+10. Run READONLY health checks.
+11. Manually review blocked/mixed rows.
+12. Only then generate product upsert SQL or an import job.
 
 ## Data Protection Rules
 
@@ -98,6 +99,11 @@ Example: for one Gear For Life bottle, these are separate decoration options:
 
 Each option can have its own setup cost, repeat setup cost, additional-colour policy and quantity-tier unit costs. `POA` or missing fixed branding prices should be preserved as `price_status = 'poa'` or `price_status = 'request_quote'`, not guessed.
 
+General decoration matrices that are not tied to one SKU should not be forced into `supplier_decoration_price_rows`. For example, Gear For Life transfer printing for bags and embroidery by stitch count should use supplier-level rate cards:
+
+- `supplier_decoration_rate_cards`
+- `supplier_decoration_rate_card_rows`
+
 The supplier import layer stores supplier costs only. Margin and final quote calculations belong in the pricing/quote layer.
 
 ## Product Conversion Principles
@@ -119,6 +125,7 @@ When transform preview is approved, product-level conversion should preserve:
 - price rows
 - decoration options
 - decoration price rows
+- decoration rate cards
 - colours
 - colour-specific images
 - gallery fallback images in `product_images`

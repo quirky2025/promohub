@@ -41,6 +41,8 @@ Load raw rows into staging tables:
 - `supplier_price_rows`
 - `supplier_decoration_options`
 - `supplier_decoration_price_rows`
+- `supplier_decoration_rate_cards`
+- `supplier_decoration_rate_card_rows`
 
 Important:
 
@@ -73,6 +75,7 @@ Warnings that need review:
 - decoration option without price rows
 - invalid decoration price rows
 - POA/request quote decoration rows
+- general decoration rate card issues
 - transform preview rows needing review
 
 ## Phase 4 - Generate Transform Preview
@@ -126,8 +129,11 @@ Convert in this order:
 5. product gallery fallback images in `product_images`
 6. decoration options
 7. decoration price rows
-8. tags/material/fulfillment/brand metadata
+8. general decoration rate cards
+9. tags/material/fulfillment/brand metadata
 
 Do not flatten colour images into product-level images. Colour-safe images belong in `product_colours.images`; unlinked, ambiguous or mismatched images belong in `product_images` with `image_role = gallery`.
 
 Decoration conversion must preserve supplier-specific method, location and artwork size. For example, `Pad Print / Box Lid / 70x40mm` and `Pad Print / Bottle / 45x45mm` are different options even when their quantity prices happen to match.
+
+Supplier-level general rate cards, such as transfer printing by size or embroidery by stitch count, should stay separate from product-specific decoration rows until a product explicitly supports that method.

@@ -53,6 +53,18 @@ decoration_price_rows as (
   cross join params x
   where x.target_batch_id is null or p.batch_id = x.target_batch_id
 ),
+decoration_rate_cards as (
+  select c.*
+  from public.supplier_decoration_rate_cards c
+  cross join params x
+  where x.target_batch_id is null or c.batch_id = x.target_batch_id
+),
+decoration_rate_card_rows as (
+  select r.*
+  from public.supplier_decoration_rate_card_rows r
+  cross join params x
+  where x.target_batch_id is null or r.batch_id = x.target_batch_id
+),
 preview_rows as (
   select p.*
   from public.supplier_transform_preview p
@@ -228,6 +240,43 @@ decoration_quote_required as (
   from decoration_price_rows
   where price_status in ('poa','request_quote')
 ),
+rate_cards_without_rows as (
+  select c.batch_id, c.supplier, c.rate_card_key, c.decoration_method, c.applies_to
+  from decoration_rate_cards c
+  left join decoration_rate_card_rows r
+    on r.batch_id = c.batch_id
+   and r.supplier = c.supplier
+   and r.rate_card_key = c.rate_card_key
+  where r.id is null
+),
+invalid_rate_card_rows as (
+  select
+    batch_id,
+    supplier,
+    rate_card_key,
+    decoration_method,
+    artwork_size_label,
+    stitch_count_min,
+    stitch_count_max,
+    min_qty,
+    max_qty,
+    unit_cost,
+    price_status
+  from decoration_rate_card_rows
+  where (min_qty is not null and min_qty <= 0)
+     or (max_qty is not null and max_qty <= 0)
+     or (stitch_count_min is not null and stitch_count_min < 0)
+     or (stitch_count_max is not null and stitch_count_max < 0)
+     or (unit_cost is not null and unit_cost < 0)
+     or (min_qty is not null and max_qty is not null and max_qty < min_qty)
+     or (stitch_count_min is not null and stitch_count_max is not null and stitch_count_max < stitch_count_min)
+     or (price_status = 'priced' and unit_cost is null)
+),
+rate_card_quote_required as (
+  select batch_id, supplier, rate_card_key, decoration_method, artwork_size_label, stitch_count_min, stitch_count_max, min_qty, max_qty, price_status
+  from decoration_rate_card_rows
+  where price_status in ('poa','request_quote')
+),
 manual_preview as (
   select batch_id, supplier, supplier_sku, raw_name, mapping_status, warning_flags, review_notes
   from preview_rows
@@ -385,6 +434,33 @@ select
   count(*)::int as issue_count,
   coalesce(jsonb_agg(to_jsonb(decoration_quote_required) order by supplier, supplier_sku) filter (where supplier is not null), '[]'::jsonb) as details
 from decoration_quote_required
+
+union all
+
+select
+  'decoration_rate_cards_without_rows' as check_name,
+  case when count(*) = 0 then 'ok' else 'issue' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(rate_cards_without_rows) order by supplier, rate_card_key) filter (where supplier is not null), '[]'::jsonb) as details
+from rate_cards_without_rows
+
+union all
+
+select
+  'invalid_decoration_rate_card_rows' as check_name,
+  case when count(*) = 0 then 'ok' else 'issue' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(invalid_rate_card_rows) order by supplier, rate_card_key) filter (where supplier is not null), '[]'::jsonb) as details
+from invalid_rate_card_rows
+
+union all
+
+select
+  'decoration_rate_card_quote_required' as check_name,
+  case when count(*) = 0 then 'ok' else 'warning' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(rate_card_quote_required) order by supplier, rate_card_key) filter (where supplier is not null), '[]'::jsonb) as details
+from rate_card_quote_required
 
 union all
 

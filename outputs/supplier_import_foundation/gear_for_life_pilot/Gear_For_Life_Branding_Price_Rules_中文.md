@@ -17,6 +17,10 @@ branding 方式 / 位置 / 尺寸 / setup
 
 branding 数量阶梯单价
   -> supplier_decoration_price_rows
+
+通用 branding 价卡，例如 Transfer / Embroidery
+  -> supplier_decoration_rate_cards
+  -> supplier_decoration_rate_card_rows
 ```
 
 最终前台展示时，再把这三层组合成客户看到的 rows。
@@ -81,6 +85,56 @@ price_status = poa
 
 前台可以显示询价或不显示自动价格，但后台必须保留原始信息，方便人工报价。
 
+## 通用 Rate Card
+
+这次整理出来的文件里，底部有两块不是产品专属 SKU 行：
+
+- Transfer Printing - Bags
+- Embroidery - Apparel & Selected Bags
+
+这两块不能强行挂到某一个产品 SKU。它们应该作为 supplier-level general rate card 保存：
+
+```text
+supplier_decoration_rate_cards
+  -> supplier_decoration_rate_card_rows
+```
+
+Transfer Printing 是按尺寸和数量区间计价，例如：
+
+```text
+60x60mm / 25-49
+100x100mm / 50-99
+210x150mm / 100-249
+300x200mm / 250+ = POA
+```
+
+Embroidery 是按 stitch count 和数量区间计价，例如：
+
+```text
+0-1000 stitches / 25-49
+5001-6000 stitches / 100-199
+15001+ stitches / 700+ = POA
+```
+
+这些行后面要由产品的可用 decoration method 决定是否套用。不能在 staging 阶段猜它属于哪个 SKU。
+
+## 这份 xlsx 的初步检查结果
+
+文件：
+
+```text
+C:\Users\jilin\Desktop\supplier\gearforlife\The Source Branding Price List - Combined.xlsx
+```
+
+已生成 preview：
+
+- 产品专属 SKUs：75
+- 产品专属 decoration options：273
+- 产品专属 decoration price rows：1069
+- 通用 rate card rows：160
+- `POA` 保留为 `price_status = poa`
+- `Knife decoration is not applicable` 保留为 `price_status = unavailable`
+
 ## 和 TRENDS 的关系
 
 TRENDS 的原始格式是一行里同时有产品价、branding 方法、branding 单价和 setup fee，所以看起来简单。
@@ -108,6 +162,8 @@ GFL branding 导入后，READONLY 检查必须能发现：
 - `priced` 状态但没有 `unit_cost`。
 - `POA` / `request_quote` 行需要人工确认。
 - area 或 size 缺失，需要人工确认是否能前台展示。
+- 通用 rate card 不应该被误当作产品 SKU。
+- unavailable 行不应该被当作价格。
 
 ## 重要提醒
 

@@ -4,6 +4,7 @@
 -- Three-layer model:
 --   1) supplier_raw_* keeps original supplier rows and image/colour facts.
 --   2) supplier_price_rows + supplier_decoration_options + supplier_decoration_price_rows keep normalized supplier commercial rows.
+--      General branding matrices use supplier_decoration_rate_cards + supplier_decoration_rate_card_rows.
 --   3) products/product_colours/product_images are generated only after preview approval.
 
 begin;
@@ -147,6 +148,51 @@ create table if not exists public.supplier_decoration_price_rows (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.supplier_decoration_rate_cards (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  rate_card_key text not null,
+  decoration_method text not null,
+  applies_to text,
+  pricing_model text not null
+    check (pricing_model in ('size_qty_matrix','stitch_count_qty','category_qty_matrix','quote_required')),
+  setup_cost numeric(12,4),
+  repeat_setup_cost numeric(12,4),
+  surcharge_cost numeric(12,4),
+  surcharge_label text,
+  notes text,
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.supplier_decoration_rate_card_rows (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  supplier_decoration_rate_card_id uuid references public.supplier_decoration_rate_cards(id) on delete cascade,
+  rate_card_key text not null,
+  decoration_method text not null,
+  applies_to text,
+  artwork_size_label text,
+  stitch_count_min int,
+  stitch_count_max int,
+  currency text default 'AUD',
+  min_qty int,
+  max_qty int,
+  unit_cost numeric(12,4),
+  setup_cost numeric(12,4),
+  repeat_setup_cost numeric(12,4),
+  surcharge_cost numeric(12,4),
+  surcharge_label text,
+  pricing_basis text not null default 'per_unit'
+    check (pricing_basis in ('per_unit','per_colour','per_position','per_colour_position','per_line','per_stitch_band','flat_setup','freight','other')),
+  price_status text not null default 'priced'
+    check (price_status in ('priced','poa','request_quote','included','unavailable')),
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
 create table if not exists public.supplier_transform_preview (
   id uuid primary key default gen_random_uuid(),
   batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
@@ -216,6 +262,12 @@ create index if not exists idx_supplier_decoration_price_rows_sku
 
 create index if not exists idx_supplier_decoration_price_rows_option
   on public.supplier_decoration_price_rows(supplier_decoration_option_id);
+
+create index if not exists idx_supplier_decoration_rate_cards_key
+  on public.supplier_decoration_rate_cards(batch_id, supplier, rate_card_key);
+
+create index if not exists idx_supplier_decoration_rate_card_rows_key
+  on public.supplier_decoration_rate_card_rows(batch_id, supplier, rate_card_key);
 
 create index if not exists idx_supplier_transform_preview_status
   on public.supplier_transform_preview(batch_id, mapping_status);
