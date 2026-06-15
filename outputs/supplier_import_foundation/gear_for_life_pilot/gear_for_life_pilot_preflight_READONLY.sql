@@ -1,0 +1,224 @@
+-- Gear For Life pilot preflight.
+-- READ ONLY. Run only after staging tables exist and Gear For Life raw data has been loaded.
+-- Set target_batch_id to a Gear For Life batch UUID, or leave null to check all Gear For Life staging rows.
+
+with params as (
+  select
+    'Gear For Life'::text as target_supplier,
+    null::uuid as target_batch_id
+),
+raw_rows as (
+  select r.*
+  from public.supplier_raw_product_rows r
+  join params p on p.target_supplier = r.supplier
+  where p.target_batch_id is null or r.batch_id = p.target_batch_id
+),
+sku_rows as (
+  select
+    batch_id,
+    supplier,
+    supplier_sku,
+    count(*) as raw_row_count,
+    count(distinct nullif(lower(trim(raw_name)), '')) as distinct_name_count,
+    jsonb_agg(distinct raw_name) filter (where raw_name is not null) as names
+  from raw_rows
+  where nullif(trim(coalesce(supplier_sku, '')), '') is not null
+  group by batch_id, supplier, supplier_sku
+),
+price_rows as (
+  select p.*
+  from public.supplier_raw_price_rows p
+  join params x on x.target_supplier = p.supplier
+  where x.target_batch_id is null or p.batch_id = x.target_batch_id
+),
+colour_rows as (
+  select c.*
+  from public.supplier_raw_colour_options c
+  join params x on x.target_supplier = c.supplier
+  where x.target_batch_id is null or c.batch_id = x.target_batch_id
+),
+image_rows as (
+  select i.*
+  from public.supplier_raw_images i
+  join params x on x.target_supplier = i.supplier
+  where x.target_batch_id is null or i.batch_id = x.target_batch_id
+),
+missing_sku as (
+  select batch_id, source_row_number, raw_name
+  from raw_rows
+  where nullif(trim(coalesce(supplier_sku, '')), '') is null
+),
+missing_name as (
+  select batch_id, supplier_sku, source_row_number
+  from raw_rows
+  where nullif(trim(coalesce(raw_name, '')), '') is null
+),
+sku_name_conflicts as (
+  select batch_id, supplier_sku, raw_row_count, distinct_name_count, names
+  from sku_rows
+  where distinct_name_count > 1
+),
+blank_category_path as (
+  select batch_id, supplier_sku, raw_name, source_row_number
+  from raw_rows
+  where nullif(trim(coalesce(raw_category_path, '')), '') is null
+),
+skus_without_price as (
+  select s.batch_id, s.supplier_sku
+  from sku_rows s
+  left join price_rows p
+    on p.batch_id = s.batch_id
+   and p.supplier_sku = s.supplier_sku
+  where p.id is null
+),
+invalid_price_rows as (
+  select batch_id, supplier_sku, min_qty, max_qty, unit_cost
+  from price_rows
+  where (min_qty is not null and min_qty <= 0)
+     or (max_qty is not null and max_qty <= 0)
+     or (unit_cost is not null and unit_cost < 0)
+     or (min_qty is not null and max_qty is not null and max_qty < min_qty)
+),
+images_without_colour_link as (
+  select batch_id, supplier_sku, image_url
+  from image_rows
+  where nullif(trim(coalesce(colour_key, '')), '') is null
+    and nullif(trim(coalesce(colour_name, '')), '') is null
+),
+image_colour_mismatches as (
+  select i.batch_id, i.supplier_sku, i.colour_key, i.colour_name, i.image_url
+  from image_rows i
+  where (
+      nullif(trim(coalesce(i.colour_key, '')), '') is not null
+      or nullif(trim(coalesce(i.colour_name, '')), '') is not null
+    )
+    and not exists (
+      select 1
+      from colour_rows c
+      where c.batch_id = i.batch_id
+        and c.supplier_sku = i.supplier_sku
+        and (
+          (i.colour_key is not null and c.colour_key = i.colour_key)
+          or (i.colour_name is not null and lower(c.colour_name) = lower(i.colour_name))
+        )
+    )
+),
+known_manual_review as (
+  select *
+  from (
+    values
+      ('OVT', 'Vantage Top', 'Clothing / Fleece'),
+      ('BHZQM', 'Barkers Corporate Highlander Merino - Mens', 'Clothing / Merino'),
+      ('WEGMCD', 'Merino Cardigan - Womens', 'Clothing / Merino'),
+      ('BT', 'Ballistic Top', 'Clothing / Pullovers'),
+      ('OTNT', 'Transition Top', 'Clothing / Pullovers'),
+      ('TNT', 'Transition Top', 'Clothing / Pullovers'),
+      ('PODCS', 'Decadent Cocktail 10 pcs Set', 'Home & Living / Miscellaneous Homeware'),
+      ('PONS', 'Nature Secateurs', 'Leisure & Outdoors'),
+      ('POPIB', 'Polar Ice 7.2L Bucket', 'Leisure & Outdoors / Coolers')
+  ) as t(supplier_sku, product_name, raw_category_path)
+),
+known_manual_present as (
+  select k.*
+  from known_manual_review k
+  join raw_rows r on r.supplier_sku = k.supplier_sku
+),
+summary as (
+  select
+    count(*) as raw_rows,
+    count(distinct supplier_sku) filter (where nullif(trim(coalesce(supplier_sku, '')), '') is not null) as unique_skus,
+    count(distinct raw_category_path) filter (where nullif(trim(coalesce(raw_category_path, '')), '') is not null) as raw_category_paths
+  from raw_rows
+)
+select
+  'gear_for_life_loaded_summary' as check_name,
+  'ok' as health_status,
+  raw_rows::int as issue_count,
+  jsonb_build_object(
+    'raw_rows', raw_rows,
+    'unique_skus', unique_skus,
+    'raw_category_paths', raw_category_paths
+  ) as details
+from summary
+
+union all
+
+select
+  'missing_supplier_sku' as check_name,
+  case when count(*) = 0 then 'ok' else 'issue' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(missing_sku) order by source_row_number) filter (where source_row_number is not null), '[]'::jsonb) as details
+from missing_sku
+
+union all
+
+select
+  'missing_product_name' as check_name,
+  case when count(*) = 0 then 'ok' else 'issue' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(missing_name) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from missing_name
+
+union all
+
+select
+  'sku_name_conflicts' as check_name,
+  case when count(*) = 0 then 'ok' else 'issue' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(sku_name_conflicts) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from sku_name_conflicts
+
+union all
+
+select
+  'blank_category_path' as check_name,
+  case when count(*) = 0 then 'ok' else 'warning' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(blank_category_path) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from blank_category_path
+
+union all
+
+select
+  'skus_without_price_rows' as check_name,
+  case when count(*) = 0 then 'ok' else 'warning' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(skus_without_price) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from skus_without_price
+
+union all
+
+select
+  'invalid_price_rows' as check_name,
+  case when count(*) = 0 then 'ok' else 'issue' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(invalid_price_rows) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from invalid_price_rows
+
+union all
+
+select
+  'images_without_colour_link' as check_name,
+  case when count(*) = 0 then 'ok' else 'warning' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(images_without_colour_link) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from images_without_colour_link
+
+union all
+
+select
+  'image_colour_mismatches' as check_name,
+  case when count(*) = 0 then 'ok' else 'issue' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(image_colour_mismatches) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from image_colour_mismatches
+
+union all
+
+select
+  'known_manual_review_present' as check_name,
+  case when count(*) = 0 then 'ok' else 'warning' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(known_manual_present) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from known_manual_present;
+
