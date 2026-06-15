@@ -1,6 +1,10 @@
 -- Supplier Import staging schema DRAFT.
 -- Review only. Do not run until the table names and import flow are approved.
 -- Purpose: preserve raw supplier data before any products transform.
+-- Three-layer model:
+--   1) supplier_raw_* keeps original supplier rows and image/colour facts.
+--   2) supplier_price_rows + supplier_decoration_options keep normalized supplier commercial rows.
+--   3) products/product_colours/product_images are generated only after preview approval.
 
 begin;
 
@@ -75,7 +79,7 @@ create table if not exists public.supplier_raw_images (
   created_at timestamptz not null default now()
 );
 
-create table if not exists public.supplier_raw_price_rows (
+create table if not exists public.supplier_price_rows (
   id uuid primary key default gen_random_uuid(),
   batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
   supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
@@ -90,7 +94,7 @@ create table if not exists public.supplier_raw_price_rows (
   created_at timestamptz not null default now()
 );
 
-create table if not exists public.supplier_raw_decoration_options (
+create table if not exists public.supplier_decoration_options (
   id uuid primary key default gen_random_uuid(),
   batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
   supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
@@ -113,6 +117,8 @@ create table if not exists public.supplier_transform_preview (
   raw_name text,
   normalized_name text,
   slug text,
+  page_role text not null default 'P'
+    check (page_role in ('P','F','collection','kit','manual_review')),
   target_category text,
   target_subcategory text,
   mapping_status text not null
@@ -123,12 +129,29 @@ create table if not exists public.supplier_transform_preview (
   brand_alias_status text,
   material_tags text[] not null default '{}'::text[],
   tags text[] not null default '{}'::text[],
-  fulfillment text,
+  fulfillment text not null default 'local_stock'
+    check (fulfillment in ('local_stock','indent_air','indent_sea','custom_sourcing')),
   offer_type text,
   kit_themes text[] not null default '{}'::text[],
   warning_flags text[] not null default '{}'::text[],
   review_notes text,
   preview_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.product_images (
+  id uuid primary key default gen_random_uuid(),
+  product_id uuid references public.products(id) on delete cascade,
+  supplier text,
+  supplier_sku text,
+  image_url text not null,
+  image_role text not null default 'gallery'
+    check (image_role in ('gallery','main','detail','lifestyle','swatch','fallback')),
+  colour_link_status text not null default 'unlinked'
+    check (colour_link_status in ('unlinked','ambiguous','mismatch','not_colour_specific')),
+  source_image_id text,
+  sort_order int,
+  raw_json jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now()
 );
 
@@ -144,14 +167,19 @@ create index if not exists idx_supplier_raw_colours_sku
 create index if not exists idx_supplier_raw_images_sku
   on public.supplier_raw_images(batch_id, supplier, supplier_sku);
 
-create index if not exists idx_supplier_raw_prices_sku
-  on public.supplier_raw_price_rows(batch_id, supplier, supplier_sku);
+create index if not exists idx_supplier_price_rows_sku
+  on public.supplier_price_rows(batch_id, supplier, supplier_sku);
 
-create index if not exists idx_supplier_raw_decoration_sku
-  on public.supplier_raw_decoration_options(batch_id, supplier, supplier_sku);
+create index if not exists idx_supplier_decoration_options_sku
+  on public.supplier_decoration_options(batch_id, supplier, supplier_sku);
 
 create index if not exists idx_supplier_transform_preview_status
   on public.supplier_transform_preview(batch_id, mapping_status);
 
-commit;
+create index if not exists idx_product_images_product
+  on public.product_images(product_id, sort_order);
 
+create index if not exists idx_product_images_supplier_sku
+  on public.product_images(supplier, supplier_sku);
+
+commit;

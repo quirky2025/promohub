@@ -27,7 +27,7 @@ sku_rows as (
 ),
 price_rows as (
   select p.*
-  from public.supplier_raw_price_rows p
+  from public.supplier_price_rows p
   join params x on x.target_supplier = p.supplier
   where x.target_batch_id is null or p.batch_id = x.target_batch_id
 ),
@@ -103,20 +103,37 @@ image_colour_mismatches as (
         )
     )
 ),
+gallery_fallback_image_candidates as (
+  select
+    batch_id,
+    supplier_sku,
+    image_url,
+    'unlinked' as gallery_reason
+  from images_without_colour_link
+
+  union all
+
+  select
+    batch_id,
+    supplier_sku,
+    image_url,
+    'mismatch' as gallery_reason
+  from image_colour_mismatches
+),
 known_manual_review as (
   select *
   from (
     values
-      ('OVT', 'Vantage Top', 'Clothing / Fleece'),
-      ('BHZQM', 'Barkers Corporate Highlander Merino - Mens', 'Clothing / Merino'),
-      ('WEGMCD', 'Merino Cardigan - Womens', 'Clothing / Merino'),
-      ('BT', 'Ballistic Top', 'Clothing / Pullovers'),
-      ('OTNT', 'Transition Top', 'Clothing / Pullovers'),
-      ('TNT', 'Transition Top', 'Clothing / Pullovers'),
-      ('PODCS', 'Decadent Cocktail 10 pcs Set', 'Home & Living / Miscellaneous Homeware'),
-      ('PONS', 'Nature Secateurs', 'Leisure & Outdoors'),
-      ('POPIB', 'Polar Ice 7.2L Bucket', 'Leisure & Outdoors / Coolers')
-  ) as t(supplier_sku, product_name, raw_category_path)
+      ('OVT', 'Vantage Top', 'Clothing / Fleece', 'Apparel', 'Sweatshirts', 'Top under Fleece; confirm as sweatshirt/fleece top.'),
+      ('BHZQM', 'Barkers Corporate Highlander Merino - Mens', 'Clothing / Merino', 'Apparel', 'Sweatshirts', 'Merino top/pullover signal; confirm not polo/shirt.'),
+      ('WEGMCD', 'Merino Cardigan - Womens', 'Clothing / Merino', 'Apparel', 'Sweatshirts', 'Merino cardigan; confirm sweatshirt/knitwear handling.'),
+      ('BT', 'Ballistic Top', 'Clothing / Pullovers', 'Apparel', 'Sweatshirts', 'Top under Pullovers; confirm as sweatshirt/pullover.'),
+      ('OTNT', 'Transition Top', 'Clothing / Pullovers', 'Apparel', 'Sweatshirts', 'Top under Pullovers; confirm as sweatshirt/pullover.'),
+      ('TNT', 'Transition Top', 'Clothing / Pullovers', 'Apparel', 'Sweatshirts', 'Top under Pullovers; confirm as sweatshirt/pullover.'),
+      ('PODCS', 'Decadent Cocktail 10 pcs Set', 'Home & Living / Miscellaneous Homeware', 'Barware & Accessories', 'Bar Accessories', 'Cocktail set; confirm barware vs home/kitchen.'),
+      ('PONS', 'Nature Secateurs', 'Leisure & Outdoors', 'Tools & Auto', 'Tool Sets & Screwdrivers', 'Secateurs/tool item; confirm target.'),
+      ('POPIB', 'Polar Ice 7.2L Bucket', 'Leisure & Outdoors / Coolers', 'Barware & Accessories', 'Bar Accessories', 'Ice bucket; confirm barware vs cooler/outdoor.')
+  ) as t(supplier_sku, product_name, raw_category_path, suggested_category, suggested_subcategory, suggestion_note)
 ),
 known_manual_present as (
   select k.*
@@ -208,10 +225,19 @@ union all
 
 select
   'image_colour_mismatches' as check_name,
-  case when count(*) = 0 then 'ok' else 'issue' end as health_status,
+  case when count(*) = 0 then 'ok' else 'warning' end as health_status,
   count(*)::int as issue_count,
   coalesce(jsonb_agg(to_jsonb(image_colour_mismatches) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
 from image_colour_mismatches
+
+union all
+
+select
+  'gallery_fallback_image_candidates' as check_name,
+  case when count(*) = 0 then 'ok' else 'warning' end as health_status,
+  count(*)::int as issue_count,
+  coalesce(jsonb_agg(to_jsonb(gallery_fallback_image_candidates) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
+from gallery_fallback_image_candidates
 
 union all
 
@@ -221,4 +247,3 @@ select
   count(*)::int as issue_count,
   coalesce(jsonb_agg(to_jsonb(known_manual_present) order by supplier_sku) filter (where supplier_sku is not null), '[]'::jsonb) as details
 from known_manual_present;
-

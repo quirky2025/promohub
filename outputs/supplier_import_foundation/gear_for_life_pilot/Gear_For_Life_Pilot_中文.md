@@ -74,19 +74,37 @@ Gear For Life 适合做第一家 pilot：
 
 ## 已知 manual review 产品
 
-| SKU | product name | raw category path | reason |
-|---|---|---|---|
-| OVT | Vantage Top | Clothing / Fleece | no high-confidence keyword match |
-| BHZQM | Barkers Corporate Highlander Merino - Mens | Clothing / Merino | no high-confidence keyword match |
-| WEGMCD | Merino Cardigan - Womens | Clothing / Merino | no high-confidence keyword match |
-| BT | Ballistic Top | Clothing / Pullovers | no high-confidence keyword match |
-| OTNT | Transition Top | Clothing / Pullovers | no high-confidence keyword match |
-| TNT | Transition Top | Clothing / Pullovers | no high-confidence keyword match |
-| PODCS | Decadent Cocktail 10 pcs Set | Home & Living / Miscellaneous Homeware | no high-confidence keyword match |
-| PONS | Nature Secateurs | Leisure & Outdoors | no high-confidence keyword match |
-| POPIB | Polar Ice 7.2L Bucket | Leisure & Outdoors / Coolers | no high-confidence keyword match |
+| SKU | product name | raw category path | 建议归类 | reason |
+|---|---|---|---|---|
+| OVT | Vantage Top | Clothing / Fleece | Apparel > Sweatshirts | Top under Fleece; confirm manually |
+| BHZQM | Barkers Corporate Highlander Merino - Mens | Clothing / Merino | Apparel > Sweatshirts | Merino pullover/top signal; confirm manually |
+| WEGMCD | Merino Cardigan - Womens | Clothing / Merino | Apparel > Sweatshirts | Merino cardigan; confirm manually |
+| BT | Ballistic Top | Clothing / Pullovers | Apparel > Sweatshirts | Top under Pullovers; confirm manually |
+| OTNT | Transition Top | Clothing / Pullovers | Apparel > Sweatshirts | Top under Pullovers; confirm manually |
+| TNT | Transition Top | Clothing / Pullovers | Apparel > Sweatshirts | Top under Pullovers; confirm manually |
+| PODCS | Decadent Cocktail 10 pcs Set | Home & Living / Miscellaneous Homeware | Barware & Accessories > Bar Accessories | cocktail set; confirm manually |
+| PONS | Nature Secateurs | Leisure & Outdoors | Tools & Auto > Tool Sets & Screwdrivers | secateurs/tool item; confirm manually |
+| POPIB | Polar Ice 7.2L Bucket | Leisure & Outdoors / Coolers | Barware & Accessories > Bar Accessories | ice bucket; confirm manually |
 
-这些不要自动进 `products`，先留 transform preview 的 `needs_review`。
+这些建议只为了人工一眼确认，不自动写入 `products`。先留 transform preview 的 `needs_review`。
+
+## Top 歧义规则
+
+`Top` 这个词本身有歧义，不能全站通用自动规则。
+
+但是在 Gear For Life 这次 pilot 里：
+
+- `Clothing / Fleece` 下的 `Top`
+- `Clothing / Pullovers` 下的 `Top`
+- `Clothing / Merino` 下的 Merino top / cardigan / pullover
+
+建议人工优先看作：
+
+```text
+Apparel > Sweatshirts
+```
+
+这仍然是建议，不是自动规则。
 
 ## 颜色和图片规则
 
@@ -97,6 +115,7 @@ Gear For Life pilot 必须验证：
 - 如果图片没有颜色关系，先标记 `image_unlinked`。
 - 如果颜色没有图片，先标记 `colour_missing_image`。
 - 不要把颜色图片打平到产品级图片。
+- 如果图片对不上颜色，放到 `product_images`，作为 `gallery` 兜底图，不进入 `product_colours.images`。
 
 最终产品页需要的是：
 
@@ -104,6 +123,8 @@ Gear For Life pilot 必须验证：
 product
   -> product_colours
        -> colour-specific images
+  -> product_images
+       -> gallery fallback images
 ```
 
 不是：
@@ -112,6 +133,15 @@ product
 product
   -> random image list
 ```
+
+## Transform Preview 必备列
+
+Gear For Life transform preview 必须包含：
+
+- `page_role`：普通产品分类写 `P`，防止误归到 F/filter-only 页面。
+- `fulfillment`：默认 `local_stock`。
+
+ready 行可以用 `P / local_stock`。manual review 行也先保留 `P / local_stock`，但 `mapping_status` 必须是 `needs_review`。
 
 ## 你接下来要做什么
 
@@ -128,4 +158,3 @@ product
 - 生成 raw staging load SQL 或导入脚本草案。
 - 生成 transform preview SQL 草案。
 - 继续坚持：SQL 只生成给你检查，你手动在 Supabase 跑。
-

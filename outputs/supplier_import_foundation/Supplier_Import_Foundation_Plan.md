@@ -47,8 +47,8 @@ Known mapping position:
 2. Store every source row in `supplier_raw_product_rows`.
 3. Store raw colour rows in `supplier_raw_colour_options`.
 4. Store raw image rows in `supplier_raw_images`.
-5. Store raw price rows in `supplier_raw_price_rows`.
-6. Store raw decoration choices in `supplier_raw_decoration_options`.
+5. Store normalized supplier price rows in `supplier_price_rows`.
+6. Store normalized supplier decoration choices in `supplier_decoration_options`.
 7. Generate `supplier_transform_preview` rows using mapping rules.
 8. Run READONLY health checks.
 9. Manually review blocked/mixed rows.
@@ -65,6 +65,7 @@ Colour/image relationship is the highest-risk area.
 - If an image has no colour link, keep it but mark it as `unlinked`.
 - If a colour has no image, keep the colour and mark it as missing imagery.
 - If one image maps to multiple colours, store the relationship explicitly rather than guessing.
+- If an image cannot be safely matched to a colour, route it to `product_images` as `image_role = gallery` after product approval. Do not put ambiguous images into `product_colours.images`.
 
 SKU handling:
 
@@ -91,6 +92,7 @@ When transform preview is approved, product-level conversion should preserve:
 - raw category path
 - raw product JSON
 - target category and subcategory
+- page_role, where `P` means primary product category page and prevents product rows being treated as F/filter-only pages
 - brand alias result
 - material/tags/eco/collection signals
 - fulfillment
@@ -100,6 +102,7 @@ When transform preview is approved, product-level conversion should preserve:
 - decoration options
 - colours
 - colour-specific images
+- gallery fallback images in `product_images`
 
 Do not publish imported products by default. Imported products should start as draft or unpublished until a product QA pass is complete.
 
@@ -130,4 +133,3 @@ Avoid first pilot:
 - Logoline full feed, because row repetition from pricing/decoration needs more dedupe handling.
 - NIConcept broad categories, because keyword mapping is required.
 - PromoBrands full feed, because multi-category path and collection signals need careful handling.
-

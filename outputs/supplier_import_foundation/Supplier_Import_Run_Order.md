@@ -38,8 +38,8 @@ Load raw rows into staging tables:
 - `supplier_raw_product_rows`
 - `supplier_raw_colour_options`
 - `supplier_raw_images`
-- `supplier_raw_price_rows`
-- `supplier_raw_decoration_options`
+- `supplier_price_rows`
+- `supplier_decoration_options`
 
 Important:
 
@@ -87,7 +87,7 @@ Output target:
 public.supplier_transform_preview
 ```
 
-The preview is the approval surface. It should include target category/subcategory, brand alias result, tags, fulfillment, offer type and warning flags.
+The preview is the approval surface. It should include target category/subcategory, `page_role`, brand alias result, tags, fulfillment, offer type and warning flags.
 
 ## Phase 5 - Manual Review
 
@@ -119,8 +119,8 @@ Convert in this order:
 2. product price rows
 3. product colours
 4. product colour image relationships
-5. decoration options
-6. tags/material/fulfillment/brand metadata
+5. product gallery fallback images in `product_images`
+6. decoration options
+7. tags/material/fulfillment/brand metadata
 
-Do not flatten colour images into product-level images until colour-specific relationships are verified.
-
+Do not flatten colour images into product-level images. Colour-safe images belong in `product_colours.images`; unlinked, ambiguous or mismatched images belong in `product_images` with `image_role = gallery`.
