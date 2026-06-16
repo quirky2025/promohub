@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { addToCart } from '@/lib/cart';
 import { getColourHex } from '@/lib/colourSwatch';
 import { slugify } from '@/lib/slug';
+import { colourImageAlt } from '@/lib/colourName';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -16,28 +17,7 @@ const SHIPPING = 30;
 const SETUP_FEE = 40;
 const TABS = ['Description', 'Sample Policy', 'Mockups & Artwork', 'Shipping & Delivery', 'Ordering Process'];
 
-// ── SEO image-alt helpers (Rulebook §9 / #3) ──
-function cleanColourName(raw) {
-  if (!raw) return null;
-  let c = String(raw).trim();
-  if (!c || ['custom', 'default'].includes(c.toLowerCase())) return null;
-  if (c.includes(':')) c = c.split(':').pop().trim();
-  c = c.replace(/^overlocking\s*-\s*/i, '').trim();
-  if (c.includes('/')) {
-    const parts = c.split('/').map(s => s.trim()).filter(Boolean);
-    if (parts.length) c = parts[0] + parts.slice(1).map(p => ' and ' + p.toLowerCase()).join('');
-  }
-  if (!c || ['custom', 'default'].includes(c.toLowerCase())) return null;
-  return c;
-}
-
-function colourImageAlt(rawColour, name) {
-  const c = cleanColourName(rawColour);
-  if (!c) return `${name} with logo`;
-  if (name.toLowerCase().startsWith(c.toLowerCase())) return `${name} with logo`;
-  return `${c} ${name} with logo`;
-}
-
+// ── colourImageAlt imported from lib/colourName (shared with 4B variant logic) ──
 function isGoodAltText(alt, name, colourNames) {
   if (!alt) return false;
   const t = String(alt).trim();
