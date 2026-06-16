@@ -43,10 +43,55 @@ function dateOrNow(value) {
   return date && !Number.isNaN(date.valueOf()) ? date : new Date();
 }
 
+// Only return a real date; never fake a lastModified (avoid false freshness signals).
+function validDate(value) {
+  const date = value ? new Date(value) : null;
+  return date && !Number.isNaN(date.valueOf()) ? date : null;
+}
+
+function hasNonEmptyImages(images) {
+  if (!images) return false;
+  try {
+    const arr = Array.isArray(images)
+      ? images
+      : typeof images === 'string'
+        ? JSON.parse(images)
+        : Object.values(images);
+    return Array.isArray(arr) && arr.length > 0;
+  } catch {
+    return false;
+  }
+}
+
+// PostgREST caps each request at 1000 rows — page through to get all products.
+async function fetchAllProducts() {
+  const PAGE = 1000;
+  let from = 0;
+  const all = [];
+  for (;;) {
+    const { data, error } = await supabase
+      .from('products')
+      .select('id, slug, name, updated_at, product_colours(images)')
+      .eq('is_published', true)
+      .order('slug', { ascending: true })
+      .range(from, from + PAGE - 1);
+    if (error) {
+      console.error('[sitemap] product page fetch failed', error);
+      break;
+    }
+    if (!data || data.length === 0) break;
+    all.push(...data);
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+  return all;
+}
+
 export default async function sitemap() {
   const staticEntries = STATIC_ROUTES.map(staticEntry);
 
-  const { data, error } = await supabase
+  // ── url_pages (categories / flat pages) ──
+  const { data: urlPagesData, error: urlPagesError } = await supabase
     .from('url_pages')
     .select('slug, canonical_url, updated_at, created_at, breadcrumb_parent, page_type, show_in_home')
     .eq('status', 'live')
@@ -54,17 +99,37 @@ export default async function sitemap() {
     .order('priority', { ascending: true })
     .order('slug', { ascending: true });
 
-  if (error) {
-    console.error('[sitemap] failed to load url_pages', error);
-    return staticEntries;
-  }
+  if (urlPagesError) console.error('[sitemap] failed to load url_pages', urlPagesError);
 
-  const urlPageEntries = (data || []).map((page) => ({
+  const urlPageEntries = (urlPagesData || []).map((page) => ({
     url: absoluteUrl(page.canonical_url || `/${page.slug}`),
     lastModified: dateOrNow(page.updated_at || page.created_at),
     changeFrequency: 'weekly',
     priority: pagePriority(page),
   }));
 
-  return [...staticEntries, ...urlPageEntries];
+  // ── products (Rulebook §11/§D gate: published + name + slug + has image) ──
+  const productRows = await fetchAllProducts();
+  const seen = new Set();
+  const productEntries = [];
+  for (const p of productRows) {
+    const slug = (p.slug || '').trim();
+    const name = (p.name || '').trim();
+    if (!slug || !name) continue;
+    const hasImage = Array.isArray(p.product_colours)
+      && p.product_colours.some((pc) => hasNonEmptyImages(pc.images));
+    if (!hasImage) continue;
+    if (seen.has(slug)) continue;
+    seen.add(slug);
+
+    const lastModified = validDate(p.updated_at);
+    productEntries.push({
+      url: absoluteUrl(`/products/${slug}`),
+      ...(lastModified ? { lastModified } : {}),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    });
+  }
+
+  return [...staticEntries, ...urlPageEntries, ...productEntries];
 }
