@@ -1,0 +1,359 @@
+-- Supplier Import staging schema DRAFT.
+-- Review only. Do not run until the table names and import flow are approved.
+-- Purpose: preserve raw supplier data before any products transform.
+-- Three-layer model:
+--   1) supplier_raw_* keeps original supplier rows and image/colour facts.
+--   2) supplier_price_rows + supplier_decoration_options + supplier_decoration_price_rows keep normalized supplier commercial rows.
+--      General branding matrices use supplier_decoration_rate_cards + supplier_decoration_rate_card_rows.
+--   3) products/product_colours/product_images are generated only after preview approval.
+
+begin;
+
+create table if not exists public.supplier_import_batches (
+  id uuid primary key default gen_random_uuid(),
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  source_file_name text,
+  source_file_hash text,
+  import_status text not null default 'draft'
+    check (import_status in ('draft','loaded_raw','validated','mapping_review','ready_to_transform','transformed','blocked')),
+  source_row_count int,
+  unique_sku_count int,
+  notes text,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.supplier_commercial_defaults (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  applies_to_category text,
+  applies_to_subcategory text,
+  fulfillment text not null default 'local_stock'
+    check (fulfillment in ('local_stock','indent_air','indent_sea','custom_sourcing')),
+  lead_time_min_days int,
+  lead_time_max_days int,
+  lead_time_unit text
+    check (lead_time_unit in ('business_days','calendar_days','weeks','unknown')),
+  lead_time_basis text
+    check (lead_time_basis in ('decorated','undecorated','after_artwork_approval','dispatch','supplier_default','unknown')),
+  lead_time_note text,
+  source_note text,
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  check (lead_time_min_days is null or lead_time_min_days >= 0),
+  check (lead_time_max_days is null or lead_time_max_days >= 0),
+  check (lead_time_min_days is null or lead_time_max_days is null or lead_time_max_days >= lead_time_min_days)
+);
+
+create table if not exists public.supplier_raw_product_rows (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  source_row_number int,
+  supplier_sku text,
+  supplier_parent_sku text,
+  supplier_product_id text,
+  raw_name text,
+  raw_description text,
+  raw_brand text,
+  raw_category_path text,
+  raw_category_1 text,
+  raw_category_2 text,
+  raw_category_3 text,
+  raw_category_4 text,
+  raw_colour_name text,
+  raw_colour_code text,
+  raw_material text,
+  raw_moq text,
+  raw_lead_time text,
+  lead_time_min_days int,
+  lead_time_max_days int,
+  lead_time_unit text
+    check (lead_time_unit in ('business_days','calendar_days','weeks','unknown')),
+  lead_time_basis text
+    check (lead_time_basis in ('decorated','undecorated','after_artwork_approval','dispatch','supplier_default','unknown')),
+  lead_time_note text,
+  raw_fulfillment text,
+  raw_is_new text,
+  raw_is_sale text,
+  raw_is_discontinued text,
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  check (lead_time_min_days is null or lead_time_min_days >= 0),
+  check (lead_time_max_days is null or lead_time_max_days >= 0),
+  check (lead_time_min_days is null or lead_time_max_days is null or lead_time_max_days >= lead_time_min_days)
+);
+
+create table if not exists public.supplier_raw_colour_options (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  supplier_sku text not null,
+  colour_key text,
+  colour_name text,
+  colour_code text,
+  hex text,
+  sort_order int,
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.supplier_raw_images (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  supplier_sku text not null,
+  image_url text not null,
+  image_role text,
+  colour_key text,
+  colour_name text,
+  source_image_id text,
+  sort_order int,
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.supplier_price_rows (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  supplier_sku text not null,
+  currency text default 'AUD',
+  min_qty int,
+  max_qty int,
+  unit_cost numeric(12,4),
+  setup_cost numeric(12,4),
+  price_label text,
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.supplier_decoration_options (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  supplier_sku text not null,
+  decoration_option_key text,
+  decoration_method text,
+  decoration_area text,
+  decoration_location text,
+  artwork_size_label text,
+  max_width_mm numeric(10,2),
+  max_height_mm numeric(10,2),
+  size_unit text default 'mm',
+  max_colours int,
+  pricing_model text not null default 'option_qty_tier'
+    check (pricing_model in ('option_qty_tier','sku_location_qty','size_qty_matrix','stitch_count_qty','flat_unit','quote_required')),
+  price_status text not null default 'priced'
+    check (price_status in ('priced','request_quote','included','unavailable')),
+  setup_cost numeric(12,4),
+  repeat_setup_cost numeric(12,4),
+  setup_cost_label text,
+  run_cost numeric(12,4),
+  additional_colour_policy text,
+  lead_time text,
+  lead_time_min_days int,
+  lead_time_max_days int,
+  lead_time_unit text
+    check (lead_time_unit in ('business_days','calendar_days','weeks','unknown')),
+  lead_time_basis text
+    check (lead_time_basis in ('decorated','undecorated','after_artwork_approval','dispatch','supplier_default','unknown')),
+  lead_time_note text,
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  check (lead_time_min_days is null or lead_time_min_days >= 0),
+  check (lead_time_max_days is null or lead_time_max_days >= 0),
+  check (lead_time_min_days is null or lead_time_max_days is null or lead_time_max_days >= lead_time_min_days)
+);
+
+create table if not exists public.supplier_decoration_price_rows (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  supplier_sku text not null,
+  supplier_decoration_option_id uuid references public.supplier_decoration_options(id) on delete cascade,
+  decoration_option_key text,
+  decoration_method text,
+  decoration_area text,
+  decoration_location text,
+  artwork_size_label text,
+  currency text default 'AUD',
+  min_qty int,
+  max_qty int,
+  unit_cost numeric(12,4),
+  setup_cost numeric(12,4),
+  repeat_setup_cost numeric(12,4),
+  pricing_basis text not null default 'per_unit'
+    check (pricing_basis in ('per_unit','per_colour','per_position','per_colour_position','per_line','per_stitch_band','flat_setup','freight','other')),
+  price_status text not null default 'priced'
+    check (price_status in ('priced','request_quote','included','unavailable')),
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.supplier_decoration_rate_cards (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  rate_card_key text not null,
+  decoration_method text not null,
+  applies_to text,
+  applies_to_category text,
+  applies_to_subcategory text,
+  is_default_for_scope boolean not null default false,
+  fallback_policy text not null default 'none'
+    check (fallback_policy in ('none','when_no_product_specific_option','always_available_for_scope','manual_review')),
+  pricing_model text not null
+    check (pricing_model in ('size_qty_matrix','stitch_count_qty','category_qty_matrix','quote_required')),
+  frontend_pricing_model text not null default 'source_rate_card'
+    check (frontend_pricing_model in ('source_rate_card','supplier_embroidery_formula','manual_review')),
+  supplier_formula_base_stitches int,
+  supplier_formula_stitch_increment int,
+  supplier_formula_increment_unit_cost numeric(12,4),
+  supplier_formula_note text,
+  setup_cost numeric(12,4),
+  repeat_setup_cost numeric(12,4),
+  surcharge_cost numeric(12,4),
+  surcharge_label text,
+  notes text,
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.supplier_decoration_rate_card_rows (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  supplier_decoration_rate_card_id uuid references public.supplier_decoration_rate_cards(id) on delete cascade,
+  rate_card_key text not null,
+  decoration_method text not null,
+  applies_to text,
+  artwork_size_label text,
+  stitch_count_min int,
+  stitch_count_max int,
+  currency text default 'AUD',
+  min_qty int,
+  max_qty int,
+  unit_cost numeric(12,4),
+  setup_cost numeric(12,4),
+  repeat_setup_cost numeric(12,4),
+  surcharge_cost numeric(12,4),
+  surcharge_label text,
+  pricing_basis text not null default 'per_unit'
+    check (pricing_basis in ('per_unit','per_colour','per_position','per_colour_position','per_line','per_stitch_band','flat_setup','freight','other')),
+  price_status text not null default 'priced'
+    check (price_status in ('priced','request_quote','included','unavailable')),
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.supplier_transform_preview (
+  id uuid primary key default gen_random_uuid(),
+  batch_id uuid not null references public.supplier_import_batches(id) on delete cascade,
+  supplier text not null check (supplier in ('Gear For Life','Logoline','NIConcept','PromoBrands')),
+  supplier_sku text not null,
+  raw_name text,
+  normalized_name text,
+  slug text,
+  page_role text not null default 'P'
+    check (page_role in ('P','F','collection','kit','manual_review')),
+  target_category text,
+  target_subcategory text,
+  mapping_status text not null
+    check (mapping_status in ('ready','needs_review','blocked','collection_or_tag','kit_or_bundle','fulfillment_only')),
+  mapping_rule_id text,
+  confidence numeric(4,2),
+  brand text,
+  brand_alias_status text,
+  material_tags text[] not null default '{}'::text[],
+  tags text[] not null default '{}'::text[],
+  fulfillment text not null default 'local_stock'
+    check (fulfillment in ('local_stock','indent_air','indent_sea','custom_sourcing')),
+  lead_time_min_days int,
+  lead_time_max_days int,
+  lead_time_unit text
+    check (lead_time_unit in ('business_days','calendar_days','weeks','unknown')),
+  lead_time_basis text
+    check (lead_time_basis in ('decorated','undecorated','after_artwork_approval','dispatch','supplier_default','unknown')),
+  lead_time_note text,
+  offer_type text,
+  kit_themes text[] not null default '{}'::text[],
+  warning_flags text[] not null default '{}'::text[],
+  review_notes text,
+  preview_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now(),
+  check (lead_time_min_days is null or lead_time_min_days >= 0),
+  check (lead_time_max_days is null or lead_time_max_days >= 0),
+  check (lead_time_min_days is null or lead_time_max_days is null or lead_time_max_days >= lead_time_min_days)
+);
+
+create table if not exists public.product_images (
+  id uuid primary key default gen_random_uuid(),
+  product_id uuid references public.products(id) on delete cascade,
+  supplier text,
+  supplier_sku text,
+  image_url text not null,
+  image_role text not null default 'gallery'
+    check (image_role in ('gallery','main','detail','lifestyle','swatch','fallback')),
+  colour_link_status text not null default 'unlinked'
+    check (colour_link_status in ('unlinked','ambiguous','mismatch','not_colour_specific')),
+  source_image_id text,
+  sort_order int,
+  raw_json jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists idx_supplier_raw_product_rows_batch_sku
+  on public.supplier_raw_product_rows(batch_id, supplier, supplier_sku);
+
+create index if not exists idx_supplier_commercial_defaults_supplier
+  on public.supplier_commercial_defaults(batch_id, supplier, applies_to_category, applies_to_subcategory);
+
+create index if not exists idx_supplier_raw_product_rows_category
+  on public.supplier_raw_product_rows(supplier, raw_category_path);
+
+create index if not exists idx_supplier_raw_colours_sku
+  on public.supplier_raw_colour_options(batch_id, supplier, supplier_sku);
+
+create index if not exists idx_supplier_raw_images_sku
+  on public.supplier_raw_images(batch_id, supplier, supplier_sku);
+
+create index if not exists idx_supplier_price_rows_sku
+  on public.supplier_price_rows(batch_id, supplier, supplier_sku);
+
+create index if not exists idx_supplier_decoration_options_sku
+  on public.supplier_decoration_options(batch_id, supplier, supplier_sku);
+
+create unique index if not exists idx_supplier_decoration_options_key_unique
+  on public.supplier_decoration_options(batch_id, supplier, supplier_sku, decoration_option_key)
+  where decoration_option_key is not null;
+
+create index if not exists idx_supplier_decoration_price_rows_sku
+  on public.supplier_decoration_price_rows(batch_id, supplier, supplier_sku);
+
+create index if not exists idx_supplier_decoration_price_rows_option
+  on public.supplier_decoration_price_rows(supplier_decoration_option_id);
+
+create index if not exists idx_supplier_decoration_price_rows_option_key
+  on public.supplier_decoration_price_rows(batch_id, supplier, supplier_sku, decoration_option_key);
+
+create unique index if not exists idx_supplier_decoration_price_rows_key_tier_unique
+  on public.supplier_decoration_price_rows(batch_id, supplier, supplier_sku, decoration_option_key, min_qty, coalesce(max_qty, 2147483647))
+  where decoration_option_key is not null and min_qty is not null;
+
+create index if not exists idx_supplier_decoration_rate_cards_key
+  on public.supplier_decoration_rate_cards(batch_id, supplier, rate_card_key);
+
+create index if not exists idx_supplier_decoration_rate_card_rows_key
+  on public.supplier_decoration_rate_card_rows(batch_id, supplier, rate_card_key);
+
+create index if not exists idx_supplier_transform_preview_status
+  on public.supplier_transform_preview(batch_id, mapping_status);
+
+create index if not exists idx_product_images_product
+  on public.product_images(product_id, sort_order);
+
+create index if not exists idx_product_images_supplier_sku
+  on public.product_images(supplier, supplier_sku);
+
+commit;
