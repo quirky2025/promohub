@@ -1,12 +1,75 @@
 import { createClient } from '@supabase/supabase-js';
 import ProductClient from './ProductClient';
 import { COLOUR_SWATCH } from '@/lib/colourSwatch';
+import { absoluteUrl } from '@/lib/siteUrl';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
 
+const BRAND = 'QuirkyPromo';
+
+// Append the brand once, never twice (SEO Rulebook §6 title format).
+function withBrand(title) {
+  if (!title) return null;
+  return title.includes(BRAND) ? title : `${title} | ${BRAND}`;
+}
+
+// SEO Rulebook §5 + §6: every TRENDS product page must declare its own
+// canonical (/products/[slug]) and a product-specific title/meta instead of
+// inheriting the homepage canonical ('/') from the root layout.
+export async function generateMetadata({ params }) {
+  const { slug } = await params;
+
+  const { data: product } = await supabase
+    .from('products')
+    .select('name, slug, meta_title, meta_description, seo_description, category, subcategory, materials, is_eco')
+    .eq('slug', slug)
+    .eq('is_published', true)
+    .single();
+
+  // Canonical always points at the product's own URL, even before the page
+  // is fully populated, so search engines never fold it into the homepage.
+  const canonical = absoluteUrl(`/products/${slug}`);
+
+  if (!product) {
+    return {
+      title: `Product Not Found | ${BRAND}`,
+      alternates: { canonical },
+      robots: { index: false, follow: true },
+    };
+  }
+
+  const title =
+    withBrand(product.meta_title) ||
+    `Custom ${product.name} with Logo | ${BRAND}`;
+
+  const description =
+    product.meta_description ||
+    product.seo_description ||
+    `Order custom ${product.name.toLowerCase()} with your logo for corporate gifts, events and brand promotions. ` +
+      `${product.materials ? product.materials + '. ' : ''}` +
+      `Fast Australia-wide delivery, branding options and bulk quote support.`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: 'website',
+      siteName: BRAND,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
+  };
+}
 function extractImgNum(url) {
   const match = url.match(/-(\d+)\.\w+$/);
   return match ? parseInt(match[1]) : 999;
