@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import ProductClient from './ProductClient';
+import ProductJsonLd from './ProductJsonLd';
 import { COLOUR_SWATCH } from '@/lib/colourSwatch';
 import { absoluteUrl } from '@/lib/siteUrl';
 
@@ -41,6 +42,7 @@ export async function generateMetadata({ params }) {
     };
   }
 
+
   const title =
     withBrand(product.meta_title) ||
     `Custom ${product.name} with Logo | ${BRAND}`;
@@ -70,6 +72,7 @@ export async function generateMetadata({ params }) {
     },
   };
 }
+
 function extractImgNum(url) {
   const match = url.match(/-(\d+)\.\w+$/);
   return match ? parseInt(match[1]) : 999;
@@ -161,14 +164,21 @@ export default async function ProductPage({ params }) {
   const finalExtras = poolUsed ? extraImages : sortedImages.slice(1);
 
   return (
-    <ProductClient
-      product={product}
-      mainImage={mainImage}
-      extraImages={finalExtras}
-      colours={colours}
-      pricingTiers={pricingTiers}
-      decorations={decorations}
-      secondaryColours={product.secondary_colours || null}
-    />
+    <>
+      <ProductJsonLd
+        product={product}
+        images={[mainImage, ...finalExtras]}
+        pricingTiers={pricingTiers}
+      />
+      <ProductClient
+        product={product}
+        mainImage={mainImage}
+        extraImages={finalExtras}
+        colours={colours}
+        pricingTiers={pricingTiers}
+        decorations={decorations}
+        secondaryColours={product.secondary_colours || null}
+      />
+    </>
   );
 }
