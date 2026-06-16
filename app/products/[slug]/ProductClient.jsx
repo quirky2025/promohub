@@ -16,6 +16,38 @@ const SHIPPING = 30;
 const SETUP_FEE = 40;
 const TABS = ['Description', 'Sample Policy', 'Mockups & Artwork', 'Shipping & Delivery', 'Ordering Process'];
 
+// ── SEO image-alt helpers (Rulebook §9 / #3) ──
+function cleanColourName(raw) {
+  if (!raw) return null;
+  let c = String(raw).trim();
+  if (!c || ['custom', 'default'].includes(c.toLowerCase())) return null;
+  if (c.includes(':')) c = c.split(':').pop().trim();
+  c = c.replace(/^overlocking\s*-\s*/i, '').trim();
+  if (c.includes('/')) {
+    const parts = c.split('/').map(s => s.trim()).filter(Boolean);
+    if (parts.length) c = parts[0] + parts.slice(1).map(p => ' and ' + p.toLowerCase()).join('');
+  }
+  if (!c || ['custom', 'default'].includes(c.toLowerCase())) return null;
+  return c;
+}
+
+function colourImageAlt(rawColour, name) {
+  const c = cleanColourName(rawColour);
+  if (!c) return `${name} with logo`;
+  if (name.toLowerCase().startsWith(c.toLowerCase())) return `${name} with logo`;
+  return `${c} ${name} with logo`;
+}
+
+function isGoodAltText(alt, name, colourNames) {
+  if (!alt) return false;
+  const t = String(alt).trim();
+  if (!t || t === name) return false;
+  const low = t.toLowerCase();
+  if (low === 'custom' || low === 'default') return false;
+  if ((colourNames || []).some(cn => cn && String(cn).toLowerCase() === low)) return false;
+  return t.length >= 8 && t.length <= 125;
+}
+
 export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations, secondaryColours }) {
   const [selectedColour, setSelectedColour] = useState(null);
   const [selectedSecondary, setSelectedSecondary] = useState(0);
@@ -60,6 +92,13 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   const bigImage = selectedColour !== null
     ? (colours[selectedColour]?.image || bottomImages[0] || mainImage)
     : (bottomImages[leftIdx] || mainImage);
+
+  // ── SEO alt text (Rulebook §9, #3) ──
+  const colourNames = (colours || []).map(c => c?.name).filter(Boolean);
+  const mainAlt = isGoodAltText(product.alt_text, product.name, colourNames)
+    ? String(product.alt_text).trim()
+    : `${product.name} with logo`;
+  const galleryAlt = `${product.name} with custom branding`;
 
   useEffect(() => {
     async function fetchSimilar() {
@@ -217,7 +256,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
         <div className="qp-pdp-left" style={{ position: 'sticky', top: '70px' }}>
           <div style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '16px', width: '100%', aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '12px' }}>
             {bigImage
-              ? <img src={bigImage} alt={product.name} style={{ width: '85%', height: '85%', objectFit: 'contain' }} />
+              ? <img src={bigImage} alt={mainAlt} style={{ width: '85%', height: '85%', objectFit: 'contain' }} />
               : <div style={{ color: '#B0AAA3', fontSize: '14px' }}>No image available</div>
             }
           </div>
@@ -226,7 +265,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               {bottomImages.map((src, i) => (
                 <div key={i} onClick={() => handleBottomThumb(i)} style={{ cursor: 'pointer', flexShrink: 0 }}>
                   <div style={{ width: '80px', height: '80px', borderRadius: '10px', border: leftIdx === i && selectedColour === null ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: leftIdx === i && selectedColour === null ? `0 2px 8px rgba(201,169,110,.3)` : 'none' }}>
-                    <img src={src} alt="" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                    <img src={src} alt={i === 0 ? mainAlt : galleryAlt} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                   </div>
                 </div>
               ))}
@@ -261,9 +300,9 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                 {secondaryColours.options.map((c, i) => {
                   const hex = resolveColourHex(c);
                   return (
-                    <div key={i} onClick={() => setSelectedSecondary(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
+                    <div key={i} onClick={() => setSelectedSecondary(i)} role="button" aria-label={`Select ${secondaryColours.label || 'option'} ${c.name}`} style={{ cursor: 'pointer', textAlign: 'center' }}>
                       <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedSecondary === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedSecondary === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
-                        {(c.image || (Array.isArray(c.images) && c.images[0])) ? <img src={c.image || c.images[0]} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                        {(c.image || (Array.isArray(c.images) && c.images[0])) ? <img src={c.image || c.images[0]} alt={colourImageAlt(c.name, product.name)} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                           : hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: hex, border: hex === '#FFFFFF' ? '1px solid #E0DDD7' : '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
                           : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
                       </div>
@@ -281,9 +320,9 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                 {colours.map((c, i) => {
                   const hex = resolveColourHex(c);
                   return (
-                    <div key={i} onClick={() => handleSelectColour(i)} style={{ cursor: 'pointer', textAlign: 'center' }}>
+                    <div key={i} onClick={() => handleSelectColour(i)} role="button" aria-label={`Select ${product.colour_label || 'colour'} ${c.name}`} style={{ cursor: 'pointer', textAlign: 'center' }}>
                       <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
-                        {c.image ? <img src={c.image} alt={c.name} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                        {c.image ? <img src={c.image} alt={colourImageAlt(c.name, product.name)} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                           : hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: hex, border: hex === '#FFFFFF' ? '1px solid #E0DDD7' : '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
                           : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
                       </div>
@@ -810,7 +849,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
                     >
                       <div style={{ height: '180px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px' }}>
-                        {img ? <img src={img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <div style={{ fontSize: '32px', color: '#D0CCC8' }}>📦</div>}
+                        {img ? <img src={img} alt={`${p.name} with logo`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <div style={{ fontSize: '32px', color: '#D0CCC8' }}>📦</div>}
                       </div>
                       <div style={{ padding: '14px 16px' }}>
                         <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', fontWeight: 600, color: NAVY, marginBottom: '8px', lineHeight: '1.4' }}>{p.name}</div>
