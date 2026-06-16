@@ -43,12 +43,6 @@ function dateOrNow(value) {
   return date && !Number.isNaN(date.valueOf()) ? date : new Date();
 }
 
-// Only return a real date; never fake a lastModified (avoid false freshness signals).
-function validDate(value) {
-  const date = value ? new Date(value) : null;
-  return date && !Number.isNaN(date.valueOf()) ? date : null;
-}
-
 function hasNonEmptyImages(images) {
   if (!images) return false;
   try {
@@ -63,7 +57,7 @@ function hasNonEmptyImages(images) {
   }
 }
 
-// PostgREST caps each request at 1000 rows — page through to get all products.
+// PostgREST caps each request at 1000 rows; page through to get all products.
 async function fetchAllProducts() {
   const PAGE = 1000;
   let from = 0;
@@ -71,7 +65,7 @@ async function fetchAllProducts() {
   for (;;) {
     const { data, error } = await supabase
       .from('products')
-      .select('id, slug, name, updated_at, product_colours(images)')
+      .select('id, slug, name, product_colours(images)')
       .eq('is_published', true)
       .order('slug', { ascending: true })
       .range(from, from + PAGE - 1);
@@ -90,7 +84,7 @@ async function fetchAllProducts() {
 export default async function sitemap() {
   const staticEntries = STATIC_ROUTES.map(staticEntry);
 
-  // ── url_pages (categories / flat pages) ──
+  // url_pages (categories / flat pages)
   const { data: urlPagesData, error: urlPagesError } = await supabase
     .from('url_pages')
     .select('slug, canonical_url, updated_at, created_at, breadcrumb_parent, page_type, show_in_home')
@@ -108,7 +102,8 @@ export default async function sitemap() {
     priority: pagePriority(page),
   }));
 
-  // ── products (Rulebook §11/§D gate: published + name + slug + has image) ──
+  // products: published + name + slug + has image; canonical /products/[slug].
+  // products has no reliable updated_at, so we omit lastModified (no fake dates).
   const productRows = await fetchAllProducts();
   const seen = new Set();
   const productEntries = [];
@@ -121,11 +116,8 @@ export default async function sitemap() {
     if (!hasImage) continue;
     if (seen.has(slug)) continue;
     seen.add(slug);
-
-    const lastModified = validDate(p.updated_at);
     productEntries.push({
       url: absoluteUrl(`/products/${slug}`),
-      ...(lastModified ? { lastModified } : {}),
       changeFrequency: 'weekly',
       priority: 0.7,
     });
