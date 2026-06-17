@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@supabase/supabase-js';
 import QuoteModal from '@/components/QuoteModal';
+import ProductImg from '@/components/ProductImg';
 
 const supabase = createClient(
   'https://ztfmeopyknfzmxvbpnxo.supabase.co',
@@ -489,7 +490,7 @@ export default function Home() {
                     style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', boxShadow: isHovered ? '0 8px 24px rgba(0,0,0,.1)' : 'none', transform: isHovered ? 'translateY(-2px)' : 'none', transition: 'all .2s' }}
                   >
                     <div style={{ height: '200px', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                      {img ? <img src={img} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} />
+                      {img ? <ProductImg src={img} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} />
                         : <div style={{ fontSize: '40px', color: '#D0CCC8' }}>📦</div>}
                     </div>
                     <div style={{ padding: '14px 16px' }}>
