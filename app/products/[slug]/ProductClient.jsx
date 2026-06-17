@@ -8,6 +8,7 @@ import { addToCart } from '@/lib/cart';
 import { getColourHex } from '@/lib/colourSwatch';
 import { slugify } from '@/lib/slug';
 import { colourImageAlt, cleanColour } from '@/lib/colourName';
+import ProductImg from '@/components/ProductImg';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -253,7 +254,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
         <div className="qp-pdp-left" style={{ position: 'sticky', top: '70px' }}>
           <div style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '16px', width: '100%', aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '12px' }}>
             {bigImage
-              ? <img src={bigImage} alt={mainAlt} style={{ width: '85%', height: '85%', objectFit: 'contain' }} />
+              ? <ProductImg src={bigImage} alt={mainAlt} size="detail" eager style={{ width: '85%', height: '85%', objectFit: 'contain' }} />
               : <div style={{ color: '#B0AAA3', fontSize: '14px' }}>No image available</div>
             }
           </div>
@@ -262,7 +263,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               {bottomImages.map((src, i) => (
                 <div key={i} onClick={() => handleBottomThumb(i)} style={{ cursor: 'pointer', flexShrink: 0 }}>
                   <div style={{ width: '80px', height: '80px', borderRadius: '10px', border: leftIdx === i && selectedColour === null ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: leftIdx === i && selectedColour === null ? `0 2px 8px rgba(201,169,110,.3)` : 'none' }}>
-                    <img src={src} alt={i === 0 ? mainAlt : galleryAlt} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                    <ProductImg src={src} alt={i === 0 ? mainAlt : galleryAlt} size="thumb" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                   </div>
                 </div>
               ))}
@@ -299,7 +300,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                   return (
                     <div key={i} onClick={() => setSelectedSecondary(i)} role="button" aria-label={`Select ${secondaryColours.label || 'option'} ${c.name}`} style={{ cursor: 'pointer', textAlign: 'center' }}>
                       <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedSecondary === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedSecondary === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
-                        {(c.image || (Array.isArray(c.images) && c.images[0])) ? <img src={c.image || c.images[0]} alt={colourImageAlt(c.name, product.name)} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                        {(c.image || (Array.isArray(c.images) && c.images[0])) ? <ProductImg src={c.image || c.images[0]} alt={colourImageAlt(c.name, product.name)} size="thumb" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                           : hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: hex, border: hex === '#FFFFFF' ? '1px solid #E0DDD7' : '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
                           : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
                       </div>
@@ -319,7 +320,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                   return (
                     <div key={i} onClick={() => handleSelectColour(i)} role="button" aria-label={`Select ${product.colour_label || 'colour'} ${c.name}`} style={{ cursor: 'pointer', textAlign: 'center' }}>
                       <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
-                        {c.image ? <img src={c.image} alt={colourImageAlt(c.name, product.name)} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                        {c.image ? <ProductImg src={c.image} alt={colourImageAlt(c.name, product.name)} size="thumb" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                           : hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: hex, border: hex === '#FFFFFF' ? '1px solid #E0DDD7' : '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
                           : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
                       </div>
@@ -851,7 +852,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
                     >
                       <div style={{ height: '180px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px' }}>
-                        {img ? <img src={img} alt={`${p.name} with logo`} style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <div style={{ fontSize: '32px', color: '#D0CCC8' }}>📦</div>}
+                        {img ? <ProductImg src={img} alt={`${p.name} with logo`} size="list" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <div style={{ fontSize: '32px', color: '#D0CCC8' }}>📦</div>}
                       </div>
                       <div style={{ padding: '14px 16px' }}>
                         <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', fontWeight: 600, color: NAVY, marginBottom: '8px', lineHeight: '1.4' }}>{p.name}</div>

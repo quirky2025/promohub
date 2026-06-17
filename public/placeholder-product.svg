@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#F0EEED"/>
+  <g fill="none" stroke="#C8C4BC" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="115" y="125" width="170" height="130" rx="10"/>
+    <circle cx="162" cy="170" r="16"/>
+    <path d="M130 245 l50 -50 35 30 35 -28 45 48"/>
+  </g>
+  <text x="200" y="305" font-family="Arial, sans-serif" font-size="20" fill="#A9A39B" text-anchor="middle">DEV placeholder</text>
+</svg>

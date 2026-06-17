@@ -5,6 +5,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import ProductImg from '@/components/ProductImg';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -103,7 +104,7 @@ function SearchResults() {
               >
                 <div style={{ aspectRatio: '1', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                   {img
-                    ? <img src={img} alt={product.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+                    ? <ProductImg src={img} alt={product.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
                     : <div style={{ color: '#B0AAA3', fontSize: '13px' }}>No image</div>
                   }
                 </div>
