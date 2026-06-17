@@ -1,8 +1,14 @@
-// Server component — emits Product + BreadcrumbList JSON-LD (Rulebook §10, #4A).
-// Real data only: omit description/sku/offers when absent; never fabricate
-// price/availability/rating. Breadcrumb uses flat canonical category URLs from
-// url_pages (decision A), falling back to /category/... only when no flat page
-// exists. url == canonical (§5); last breadcrumb item == product canonical.
+// Server component — emits Product/ProductGroup + BreadcrumbList JSON-LD
+// (Rulebook §10, #4A + #4B-4). Real data only: omit description/sku/offers when
+// absent; never fabricate price/availability/rating. Breadcrumb uses flat
+// canonical category URLs from url_pages (decision A), falling back to
+// /category/... only when no flat page exists. url == canonical (§5).
+//
+// 4B-4: when the product has >= 2 ready colour variants (product_variants,
+// status='variant_ready'), the top-level type becomes ProductGroup with
+// hasVariant[] (each a Product: color/image/variant-url, offers INHERITED from
+// the product's pricing tiers — no per-colour price, no per-colour SKU). Fewer
+// than 2 ready variants -> unchanged plain Product (4A behaviour).
 import { supabase } from '@/lib/supabase';
 import { absoluteUrl } from '@/lib/siteUrl';
 import { slugify } from '@/lib/slug';
@@ -39,10 +45,27 @@ export default async function ProductJsonLd({ product, images = [], pricingTiers
   const description = (product.meta_description || product.seo_description || '').trim() || null;
   const brand = (product.brand || '').trim() || BRAND_FALLBACK;
 
-  // ── Product ──
-  const productLd = {
+  // offers: only when real prices exist (AggregateOffer, AUD, ex-GST). Returns
+  // the offer object for a given url, or null. Variants inherit the SAME tiers
+  // (no per-colour price), so each variant reuses this with its own url.
+  const prices = (pricingTiers || [])
+    .map((t) => Number(t.base_price))
+    .filter((p) => Number.isFinite(p) && p > 0)
+    .map((p) => +(p * MARGIN).toFixed(2));
+  const lowPrice = prices.length ? Math.min(...prices).toFixed(2) : null;
+  const highPrice = prices.length ? Math.max(...prices).toFixed(2) : null;
+  const offerFor = (url) => (prices.length ? {
+    '@type': 'AggregateOffer',
+    priceCurrency: 'AUD',
+    lowPrice,
+    highPrice,
+    offerCount: prices.length,
+    url,
+  } : null);
+
+  // ── base Product fields (shared by Product and ProductGroup) ──
+  const base = {
     '@context': 'https://schema.org',
-    '@type': 'Product',
     name: product.name,
     ...(description ? { description } : {}),
     ...(product.supplier_sku ? { sku: String(product.supplier_sku) } : {}),
@@ -51,19 +74,50 @@ export default async function ProductJsonLd({ product, images = [], pricingTiers
     url: canonical,
   };
 
-  // offers: only when real prices exist (AggregateOffer, AUD, ex-GST)
-  const prices = (pricingTiers || [])
-    .map((t) => Number(t.base_price))
-    .filter((p) => Number.isFinite(p) && p > 0)
-    .map((p) => +(p * MARGIN).toFixed(2));
-  if (prices.length) {
-    productLd.offers = {
-      '@type': 'AggregateOffer',
-      priceCurrency: 'AUD',
-      lowPrice: Math.min(...prices).toFixed(2),
-      highPrice: Math.max(...prices).toFixed(2),
-      offerCount: prices.length,
-      url: canonical,
+  // ── 4B-4: ready colour variants → ProductGroup + hasVariant ──
+  // RLS allows anon to read variant_ready variants of published products.
+  const { data: variants } = await supabase
+    .from('product_variants')
+    .select('colour_name, colour_slug, image_url')
+    .eq('product_id', product.id)
+    .eq('status', 'variant_ready')
+    .eq('is_active', true)
+    .order('sort_order', { ascending: true });
+
+  const ready = (variants || []).filter(
+    (v) => v.colour_name && v.colour_slug && v.image_url
+  );
+
+  let mainLd;
+  if (ready.length >= 2) {
+    const groupId = String(product.supplier_sku || product.slug);
+    mainLd = {
+      ...base,
+      '@type': 'ProductGroup',
+      productGroupID: groupId,
+      variesBy: ['https://schema.org/color'],
+      hasVariant: ready.map((v) => {
+        const vUrl = `${canonical}?colour=${v.colour_slug}`;
+        const offer = offerFor(vUrl);
+        return {
+          '@type': 'Product',
+          name: `${product.name} - ${v.colour_name}`,
+          color: v.colour_name,
+          image: v.image_url,
+          url: vUrl,
+          inProductGroupID: groupId,
+          brand: { '@type': 'Brand', name: brand },
+          ...(offer ? { offers: offer } : {}),
+        };
+      }),
+    };
+  } else {
+    // 4A unchanged: plain Product (single colour / no ready variants).
+    const offer = offerFor(canonical);
+    mainLd = {
+      ...base,
+      '@type': 'Product',
+      ...(offer ? { offers: offer } : {}),
     };
   }
 
@@ -88,7 +142,7 @@ export default async function ProductJsonLd({ product, images = [], pricingTiers
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(productLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(mainLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
     </>
   );
