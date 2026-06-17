@@ -44,7 +44,7 @@ export default function EcoPage() {
       setLoading(true);
       const { data } = await supabase
         .from('products')
-        .select('id, name, category, subcategory, is_eco, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
+        .select('id, name, slug, category, subcategory, is_eco, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
         .eq('is_eco', true)
         .eq('is_published', true);
       if (data) setAllProducts(data);
@@ -189,7 +189,7 @@ export default function EcoPage() {
                 const price = getLowestPrice(product);
                 const isHovered = hoveredId === product.id;
                 return (
-                  <Link key={product.id} href={`/products/${toSlug(product.name)}`} style={{ textDecoration: 'none' }}>
+                  <Link key={product.id} href={`/products/${product.slug}`} style={{ textDecoration: 'none' }}>
                     <div
                       onMouseEnter={() => setHoveredId(product.id)}
                       onMouseLeave={() => setHoveredId(null)}
