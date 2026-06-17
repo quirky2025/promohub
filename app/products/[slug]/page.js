@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import ProductClient from './ProductClient';
 import ProductJsonLd from './ProductJsonLd';
 import { COLOUR_SWATCH } from '@/lib/colourSwatch';
+import { colourSlug } from '@/lib/colourName';
 import { absoluteUrl } from '@/lib/siteUrl';
 
 const supabase = createClient(
@@ -20,8 +21,14 @@ function withBrand(title) {
 // SEO Rulebook §5 + §6: every TRENDS product page must declare its own
 // canonical (/products/[slug]) and a product-specific title/meta instead of
 // inheriting the homepage canonical ('/') from the root layout.
-export async function generateMetadata({ params }) {
+export async function generateMetadata({ params, searchParams }) {
   const { slug } = await params;
+
+  // 4B-3: a colour-variant URL (/products/[slug]?colour=...) must NOT be indexed
+  // (faceted noindex, Rulebook §A) but its canonical still points at the base
+  // product URL, so equity consolidates on /products/[slug].
+  const sp = searchParams ? await searchParams : {};
+  const hasColour = typeof sp.colour === 'string' && sp.colour.length > 0;
 
   const { data: product } = await supabase
     .from('products')
@@ -58,6 +65,8 @@ export async function generateMetadata({ params }) {
     title,
     description,
     alternates: { canonical },
+    // base URL stays indexable; ?colour= variant URLs are noindex,follow.
+    robots: hasColour ? { index: false, follow: true } : undefined,
     openGraph: {
       title,
       description,
@@ -78,7 +87,7 @@ function extractImgNum(url) {
   return match ? parseInt(match[1]) : 999;
 }
 
-export default async function ProductPage({ params }) {
+export default async function ProductPage({ params, searchParams }) {
   const { slug } = await params;
 
   const { data: product, error } = await supabase
@@ -163,6 +172,17 @@ export default async function ProductPage({ params }) {
   const poolUsed = colours.some(c => c.image && colourImages.includes(c.image));
   const finalExtras = poolUsed ? extraImages : sortedImages.slice(1);
 
+  // ── 4B-3: SSR pre-select colour from ?colour=<colour_slug> ──
+  // colourSlug() is the SAME function the 4B-2 backfill used, so the slug here is
+  // byte-identical to product_variants.colour_slug — the URL always matches the DB.
+  const sp = searchParams ? await searchParams : {};
+  const wantColour = typeof sp.colour === 'string' ? sp.colour : null;
+  let initialColourIndex = null;
+  if (wantColour) {
+    const i = colourData.findIndex(c => colourSlug(c.name) === wantColour);
+    if (i >= 0) initialColourIndex = i;
+  }
+
   return (
     <>
       <ProductJsonLd
@@ -178,6 +198,7 @@ export default async function ProductPage({ params }) {
         pricingTiers={pricingTiers}
         decorations={decorations}
         secondaryColours={product.secondary_colours || null}
+        initialColourIndex={initialColourIndex}
       />
     </>
   );
