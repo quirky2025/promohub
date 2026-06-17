@@ -28,8 +28,9 @@ function isGoodAltText(alt, name, colourNames) {
   return t.length >= 8 && t.length <= 125;
 }
 
-export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations, secondaryColours }) {
-  const [selectedColour, setSelectedColour] = useState(null);
+export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations, secondaryColours, initialColourIndex }) {
+  // 4B-3: SSR pre-selects a colour from ?colour=<colour_slug> (page.js passes its index).
+  const [selectedColour, setSelectedColour] = useState(initialColourIndex ?? null);
   const [selectedSecondary, setSelectedSecondary] = useState(0);
   const [leftIdx, setLeftIdx] = useState(0);
   const [qty, setQty] = useState(product.min_qty || 48);
