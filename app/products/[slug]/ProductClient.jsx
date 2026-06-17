@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { addToCart } from '@/lib/cart';
 import { getColourHex } from '@/lib/colourSwatch';
 import { slugify } from '@/lib/slug';
-import { colourImageAlt } from '@/lib/colourName';
+import { colourImageAlt, cleanColour } from '@/lib/colourName';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -80,6 +80,22 @@ export default function ProductClient({ product, mainImage, colours, extraImages
     ? String(product.alt_text).trim()
     : `${product.name} with logo`;
   const galleryAlt = `${product.name} with custom branding`;
+
+  // ── Available colours visible text (Rulebook §11.2, #2) ──
+  // Server-rendered, crawlable list of real discrete colours (cleaned names,
+  // deduped). Skips Custom / placeholder. Shown only when >= 2 real colours.
+  const availableColours = (() => {
+    const seen = new Set();
+    const out = [];
+    for (const c of (colours || [])) {
+      const { name } = cleanColour(c?.name);
+      if (name) {
+        const k = name.toLowerCase();
+        if (!seen.has(k)) { seen.add(k); out.push(name); }
+      }
+    }
+    return out;
+  })();
 
   useEffect(() => {
     async function fetchSimilar() {
@@ -312,6 +328,11 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                   );
                 })}
               </div>
+              {availableColours.length >= 2 && (
+                <p style={{ fontSize: '13px', color: '#5A5550', lineHeight: 1.6, margin: '14px 0 0', fontFamily: '"DM Sans", sans-serif' }}>
+                  Available colours: {availableColours.join(', ')}.
+                </p>
+              )}
             </div>
           )}
 
