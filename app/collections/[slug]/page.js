@@ -99,7 +99,7 @@ export default function CollectionPage() {
       const orFilter = values.map(v => `collection.cs.${JSON.stringify([v])}`).join(',');
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, category, subcategory, is_eco, collection, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
+        .select('id, name, slug, category, subcategory, is_eco, collection, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
         .eq('is_published', true)
         .or(orFilter);
 
@@ -244,7 +244,7 @@ export default function CollectionPage() {
                 const price = getLowestPrice(product);
                 const isHovered = hoveredId === product.id;
                 return (
-                  <Link key={product.id} href={`/products/${toSlug(product.name)}`} style={{ textDecoration: 'none' }}>
+                  <Link key={product.id} href={`/products/${product.slug}`} style={{ textDecoration: 'none' }}>
                     <div onMouseEnter={() => setHoveredId(product.id)} onMouseLeave={() => setHoveredId(null)}
                       style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', boxShadow: isHovered ? '0 8px 24px rgba(0,0,0,.1)' : '0 2px 6px rgba(0,0,0,.05)', transform: isHovered ? 'translateY(-2px)' : 'none', transition: 'box-shadow .2s, transform .2s', height: '100%', display: 'flex', flexDirection: 'column' }}>
                       <div style={{ height: '190px', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
