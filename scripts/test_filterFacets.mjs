@@ -27,4 +27,13 @@ check('no selection', applyFilters(P,'Bags',{}).length, 18);
 // stock Local Stock -> 12
 check('stock Local', applyFilters(P,'Bags',{stock:new Set(['Local Stock'])}).length, 12);
 
+// noThin: stock/eco surface count-1 values; normal facets (brand) still hide them
+const Q = [];
+for (let i=0;i<3;i++) Q.push({ category:'Bags', subcategory:'Tote Bags', colour_slugs:['black'], min_qty:50, fulfillment:'local_stock', _price:5, brand:'Acme', _decorationNames:[] });
+Q.push({ category:'Bags', subcategory:'Tote Bags', colour_slugs:['black'], min_qty:50, fulfillment:'indent_air', _price:5, brand:'Solo', is_eco:true, _decorationNames:[] });
+const qf = computeFacets(Q, 'Bags');
+check('noThin stock shows Indent Air (count 1)', qf.find(f=>f.key==='stock').values.map(v=>v.value).sort(), ['Indent Air','Local Stock']);
+check('noThin eco shows (count 1)', !!qf.find(f=>f.key==='eco'), true);
+check('brand still thin-hidden (Solo count1 gone)', qf.find(f=>f.key==='brand').values.map(v=>v.value), ['Acme']);
+
 console.log('\n'+pass+' passed, '+fail+' failed'); process.exit(fail?1:0);
