@@ -102,7 +102,7 @@ export default async function UrlPage({ params }) {
 }
 
 async function getChildPageCards(urlPage) {
-  const childPages = await getLiveChildUrlPages(urlPage.slug);
+  const childPages = (await getLiveChildUrlPages(urlPage.slug)).filter((c) => c.page_type !== 'collection');
 
   const cards = await Promise.all(
     childPages.map(async (childPage) => {
