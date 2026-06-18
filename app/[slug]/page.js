@@ -10,6 +10,7 @@ import {
   getProductsForUrlPage,
 } from '@/lib/urlPages';
 import { absoluteUrl } from '@/lib/siteUrl';
+import CategoryFilter from '@/components/CategoryFilter';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -41,7 +42,17 @@ export default async function UrlPage({ params }) {
 
   if (!urlPage) notFound();
 
-  const { products, count, error, unsupported } = await getProductsForUrlPage(urlPage);
+  const filterable = urlPage.product_filter?.type === 'category' || urlPage.product_filter?.type === 'subcategory';
+  const { products, count, error, unsupported } = await getProductsForUrlPage(urlPage, filterable ? 1000 : 96);
+  const filterProducts = filterable
+    ? products.map((p) => ({
+        ...p,
+        _image: getFirstImage(p),
+        _price: getLowestPrice(p),
+        _swatches: getColourSwatches(p),
+        _decorationNames: (p.decoration_options || []).filter((d) => d.type !== 'addon').map((d) => d.name),
+      }))
+    : null;
   const childPages = urlPage.product_filter?.type === 'category'
     ? await getChildPageCards(urlPage)
     : [];
@@ -85,11 +96,15 @@ export default async function UrlPage({ params }) {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(214px, 1fr))', gap: '20px' }}>
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+            {filterable ? (
+              <CategoryFilter products={filterProducts} category={urlPage.product_filter?.category} includeType={urlPage.product_filter?.type === 'category'} />
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(214px, 1fr))', gap: '20px' }}>
+                {products.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
           </>
         )}
       </section>
