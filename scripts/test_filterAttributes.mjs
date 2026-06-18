@@ -1,7 +1,8 @@
 // Fixture tests for lib/filterAttributes.js  ->  node scripts/test_filterAttributes.mjs
 import {
   colourFamiliesOf, decorationFamiliesOf, isDecorationCharge,
-  moqBucket, capacityBucketBags, capacityBucketDrinkware, stockTypeOf
+  moqBucket, capacityBucketBags, capacityBucketDrinkware, stockTypeOf,
+  materialFamiliesOf,
 } from '../lib/filterAttributes.js';
 
 let pass = 0, fail = 0;
@@ -25,12 +26,22 @@ check('redwood NOT Red (token-aware)', colourFamiliesOf(['redwood']), []);
 // Decoration (charge exclusion + 6 families + precedence)
 check('Embroidery Per Position', decorationFamiliesOf(['Embroidery Per Position (up to 10,000 stitches)']), ['Embroidery']);
 check('Additional Stitches is charge', isDecorationCharge('Embroidery Per Additional 5,000 Stitches'), true);
-check('Screen Print -> Spot', decorationFamiliesOf(['Screen Print']), ['Spot Colour Print']);
-check('Pad Print -> Spot', decorationFamiliesOf(['Pad Print Per Colour/Position']), ['Spot Colour Print']);
+check('Screen Print -> Screen/Pad', decorationFamiliesOf(['Screen Print']), ['Screen / Pad Print']);
+check('Pad Print -> Screen/Pad', decorationFamiliesOf(['Pad Print Per Colour/Position']), ['Screen / Pad Print']);
 check('UVDTF -> Full Colour', decorationFamiliesOf(['UVDTF Full Colour']), ['Full Colour']);
 check('Laser Engraving', decorationFamiliesOf(['Laser Engraving Per Position']), ['Laser Engraving']);
 check('Digital Transfer -> Transfer (precedence)', decorationFamiliesOf(['Digital Transfer']), ['Transfer']);
 check('Debossing -> Special', decorationFamiliesOf(['Debossing Per Position']), ['Special']);
+
+// Material (keyword, one family per tag, precedence)
+check('Cotton', materialFamiliesOf(['Cotton']), ['Cotton']);
+check('Jute / Hessian', materialFamiliesOf(['Jute']), ['Jute']);
+check('600D Polyester', materialFamiliesOf(['600D Polyester']), ['Polyester']);
+check('Non-Woven PP -> Non-Woven (not Plastic)', materialFamiliesOf(['Non-Woven Polypropylene']), ['Non-Woven']);
+check('recycled polyester -> RPET (not Polyester)', materialFamiliesOf(['Recycled Polyester']), ['RPET']);
+check('RPET', materialFamiliesOf(['rPET']), ['RPET']);
+check('Canvas', materialFamiliesOf(['Cotton Canvas']), ['Cotton']);
+check('two tags -> two families', materialFamiliesOf(['Nylon','Aluminium']), ['Nylon','Metal']);
 
 // Buckets
 check('moq 1000 -> >500', moqBucket(1000), '>500');
