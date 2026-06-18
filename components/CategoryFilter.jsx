@@ -36,7 +36,9 @@ export default function CategoryFilter({ products = [], category, includeType = 
 
   return (
     <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
-      <FilterSidebar facets={facets} selected={selected} onToggle={onToggle} onClear={clearAll} resultCount={filtered.length} />
+      <div style={{ width: '240px', flexShrink: 0 }}>
+        <FilterSidebar facets={facets} selected={selected} onToggle={onToggle} onClear={clearAll} resultCount={filtered.length} />
+      </div>
       <div style={{ flex: 1 }}>
         {filtered.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570' }}>No products match these filters.</div>
