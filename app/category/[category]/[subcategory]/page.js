@@ -55,7 +55,7 @@ export default function SubcategoryPage() {
       const { data: subs } = await supabase
         .from('nav_subcategories')
         .select('subcategory')
-        .ilike('category', categoryName);
+        .ilike('category', categoryName.split(' ').join('%'));
       if (subs && subs.length) {
         realSub = findNameBySlug(subs.map(s => s.subcategory), subcategory);
       }
@@ -70,7 +70,7 @@ export default function SubcategoryPage() {
           product_colours ( id, name, hex, images, sort_order ),
           pricing_tiers ( min_qty, base_price )
         `)
-        .ilike('category', categoryName)
+        .ilike('category', categoryName.split(' ').join('%'))
         .eq('is_published', true)
         .order('name');
 

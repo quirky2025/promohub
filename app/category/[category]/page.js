@@ -66,7 +66,7 @@ export default function CategoryPage() {
       const { data: allData } = await supabase
         .from('products')
         .select('id, name, slug, subcategory, extra_subcategories, is_eco, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
-        .ilike('category', categoryName)
+        .ilike('category', categoryName.split(' ').join('%'))
         .eq('is_published', true);
 
       if (allData) {
