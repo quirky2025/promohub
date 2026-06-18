@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { absoluteUrl } from '@/lib/siteUrl';
+import { SCENES } from '@/lib/kits';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,6 +12,8 @@ const STATIC_ROUTES = [
   '/contact',
   '/faq',
   '/new-arrivals',
+  '/promo-kits',
+  '/promotional-products',
   '/resources/portfolio',
   '/sale',
   '/services/decoration-methods',
@@ -83,6 +86,7 @@ async function fetchAllProducts() {
 
 export default async function sitemap() {
   const staticEntries = STATIC_ROUTES.map(staticEntry);
+  const kitSceneEntries = SCENES.map((scene) => staticEntry(`/promo-kits/${scene.slug}`));
 
   // url_pages (categories / flat pages)
   const { data: urlPagesData, error: urlPagesError } = await supabase
@@ -123,5 +127,5 @@ export default async function sitemap() {
     });
   }
 
-  return [...staticEntries, ...urlPageEntries, ...productEntries];
+  return [...staticEntries, ...kitSceneEntries, ...urlPageEntries, ...productEntries];
 }
