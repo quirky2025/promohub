@@ -52,6 +52,10 @@ check('text: 100% Cotton Canvas', materialFamiliesFromText('100% Cotton Canvas')
 check('text: Stainless Steel', materialFamiliesFromText('Stainless Steel Bottle'), ['Metal']);
 check('text: empty', materialFamiliesFromText(''), []);
 check('text: Recycled Cotton (not RPET)', materialFamiliesFromText('Recycled Cotton'), ['Cotton']);
+check('name: Poly Tote Bag -> Polyester', materialFamiliesFromText('Poly Tote Bag'), ['Polyester']);
+check('name: Juco Shopper -> Jute+Cotton', materialFamiliesFromText('Juco Shopper'), ['Jute','Cotton']);
+check('name: polypropylene NOT Polyester', materialFamiliesFromText('Polypropylene Bag'), ['Plastic']);
+check('name: Non-Woven Tote', materialFamiliesFromText('Non-Woven Tote'), ['Non-Woven']);
 
 // Buckets
 check('moq 1000 -> >500', moqBucket(1000), '>500');
