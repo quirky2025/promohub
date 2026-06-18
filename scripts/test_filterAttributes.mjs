@@ -2,7 +2,7 @@
 import {
   colourFamiliesOf, decorationFamiliesOf, isDecorationCharge,
   moqBucket, capacityBucketBags, capacityBucketDrinkware, stockTypeOf,
-  materialFamiliesOf, materialFamiliesFromText, isBpaFreeText, gendersFromText,
+  materialFamiliesOf, materialFamiliesFromText, materialPrimaryFromText, isBpaFreeText, gendersFromText,
 } from '../lib/filterAttributes.js';
 
 let pass = 0, fail = 0;
@@ -65,6 +65,13 @@ check('Borosilicate Glass', materialFamiliesFromText('Borosilicate Glass Cup'), 
 check('Bamboo + Ceramic mug', materialFamiliesFromText('Bamboo Lid Ceramic Mug').sort(), ['Bamboo','Ceramic']);
 check('Carbon Steel -> Metal (no stainless)', materialFamiliesFromText('Carbon Steel Mug'), ['Metal']);
 check('tag Stainless Steel', materialFamiliesOf(['Stainless Steel']), ['Stainless Steel']);
+
+// PRIMARY material (drop lid/seal/handle/sleeve accessory parts)
+check('primary: steel bottle w/ poly handle -> Stainless Steel only', materialPrimaryFromText('Bottle: 201 Stainless Steel Outer, 304 Stainless Steel Inner | Lid: Polypropylene (PP) and a Silicone Seal | Carry Handle: Polyester (PES)'), ['Stainless Steel']);
+check('primary: glass bottle w/ jute sleeve -> Glass only', materialPrimaryFromText('Bottle: Borosilicate Glass | Sleeve: Jute/Hessian'), ['Glass']);
+check('primary: bag body poly, nylon lining/PU trim -> Polyester only', materialPrimaryFromText('Body: 600D Polyester | Lining: Nylon | Trim: PU'), ['Polyester']);
+check('primary: unlabeled fallback', materialPrimaryFromText('Stainless Steel'), ['Stainless Steel']);
+check('primary: empty', materialPrimaryFromText(''), []);
 
 // BPA Free
 check('BPA: Tritan -> true', isBpaFreeText('Tritan Bottle'), true);
