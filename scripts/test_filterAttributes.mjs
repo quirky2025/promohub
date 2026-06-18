@@ -2,7 +2,7 @@
 import {
   colourFamiliesOf, decorationFamiliesOf, isDecorationCharge,
   moqBucket, capacityBucketBags, capacityBucketDrinkware, stockTypeOf,
-  materialFamiliesOf, materialFamiliesFromText, materialPrimaryFromText, isBpaFreeText, gendersFromText,
+  materialFamiliesOf, materialFamiliesFromText, materialPrimaryFromText, primaryBottleMaterial, isBpaFreeText, gendersFromText,
 } from '../lib/filterAttributes.js';
 
 let pass = 0, fail = 0;
@@ -54,7 +54,7 @@ check('text: empty', materialFamiliesFromText(''), []);
 check('text: Recycled Cotton (not RPET)', materialFamiliesFromText('Recycled Cotton'), ['Cotton']);
 check('name: Poly Tote Bag -> Polyester', materialFamiliesFromText('Poly Tote Bag'), ['Polyester']);
 check('name: Juco Shopper -> Jute+Cotton', materialFamiliesFromText('Juco Shopper'), ['Jute','Cotton']);
-check('name: polypropylene NOT Polyester', materialFamiliesFromText('Polypropylene Bag'), ['Plastic']);
+check('name: polypropylene -> PP (not Polyester/Plastic)', materialFamiliesFromText('Polypropylene Bag'), ['Polypropylene']);
 check('name: Non-Woven Tote', materialFamiliesFromText('Non-Woven Tote'), ['Non-Woven']);
 
 // Drinkware materials (split metal; tritan/glass/ceramic/bamboo)
@@ -72,6 +72,14 @@ check('primary: glass bottle w/ jute sleeve -> Glass only', materialPrimaryFromT
 check('primary: bag body poly, nylon lining/PU trim -> Polyester only', materialPrimaryFromText('Body: 600D Polyester | Lining: Nylon | Trim: PU'), ['Polyester']);
 check('primary: unlabeled fallback', materialPrimaryFromText('Stainless Steel'), ['Stainless Steel']);
 check('primary: empty', materialPrimaryFromText(''), []);
+
+// DRINKWARE single bottle material (whitelist + first-by-position)
+const DW=['Stainless Steel','Aluminium','Glass','Tritan','Ceramic','Polypropylene','Bamboo','RPET'];
+check('dw: steel bottle + PP lid -> Stainless Steel', primaryBottleMaterial('Bottle: 201 Stainless Steel | Lid: Polypropylene (PP) and a Silicone Seal | Handle: Polyester', 'Halifax Bottle', DW), ['Stainless Steel']);
+check('dw: unlabeled steel + pp lid -> Stainless Steel', primaryBottleMaterial('Stainless steel bottle with a PP lid and silicone seal', '', DW), ['Stainless Steel']);
+check('dw: real PP bottle -> Polypropylene', primaryBottleMaterial('Polypropylene drink bottle', '', DW), ['Polypropylene']);
+check('dw: glass + bamboo lid -> Glass', primaryBottleMaterial('Bottle: Borosilicate Glass | Lid: Bamboo', 'Eden Glass Bottle', DW), ['Glass']);
+check('dw: name only Tritan -> Tritan', primaryBottleMaterial('', 'Clear Tritan Drink Bottle', DW), ['Tritan']);
 
 // BPA Free
 check('BPA: Tritan -> true', isBpaFreeText('Tritan Bottle'), true);
