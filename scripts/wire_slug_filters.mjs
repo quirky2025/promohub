@@ -61,10 +61,18 @@ editFile('app/[slug]/page.js', [
 ]);
 
 editFile('lib/urlPages.js', [
+  // Edit B (fresh clone): full filter-field injection, incl. materials. Run first so a
+  // fresh clone gets "material_tags, materials" and Edit A then no-ops via its done-marker.
   [
     "  pricing_tiers ( min_qty, base_price )",
-    "  colour_slugs, fulfillment, capacity, pen_mechanism, pen_ink_colour, material_tags, pricing_tiers ( min_qty, base_price ), decoration_options ( name, type )",
+    "  colour_slugs, fulfillment, capacity, pen_mechanism, pen_ink_colour, material_tags, materials, pricing_tiers ( min_qty, base_price ), decoration_options ( name, type )",
     'PRODUCT_SELECT', 'decoration_options ( name, type )'
+  ],
+  // Edit A (already-patched clone w/o materials): add materials next to material_tags.
+  [
+    "material_tags, pricing_tiers ( min_qty, base_price )",
+    "material_tags, materials, pricing_tiers ( min_qty, base_price )",
+    'PRODUCT_SELECT+materials', 'material_tags, materials'
   ],
 ]);
 
