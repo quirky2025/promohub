@@ -23,12 +23,13 @@ export default function CategoryFilter({ products = [], category, includeType = 
   const facets = useMemo(() => computeFacets(products, category, { includeType }), [products, category, includeType]);
   const filtered = useMemo(() => applyFilters(products, category, selected, { includeType }), [products, category, selected, includeType]);
 
+  // Single-select per facet group: picking a new value replaces the previous one
+  // in the same group; clicking the already-selected value clears it.
   function onToggle(key, value) {
     setSelected(prev => {
       const next = { ...prev };
-      const s = new Set(next[key] || []);
-      if (s.has(value)) s.delete(value); else s.add(value);
-      next[key] = s;
+      const alreadyOn = (prev[key] && prev[key].has(value));
+      next[key] = alreadyOn ? new Set() : new Set([value]);
       return next;
     });
   }
