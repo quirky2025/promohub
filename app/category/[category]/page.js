@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { slugify, titleFromSlug } from '@/lib/slug';
+import FilterSidebar from '@/components/FilterSidebar';
+import { computeFacets, applyFilters } from '@/lib/filterFacets';
 import ProductImg from '@/components/ProductImg';
 
 const NAVY = '#1B2A4A';
@@ -54,7 +56,7 @@ export default function CategoryPage() {
 
   // Filters
   const [isEco, setIsEco] = useState(false);
-  const [minQtyFilter, setMinQtyFilter] = useState('');
+  const [selected, setSelected] = useState({});
   const [sortBy, setSortBy] = useState('name');
   const [page, setPage] = useState(0);
 
@@ -65,7 +67,7 @@ export default function CategoryPage() {
 
       const { data: allData } = await supabase
         .from('products')
-        .select('id, name, slug, subcategory, extra_subcategories, is_eco, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
+        .select('id, name, slug, subcategory, extra_subcategories, is_eco, min_qty, brand, fulfillment, capacity, pen_mechanism, pen_ink_colour, material_tags, colour_slugs, is_published, product_colours(images, sort_order), pricing_tiers(base_price), decoration_options(name, type)')
         .ilike('category', categoryName)
         .eq('is_published', true);
 
@@ -95,7 +97,12 @@ export default function CategoryPage() {
           });
         });
         setSubcategories(Object.values(subMap).sort((a, b) => a.name.localeCompare(b.name)));
-        setAllProducts(allData);
+        const enriched = allData.map(p => ({
+          ...p,
+          _price: getLowestPrice(p),
+          _decorationNames: (p.decoration_options || []).filter(d => d.type !== 'addon').map(d => d.name),
+        }));
+        setAllProducts(enriched);
         setTotal(allData.length);
       }
       setLoading(false);
@@ -103,16 +110,19 @@ export default function CategoryPage() {
     fetchData();
   }, [category]);
 
-  // Apply filters + sort
+  // Facet options from the full category set (stable counts)
+  const facets = useMemo(() => computeFacets(allProducts, categoryName), [allProducts, categoryName]);
+
+  // Apply selected facets + eco + sort
   const getFiltered = useCallback(() => {
-    let result = [...allProducts];
+    let result = applyFilters(allProducts, categoryName, selected);
     if (isEco) result = result.filter(p => p.is_eco === true);
-    if (minQtyFilter) result = result.filter(p => p.min_qty <= parseInt(minQtyFilter));
+    result = [...result];
     if (sortBy === 'name') result.sort((a, b) => a.name.localeCompare(b.name));
-    if (sortBy === 'price') result.sort((a, b) => getLowestPrice(a) - getLowestPrice(b));
-    if (sortBy === 'min_qty') result.sort((a, b) => a.min_qty - b.min_qty);
+    else if (sortBy === 'price') result.sort((a, b) => (a._price || 0) - (b._price || 0));
+    else if (sortBy === 'min_qty') result.sort((a, b) => a.min_qty - b.min_qty);
     return result;
-  }, [allProducts, isEco, minQtyFilter, sortBy]);
+  }, [allProducts, categoryName, selected, isEco, sortBy]);
 
   useEffect(() => {
     const filtered = getFiltered();
@@ -141,9 +151,19 @@ export default function CategoryPage() {
     return arr[0] || null;
   }
 
+  function onToggle(key, value) {
+    setSelected(prev => {
+      const next = { ...prev };
+      const s = new Set(next[key] || []);
+      if (s.has(value)) s.delete(value); else s.add(value);
+      next[key] = s;
+      return next;
+    });
+  }
+
   function clearFilters() {
+    setSelected({});
     setIsEco(false);
-    setMinQtyFilter('');
     setSortBy('name');
   }
 
@@ -210,48 +230,23 @@ export default function CategoryPage() {
       <div className="qp-cat-main" style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 40px', display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
 
         {/* FILTER SIDEBAR */}
-        <div className="qp-cat-sidebar" style={{ width: '220px', flexShrink: 0, background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,.06)', position: 'sticky', top: '72px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <span style={{ fontSize: '15px', fontWeight: 700, color: NAVY }}>Filters</span>
-            <button onClick={clearFilters} style={{ fontSize: '12px', color: GOLD, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Clear all</button>
-          </div>
-
-          {/* Sort */}
-          <div style={{ marginBottom: '20px' }}>
-            <div style={labelStyle}>Sort By</div>
-            <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle}>
-              <option value="name">Name A–Z</option>
-              <option value="price">Price: Low to High</option>
-              <option value="min_qty">Min Quantity</option>
-            </select>
-          </div>
-
-          {/* Min Qty */}
-          <div style={{ marginBottom: '20px' }}>
-            <div style={labelStyle}>Max Min. Quantity</div>
-            <select value={minQtyFilter} onChange={e => setMinQtyFilter(e.target.value)} style={selectStyle}>
-              <option value="">Any</option>
-              <option value="25">Up to 25</option>
-              <option value="50">Up to 50</option>
-              <option value="100">Up to 100</option>
-              <option value="250">Up to 250</option>
-              <option value="500">Up to 500</option>
-            </select>
-          </div>
-
-          {/* Eco */}
-          <div style={{ marginBottom: '20px' }}>
-            <div style={labelStyle}>Sustainability</div>
+        <div className="qp-cat-sidebar" style={{ width: '220px', flexShrink: 0, position: 'sticky', top: '72px' }}>
+          <div style={{ background: '#fff', borderRadius: '12px', padding: '20px 24px', boxShadow: '0 2px 8px rgba(0,0,0,.06)', marginBottom: '16px' }}>
+            <div style={{ marginBottom: '14px' }}>
+              <div style={labelStyle}>Sort By</div>
+              <select value={sortBy} onChange={e => setSortBy(e.target.value)} style={selectStyle}>
+                <option value="name">Name A-Z</option>
+                <option value="price">Price: Low to High</option>
+                <option value="min_qty">Min Quantity</option>
+              </select>
+            </div>
             <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-              <input type="checkbox" checked={isEco} onChange={e => setIsEco(e.target.checked)}
-                style={{ width: '16px', height: '16px', accentColor: GOLD }} />
-              <span style={{ fontSize: '14px', color: '#1a1a1a' }}>🌿 Eco-Friendly only</span>
+              <input type="checkbox" checked={isEco} onChange={e => setIsEco(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: GOLD }} />
+              <span style={{ fontSize: '14px', color: '#1a1a1a' }}>Eco-Friendly only</span>
             </label>
           </div>
 
-          <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '16px', fontSize: '13px', color: '#7A7570' }}>
-            {filtered.length} product{filtered.length !== 1 ? 's' : ''} found
-          </div>
+          <FilterSidebar facets={facets} selected={selected} onToggle={onToggle} onClear={clearFilters} resultCount={filtered.length} />
         </div>
 
         {/* PRODUCT GRID */}
