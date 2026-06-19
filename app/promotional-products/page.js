@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { getCategoryHubCards } from '@/lib/urlPages';
 import { absoluteUrl, SITE_URL } from '@/lib/siteUrl';
 import ProductImg from '@/components/ProductImg';
+import QuoteButton from '@/components/QuoteButton';
 
-const NAVY = '#1B2A4A', GOLD = '#C9A96E', CREAM = '#F8F7F4', LINE = '#E0DDD7', MUTED = '#7A7570';
+const NAVY = '#1B2A4A', GOLD = '#C9A96E', CREAM = '#F8F7F4', LINE = '#E0DDD7', MUTED = '#000000';
 const serif = '"Cormorant Garamond", serif';
 
 export const revalidate = 1800;
@@ -68,13 +69,16 @@ export default async function PromotionalProductsPage() {
         </div>
       </nav>
 
-      <section style={{ background: '#fff', borderBottom: `1px solid ${LINE}` }}>
-        <div style={{ maxWidth: 1180, margin: '0 auto', padding: '46px 24px 38px', textAlign: 'center' }}>
-          <div style={{ color: GOLD, fontSize: 11, fontWeight: 700, letterSpacing: 1.6, textTransform: 'uppercase', marginBottom: 10 }}>Add your logo to anything</div>
-          <h1 style={{ fontFamily: serif, fontSize: 42, lineHeight: 1.08, color: NAVY, margin: 0, fontWeight: 600 }}>Promotional Products Australia</h1>
-          <p style={{ fontSize: 17, color: MUTED, maxWidth: 720, margin: '16px auto 0', lineHeight: 1.6 }}>
-            Browse our full range of custom promotional products and branded merchandise by category — or <Link href="/promo-kits" style={{ color: NAVY, fontWeight: 600 }}>build a ready-made promo kit</Link>.
+      <section style={{ background: NAVY }}>
+        <div style={{ maxWidth: 1180, margin: '0 auto', padding: '54px 24px 58px', textAlign: 'center' }}>
+          <div style={{ display: 'inline-block', background: `${GOLD}25`, color: GOLD, fontSize: 11, fontWeight: 700, letterSpacing: 1.4, textTransform: 'uppercase', padding: '5px 13px', borderRadius: 20, marginBottom: 18 }}>Promotional Products</div>
+          <h1 style={{ fontFamily: serif, fontSize: 46, lineHeight: 1.08, color: '#fff', margin: 0, fontWeight: 600 }}>Promotional Products Australia</h1>
+          <p style={{ fontSize: 16.5, color: 'rgba(255,255,255,.78)', maxWidth: 760, margin: '16px auto 0', lineHeight: 1.7 }}>
+            Browse our full range of custom promotional products and branded merchandise by category.
           </p>
+          <div style={{ marginTop: 22 }}>
+            <QuoteButton label="Get a Quote" source="promotional-products" style={{ background: GOLD, color: '#fff', padding: '12px 24px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, fontFamily: 'inherit' }} />
+          </div>
         </div>
       </section>
 
@@ -109,7 +113,7 @@ export default async function PromotionalProductsPage() {
                   {cat.children.length > 0 && (
                     <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: '6px 14px' }}>
                       {cat.children.map((sub) => (
-                        <Link key={sub.slug} href={catHref(sub)} style={{ color: '#3a3f45', textDecoration: 'none', fontSize: 13 }}>{catName(sub)}</Link>
+                        <Link key={sub.slug} href={catHref(sub)} style={{ color: '#000000', textDecoration: 'none', fontSize: 13 }}>{catName(sub)}</Link>
                       ))}
                     </div>
                   )}
@@ -126,7 +130,7 @@ export default async function PromotionalProductsPage() {
           <h2 style={{ fontFamily: serif, fontSize: 24, color: NAVY, margin: 0, fontWeight: 600 }}>Custom promotional products in Australia</h2>
           <div style={{ color: MUTED, fontSize: 14.5, lineHeight: 1.75, marginTop: 12 }}>
             <p style={{ margin: 0 }}>QuirkyPromo supplies promotional products, branded merchandise and corporate gifts to Australian businesses of every size. Browse by category to compare options by colour, price, minimum order quantity, material and branding method.</p>
-            <p style={{ marginTop: 11 }}>Many products are available from Australian inventory with local decoration and Australia-wide delivery. For event packs and staff gifts, our <Link href="/promo-kits" style={{ color: NAVY, fontWeight: 600 }}>promo kits</Link> bundle the essentials by occasion.</p>
+            <p style={{ marginTop: 11 }}>Many products are available from Australian inventory with local decoration and Australia-wide delivery.</p>
           </div>
         </div>
       </section>

@@ -3,7 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import { getFirstImage, getLowestPrice } from '@/lib/urlPages';
 import ProductImg from '@/components/ProductImg';
-const NAVY = '#1B2A4A', GOLD = '#C9A96E', GOLD_DK = '#B2925A', CREAM = '#F8F7F4', LINE = '#E0DDD7', MUTED = '#7A7570';
+const NAVY = '#1B2A4A', GOLD = '#C9A96E', GOLD_DK = '#B2925A', CREAM = '#F8F7F4', LINE = '#E0DDD7', MUTED = '#000000';
 const SITE = 'https://www.quirkypromo.com.au';
 const serif = '"Cormorant Garamond", serif';
 
@@ -78,16 +78,16 @@ export default async function Home() {
 
       {/* HERO */}
       <section style={{ background: CREAM, borderBottom: `1px solid ${LINE}` }}>
-        <div style={{ ...wrap, textAlign: 'center', paddingTop: 52, paddingBottom: 10, maxWidth: 820 }}>
+        <div style={{ ...wrap, textAlign: 'center', paddingTop: 56, paddingBottom: 50, maxWidth: 880 }}>
           <div style={{ fontSize: 12.5, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD_DK, marginBottom: 14 }}>Australia-wide · transparent pricing · flexible MOQ</div>
           <h1 style={{ fontFamily: serif, fontWeight: 700, color: NAVY, fontSize: 44, lineHeight: 1.08, letterSpacing: '-.5px', margin: 0 }}>Promotional Products, Branded Merchandise &amp; Corporate Gifts Australia</h1>
           <p style={{ fontSize: 17.5, color: MUTED, margin: '16px auto 24px', maxWidth: 600 }}>Create branded products and corporate gifts with transparent pricing, flexible MOQ and Australia-wide delivery.</p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="/promotional-products" style={btn(GOLD, NAVY)}>Browse products</a>
           </div>
-        </div>
-        <div style={{ ...wrap, paddingBottom: 8 }}>
-          <img src="/kit-hero.svg" alt="Branded promotional products — drink bottles, tote bags, t-shirts, notebooks, pens and caps with your logo" style={{ width: '100%', maxWidth: 1000, display: 'block', margin: '0 auto' }} />
+          <div style={{ marginTop: 30 }}>
+            <img src="/hero-products.png" alt="Navy branded promotional products — cap, t-shirt, drink bottle, notebook, tote bag and pen, each with your logo" style={{ width: '100%', maxWidth: 1000, height: 'auto', display: 'block', margin: '0 auto' }} />
+          </div>
         </div>
       </section>
 
