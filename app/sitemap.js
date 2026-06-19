@@ -11,6 +11,7 @@ const STATIC_ROUTES = [
   '/contact',
   '/faq',
   '/new-arrivals',
+  '/promotional-products',
   '/resources/portfolio',
   '/sale',
   '/services/decoration-methods',
