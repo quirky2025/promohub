@@ -1,11 +1,12 @@
 // Homepage V1 — server component (SSR + SEO). Global Nav/Footer from layout.js.
 // Discovery hub + Kit entry + line-draw hero. See HOMEPAGE.md.
 import { supabase } from '@/lib/supabase';
-import { getFirstImage, getLowestPrice } from '@/lib/urlPages';
+import { getFirstImage, getLowestPrice, getHeroProductImages } from '@/lib/urlPages';
 import ProductImg from '@/components/ProductImg';
 const NAVY = '#1B2A4A', GOLD = '#C9A96E', GOLD_DK = '#B2925A', CREAM = '#F8F7F4', LINE = '#E0DDD7', MUTED = '#7A7570';
 const SITE = 'https://www.quirkypromo.com.au';
 const serif = '"Cormorant Garamond", serif';
+const HERO_SLUGS = ['custom-t-shirts-australia', 'branded-notebooks-australia', 'custom-bags-australia', 'custom-drinkware-australia', 'branded-pens-australia'];
 
 export const metadata = {
   title: 'Promotional Products & Corporate Gifts Australia | QuirkyPromo',
@@ -72,19 +73,29 @@ async function getNewArrivals() {
 
 export default async function Home() {
   const newArrivals = await getNewArrivals();
+  const heroProducts = await getHeroProductImages(HERO_SLUGS);
   return (
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       {/* HERO */}
       <section style={{ background: CREAM, borderBottom: `1px solid ${LINE}` }}>
-        <div style={{ ...wrap, textAlign: 'center', paddingTop: 52, paddingBottom: 10, maxWidth: 820 }}>
+        <div style={{ ...wrap, textAlign: 'center', paddingTop: 56, paddingBottom: 50, maxWidth: 880 }}>
           <div style={{ fontSize: 12.5, fontWeight: 600, letterSpacing: '.14em', textTransform: 'uppercase', color: GOLD_DK, marginBottom: 14 }}>Australia-wide · transparent pricing · flexible MOQ</div>
           <h1 style={{ fontFamily: serif, fontWeight: 700, color: NAVY, fontSize: 44, lineHeight: 1.08, letterSpacing: '-.5px', margin: 0 }}>Promotional Products, Branded Merchandise &amp; Corporate Gifts Australia</h1>
           <p style={{ fontSize: 17.5, color: MUTED, margin: '16px auto 24px', maxWidth: 600 }}>Create branded products and corporate gifts with transparent pricing, flexible MOQ and Australia-wide delivery.</p>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
             <a href="/promotional-products" style={btn(GOLD, NAVY)}>Browse products</a>
           </div>
+          {heroProducts.length > 0 && (
+            <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginTop: 40 }}>
+              {heroProducts.map((p, i) => (
+                <a key={i} href={p.href} aria-label={p.label} style={{ display: 'block', width: 150, height: 150, background: '#fff', border: `1px solid ${LINE}`, borderRadius: 16, overflow: 'hidden' }}>
+                  <ProductImg src={p.image} alt={p.label} size="list" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 13, boxSizing: 'border-box' }} />
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
