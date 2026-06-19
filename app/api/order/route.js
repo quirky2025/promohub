@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
+import { resolveB2BFromRequest } from '@/lib/b2bContext';
 import Stripe from 'stripe';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
@@ -190,6 +191,7 @@ async function generateInvoicePDF({
 export async function POST(req) {
   try {
     const body = await req.json();
+    const b2b = await resolveB2BFromRequest(req);
     const { customer, items, subtotal, shipping, gst, total, paymentMethod, surcharge, stripePaymentId } = body;
 
     // ✅ Stripe服务端验证
@@ -229,6 +231,7 @@ export async function POST(req) {
       payment_method: paymentMethod,
       payment_status: paymentStatus,
       created_at: new Date().toISOString(),
+      ...b2b,
     });
 
     if (error) throw error;

@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
+import { resolveB2BFromRequest } from '@/lib/b2bContext';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -210,6 +211,7 @@ const reasons = [
 export async function POST(req) {
   try {
     const body = await req.json();
+    const b2b = await resolveB2BFromRequest(req);
     const {
       name, company, email, phone,
       qty, colour,
@@ -275,6 +277,7 @@ export async function POST(req) {
       total: total || 0,
       status: 'pending',
       valid_until: validUntil,
+      ...b2b,
     });
 
     // ✅ Generate PDF

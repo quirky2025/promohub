@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getCart, clearCart, removeFromCart } from '@/lib/cart';
+import { supabase } from '@/lib/supabase';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -43,9 +44,10 @@ function StripePaymentForm({ orderData, onSuccess, onError }) {
     } else if (paymentIntent.status === 'succeeded') {
       // Payment successful, now save order
       try {
+        const { data: { session: _os } } = await supabase.auth.getSession();
         const res = await fetch('/api/order', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...(_os ? { Authorization: `Bearer ${_os.access_token}` } : {}) },
           body: JSON.stringify({ ...orderData, paymentMethod: 'stripe', stripePaymentId: paymentIntent.id }),
         });
         if (res.ok) {
@@ -206,9 +208,10 @@ export default function PlaceOrderPage() {
         uploadedLogoUrl = await uploadLogo(logoFile);
         if (uploadedLogoUrl) setLogoUrl(uploadedLogoUrl);
       }
+      const { data: { session: _os2 } } = await supabase.auth.getSession();
       const res = await fetch('/api/order', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(_os2 ? { Authorization: `Bearer ${_os2.access_token}` } : {}) },
         body: JSON.stringify({ ...orderData, total: orderTotal, paymentMethod: 'eft', surcharge: 0 }),
       });
       if (res.ok) {
