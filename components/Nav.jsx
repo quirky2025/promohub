@@ -524,7 +524,7 @@ export default function Nav() {
                 </button>
               </div>
             ) : (
-              <Link href="/account/login" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 500 }}>👤 <span>Sign In</span></Link>
+              <><Link href="/account/login" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 500 }}>👤 <span>Sign In</span></Link><Link href="/account/register" style={{ color: 'rgba(255,255,255,.85)', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', fontWeight: 500 }}>Register</Link></>
             )}
             <Link href="/cart" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', gap: '7px', fontWeight: 500, position: 'relative' }}>
               🛒 <span>Cart</span>
@@ -735,7 +735,7 @@ export default function Nav() {
                 {user ? (
                   <button onClick={() => go('/account')} style={mAccountBtn}>👤 {user.user_metadata?.name?.split(' ')[0] || 'Account'}</button>
                 ) : (
-                  <button onClick={() => go('/account/login')} style={mAccountBtn}>👤 Sign In</button>
+                  <><button onClick={() => go('/account/login')} style={mAccountBtn}>👤 Sign In</button><button onClick={() => go('/account/register')} style={mAccountBtn}>Register</button></>
                 )}
                 <button onClick={() => go('/cart')} style={mAccountBtn}>🛒 Cart{cartCount > 0 ? ` (${cartCount})` : ''}</button>
               </div>
