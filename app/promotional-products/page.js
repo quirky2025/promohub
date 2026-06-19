@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { getCategoryHubCards } from '@/lib/urlPages';
 import { absoluteUrl, SITE_URL } from '@/lib/siteUrl';
 import ProductImg from '@/components/ProductImg';
+import QuoteButton from '@/components/QuoteButton';
 
-const NAVY = '#1B2A4A', GOLD = '#C9A96E', CREAM = '#F8F7F4', LINE = '#E0DDD7', MUTED = '#7A7570';
+const NAVY = '#1B2A4A', GOLD = '#C9A96E', CREAM = '#F8F7F4', LINE = '#E0DDD7', MUTED = '#000000';
 const serif = '"Cormorant Garamond", serif';
 
 export const revalidate = 1800;
@@ -76,7 +77,7 @@ export default async function PromotionalProductsPage() {
             Browse our full range of custom promotional products and branded merchandise by category.
           </p>
           <div style={{ marginTop: 22 }}>
-            <Link href="/contact" style={{ display: 'inline-block', background: GOLD, color: '#fff', padding: '12px 24px', borderRadius: 8, textDecoration: 'none', fontWeight: 700, fontSize: 14 }}>Get a quote</Link>
+            <QuoteButton label="Get a Quote" source="promotional-products" style={{ background: GOLD, color: '#fff', padding: '12px 24px', borderRadius: 8, border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: 14, fontFamily: 'inherit' }} />
           </div>
         </div>
       </section>
@@ -112,7 +113,7 @@ export default async function PromotionalProductsPage() {
                   {cat.children.length > 0 && (
                     <div style={{ marginTop: 12, display: 'flex', flexWrap: 'wrap', gap: '6px 14px' }}>
                       {cat.children.map((sub) => (
-                        <Link key={sub.slug} href={catHref(sub)} style={{ color: '#3a3f45', textDecoration: 'none', fontSize: 13 }}>{catName(sub)}</Link>
+                        <Link key={sub.slug} href={catHref(sub)} style={{ color: '#000000', textDecoration: 'none', fontSize: 13 }}>{catName(sub)}</Link>
                       ))}
                     </div>
                   )}
