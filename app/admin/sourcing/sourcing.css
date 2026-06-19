@@ -204,3 +204,39 @@
   margin-top: 10px;
 }
 .srcx-landed table td, .srcx-landed table th { padding: 5px 10px; }
+.srcx-matrix {
+  min-width: 2500px;
+}
+.srcx-matrix th,
+.srcx-matrix td {
+  white-space: nowrap;
+}
+.srcx-matrix input,
+.srcx-matrix select {
+  box-sizing: border-box;
+  border: 1px solid #d8d2c6;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  color: var(--ink);
+  background: #fff;
+}
+.srcx-matrix input:focus,
+.srcx-matrix select:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(201, 164, 92, 0.2);
+}
+.srcx-edit-table {
+  min-width: 860px;
+}
+.srcx-edit-table input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d8d2c6;
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  color: var(--ink);
+  background: #fff;
+}

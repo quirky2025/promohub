@@ -110,7 +110,7 @@ export default function AdminDashboard() {
               <tbody>
                 {stats.recent_orders.map(order => (
                   <tr key={order.id} style={{ borderBottom: '1px solid #F0EEED' }}>
-                    <td style={{ padding: '10px 12px', fontWeight: 600, color: GOLD, fontFamily: '"DM Mono", monospace' }}>{order.invoice_number}</td>
+                    <td style={{ padding: '10px 12px', fontWeight: 600, color: GOLD, fontFamily: '"DM Mono", monospace' }}>{order.order_number || order.invoice_number}</td>
                     <td style={{ padding: '10px 12px', color: NAVY }}>{order.customer_name}</td>
                     <td style={{ padding: '10px 12px', fontFamily: '"DM Mono", monospace' }}>${order.total?.toFixed(2)}</td>
                     <td style={{ padding: '10px 12px', color: '#7A7570' }}>{order.payment_method?.toUpperCase()}</td>

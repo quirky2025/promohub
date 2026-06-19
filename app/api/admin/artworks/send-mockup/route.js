@@ -1,15 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { isAdmin, unauthorized } from '@/lib/adminAuth';
+import { sourcingDb } from '@/lib/sourcingDb';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req) {
+  if (!(await isAdmin(req))) return unauthorized();
+
   try {
     const { token, mockupUrl } = await req.json();
+    const supabase = sourcingDb();
 
     const { data: artwork } = await supabase
       .from('artworks')

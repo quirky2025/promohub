@@ -1,12 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
-
-// Use service key to bypass RLS
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+import { isAdmin, unauthorized } from '@/lib/adminAuth';
+import { sourcingDb } from '@/lib/sourcingDb';
 
 export async function POST(req) {
+  if (!(await isAdmin(req))) return unauthorized();
+
   try {
     const formData = await req.formData();
     const file = formData.get('file');
@@ -16,6 +13,7 @@ export async function POST(req) {
 
     const fileName = `${orderNumber}_${Date.now()}.pdf`;
     const buffer = Buffer.from(await file.arrayBuffer());
+    const supabase = sourcingDb();
 
     const { error } = await supabase.storage
       .from('mockups')

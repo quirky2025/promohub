@@ -1,25 +1,20 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 const BG = '#F8F7F4';
 
 const STATUS_COLOURS = {
-  pending:     { bg: '#FEF3C7', color: '#92400E', label: 'Pending' },
-  in_progress: { bg: '#DBEAFE', color: '#1E40AF', label: 'In Progress' },
-  sent:        { bg: '#D1FAE5', color: '#065F46', label: 'Sent' },
-  accepted:    { bg: '#1B2A4A', color: '#C9A96E', label: 'Accepted' },
-  declined:    { bg: '#FEE2E2', color: '#991B1B', label: 'Declined' },
-  expired:     { bg: '#F3F4F6', color: '#6B7280', label: 'Expired' },
+  new:            { bg: '#FEF3C7', color: '#92400E', label: 'New' },
+  reviewing:      { bg: '#DBEAFE', color: '#1E40AF', label: 'Reviewing' },
+  supplier_quote: { bg: '#EDE9FE', color: '#5B21B6', label: 'Supplier Quote' },
+  quoted:         { bg: '#D1FAE5', color: '#065F46', label: 'Quoted' },
+  accepted:       { bg: '#1B2A4A', color: '#C9A96E', label: 'Accepted' },
+  rejected:       { bg: '#FEE2E2', color: '#991B1B', label: 'Rejected' },
+  archived:       { bg: '#F3F4F6', color: '#6B7280', label: 'Archived' },
 };
 
 export default function AdminQuotesPage() {
@@ -30,28 +25,51 @@ export default function AdminQuotesPage() {
   const [internalNote, setInternalNote] = useState('');
   const [saving, setSaving]           = useState(false);
 
-  useEffect(() => { fetchQuotes(); }, [statusFilter]);
+  useEffect(() => {
+    let cancelled = false;
+    const params = new URLSearchParams();
+    if (statusFilter) params.set('status', statusFilter);
+    fetch(`/api/admin/quotes?${params.toString()}`)
+      .then((res) => res.json().then((data) => ({ ok: res.ok, data })))
+      .then(({ ok, data }) => {
+        if (cancelled) return;
+        if (ok) setQuotes(data.quotes || []);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!cancelled) setLoading(false);
+      });
 
-  async function fetchQuotes() {
-    setLoading(true);
-    let q = supabase.from('quotes').select('*').order('created_at', { ascending: false });
-    if (statusFilter) q = q.eq('status', statusFilter);
-    const { data } = await q;
-    if (data) setQuotes(data);
-    setLoading(false);
-  }
+    return () => {
+      cancelled = true;
+    };
+  }, [statusFilter]);
 
   async function updateStatus(id, status) {
-    await supabase.from('quotes').update({ status }).eq('id', id);
-    setQuotes(prev => prev.map(r => r.id === id ? { ...r, status } : r));
-    if (selected?.id === id) setSelected(prev => ({ ...prev, status }));
+    const res = await fetch('/api/admin/quotes', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, action: 'status', status }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setQuotes(prev => prev.map(r => r.id === id ? data.quote : r));
+      if (selected?.id === id) setSelected(data.quote);
+    }
   }
 
   async function saveNote(id) {
     setSaving(true);
-    await supabase.from('quotes').update({ internal_notes: internalNote }).eq('id', id);
-    setQuotes(prev => prev.map(r => r.id === id ? { ...r, internal_notes: internalNote } : r));
-    if (selected?.id === id) setSelected(prev => ({ ...prev, internal_notes: internalNote }));
+    const res = await fetch('/api/admin/quotes', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, action: 'note', internal_notes: internalNote }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      setQuotes(prev => prev.map(r => r.id === id ? data.quote : r));
+      if (selected?.id === id) setSelected(data.quote);
+    }
     setSaving(false);
   }
 
@@ -101,7 +119,7 @@ export default function AdminQuotesPage() {
               </thead>
               <tbody>
                 {quotes.map((q, i) => {
-                  const st = STATUS_COLOURS[q.status] || STATUS_COLOURS.pending;
+                  const st = STATUS_COLOURS[q.display_status || q.status] || STATUS_COLOURS.new;
                   const isSelected = selected?.id === q.id;
                   return (
                     <tr key={q.id} onClick={() => openDetail(q)}
@@ -159,7 +177,7 @@ export default function AdminQuotesPage() {
             <div style={{ display: 'flex', gap: '8px', marginBottom: '24px', flexWrap: 'wrap' }}>
               {Object.entries(STATUS_COLOURS).map(([key, val]) => (
                 <button key={key} onClick={() => updateStatus(selected.id, key)}
-                  style={{ padding: '6px 14px', borderRadius: '20px', border: `2px solid ${selected.status === key ? val.color : '#E0DDD7'}`, background: selected.status === key ? val.bg : '#fff', color: selected.status === key ? val.color : '#7A7570', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                  style={{ padding: '6px 14px', borderRadius: '20px', border: `2px solid ${(selected.display_status || selected.status) === key ? val.color : '#E0DDD7'}`, background: (selected.display_status || selected.status) === key ? val.bg : '#fff', color: (selected.display_status || selected.status) === key ? val.color : '#7A7570', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
                   {val.label}
                 </button>
               ))}

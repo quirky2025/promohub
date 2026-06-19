@@ -1,6 +1,3 @@
-// app/admin/sourcing/layout.js
-// 给整个 Sourcing 板块加一条子导航(询盘 / 工厂 / 报价检索 / 趋势 / 运费),
-// 你现有的 /admin/sourcing 询盘页也会被它包住,自动出现在第一个标签。
 'use client';
 
 import Link from 'next/link';
@@ -8,11 +5,13 @@ import { usePathname } from 'next/navigation';
 import './sourcing.css';
 
 const TABS = [
-  { href: '/admin/sourcing', label: '询盘 / 请求', exact: true },
-  { href: '/admin/sourcing/factories', label: '工厂管理' },
-  { href: '/admin/sourcing/quotes', label: '报价检索' },
-  { href: '/admin/sourcing/trends', label: '价格趋势' },
-  { href: '/admin/sourcing/freight', label: '运费价格' },
+  { href: '/admin/sourcing', label: 'Requests', exact: true },
+  { href: '/admin/sourcing/made-to-order', label: 'Made-to-Order Products' },
+  { href: '/admin/sourcing/factories', label: 'Factories' },
+  { href: '/admin/sourcing/costing', label: 'Costing' },
+  { href: '/admin/sourcing/quotes', label: 'Quote Search' },
+  { href: '/admin/sourcing/trends', label: 'Trends' },
+  { href: '/admin/sourcing/freight', label: 'Freight Rates' },
 ];
 
 export default function SourcingLayout({ children }) {
@@ -20,15 +19,17 @@ export default function SourcingLayout({ children }) {
   return (
     <div className="srcx-wrap">
       <nav className="srcx-subnav">
-        <Link href="/admin" style={{ color: 'var(--gold)', fontWeight: 700, textDecoration: 'none', paddingBottom: 10, marginRight: 4 }}>← 后台首页</Link>
+        <Link href="/admin" style={{ color: 'var(--gold)', fontWeight: 700, textDecoration: 'none', paddingBottom: 10, marginRight: 4 }}>
+          Back to Admin
+        </Link>
         <span className="srcx-subnav-title">Sourcing</span>
-        {TABS.map((t) => {
-          const active = t.exact
-            ? pathname === t.href
-            : pathname.startsWith(t.href);
+        {TABS.map((tab) => {
+          const active = tab.exact
+            ? pathname === tab.href
+            : pathname.startsWith(tab.href);
           return (
-            <Link key={t.href} href={t.href} className={active ? 'active' : ''}>
-              {t.label}
+            <Link key={tab.href} href={tab.href} className={active ? 'active' : ''}>
+              {tab.label}
             </Link>
           );
         })}

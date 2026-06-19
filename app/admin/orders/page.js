@@ -1,166 +1,255 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 const BG = '#F8F7F4';
+const BORDER = '#E0DDD7';
 
 const STATUS_FLOW = [
-  { key: 'pending',          label: 'Pending',           emoji: '🕐', bg: '#FEF3C7', color: '#92400E' },
-  { key: 'artwork_sent',     label: 'Artwork Sent',       emoji: '🎨', bg: '#DBEAFE', color: '#1E40AF' },
-  { key: 'artwork_approved', label: 'Artwork Approved',   emoji: '✅', bg: '#D1FAE5', color: '#065F46' },
-  { key: 'in_production',    label: 'In Production',      emoji: '🏭', bg: '#EDE9FE', color: '#5B21B6' },
-  { key: 'dispatched',       label: 'Dispatched',         emoji: '🚚', bg: '#FEF9C3', color: '#854D0E' },
-  { key: 'delivered',        label: 'Delivered',          emoji: '📦', bg: '#DCFCE7', color: '#166534' },
-  { key: 'cancelled',        label: 'Cancelled',          emoji: '✗',  bg: '#FEE2E2', color: '#991B1B' },
+  { key: 'quote', label: 'Quote', bg: '#F3F4F6', color: '#4B5563' },
+  { key: 'confirmed', label: 'Confirmed', bg: '#FEF3C7', color: '#92400E' },
+  { key: 'proof_sent', label: 'Proof Sent', bg: '#DBEAFE', color: '#1E40AF' },
+  { key: 'approved', label: 'Approved', bg: '#D1FAE5', color: '#065F46' },
+  { key: 'in_production', label: 'Production', bg: '#EDE9FE', color: '#5B21B6' },
+  { key: 'dispatched', label: 'Dispatched', bg: '#FEF9C3', color: '#854D0E' },
+  { key: 'completed', label: 'Completed', bg: '#DCFCE7', color: '#166534' },
+  { key: 'cancelled', label: 'Cancelled', bg: '#FEE2E2', color: '#991B1B' },
 ];
 
-const STATUS_MAP = Object.fromEntries(STATUS_FLOW.map(s => [s.key, s]));
+const STATUS_MAP = Object.fromEntries(STATUS_FLOW.map((item) => [item.key, item]));
 
-const PAYMENT_STATUS = {
-  paid:    { bg: '#D1FAE5', color: '#065F46', label: 'Paid' },
-  unpaid:  { bg: '#FEE2E2', color: '#991B1B', label: 'Unpaid' },
-  pending: { bg: '#FEF3C7', color: '#92400E', label: 'Pending' },
-};
+const PAYMENT_STATUS = [
+  { key: 'unpaid', label: 'Unpaid' },
+  { key: 'pending', label: 'Pending' },
+  { key: 'partial', label: 'Partial' },
+  { key: 'paid', label: 'Paid' },
+  { key: 'refunded', label: 'Refunded' },
+];
+
+function fmtMoney(value) {
+  const number = Number(value || 0);
+  if (!Number.isFinite(number) || number === 0) return '$0.00';
+  return `$${number.toFixed(2)}`;
+}
+
+function fmtDate(value) {
+  if (!value) return '-';
+  return new Date(value).toLocaleDateString('en-AU', {
+    day: 'numeric',
+    month: 'short',
+    year: '2-digit',
+  });
+}
+
+function fmtDateTime(value) {
+  if (!value) return '-';
+  return new Date(value).toLocaleString('en-AU', {
+    timeZone: 'Australia/Sydney',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function statusStyle(status) {
+  return STATUS_MAP[status] || STATUS_MAP.quote;
+}
 
 export default function AdminOrdersPage() {
-  const [orders, setOrders]           = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [selected, setSelected]       = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [counts, setCounts] = useState({});
+  const [schemaMissing, setSchemaMissing] = useState({});
+  const [selectedId, setSelectedId] = useState(null);
   const [statusFilter, setStatusFilter] = useState('');
-  const [internalNote, setInternalNote] = useState('');
-  const [trackingNumber, setTrackingNumber] = useState('');
-  const [trackingUrl, setTrackingUrl] = useState('');
-  const [saving, setSaving]           = useState(false);
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [details, setDetails] = useState({
+    po_number: '',
+    payment_terms: 'prepaid',
+    payment_status: 'unpaid',
+    supplier: '',
+    ship_date: '',
+    tracking_number: '',
+    tracking_url: '',
+    internal_notes: '',
+  });
 
-  useEffect(() => { fetchOrders(); }, [statusFilter]);
+  const selected = useMemo(
+    () => orders.find((order) => order.id === selectedId) || null,
+    [orders, selectedId]
+  );
 
-  async function fetchOrders() {
+  useEffect(() => {
+    fetchOrders();
+  }, [statusFilter]);
+
+  async function fetchOrders(nextSearch = search) {
     setLoading(true);
-    let q = supabase.from('orders').select('*').order('created_at', { ascending: false });
-    if (statusFilter) q = q.eq('status', statusFilter);
-    const { data } = await q;
-    if (data) setOrders(data);
+    setError('');
+    const params = new URLSearchParams();
+    if (statusFilter) params.set('status', statusFilter);
+    if (nextSearch.trim()) params.set('search', nextSearch.trim());
+
+    const res = await fetch(`/api/admin/orders?${params.toString()}`);
+    const json = await res.json();
+    if (!res.ok) {
+      setError(json.error || 'Failed to load orders');
+      setOrders([]);
+    } else {
+      setOrders(json.orders || []);
+      setCounts(json.counts || {});
+      setSchemaMissing(json.schema_missing || {});
+      if (selectedId && !(json.orders || []).some((order) => order.id === selectedId)) {
+        setSelectedId(null);
+      }
+    }
     setLoading(false);
   }
 
-  async function updateStatus(id, status) {
-    const updates = { status };
-    const now = new Date().toISOString();
-    if (status === 'artwork_approved') updates.artwork_approved_at = now;
-    if (status === 'in_production')    updates.production_started_at = now;
-    if (status === 'dispatched')       updates.dispatched_at = now;
-
-    await supabase.from('orders').update(updates).eq('id', id);
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
-    if (selected?.id === id) setSelected(prev => ({ ...prev, ...updates }));
-  }
-
-  async function saveDetails(id) {
+  async function updateStatus(orderId, status) {
     setSaving(true);
-    const updates = {
-      internal_notes: internalNote,
-      tracking_number: trackingNumber,
-      tracking_url: trackingUrl,
-    };
-    await supabase.from('orders').update(updates).eq('id', id);
-    setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
-    if (selected?.id === id) setSelected(prev => ({ ...prev, ...updates }));
+    setError('');
+    const res = await fetch('/api/admin/orders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: orderId, action: 'status', status }),
+    });
+    const json = await res.json();
+    if (!res.ok) setError(json.error || 'Failed to update status');
+    await fetchOrders();
     setSaving(false);
   }
 
-  function openDetail(order) {
-    setSelected(order);
-    setInternalNote(order.internal_notes || '');
-    setTrackingNumber(order.tracking_number || '');
-    setTrackingUrl(order.tracking_url || '');
+  async function saveDetails() {
+    if (!selected) return;
+    setSaving(true);
+    setError('');
+    const res = await fetch('/api/admin/orders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: selected.id, action: 'details', ...details }),
+    });
+    const json = await res.json();
+    if (!res.ok) setError(json.error || 'Failed to save order details');
+    await fetchOrders();
+    setSaving(false);
   }
 
-  const fmt = v => v != null ? `$${Number(v).toFixed(2)}` : '—';
-  const fmtDate = d => d ? new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: '2-digit' }) : null;
-  const fmtDateTime = d => d ? new Date(d).toLocaleString('en-AU', { timeZone: 'Australia/Sydney', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : null;
+  function submitSearch(event) {
+    event.preventDefault();
+    fetchOrders(search);
+  }
 
-  const currentStatus = selected ? (STATUS_MAP[selected.status] || STATUS_FLOW[0]) : null;
+  function syncDetailsFromOrder(order) {
+    setDetails({
+      po_number: order.po_number || '',
+      payment_terms: order.payment_terms || 'prepaid',
+      payment_status: order.payment_status || 'unpaid',
+      supplier: order.supplier || '',
+      ship_date: order.ship_date || '',
+      tracking_number: order.tracking_number || '',
+      tracking_url: order.tracking_url || '',
+      internal_notes: order.internal_notes || '',
+    });
+  }
+
+  function openOrder(order) {
+    setSelectedId(order.id);
+    syncDetailsFromOrder(order);
+  }
+
+  const missingTables = Object.entries(schemaMissing)
+    .filter(([, missing]) => missing)
+    .map(([name]) => name);
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', minHeight: '100vh' }}>
+    <div style={{ minHeight: '100vh', background: '#fff', color: NAVY, fontFamily: '"DM Sans", sans-serif' }}>
+      <header style={{ background: NAVY, color: '#fff', padding: '14px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '18px', flexWrap: 'wrap' }}>
+          <Link href="/admin" style={{ color: 'rgba(255,255,255,.65)', fontSize: '13px', textDecoration: 'none' }}>Back to Admin</Link>
+          <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 700 }}>Order Flow</h1>
+          <span style={{ background: GOLD, color: '#fff', borderRadius: '999px', padding: '3px 10px', fontSize: '12px', fontWeight: 700 }}>{orders.length}</span>
+        </div>
+        <form onSubmit={submitSearch} style={{ display: 'flex', gap: '8px', minWidth: '280px' }}>
+          <input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search order, customer, supplier"
+            style={{ width: '260px', padding: '8px 10px', borderRadius: '6px', border: '1px solid rgba(255,255,255,.25)', background: 'rgba(255,255,255,.08)', color: '#fff', outline: 'none' }}
+          />
+          <button type="submit" style={navButtonStyle(true)}>Search</button>
+        </form>
+      </header>
 
-      {/* HEADER */}
-      <div style={{ background: NAVY, padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <Link href="/admin" style={{ color: 'rgba(255,255,255,.5)', fontSize: '13px', textDecoration: 'none' }}>← Admin</Link>
-          <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: '#fff', margin: 0 }}>Orders</h1>
-          <span style={{ background: GOLD, color: '#fff', fontSize: '12px', fontWeight: 700, padding: '3px 10px', borderRadius: '20px' }}>{orders.length}</span>
-        </div>
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          <button onClick={() => setStatusFilter('')}
-            style={{ padding: '5px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: statusFilter === '' ? GOLD : 'rgba(255,255,255,.1)', color: '#fff' }}>
-            All
+      <div style={{ borderBottom: `1px solid ${BORDER}`, padding: '10px 28px', display: 'flex', gap: '8px', overflowX: 'auto' }}>
+        <button onClick={() => setStatusFilter('')} style={filterStyle(statusFilter === '')}>
+          All
+        </button>
+        {STATUS_FLOW.map((status) => (
+          <button key={status.key} onClick={() => setStatusFilter(status.key)} style={filterStyle(statusFilter === status.key)}>
+            {status.label}
+            <span style={{ marginLeft: '6px', color: statusFilter === status.key ? '#fff' : '#7A7570' }}>{counts[status.key] || 0}</span>
           </button>
-          {STATUS_FLOW.map(s => (
-            <button key={s.key} onClick={() => setStatusFilter(s.key)}
-              style={{ padding: '5px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: statusFilter === s.key ? GOLD : 'rgba(255,255,255,.1)', color: '#fff' }}>
-              {s.emoji} {s.label}
-            </button>
-          ))}
-        </div>
+        ))}
       </div>
 
-      <div style={{ display: 'flex', height: 'calc(100vh - 65px)' }}>
+      {missingTables.length > 0 && (
+        <div style={{ margin: '16px 28px 0', border: '1px solid #F59E0B', background: '#FFFBEB', color: '#92400E', borderRadius: '8px', padding: '10px 14px', fontSize: '13px' }}>
+          Schema pending: {missingTables.join(', ')}. Review and run outputs/admin_order_flow/order_to_dispatch_schema_CREATE.sql in Supabase to enable normalized items, proof versions and audit logs.
+        </div>
+      )}
 
-        {/* LEFT — LIST */}
-        <div style={{ width: selected ? '50%' : '100%', overflowY: 'auto', borderRight: '1px solid #E0DDD7', transition: 'width .2s' }}>
+      {error && (
+        <div style={{ margin: '16px 28px 0', border: '1px solid #FCA5A5', background: '#FEF2F2', color: '#991B1B', borderRadius: '8px', padding: '10px 14px', fontSize: '13px' }}>
+          {error}
+        </div>
+      )}
+
+      <main style={{ display: 'grid', gridTemplateColumns: selected ? 'minmax(520px, 1fr) minmax(420px, 520px)' : '1fr', minHeight: 'calc(100vh - 118px)' }}>
+        <section style={{ overflow: 'auto', borderRight: selected ? `1px solid ${BORDER}` : 'none' }}>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570' }}>Loading...</div>
+            <EmptyState label="Loading orders..." />
           ) : orders.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570' }}>No orders yet</div>
+            <EmptyState label="No orders found" />
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
-                <tr style={{ background: '#fff', borderBottom: '2px solid #E0DDD7' }}>
-                  {['Order #', 'Date', 'Customer', 'Items', 'Total', 'Payment', 'Status', ''].map(h => (
-                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#7A7570', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
+                <tr style={{ background: BG, borderBottom: `1px solid ${BORDER}` }}>
+                  {['Order', 'Date', 'Customer', 'Items', 'Terms', 'Total', 'Status', ''].map((head) => (
+                    <th key={head} style={{ textAlign: 'left', padding: '11px 14px', color: '#7A7570', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.04em', whiteSpace: 'nowrap' }}>{head}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {orders.map((order, i) => {
-                  const st = STATUS_MAP[order.status] || STATUS_FLOW[0];
-                  const pay = PAYMENT_STATUS[order.payment_status] || PAYMENT_STATUS.pending;
+                {orders.map((order, index) => {
+                  const status = statusStyle(order.display_status);
                   const isSelected = selected?.id === order.id;
-                  const itemCount = Array.isArray(order.items) ? order.items.length : 0;
                   return (
-                    <tr key={order.id} onClick={() => openDetail(order)}
-                      style={{ background: isSelected ? '#FDF8F0' : i % 2 === 0 ? '#fff' : BG, borderBottom: '1px solid #F0EEED', cursor: 'pointer', borderLeft: isSelected ? `3px solid ${GOLD}` : '3px solid transparent' }}>
-                      <td style={{ padding: '12px 16px', fontWeight: 700, color: GOLD, fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{order.invoice_number}</td>
-                      <td style={{ padding: '12px 16px', color: '#7A7570', whiteSpace: 'nowrap' }}>{fmtDate(order.created_at)}</td>
-                      <td style={{ padding: '12px 16px', fontWeight: 600, color: NAVY }}>
-                        <div>{order.customer_name}</div>
-                        {order.customer_company && <div style={{ fontSize: '11px', color: '#7A7570', fontWeight: 400 }}>{order.customer_company}</div>}
+                    <tr key={order.id} onClick={() => openOrder(order)} style={{ cursor: 'pointer', borderBottom: '1px solid #F0EEED', background: isSelected ? '#FDF8F0' : index % 2 ? '#fff' : '#FAFAF9', borderLeft: isSelected ? `3px solid ${GOLD}` : '3px solid transparent' }}>
+                      <td style={cellStyle}>
+                        <div style={{ color: GOLD, fontWeight: 800, fontFamily: 'monospace' }}>{order.order_number || '-'}</div>
+                        {order.po_number && <div style={{ fontSize: '11px', color: '#7A7570' }}>PO {order.po_number}</div>}
                       </td>
-                      <td style={{ padding: '12px 16px', color: '#5A5550' }}>
-                        {itemCount} item{itemCount !== 1 ? 's' : ''}
+                      <td style={{ ...cellStyle, color: '#7A7570', whiteSpace: 'nowrap' }}>{fmtDate(order.created_at)}</td>
+                      <td style={cellStyle}>
+                        <div style={{ fontWeight: 700 }}>{order.customer_name || '-'}</div>
+                        <div style={{ color: '#7A7570', fontSize: '12px' }}>{order.customer_company || order.customer_email || ''}</div>
                       </td>
-                      <td style={{ padding: '12px 16px', color: NAVY, fontWeight: 700 }}>{fmt(order.total)}</td>
-                      <td style={{ padding: '12px 16px' }}>
-                        <span style={{ background: pay.bg, color: pay.color, fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px' }}>{pay.label}</span>
+                      <td style={cellStyle}>{order.items?.length || 0}</td>
+                      <td style={cellStyle}>{order.payment_terms || 'prepaid'}</td>
+                      <td style={{ ...cellStyle, fontWeight: 800 }}>{fmtMoney(order.total_gross)}</td>
+                      <td style={cellStyle}>
+                        <span style={{ background: status.bg, color: status.color, padding: '4px 8px', borderRadius: '999px', fontSize: '11px', fontWeight: 800, whiteSpace: 'nowrap' }}>{status.label}</span>
                       </td>
-                      <td style={{ padding: '12px 16px' }}>
-                        <span style={{ background: st.bg, color: st.color, fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{st.emoji} {st.label}</span>
-                      </td>
-                      <td style={{ padding: '12px 16px' }}>
-                        <a href={`mailto:${order.customer_email}?subject=Re: Order ${order.invoice_number}`}
-                          onClick={e => e.stopPropagation()}
-                          style={{ color: GOLD, fontSize: '12px', fontWeight: 600, textDecoration: 'none' }}>
-                          Reply →
+                      <td style={cellStyle}>
+                        <a href={`mailto:${order.customer_email || ''}?subject=Re: Order ${order.order_number || ''}`} onClick={(event) => event.stopPropagation()} style={{ color: GOLD, fontWeight: 700, textDecoration: 'none' }}>
+                          Email
                         </a>
                       </td>
                     </tr>
@@ -169,165 +258,239 @@ export default function AdminOrdersPage() {
               </tbody>
             </table>
           )}
-        </div>
+        </section>
 
-        {/* RIGHT — DETAIL */}
         {selected && (
-          <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: '#fff' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+          <aside style={{ padding: '22px 24px', overflow: 'auto', background: '#fff' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'flex-start', marginBottom: '18px' }}>
               <div>
-                <div style={{ fontSize: '12px', color: GOLD, fontWeight: 700, fontFamily: 'monospace', marginBottom: '4px' }}>{selected.invoice_number}</div>
-                <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: NAVY, margin: '0 0 4px' }}>{selected.customer_name}</h2>
-                <div style={{ fontSize: '13px', color: '#7A7570' }}>
-                  {selected.customer_company && `${selected.customer_company} · `}
-                  <a href={`mailto:${selected.customer_email}`} style={{ color: GOLD }}>{selected.customer_email}</a>
-                  {selected.customer_phone && ` · ${selected.customer_phone}`}
+                <div style={{ color: GOLD, fontFamily: 'monospace', fontSize: '12px', fontWeight: 800 }}>{selected.order_number || '-'}</div>
+                <h2 style={{ margin: '4px 0', fontSize: '24px', lineHeight: 1.1 }}>{selected.customer_name || 'Customer'}</h2>
+                <div style={{ color: '#7A7570', fontSize: '13px', lineHeight: 1.6 }}>
+                  {selected.customer_company && <span>{selected.customer_company} / </span>}
+                  <a href={`mailto:${selected.customer_email || ''}`} style={{ color: GOLD }}>{selected.customer_email || '-'}</a>
+                  {selected.customer_phone && <span> / {selected.customer_phone}</span>}
                 </div>
               </div>
-              <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: '#B0AAA3' }}>×</button>
+              <button onClick={() => setSelectedId(null)} style={{ border: 'none', background: 'transparent', color: '#7A7570', cursor: 'pointer', fontSize: '20px' }}>x</button>
             </div>
 
-            {/* ORDER PROGRESS */}
-            <div style={{ background: BG, borderRadius: '12px', padding: '16px', marginBottom: '20px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>Order Progress</div>
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                {STATUS_FLOW.filter(s => s.key !== 'cancelled').map((s, i) => {
-                  const statusKeys = STATUS_FLOW.filter(x => x.key !== 'cancelled').map(x => x.key);
-                  const currentIdx = statusKeys.indexOf(selected.status);
-                  const thisIdx = statusKeys.indexOf(s.key);
-                  const isDone = thisIdx <= currentIdx;
-                  const isCurrent = s.key === selected.status;
+            <Panel title="Status">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
+                {STATUS_FLOW.map((status) => {
+                  const active = selected.display_status === status.key;
                   return (
-                    <button key={s.key} onClick={() => updateStatus(selected.id, s.key)}
-                      style={{ padding: '6px 12px', borderRadius: '20px', border: `2px solid ${isCurrent ? s.color : isDone ? '#D1FAE5' : '#E0DDD7'}`, background: isCurrent ? s.bg : isDone ? '#F0FDF4' : '#fff', color: isCurrent ? s.color : isDone ? '#166534' : '#B0AAA3', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
-                      {s.emoji} {s.label}
+                    <button key={status.key} disabled={saving} onClick={() => updateStatus(selected.id, status.key)} style={{ border: `2px solid ${active ? status.color : BORDER}`, background: active ? status.bg : '#fff', color: active ? status.color : '#7A7570', borderRadius: '999px', padding: '6px 10px', fontSize: '12px', fontWeight: 800, cursor: saving ? 'not-allowed' : 'pointer' }}>
+                      {status.label}
                     </button>
                   );
                 })}
-                <button onClick={() => updateStatus(selected.id, 'cancelled')}
-                  style={{ padding: '6px 12px', borderRadius: '20px', border: `2px solid ${selected.status === 'cancelled' ? '#991B1B' : '#E0DDD7'}`, background: selected.status === 'cancelled' ? '#FEE2E2' : '#fff', color: selected.status === 'cancelled' ? '#991B1B' : '#B0AAA3', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
-                  ✗ Cancel
-                </button>
               </div>
-
-              {/* Timeline */}
-              <div style={{ marginTop: '12px', fontSize: '12px', color: '#7A7570', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                {selected.created_at && <span>🕐 Ordered: {fmtDateTime(selected.created_at)}</span>}
-                {selected.artwork_approved_at && <span>✅ Approved: {fmtDateTime(selected.artwork_approved_at)}</span>}
-                {selected.production_started_at && <span>🏭 Production: {fmtDateTime(selected.production_started_at)}</span>}
-                {selected.dispatched_at && <span>🚚 Dispatched: {fmtDateTime(selected.dispatched_at)}</span>}
+              <div style={{ marginTop: '10px', color: '#7A7570', fontSize: '12px', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                <span>Created {fmtDateTime(selected.created_at)}</span>
+                {selected.artwork_approved_at && <span>Approved {fmtDateTime(selected.artwork_approved_at)}</span>}
+                {selected.production_started_at && <span>Production {fmtDateTime(selected.production_started_at)}</span>}
+                {selected.dispatched_at && <span>Dispatched {fmtDateTime(selected.dispatched_at)}</span>}
               </div>
-            </div>
+            </Panel>
 
-            {/* ORDER ITEMS */}
-            <Section title="📦 Order Items">
-              {Array.isArray(selected.items) && selected.items.map((item, i) => (
-                <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid #F0EEED' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                    <div>
-                      <div style={{ fontWeight: 600, color: NAVY, fontSize: '13px' }}>{item.productName}</div>
-                      {item.colour && <div style={{ fontSize: '12px', color: '#7A7570' }}>Colour: {item.colour}</div>}
-                      {item.addons?.map((a, j) => <div key={j} style={{ fontSize: '12px', color: '#7A7570' }}>+ {a.name}</div>)}
-                      <div style={{ fontSize: '12px', color: '#7A7570' }}>Qty: {item.qty} × {fmt(item.unitPrice)}</div>
+            <Panel title="Commercial">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <Field label="PO Number" value={details.po_number} onChange={(value) => setDetails((prev) => ({ ...prev, po_number: value }))} />
+                <Select label="Payment Terms" value={details.payment_terms} onChange={(value) => setDetails((prev) => ({ ...prev, payment_terms: value }))} options={[{ key: 'prepaid', label: 'Prepaid' }, { key: 'monthly', label: 'Monthly' }]} />
+                <Select label="Payment Status" value={details.payment_status} onChange={(value) => setDetails((prev) => ({ ...prev, payment_status: value }))} options={PAYMENT_STATUS} />
+                <Field label="Supplier" value={details.supplier} onChange={(value) => setDetails((prev) => ({ ...prev, supplier: value }))} />
+              </div>
+            </Panel>
+
+            <Panel title="Dispatch">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <Field label="Ship Date" type="date" value={details.ship_date} onChange={(value) => setDetails((prev) => ({ ...prev, ship_date: value }))} />
+                <Field label="Tracking Number" value={details.tracking_number} onChange={(value) => setDetails((prev) => ({ ...prev, tracking_number: value }))} />
+              </div>
+              <Field label="Tracking URL" value={details.tracking_url} onChange={(value) => setDetails((prev) => ({ ...prev, tracking_url: value }))} />
+            </Panel>
+
+            <Panel title="Order Items">
+              {selected.items?.length ? (
+                <div style={{ border: `1px solid ${BORDER}`, borderRadius: '8px', overflow: 'hidden' }}>
+                  {selected.items.map((item) => (
+                    <div key={item.id} style={{ padding: '10px 12px', borderBottom: `1px solid ${BORDER}` }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px' }}>
+                        <div>
+                          <div style={{ fontWeight: 800 }}>{item.product_description}</div>
+                          <div style={{ color: '#7A7570', fontSize: '12px', marginTop: '3px' }}>
+                            {item.stock_code || item.supplier_sku || 'No SKU'}
+                            {item.colour && <span> / {item.colour}</span>}
+                            {item.decoration_method && <span> / {item.decoration_method}</span>}
+                          </div>
+                        </div>
+                        <div style={{ textAlign: 'right', fontWeight: 800, whiteSpace: 'nowrap' }}>{fmtMoney(item.line_total)}</div>
+                      </div>
+                      <div style={{ marginTop: '5px', color: '#7A7570', fontSize: '12px' }}>
+                        Qty {item.quantity} x {fmtMoney(item.unit_price)}
+                        {Number(item.setup_cost || 0) > 0 && <span> + setup {fmtMoney(item.setup_cost)}</span>}
+                      </div>
                     </div>
-                    <div style={{ fontWeight: 700, color: NAVY }}>{fmt(item.subtotal)}</div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </Section>
+              ) : (
+                <SmallEmpty label="No item rows yet" />
+              )}
+            </Panel>
 
-            {/* PRICING */}
-            <Section title="💰 Payment">
-              <Row label="Subtotal (excl. GST)" value={fmt(selected.subtotal)} />
-              <Row label="Shipping" value={fmt(selected.shipping)} />
-              <Row label="GST (10%)" value={fmt(selected.gst)} />
-              <Row label="Total (incl. GST)" value={fmt(selected.total)} bold />
-              <Row label="Payment Method" value={selected.payment_method === 'eft' ? 'EFT Bank Transfer' : 'Credit Card (Stripe)'} />
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
-                <span style={{ color: '#7A7570', fontSize: '13px', width: '140px' }}>Payment Status</span>
-                {['paid', 'unpaid'].map(p => {
-                  const ps = PAYMENT_STATUS[p];
-                  return (
-                    <button key={p} onClick={async () => {
-                      await supabase.from('orders').update({ payment_status: p }).eq('id', selected.id);
-                      setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, payment_status: p } : o));
-                      setSelected(prev => ({ ...prev, payment_status: p }));
-                    }}
-                      style={{ padding: '4px 12px', borderRadius: '20px', border: `2px solid ${selected.payment_status === p ? ps.color : '#E0DDD7'}`, background: selected.payment_status === p ? ps.bg : '#fff', color: selected.payment_status === p ? ps.color : '#B0AAA3', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
-                      {ps.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </Section>
+            <Panel title="Pricing">
+              <Row label="Net" value={fmtMoney(selected.total_net)} />
+              <Row label="GST" value={fmtMoney(selected.gst_total)} />
+              <Row label="Gross" value={fmtMoney(selected.total_gross)} bold />
+            </Panel>
 
-            {/* DELIVERY */}
-            <Section title="🚚 Delivery">
-              {selected.delivery_address && <Row label="Address" value={selected.delivery_address} />}
+            <Panel title="Artwork Proofs">
+              {selected.artwork_proofs?.length ? (
+                selected.artwork_proofs.map((proof) => (
+                  <div key={proof.id} style={{ border: `1px solid ${BORDER}`, borderRadius: '8px', padding: '10px 12px', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '10px' }}>
+                      <strong>v{proof.version} / {proof.status}</strong>
+                      {proof.proof_pdf_url && <a href={proof.proof_pdf_url} target="_blank" style={{ color: GOLD, fontWeight: 700 }}>Open PDF</a>}
+                    </div>
+                    <div style={{ color: '#7A7570', fontSize: '12px', marginTop: '5px' }}>
+                      {proof.print_method || 'Method TBC'} / {proof.print_position || 'Position TBC'} / {proof.print_size || 'Size TBC'}
+                    </div>
+                    {proof.comment && <div style={{ marginTop: '6px', fontSize: '12px' }}>{proof.comment}</div>}
+                  </div>
+                ))
+              ) : (
+                <SmallEmpty label="No proof versions yet" />
+              )}
+            </Panel>
 
-              {/* Tracking */}
-              <div style={{ marginTop: '12px' }}>
-                <div style={{ fontSize: '12px', color: '#7A7570', marginBottom: '6px', fontWeight: 600 }}>Tracking Details</div>
-                <input value={trackingNumber} onChange={e => setTrackingNumber(e.target.value)}
-                  placeholder="Tracking number..."
-                  style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', marginBottom: '6px', boxSizing: 'border-box' }} />
-                <input value={trackingUrl} onChange={e => setTrackingUrl(e.target.value)}
-                  placeholder="Tracking URL..."
-                  style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
-              </div>
-            </Section>
+            <Panel title="Approvals">
+              {selected.approvals?.length ? (
+                selected.approvals.map((approval) => (
+                  <Row key={approval.id} label={approval.method} value={`${approval.signer_email || '-'} / ${fmtDateTime(approval.signed_at)}`} />
+                ))
+              ) : (
+                <SmallEmpty label="No approval recorded" />
+              )}
+            </Panel>
 
-            {/* INTERNAL NOTES */}
-            <Section title="🔒 Internal Notes">
-              <textarea value={internalNote} onChange={e => setInternalNote(e.target.value)}
-                placeholder="Add internal notes, production details, supplier info..."
+            <Panel title="Status Log">
+              {selected.status_log?.length ? (
+                selected.status_log.map((event) => (
+                  <div key={event.id} style={{ fontSize: '12px', borderBottom: '1px solid #F0EEED', padding: '7px 0' }}>
+                    <strong>{event.status}</strong>
+                    <span style={{ color: '#7A7570' }}> / {fmtDateTime(event.created_at)}</span>
+                    {event.note && <div style={{ color: '#7A7570', marginTop: '3px' }}>{event.note}</div>}
+                  </div>
+                ))
+              ) : (
+                <SmallEmpty label="No status log yet" />
+              )}
+            </Panel>
+
+            <Panel title="Internal Notes">
+              <textarea
+                value={details.internal_notes}
+                onChange={(event) => setDetails((prev) => ({ ...prev, internal_notes: event.target.value }))}
                 rows={4}
-                style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', color: NAVY, outline: 'none', resize: 'vertical', lineHeight: 1.6, boxSizing: 'border-box' }} />
-              <button onClick={() => saveDetails(selected.id)} disabled={saving}
-                style={{ marginTop: '8px', background: saving ? '#B0AAA3' : NAVY, color: '#fff', border: 'none', borderRadius: '8px', padding: '10px 24px', fontSize: '13px', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                style={{ width: '100%', resize: 'vertical', border: `1px solid ${BORDER}`, borderRadius: '8px', padding: '9px 10px', boxSizing: 'border-box', color: NAVY, fontFamily: 'inherit', lineHeight: 1.5 }}
+              />
+              <button disabled={saving} onClick={saveDetails} style={{ marginTop: '10px', width: '100%', background: saving ? '#B0AAA3' : NAVY, color: '#fff', border: 'none', borderRadius: '8px', padding: '11px 14px', fontWeight: 800, cursor: saving ? 'not-allowed' : 'pointer' }}>
                 {saving ? 'Saving...' : 'Save Details'}
               </button>
-            </Section>
-
-            {/* ACTIONS */}
-            <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-              <a href={`mailto:${selected.customer_email}?subject=Re: Order ${selected.invoice_number}`}
-                style={{ flex: 1, display: 'block', background: GOLD, color: '#fff', textAlign: 'center', padding: '12px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
-                📧 Email Customer
-              </a>
-              {selected.customer_phone && (
-                <a href={`tel:${selected.customer_phone}`}
-                  style={{ display: 'block', background: NAVY, color: '#fff', textAlign: 'center', padding: '12px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
-                  📞 Call
-                </a>
-              )}
-            </div>
-
-            <div style={{ marginTop: '16px', fontSize: '12px', color: '#B0AAA3', textAlign: 'center' }}>
-              {selected.created_at && `Ordered ${new Date(selected.created_at).toLocaleString('en-AU', { timeZone: 'Australia/Sydney', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`}
-            </div>
-          </div>
+            </Panel>
+          </aside>
         )}
-      </div>
+      </main>
     </div>
   );
 }
 
-function Section({ title, children }) {
+function navButtonStyle(active) {
+  return {
+    border: 'none',
+    borderRadius: '6px',
+    padding: '8px 12px',
+    background: active ? GOLD : 'rgba(255,255,255,.12)',
+    color: '#fff',
+    fontWeight: 800,
+    cursor: 'pointer',
+  };
+}
+
+function filterStyle(active) {
+  return {
+    border: `1px solid ${active ? NAVY : BORDER}`,
+    background: active ? NAVY : '#fff',
+    color: active ? '#fff' : NAVY,
+    borderRadius: '6px',
+    padding: '7px 12px',
+    fontSize: '12px',
+    fontWeight: 800,
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+  };
+}
+
+const cellStyle = {
+  padding: '12px 14px',
+  verticalAlign: 'top',
+};
+
+function EmptyState({ label }) {
+  return <div style={{ padding: '70px 24px', textAlign: 'center', color: '#7A7570' }}>{label}</div>;
+}
+
+function SmallEmpty({ label }) {
+  return <div style={{ border: `1px dashed ${BORDER}`, borderRadius: '8px', padding: '12px', color: '#7A7570', fontSize: '13px', textAlign: 'center' }}>{label}</div>;
+}
+
+function Panel({ title, children }) {
   return (
-    <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #F0EEED' }}>
-      <div style={{ fontSize: '12px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>{title}</div>
+    <section style={{ borderTop: '1px solid #F0EEED', paddingTop: '15px', marginTop: '15px' }}>
+      <h3 style={{ margin: '0 0 10px', fontSize: '12px', color: '#7A7570', textTransform: 'uppercase', letterSpacing: '.06em' }}>{title}</h3>
       {children}
-    </div>
+    </section>
+  );
+}
+
+function Field({ label, value, onChange, type = 'text' }) {
+  return (
+    <label style={{ display: 'block', fontSize: '12px', color: '#7A7570', fontWeight: 700 }}>
+      {label}
+      <input
+        type={type}
+        value={value || ''}
+        onChange={(event) => onChange(event.target.value)}
+        style={{ display: 'block', marginTop: '5px', width: '100%', border: `1px solid ${BORDER}`, borderRadius: '7px', padding: '8px 9px', boxSizing: 'border-box', color: NAVY, fontFamily: 'inherit' }}
+      />
+    </label>
+  );
+}
+
+function Select({ label, value, onChange, options }) {
+  return (
+    <label style={{ display: 'block', fontSize: '12px', color: '#7A7570', fontWeight: 700 }}>
+      {label}
+      <select
+        value={value || ''}
+        onChange={(event) => onChange(event.target.value)}
+        style={{ display: 'block', marginTop: '5px', width: '100%', border: `1px solid ${BORDER}`, borderRadius: '7px', padding: '8px 9px', boxSizing: 'border-box', color: NAVY, background: '#fff', fontFamily: 'inherit' }}
+      >
+        {options.map((option) => (
+          <option key={option.key} value={option.key}>{option.label}</option>
+        ))}
+      </select>
+    </label>
   );
 }
 
 function Row({ label, value, bold }) {
-  if (!value) return null;
+  if (!value && value !== 0) return null;
   return (
-    <div style={{ display: 'flex', gap: '12px', marginBottom: '8px', fontSize: '13px' }}>
-      <span style={{ color: '#7A7570', width: '140px', flexShrink: 0 }}>{label}</span>
-      <span style={{ color: '#1B2A4A', fontWeight: bold ? 700 : 400, flex: 1 }}>{value}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '14px', fontSize: '13px', padding: '5px 0' }}>
+      <span style={{ color: '#7A7570' }}>{label}</span>
+      <span style={{ fontWeight: bold ? 800 : 500, textAlign: 'right' }}>{value}</span>
     </div>
   );
 }

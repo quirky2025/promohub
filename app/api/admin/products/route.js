@@ -1,15 +1,14 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+import { isAdmin, unauthorized } from '@/lib/adminAuth';
+import { sourcingDb } from '@/lib/sourcingDb';
 
 export async function GET(req) {
+  if (!(await isAdmin(req))) return unauthorized();
+
   const { searchParams } = new URL(req.url);
   const search = searchParams.get('search') || '';
   const category = searchParams.get('category') || '';
   const published = searchParams.get('published');
+  const supabase = sourcingDb();
 
   let query = supabase
     .from('products')
@@ -28,11 +27,13 @@ export async function GET(req) {
 }
 
 export async function PATCH(req) {
+  if (!(await isAdmin(req))) return unauthorized();
+
   const body = await req.json();
   const { id, ...updates } = body;
   if (!id) return Response.json({ error: 'No id' }, { status: 400 });
 
-  const { error } = await supabase
+  const { error } = await sourcingDb()
     .from('products')
     .update(updates)
     .eq('id', id);

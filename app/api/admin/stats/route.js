@@ -1,25 +1,30 @@
-import { createClient } from '@supabase/supabase-js';
+import { isAdmin, unauthorized } from '@/lib/adminAuth';
+import { sourcingDb } from '@/lib/sourcingDb';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+export async function GET(request) {
+  if (!(await isAdmin(request))) return unauthorized();
 
-export async function GET() {
+  const supabase = sourcingDb();
   const [ordersRes, artworksRes, quotesRes, recentRes] = await Promise.all([
-    supabase.from('orders').select('total, payment_status', { count: 'exact' }),
+    supabase.from('orders').select('*', { count: 'exact' }),
     supabase.from('artworks').select('status', { count: 'exact' }).eq('status', 'logo_received'),
-    supabase.from('quotes').select('status', { count: 'exact' }).eq('status', 'pending'),
+    supabase.from('quotes').select('status', { count: 'exact' }).in('status', ['pending', 'new']),
     supabase.from('orders').select('*').order('created_at', { ascending: false }).limit(5),
   ]);
 
-  const revenue = ordersRes.data?.filter(o => o.payment_status === 'paid').reduce((sum, o) => sum + (o.total || 0), 0) || 0;
+  if (ordersRes.error) {
+    return Response.json({ error: ordersRes.error.message }, { status: 500 });
+  }
+
+  const revenue = ordersRes.data
+    ?.filter((order) => order.payment_status === 'paid')
+    .reduce((sum, order) => sum + Number(order.total_gross || order.total || 0), 0) || 0;
 
   return Response.json({
     orders: ordersRes.count || 0,
     artworks_pending: artworksRes.count || 0,
     quotes_pending: quotesRes.count || 0,
-    revenue: Math.round(revenue / 1.1), // excl GST
+    revenue: Math.round(revenue / 1.1),
     recent_orders: recentRes.data || [],
   });
 }
