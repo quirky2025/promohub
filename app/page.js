@@ -86,9 +86,6 @@ export default async function Home() {
             <a href="/promotional-products" style={btn(GOLD, NAVY)}>Browse products</a>
           </div>
         </div>
-        <div style={{ ...wrap, paddingBottom: 8 }}>
-          <img src="/kit-hero.svg" alt="Branded promotional products — drink bottles, tote bags, t-shirts, notebooks, pens and caps with your logo" style={{ width: '100%', maxWidth: 1000, display: 'block', margin: '0 auto' }} />
-        </div>
       </section>
 
       {/* TRUST STRIP */}
