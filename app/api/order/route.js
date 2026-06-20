@@ -311,6 +311,8 @@ export async function POST(req) {
 
           <h2 style="font-size: 14px; color: #1B2A4A; margin: 20px 0 12px; padding-bottom: 10px; border-bottom: 1px solid #F0EEED; text-transform: uppercase; letter-spacing: 0.08em;">Delivery Address</h2>
           <p style="font-size: 14px; color: #3D3A36; margin: 0 0 20px;">${deliveryAddress}</p>
+          ${customer.requiredDate ? `<h2 style="font-size: 14px; color: #1B2A4A; margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.08em;">Required Date</h2><p style="font-size: 14px; color: #3D3A36; margin: 0 0 16px;">${customer.requiredDate}</p>` : ''}
+          ${customer.comments ? `<h2 style="font-size: 14px; color: #1B2A4A; margin: 20px 0 8px; text-transform: uppercase; letter-spacing: 0.08em;">Comments</h2><p style="font-size: 14px; color: #3D3A36; margin: 0 0 16px; white-space: pre-wrap;">${customer.comments}</p>` : ''}
 
           <p style="font-size: 14px; color: #7A7570; margin: 0 0 4px;">Questions? Call us: <strong style="color: #1B2A4A;">02 9477 4748</strong></p>
           <p style="font-size: 14px; color: #7A7570; margin: 0;">Or email: <a href="mailto:hello@quirkypromo.com.au" style="color: #C9A96E;">hello@quirkypromo.com.au</a></p>
