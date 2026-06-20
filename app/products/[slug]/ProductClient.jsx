@@ -1025,9 +1025,10 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
         padColours: numColours,
         screenPositions: numPositions,
       };
+      const { data: { session: _qs } } = await supabase.auth.getSession();
       const res = await fetch('/api/quote', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(_qs ? { Authorization: `Bearer ${_qs.access_token}` } : {}) },
         body: JSON.stringify(payload),
       });
       if (res.ok) setStatus('success');
