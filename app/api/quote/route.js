@@ -236,8 +236,8 @@ export async function POST(req) {
       return 'other';
     }
 
-    let brandingSummary = brandingMethod || 'None / Unbranded';
-    if (brandingMethod) {
+    let brandingSummary = body.brandingSummary || brandingMethod || 'None / Unbranded';
+    if (!body.brandingSummary && brandingMethod) {
       const bt = getBrandingType(brandingMethod);
       if (bt === 'pad') brandingSummary = `${brandingMethod} — ${padPositions} position(s), ${padColours} colour(s)`;
       else if (bt === 'screen') brandingSummary = `${brandingMethod} — ${screenPositions} position(s), 1 colour`;
