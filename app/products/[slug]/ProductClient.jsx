@@ -13,6 +13,10 @@ import ProductImg from '@/components/ProductImg';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
+const aud = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const isColourMethod = (d) => { const n = (d?.name || '').toLowerCase(); return n.includes('screen print') || n.includes('pad print'); };
+const isOneColourLocked = (d) => { const x = (d?.detail || '').toLowerCase(); return x.includes('one colour') || x.includes('1 colour'); };
+const brandingLabel = (d, setupQty) => isColourMethod(d) ? `${d.name} — ${isOneColourLocked(d) ? 1 : (setupQty || 1)} colour · 1 position` : `${d.name} — Full Colour · 1 position`;
 const MARGIN = 1.40;
 const GST = 0.10;
 const SHIPPING = 30;
@@ -137,6 +141,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   const grand = subtotal + SHIPPING + gstAmt;
   const firstRetailPrice = pricingTiers[0] ? pricingTiers[0].base_price * MARGIN : 0;
   const isValidQty = qty >= (product.min_qty || 1);
+  const canAdd = isValidQty && (colours.length === 0 || selectedColour !== null);
   const collectionLabel = product.collection
     ? (Array.isArray(product.collection) ? product.collection.join(', ') : product.collection)
     : null;
@@ -314,7 +319,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           )}
           {colours.length > 0 && (
             <div>
-              <StepLabel num={mainColourStep} text={`Choose ${product.colour_label || 'Product Colour'}`} />
+              <StepLabel num={mainColourStep} text={`Choose ${product.colour_label || 'Product Colour'} *`} />
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
                 {colours.map((c, i) => {
                   const hex = resolveColourHex(c);
@@ -339,7 +344,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           )}
 
       <div>
-            <StepLabel num={qtyStep} text={hasSizes ? 'Enter Quantity per Size' : 'Enter Quantity'} />
+            <StepLabel num={qtyStep} text={(hasSizes ? 'Enter Quantity per Size' : 'Enter Quantity') + ' *'} />
             {hasSizes ? (
               <div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', margin: '12px 0 10px' }}>
@@ -441,7 +446,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                           <td style={tdStyle}>{d.has_setup ? `$${(SETUP_FEE * MARGIN).toFixed(2)}` : '—'}</td>
                           <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                             {d.has_setup
-                              ? <input type="number" value={st.setupQty} min="1" disabled={!st.on}onChange={e => setSetupQty(d.id, e.target.value)} style={{ width: '54px', border: '1.5px solid #C8C4BC', borderRadius: '6px', padding: '5px 6px', fontSize: '13px', fontWeight: 600, textAlign: 'center', fontFamily: '"DM Sans", sans-serif', background: !st.on ? '#F4F2EE' : '#fff', color: !st.on ? '#B0AAA3' : NAVY,outline: 'none' }} />
+                              ? <input type="number" value={(!isColourMethod(d) || isOneColourLocked(d)) ? 1 : st.setupQty} min="1" disabled={!st.on || !isColourMethod(d) || isOneColourLocked(d)}onChange={e => setSetupQty(d.id, e.target.value)} style={{ width: '54px', border: '1.5px solid #C8C4BC', borderRadius: '6px', padding: '5px 6px', fontSize: '13px', fontWeight: 600, textAlign: 'center', fontFamily: '"DM Sans", sans-serif', background: !st.on ? '#F4F2EE' : '#fff', color: !st.on ? '#B0AAA3' : NAVY,outline: 'none' }} />
                               : <span style={{ color: '#B0AAA3' }}>—</span>}
                           </td>
                         </tr>
@@ -512,7 +517,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                   </tr>
                   <tr>
                     <td style={tdLabelStyle}>Buy (subtotal)</td>
-                    {pricingTiers.map(t => { const u = calcUnit(t.base_price, t.min_qty); const isActive = activeTier?.id === t.id; return <td key={t.id} style={{ ...tdStyle, fontWeight: 600, color: isActive ? GOLD : NAVY, background: isActive ? '#FDF8F0' : undefined }}>${(u * t.min_qty).toFixed(2)}</td>; })}
+                    {pricingTiers.map(t => { const u = calcUnit(t.base_price, t.min_qty); const isActive = activeTier?.id === t.id; return <td key={t.id} style={{ ...tdStyle, fontWeight: 600, color: isActive ? GOLD : NAVY, background: isActive ? '#FDF8F0' : undefined }}>{aud(u * t.min_qty)}</td>; })}
                   </tr>
                 </tbody>
               </table>
@@ -521,31 +526,38 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
           {isValidQty && unitPrice > 0 && (
             <div style={{ background: NAVY, borderRadius: '16px', padding: '24px', color: '#fff' }}>
+              <div style={{ marginBottom: '14px', paddingBottom: '14px', borderBottom: '1px solid rgba(255,255,255,.12)' }}>
+                <div style={{ fontSize: '11px', color: '#fff', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>Your Selection</div>
+                <div style={{ fontSize: '14px', color: '#fff', lineHeight: 1.6 }}>
+                  {selectedColour !== null && colours[selectedColour]?.name ? (<span><strong>{colours[selectedColour].name}</strong> · </span>) : null}
+                  Qty <strong>{Number(qty).toLocaleString('en-AU')}</strong> · {decorations.filter(d => addonState[d.id]?.on).map(d => brandingLabel(d, addonState[d.id]?.setupQty)).join(' · ') || 'Unbranded'}
+                </div>
+              </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '16px' }}>
                 <div>
-                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Unit price (excl. GST)</div>
+                  <div style={{ fontSize: '11px', color: '#fff', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Unit price (excl. GST)</div>
                   <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '32px', fontWeight: 500, color: GOLD }}>${unitPrice.toFixed(2)}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.4)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Subtotal (excl. GST)</div>
-                  <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '26px', fontWeight: 500, color: '#fff' }}>${subtotal.toFixed(2)}</div>
+                  <div style={{ fontSize: '11px', color: '#fff', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>Subtotal (excl. GST)</div>
+                  <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '26px', fontWeight: 500, color: '#fff' }}>{aud(subtotal)}</div>
                 </div>
               </div>
               <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,.12)', margin: '0 0 14px' }} />
-              <PriceRow label="Subtotal (excl. GST)" value={`$${subtotal.toFixed(2)}`} />
+              <PriceRow label="Subtotal (excl. GST)" value={`${aud(subtotal)}`} />
               <PriceRow label="Shipping & Handling" value={`$${SHIPPING.toFixed(2)}`} />
-              <PriceRow label="GST (10%)" value={`$${gstAmt.toFixed(2)}`} />
-              <PriceRow label="Total (incl. GST)" value={`$${grand.toFixed(2)}`} bold />
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,.25)', marginTop: '8px' }}>All prices in AUD. GST invoice provided with order.</div>
+              <PriceRow label="GST (10%)" value={`${aud(gstAmt)}`} />
+              <PriceRow label="Total (incl. GST)" value={`${aud(grand)}`} bold />
+              <div style={{ fontSize: '11px', color: '#fff', marginTop: '8px' }}>All prices in AUD. GST invoice provided with order.</div>
             </div>
           )}
 
           <button
-            onClick={isValidQty ? handleAddToCart : undefined}
-            disabled={!isValidQty}
+            onClick={canAdd ? handleAddToCart : undefined}
+            disabled={!canAdd}
             style={{
               width: '100%',
-              background: isValidQty ? GOLD : '#C8C4BC',
+              background: canAdd ? GOLD : '#C8C4BC',
               color: '#fff', border: 'none', borderRadius: '12px', padding: '20px',
               fontSize: '19px', fontWeight: 700,
               cursor: isValidQty ? 'pointer' : 'not-allowed',
@@ -553,7 +565,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               boxShadow: isValidQty ? '0 4px 16px rgba(201,169,110,.4)' : 'none',
               transition: 'background .3s',
             }}>
-            {cartAdded ? '✅ Added to Cart!' : isValidQty ? `Add to Cart  —  $${grand.toFixed(2)} incl. GST` : 'Enter quantity to see pricing'}
+            {cartAdded ? '✅ Added to Cart!' : !isValidQty ? 'Enter quantity to see pricing' : (colours.length > 0 && selectedColour === null) ? 'Choose a colour to continue' : `Add to Cart  —  ${aud(grand)} incl. GST`}
           </button>
 
           <button onClick={() => setQuoteOpen(true)} style={{ width: '100%', background: NAVY, color: '#fff', border: 'none', borderRadius: '12px', padding: '18px', fontSize: '17px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
@@ -1392,9 +1404,9 @@ function StepLabel({ num, text }) {
 
 function PriceRow({ label, value, bold }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: bold ? '14px' : '13px', fontWeight: bold ? 700 : 400, marginBottom: '8px', fontFamily: '"DM Sans", sans-serif' }}>
-      <span style={{ color: bold ? 'rgba(255,255,255,.9)' : 'rgba(255,255,255,.5)' }}>{label}</span>
-      <span style={{ color: bold ? GOLD : '#fff' }}>{value}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontWeight: bold ? 700 : 400, marginBottom: '8px', marginTop: bold ? '2px' : 0, paddingTop: bold ? '12px' : 0, borderTop: bold ? '1px solid rgba(255,255,255,.18)' : 'none', fontFamily: '"DM Sans", sans-serif' }}>
+      <span style={{ color: '#fff', fontSize: bold ? '15px' : '13px' }}>{label}</span>
+      <span style={{ color: bold ? GOLD : '#fff', fontFamily: bold ? '"DM Mono", monospace' : 'inherit', fontSize: bold ? '30px' : '13px', fontWeight: bold ? 700 : 400, lineHeight: 1 }}>{value}</span>
     </div>
   );
 }
