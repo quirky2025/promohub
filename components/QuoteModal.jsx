@@ -54,16 +54,29 @@ export default function QuoteModal({ open, onClose, source = 'homepage' }) {
     }
     setSubmitting(true);
     setError('');
-    const { error: err } = await supabase.from('quote_requests').insert([{
-      name: form.name.trim(),
-      company: form.company.trim() || null,
-      email: form.email.trim(),
-      phone: form.phone.trim() || null,
-      message: form.message.trim(),
-      quantity: form.quantity.trim() || null,
-      date_needed: form.date_needed || null,
-      source,
-    }]);
+    let err = null;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const headers = { 'Content-Type': 'application/json' };
+      if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`;
+      const res = await fetch('/api/lead-enquiry', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          name: form.name.trim(),
+          company: form.company.trim() || null,
+          email: form.email.trim(),
+          phone: form.phone.trim() || null,
+          message: form.message.trim(),
+          quantity: form.quantity.trim() || null,
+          date_needed: form.date_needed || null,
+          source,
+        }),
+      });
+      if (!res.ok) err = await res.json().catch(() => ({ error: 'failed' }));
+    } catch (e) {
+      err = { error: e.message };
+    }
     setSubmitting(false);
     if (err) {
       setError('Something went wrong. Please try again or call us on 02 9477 4748.');
