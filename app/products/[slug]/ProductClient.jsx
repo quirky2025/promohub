@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { addToCart } from '@/lib/cart';
+import CartDrawer from '@/components/CartDrawer';
 import { getColourHex } from '@/lib/colourSwatch';
 import { slugify } from '@/lib/slug';
 import { colourImageAlt, cleanColour } from '@/lib/colourName';
@@ -552,18 +553,8 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               boxShadow: isValidQty ? '0 4px 16px rgba(201,169,110,.4)' : 'none',
               transition: 'background .3s',
             }}>
-            {cartAdded ? '✅ Added to Cart!' : isValidQty ? `Place Order  —  $${grand.toFixed(2)} incl. GST` : 'Enter quantity to see pricing'}
+            {cartAdded ? '✅ Added to Cart!' : isValidQty ? `Add to Cart  —  $${grand.toFixed(2)} incl. GST` : 'Enter quantity to see pricing'}
           </button>
-          {cartAdded && (
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={() => router.push('/place-order')} style={{ flex: 1, background: GOLD, color: '#fff', border: 'none', borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
-                View Order
-              </button>
-              <button onClick={() => router.push(`/category/${encodeURIComponent((product.category || '').toLowerCase())}`)} style={{ flex: 1, background: '#fff', color: NAVY, border: `1.5px solid ${NAVY}`, borderRadius: '10px', padding: '14px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
-                ← Keep Shopping
-              </button>
-            </div>
-          )}
 
           <button onClick={() => setQuoteOpen(true)} style={{ width: '100%', background: NAVY, color: '#fff', border: 'none', borderRadius: '12px', padding: '18px', fontSize: '17px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
             <span style={{ fontSize: '20px' }}>💬</span> Get a Quote / Ask a Question
@@ -882,6 +873,8 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           onClose={() => setQuoteOpen(false)}
         />
       )}
+
+      <CartDrawer open={cartAdded} onClose={() => setCartAdded(false)} />
 
     </div>
   );
