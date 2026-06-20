@@ -23,6 +23,7 @@ const LOST_REASONS = ['Too expensive', 'Went with another supplier', 'No budget 
 
 const aud = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+const fmtAddr = (co) => { if (!co) return ''; const a = co.billing_address; if (!a) return ''; if (typeof a === 'string') return a; try { return Object.values(a).filter(Boolean).join(', '); } catch { return ''; } };
 
 function StatusPill({ status }) {
   const m = STATUS_META[status] || STATUS_META.new;
@@ -220,7 +221,7 @@ export default function AdminDealsPage() {
                   </div>
 
                   {selected.kind === 'enquiry' && (
-                    <button onClick={() => { setBuilderPrefill({ name: selected.customer_name, company: selected.customer_company, email: selected.customer_email, phone: detail.record?.phone || '' }); setBuilderOpen(true); }} style={{ width: '100%', background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '14px' }}>＋ Build Quote</button>
+                    <button onClick={() => { setBuilderPrefill({ name: selected.customer_name, company: selected.customer_company, email: selected.customer_email, phone: detail.record?.phone || '', delivery: fmtAddr(detail.company) }); setBuilderOpen(true); }} style={{ width: '100%', background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '14px' }}>＋ Build Quote</button>
                   )}
 
                   <div style={{ fontSize: '11px', color: '#7A7570', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Internal note</div>

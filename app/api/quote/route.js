@@ -61,15 +61,16 @@ async function generateQuotePDF({
     page.drawText('QUIRKY', { x: 40, y: height - 46, size: 20, font: fontBold, color: WHITE });
     page.drawText('PROMO', { x: 40 + fontBold.widthOfTextAtSize('QUIRKY', 20), y: height - 46, size: 20, font: fontBold, color: GOLD });
   }
-  page.drawText('Quirky Promo   ABN 95 656 714 270', { x: 40, y: height - 72, size: 8, font: fontReg, color: WHITE });
-  page.drawText('02 9477 4748   ·   hello@quirkypromo.com.au   ·   quirkypromo.com.au', { x: 40, y: height - 84, size: 8, font: fontReg, color: rgb(0.78, 0.81, 0.88) });
+  const compInfo = [['ABN:', '95 656 714 270'], ['Phone:', '02 9477 4748'], ['Email:', 'hello@quirkypromo.com.au'], ['Web:', 'quirkypromo.com.au']];
+  let ciY = height - 62;
+  compInfo.forEach(([lab, val]) => { page.drawText(lab, { x: 40, y: ciY, size: 8, font: fontBold, color: WHITE }); page.drawText(val, { x: 40 + fontBold.widthOfTextAtSize(lab, 8) + 5, y: ciY, size: 8, font: fontReg, color: WHITE }); ciY -= 10; });
   const dW = fontBold.widthOfTextAtSize(docType, 22);
   page.drawText(docType, { x: width - 40 - dW, y: height - 52, size: 22, font: fontBold, color: GOLD });
   rt(quoteNumber || '', width - 40, height - 68, 11, fontReg, WHITE);
 
   // ── META (right) ────────────────────────────────────────
   let metaY = height - 120;
-  const metaRow = (label, val) => { page.drawText(label, { x: 400, y: metaY, size: 8.5, font: fontReg, color: GREY }); rt(val, width - 40, metaY, 8.5, fontReg, BLACK); metaY -= 13; };
+  const metaRow = (label, val) => { page.drawText(label, { x: 400, y: metaY, size: 8.5, font: fontBold, color: BLACK }); rt(val, width - 40, metaY, 8.5, fontReg, BLACK); metaY -= 13; };
   metaRow('Date:', new Date().toLocaleDateString('en-AU'));
   if (validUntil) metaRow(docType === 'QUOTE' ? 'Valid until:' : 'Date:', validUntil);
   metaRow('Page:', `1 of ${totalPages || 1}`);
@@ -77,14 +78,14 @@ async function generateQuotePDF({
   // ── CUSTOMER / DELIVERY BOXES ───────────────────────────
   let y = height - 122;
   const gap = 14, bw = (width - 80 - gap) / 2, cdX = 40, ddX = 40 + bw + gap, bH = 82, bTop = y;
-  page.drawText('Customer Detail:', { x: cdX, y: bTop + 2, size: 8, font: fontBold, color: NAVY });
-  page.drawText('Delivery Detail:', { x: ddX, y: bTop + 2, size: 8, font: fontBold, color: NAVY });
+  page.drawText('Customer Detail:', { x: cdX, y: bTop + 2, size: 8, font: fontBold, color: BLACK });
+  page.drawText('Delivery Detail:', { x: ddX, y: bTop + 2, size: 8, font: fontBold, color: BLACK });
   page.drawRectangle({ x: cdX, y: bTop - bH, width: bw, height: bH, borderColor: BORDER, borderWidth: 0.8 });
   page.drawRectangle({ x: ddX, y: bTop - bH, width: bw, height: bH, borderColor: BORDER, borderWidth: 0.8 });
   let cy = bTop - 14;
   [customer.company, customer.name, customer.email, customer.phone].filter(Boolean).forEach(l => { page.drawText(String(l).substring(0, 44), { x: cdX + 8, y: cy, size: 8.5, font: fontReg, color: BLACK }); cy -= 13; });
   let dy = bTop - 14;
-  (deliveryAddress ? String(deliveryAddress).split(/,\s*/) : ['Same as customer']).slice(0, 5).forEach(l => { page.drawText(l.substring(0, 44), { x: ddX + 8, y: dy, size: 8.5, font: fontReg, color: BLACK }); dy -= 13; });
+  (deliveryAddress ? String(deliveryAddress).split(/,\s*/) : ['TO BE CONFIRMED']).slice(0, 5).forEach(l => { page.drawText(l.substring(0, 44), { x: ddX + 8, y: dy, size: 8.5, font: fontReg, color: BLACK }); dy -= 13; });
   y = bTop - bH - 24;
 
   // ── ITEM TABLE ──────────────────────────────────────────
@@ -115,13 +116,13 @@ async function generateQuotePDF({
   page.drawText(String(product.sku || '—'), { x: cStock, y: r1, size: 8, font: fontReg, color: BLACK });
   page.drawText(String(product.name || '').substring(0, 46), { x: cDesc, y: r1, size: 8.5, font: fontBold, color: NAVY });
   let liny = r1 - 11;
-  descLines.forEach(l => { page.drawText(l.substring(0, 62), { x: cDesc, y: liny, size: 7.5, font: fontReg, color: GREY }); liny -= 11; });
+  descLines.forEach(l => { page.drawText(l.substring(0, 62), { x: cDesc, y: liny, size: 7.5, font: fontReg, color: BLACK }); liny -= 11; });
   rt(String(qty), cQtyR, r1, 8, fontReg, BLACK);
   page.drawText('EA', { x: cUnit, y: r1, size: 8, font: fontReg, color: BLACK });
   rt(`$${unitPrice.toFixed(2)}`, cPriceR, r1, 8, fontReg, BLACK);
   rt(`${(Number(disc) || 0).toFixed(2)}`, cDiscR, r1, 8, fontReg, BLACK);
   rt('10.00', cTaxR, r1, 8, fontReg, BLACK);
-  rt(`$${subtotal.toFixed(2)}`, cTotR, r1, 8, fontBold, NAVY);
+  rt(`$${subtotal.toFixed(2)}`, cTotR, r1, 8, fontBold, BLACK);
   y -= rowH + 2;
 
   // freight row
@@ -133,35 +134,35 @@ async function generateQuotePDF({
   rt(`$${shipping.toFixed(2)}`, cPriceR, fr, 8, fontReg, BLACK);
   rt('0.00', cDiscR, fr, 8, fontReg, BLACK);
   rt('10.00', cTaxR, fr, 8, fontReg, BLACK);
-  rt(`$${shipping.toFixed(2)}`, cTotR, fr, 8, fontBold, NAVY);
+  rt(`$${shipping.toFixed(2)}`, cTotR, fr, 8, fontBold, BLACK);
   y -= 26;
   page.drawLine({ start: { x: 40, y: y + 6 }, end: { x: width - 40, y: y + 6 }, thickness: 0.5, color: BORDER });
 
   // ── TOTALS (right) ──────────────────────────────────────
   y -= 6;
-  const totRow = (label, value, bold) => { page.drawText(label, { x: 380, y, size: 9, font: bold ? fontBold : fontReg, color: bold ? NAVY : GREY }); rt(value, cTotR, y, 9, bold ? fontBold : fontReg, bold ? GOLD : BLACK); y -= 15; };
+  const totRow = (label, value, bold, big) => { const sz = big ? 12 : 9; page.drawText(label, { x: 358, y, size: sz, font: bold ? fontBold : fontReg, color: BLACK }); rt(value, cTotR, y, sz, bold ? fontBold : fontReg, BLACK); y -= big ? 18 : 15; };
   totRow('Subtotal (excl. GST)', `$${subtotal.toFixed(2)}`);
   totRow('Shipping & Handling', `$${shipping.toFixed(2)}`);
   totRow('GST (10%)', `$${gst.toFixed(2)}`);
   page.drawLine({ start: { x: 378, y: y + 11 }, end: { x: width - 40, y: y + 11 }, thickness: 1, color: NAVY });
-  totRow('TOTAL (incl. GST)', `$${total.toFixed(2)}`, true);
+  totRow('TOTAL (incl. GST)', `$${total.toFixed(2)}`, true, true);
   y -= 12;
-  if (requiredDate) { page.drawText(`Required by: ${requiredDate}`, { x: 40, y, size: 8, font: fontReg, color: GREY }); }
+  if (requiredDate) { page.drawText(`Required by: ${requiredDate}`, { x: 40, y, size: 8, font: fontBold, color: BLACK }); }
   y -= 24;
 
   // ── NOTE (bold) ─────────────────────────────────────────
-  const noteText = docType === 'QUOTE'
+  const note1 = docType === 'QUOTE'
     ? `NOTE: Estimated production lead time is ${leadTimeDays} business days from artwork approval and receipt of full payment.`
     : `NOTE: Production commences only after artwork approval and full payment have been received. Estimated lead time: ${leadTimeDays} business days.`;
-  const noteWords = noteText.split(' ');
-  const noteRendered = [];
-  { let line = ''; for (const w of noteWords) { if (fontBold.widthOfTextAtSize(line + w, 9) > width - 110) { noteRendered.push(line.trim()); line = w + ' '; } else line += w + ' '; } if (line.trim()) noteRendered.push(line.trim()); }
-  const noteH = 12 + noteRendered.length * 12;
-  page.drawRectangle({ x: 40, y: y - noteH + 6, width: width - 80, height: noteH, color: rgb(0.98, 0.94, 0.85) });
-  noteRendered.forEach((l, i) => page.drawText(l, { x: 50, y: y - 6 - i * 12, size: 9, font: fontBold, color: NAVY }));
-  y -= noteH + 8;
-  page.drawText('Stock and pricing are subject to availability and are confirmed at the time of order.', { x: 40, y, size: 7.5, font: fontReg, color: GREY });
-  y -= 16;
+  const note2 = 'NOTE: Stock and pricing are subject to availability and are confirmed at the time of order.';
+  const wrapNote = (t) => { const out = []; let line = ''; for (const w of t.split(' ')) { if (fontBold.widthOfTextAtSize(line + w, 9) > width - 110) { out.push(line.trim()); line = w + ' '; } else line += w + ' '; } if (line.trim()) out.push(line.trim()); return out; };
+  const noteLines = [...wrapNote(note1), '', ...wrapNote(note2)];
+  const NPAD = 11, NLH = 13;
+  const noteH = NPAD * 2 + noteLines.length * NLH - (NLH - 9);
+  page.drawRectangle({ x: 40, y: y - noteH, width: width - 80, height: noteH, color: rgb(0.98, 0.94, 0.85) });
+  let nY = y - NPAD - 8;
+  noteLines.forEach(l => { if (l) page.drawText(l, { x: 50, y: nY, size: 9, font: fontBold, color: BLACK }); nY -= NLH; });
+  y -= noteH + 14;
 
   if (notes) {
     page.drawText('Notes:', { x: 40, y, size: 8, font: fontBold, color: NAVY }); y -= 12;
@@ -170,8 +171,8 @@ async function generateQuotePDF({
 
   // ── FOOTER ──────────────────────────────────────────────
   page.drawLine({ start: { x: 40, y: 48 }, end: { x: width - 40, y: 48 }, thickness: 0.5, color: BORDER });
-  page.drawText(docType === 'QUOTE' ? `This quote is valid until ${validUntil}.` : 'Thank you for your order.', { x: 40, y: 34, size: 7.5, font: fontReg, color: GREY });
-  page.drawText('Quirky Promo  ·  ABN 95 656 714 270  ·  quirkypromo.com.au  ·  hello@quirkypromo.com.au', { x: 40, y: 23, size: 7.5, font: fontReg, color: GREY });
+  page.drawText(docType === 'QUOTE' ? `This quote is valid until ${validUntil}.` : 'Thank you for your order.', { x: 40, y: 34, size: 7.5, font: fontReg, color: BLACK });
+  page.drawText('Quirky Promo  ·  ABN 95 656 714 270  ·  quirkypromo.com.au  ·  hello@quirkypromo.com.au', { x: 40, y: 23, size: 7.5, font: fontReg, color: BLACK });
 
   const pdfBytes = await pdfDoc.save();
   return Buffer.from(pdfBytes);
@@ -215,9 +216,9 @@ export async function POST(req) {
       else if (otherPositions) brandingSummary = `${brandingMethod} — ${otherPositions} position(s)`;
     }
 
-    // Valid until date (14 days)
+    // Valid until date (30 days)
     const validUntilDate = new Date();
-    validUntilDate.setDate(validUntilDate.getDate() + 14);
+    validUntilDate.setDate(validUntilDate.getDate() + 30);
     const validUntil = validUntilDate.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
 
     // Quote number
@@ -339,7 +340,7 @@ export async function POST(req) {
         </div>
         <div style="background: #fff; border: 1px solid #E0DDD7; border-top: none; padding: 28px 32px; border-radius: 0 0 12px 12px;">
           <p style="font-size: 15px; margin: 0 0 16px;">Hi ${name},</p>
-          <p style="font-size: 15px; margin: 0 0 24px;">Thank you for your enquiry! Please find your quote attached as a PDF. This quote is valid for <strong>14 days</strong>.</p>
+          <p style="font-size: 15px; margin: 0 0 24px;">Thank you for your enquiry! Please find your quote attached as a PDF. This quote is valid for <strong>30 days</strong>.</p>
           <div style="background: #F8F7F4; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px; font-size: 14px;">
             <div style="margin-bottom: 6px;"><span style="color: #7A7570;">Quote Number:</span> <strong style="color: #C9A96E;">${quoteNumber}</strong></div>
             <div style="margin-bottom: 6px;"><span style="color: #7A7570;">Product:</span> <strong>${productName}</strong></div>

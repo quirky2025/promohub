@@ -35,7 +35,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
   useEffect(() => {
     if (open) {
       setCust({ name: prefill?.name || '', company: prefill?.company || '', email: prefill?.email || '', phone: prefill?.phone || '' });
-      setQ(''); setResults([]); setProduct(null); setQty(''); setColour(''); setCustomColour(false); setAddon({}); setOverride(''); setLeadTime('7'); setDisc(''); setRequiredDate(''); setDelivery(''); setNotes(''); setStatus('idle'); setError('');
+      setQ(''); setResults([]); setProduct(null); setQty(''); setColour(''); setCustomColour(false); setAddon({}); setOverride(''); setLeadTime('7'); setDisc(''); setRequiredDate(''); setDelivery(prefill?.delivery || ''); setNotes(''); setStatus('idle'); setError('');
     }
   }, [open, prefill]);
 
@@ -113,7 +113,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
   }
 
   return (
-    <div onClick={e => { if (e.target === e.currentTarget) onClose(); }} style={{ position: 'fixed', inset: 0, background: 'rgba(27,42,74,0.55)', zIndex: 2000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '32px 16px', overflowY: 'auto', fontFamily: '"DM Sans", sans-serif' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(27,42,74,0.55)', zIndex: 2000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '32px 16px', overflowY: 'auto', fontFamily: '"DM Sans", sans-serif' }}>
       <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '560px', boxShadow: '0 24px 64px rgba(0,0,0,.25)' }}>
         <div style={{ padding: '18px 22px', borderBottom: '1px solid #E0DDD7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: 0 }}>Build a Quote</h2>
