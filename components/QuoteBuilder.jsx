@@ -21,9 +21,11 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
   const [product, setProduct] = useState(null);
   const [qty, setQty] = useState('');
   const [colour, setColour] = useState('');
+  const [customColour, setCustomColour] = useState(false);
   const [addon, setAddon] = useState({});
   const [override, setOverride] = useState('');
   const [requiredDate, setRequiredDate] = useState('');
+  const [delivery, setDelivery] = useState('');
   const [notes, setNotes] = useState('');
   const [status, setStatus] = useState('idle');
   const [error, setError] = useState('');
@@ -31,7 +33,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
   useEffect(() => {
     if (open) {
       setCust({ name: prefill?.name || '', company: prefill?.company || '', email: prefill?.email || '', phone: prefill?.phone || '' });
-      setQ(''); setResults([]); setProduct(null); setQty(''); setColour(''); setAddon({}); setOverride(''); setRequiredDate(''); setNotes(''); setStatus('idle'); setError('');
+      setQ(''); setResults([]); setProduct(null); setQty(''); setColour(''); setCustomColour(false); setAddon({}); setOverride(''); setRequiredDate(''); setDelivery(''); setNotes(''); setStatus('idle'); setError('');
     }
   }, [open, prefill]);
 
@@ -52,7 +54,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
     const data = await res.json();
     if (data.product) {
       setProduct(data.product);
-      setQty(String(data.product.min_qty || ''));
+      setQty(String(data.product.min_qty || '')); setColour(''); setCustomColour(false);
       const a = {}; (data.product.decoration_options || []).forEach(d => { a[d.id] = { on: false, setupQty: d.default_setup_qty || 1 }; });
       setAddon(a);
     }
@@ -65,6 +67,8 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
   const nQty = parseInt(qty) || 0;
   const activeTier = tiers.filter(t => nQty >= t.min_qty).sort((a, b) => b.min_qty - a.min_qty)[0] || tiers[0] || null;
   const selectedDecos = decos.filter(d => addon[d.id]?.on);
+  const brandingDecos = selectedDecos.filter(d => d.type !== 'addon');
+  const addonDecos = selectedDecos.filter(d => d.type === 'addon');
 
   let autoUnit = 0;
   if (activeTier && nQty > 0) {
@@ -78,7 +82,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
   const subtotal = Math.round(unitPrice * nQty * 100) / 100;
   const gst = Math.round((subtotal + SHIPPING) * GST * 100) / 100;
   const total = subtotal + SHIPPING + gst;
-  const brandingSummary = selectedDecos.map(d => brandingLabel(d, addon[d.id]?.setupQty)).join(' · ') || 'Unbranded';
+  const brandingSummary = brandingDecos.map(d => brandingLabel(d, addon[d.id]?.setupQty)).join(' · ') || 'Unbranded';
   const canSend = cust.name && cust.email && product && nQty > 0;
 
   async function send() {
@@ -90,10 +94,11 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
         body: JSON.stringify({
           name: cust.name, company: cust.company, email: cust.email, phone: cust.phone,
           qty: nQty, colour,
-          brandingMethod: selectedDecos.map(d => d.name).join(', '),
-          brandingSummary, extraOptions: selectedDecos.map(d => d.name),
-          requiredDate: rd, deliveryAddress: '', artworkFileName: '', notes,
+          brandingMethod: brandingDecos.map(d => d.name).join(', '),
+          brandingSummary, extraOptions: addonDecos.map(d => d.name),
+          requiredDate: rd, deliveryAddress: delivery, artworkFileName: '', notes,
           productName: product.name, productSku: product.supplier_sku || '',
+          status: 'quote_sent',
           unitPrice, subtotal, shipping: SHIPPING, gst, total,
         }),
       });
@@ -145,6 +150,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
                 </div>
               )}
               {searching && <div style={{ fontSize: '11px', color: '#9B958E', marginTop: '4px' }}>Searching…</div>}
+              {product && <div style={{ fontSize: '11px', color: '#7A7570', marginTop: '5px', fontFamily: '"DM Mono", monospace' }}>SKU: {product.supplier_sku || '—'} · min {product.min_qty}</div>}
             </div>
 
             {product && (
@@ -156,12 +162,18 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
                   </div>
                   <div>
                     <div style={lbl}>Colour</div>
-                    {(product.product_colours || []).length > 0 ? (
-                      <select value={colour} onChange={e => setColour(e.target.value)} style={inp}>
+                    {(product.product_colours || []).length > 0 && !customColour ? (
+                      <select value={colour} onChange={e => { if (e.target.value === '__custom__') { setCustomColour(true); setColour(''); } else setColour(e.target.value); }} style={inp}>
                         <option value="">Select…</option>
                         {product.product_colours.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                        <option value="__custom__">Other / type my own…</option>
                       </select>
-                    ) : <input value={colour} onChange={e => setColour(e.target.value)} placeholder="e.g. Navy" style={inp} />}
+                    ) : (
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <input value={colour} onChange={e => setColour(e.target.value)} placeholder="Type colour…" style={inp} autoFocus />
+                        {(product.product_colours || []).length > 0 && <button type="button" onClick={() => { setCustomColour(false); setColour(''); }} title="Back to list" style={{ border: '1px solid #E0DDD7', borderRadius: '8px', background: '#fff', padding: '0 10px', fontSize: '12px', cursor: 'pointer', color: NAVY }}>List</button>}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -195,6 +207,11 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
                     <div style={lbl}>Unit price (override)</div>
                     <input type="number" step="0.01" value={override} onChange={e => setOverride(e.target.value)} placeholder={aud(autoUnit).replace('$', '')} style={{ ...inp, fontFamily: '"DM Mono", monospace' }} />
                   </div>
+                </div>
+
+                <div>
+                  <div style={lbl}>Delivery address</div>
+                  <textarea value={delivery} onChange={e => setDelivery(e.target.value)} rows={2} placeholder="Street, suburb, state, postcode — shown on the quote" style={{ ...inp, resize: 'vertical' }} />
                 </div>
 
                 <div>

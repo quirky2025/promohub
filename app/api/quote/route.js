@@ -73,7 +73,12 @@ async function generateQuotePDF({
   if (customer.company) page.drawText(customer.company, { x: 300, y: y - 25, size: 9, font: fontReg, color: BLACK });
   page.drawText(customer.email || '', { x: 300, y: y - 37, size: 9, font: fontReg, color: BLACK });
   if (customer.phone) page.drawText(customer.phone, { x: 300, y: y - 49, size: 9, font: fontReg, color: BLACK });
-  if (deliveryAddress) page.drawText(deliveryAddress.substring(0, 60), { x: 300, y: y - 61, size: 8, font: fontReg, color: GREY });
+  if (deliveryAddress) {
+    const da = String(deliveryAddress);
+    page.drawText('Deliver to:', { x: 300, y: y - 61, size: 8, font: fontBold, color: NAVY });
+    page.drawText(da.substring(0, 50), { x: 300, y: y - 72, size: 8, font: fontReg, color: GREY });
+    if (da.length > 50) page.drawText(da.substring(50, 100), { x: 300, y: y - 82, size: 8, font: fontReg, color: GREY });
+  }
 
   y -= 90;
 
@@ -85,48 +90,51 @@ async function generateQuotePDF({
   page.drawText('PRODUCT DETAILS', { x: 40, y, size: 8, font: fontBold, color: NAVY });
   y -= 18;
 
-  // Table header
-  page.drawRectangle({ x: 40, y: y - 4, width: width - 80, height: 20, color: NAVY });
-  page.drawText('ITEM', { x: 48, y: y + 1, size: 8, font: fontBold, color: WHITE });
-  page.drawText('QTY', { x: 290, y: y + 1, size: 8, font: fontBold, color: WHITE });
-  page.drawText('UNIT PRICE', { x: 350, y: y + 1, size: 8, font: fontBold, color: WHITE });
-  page.drawText('NET AMOUNT', { x: 430, y: y + 1, size: 8, font: fontBold, color: WHITE });
-  page.drawText('GST', { x: 515, y: y + 1, size: 8, font: fontBold, color: WHITE });
-  y -= 22;
+  // Table header bar (white text on navy)
+  const HB = 18;
+  page.drawRectangle({ x: 40, y: y - HB, width: width - 80, height: HB, color: NAVY });
+  const hY = y - HB + 6;
+  page.drawText('ITEM', { x: 48, y: hY, size: 8, font: fontBold, color: WHITE });
+  page.drawText('QTY', { x: 290, y: hY, size: 8, font: fontBold, color: WHITE });
+  page.drawText('UNIT PRICE', { x: 350, y: hY, size: 8, font: fontBold, color: WHITE });
+  page.drawText('NET AMOUNT', { x: 430, y: hY, size: 8, font: fontBold, color: WHITE });
+  page.drawText('GST', { x: 515, y: hY, size: 8, font: fontBold, color: WHITE });
+  y -= HB + 6;
 
-  // Product row
-  // Calculate row height based on content
+  // Product row (sits fully below the header bar — no overlap)
   const addonsList = addons ? addons.split(', ').filter(Boolean) : [];
   const hasBranding = brandingSummary && brandingSummary !== 'None / Unbranded';
-  const rowLines = 1 + (colour ? 1 : 0) + (hasBranding ? 1 : 0) + addonsList.length;
-  const rowHeight = Math.max(48, rowLines * 14 + 10);
+  const rowLines = 1 + (product.sku ? 1 : 0) + (colour ? 1 : 0) + (hasBranding ? 1 : 0) + addonsList.length;
+  const rowHeight = Math.max(44, rowLines * 12 + 16);
 
-  page.drawRectangle({ x: 40, y: y - rowHeight + 24, width: width - 80, height: rowHeight, color: LIGHT });
+  const rowTop = y;
+  page.drawRectangle({ x: 40, y: rowTop - rowHeight, width: width - 80, height: rowHeight, color: LIGHT });
 
-  // Product name
-  page.drawText(product.name || '', { x: 48, y: y + 16, size: 9, font: fontBold, color: NAVY });
-  let detailY = y + 4;
-  // Colour
+  const nameY = rowTop - 14;
+  page.drawText(product.name || '', { x: 48, y: nameY, size: 9, font: fontBold, color: NAVY });
+  let detailY = nameY - 12;
+  if (product.sku) {
+    page.drawText(`SKU: ${product.sku}`, { x: 48, y: detailY, size: 7.5, font: fontReg, color: GREY });
+    detailY -= 12;
+  }
   if (colour) {
     page.drawText(`Colour: ${colour}`, { x: 48, y: detailY, size: 8, font: fontReg, color: GREY });
     detailY -= 12;
   }
-  // Branding
   if (hasBranding) {
     page.drawText(`Branding: ${brandingSummary.substring(0, 55)}`, { x: 48, y: detailY, size: 7.5, font: fontReg, color: GREY });
     detailY -= 12;
   }
-  // Add-ons — listed right under branding
   addonsList.forEach(addon => {
     page.drawText(`Add-on: ${addon}`, { x: 48, y: detailY, size: 7.5, font: fontReg, color: GREY });
     detailY -= 12;
   });
 
-  page.drawText(String(qty), { x: 295, y: y + 8, size: 9, font: fontReg, color: BLACK });
-  page.drawText(`$${unitPrice.toFixed(2)}`, { x: 350, y: y + 8, size: 9, font: fontReg, color: BLACK });
-  page.drawText(`$${subtotal.toFixed(2)}`, { x: 430, y: y + 8, size: 9, font: fontBold, color: NAVY });
-  page.drawText('10%', { x: 520, y: y + 8, size: 9, font: fontReg, color: BLACK });
-  y -= rowHeight;
+  page.drawText(String(qty), { x: 295, y: nameY, size: 9, font: fontReg, color: BLACK });
+  page.drawText(`$${unitPrice.toFixed(2)}`, { x: 350, y: nameY, size: 9, font: fontReg, color: BLACK });
+  page.drawText(`$${subtotal.toFixed(2)}`, { x: 430, y: nameY, size: 9, font: fontBold, color: NAVY });
+  page.drawText('10%', { x: 520, y: nameY, size: 9, font: fontReg, color: BLACK });
+  y = rowTop - rowHeight - 8;
 
   // Shipping row
   page.drawRectangle({ x: 40, y: y - 4, width: width - 80, height: 20, color: WHITE });
@@ -279,7 +287,7 @@ export async function POST(req) {
       gst: gst || 0,
       shipping: shipping || 30,
       total: total || 0,
-      status: 'pending',
+      status: body.status || 'pending',
       valid_until: validUntil,
       ...link,
     });
