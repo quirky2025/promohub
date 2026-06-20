@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg1"
+   width="2400"
+   height="1006.6667"
+   viewBox="0 0 2400 1006.6667"
+   sodipodi:docname="Netflix_Logo_PMS copy.ai"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath2">
+      <path
+         d="M 0,755 H 1800 V 0 H 0 Z"
+         transform="translate(-1135.9504,-569.19781)"
+         id="path2" />
+    </clipPath>
+  </defs>
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1">
+    <inkscape:page
+       x="0"
+       y="0"
+       inkscape:label="1"
+       id="page1"
+       width="2400"
+       height="1006.6667"
+       margin="247.73599 248.66667"
+       bleed="0" />
+  </sodipodi:namedview>
+  <g
+     id="layer-MC0"
+     inkscape:groupmode="layer"
+     inkscape:label="Netflix_Logo_PMS">
+    <path
+       id="path1"
+       d="m 0,0 h -60.089 v -336.069 c 54.611,-1.88 108.994,-4.635 163.154,-8.246 v 59.209 C 68.807,-282.82 34.45,-280.883 0,-279.28 Z M 477.55,-0.034 H 411.546 L 368.033,-100.885 328.938,-0.034 H 263.926 L 333.79,-180.241 257.519,-357.03 c 21.101,-2.058 42.146,-4.253 63.162,-6.574 l 44.357,102.791 43.93,-113.312 c 22.881,-2.942 45.709,-6.012 68.489,-9.263 l 0.093,0.039 -78.281,201.891 z m -743.91,-333.099 60.093,0.013 v 136.705 h 81.457 v 59.209 h -81.457 v 77.427 h 107.66 V -0.037 H -266.36 Z m -224.399,273.358 h 62.892 v -276.878 c 19.996,0.755 40.034,1.377 60.092,1.902 v 274.976 h 62.89 v 59.741 h -185.874 z m -205.44,-294.087 c 55.384,5.033 111.025,9.18 166.918,12.4 v 59.217 c -35.712,-2.065 -71.321,-4.508 -106.827,-7.301 v 89.641 c 23.297,0.233 53.974,0.943 81.151,0.606 v 59.214 c -21.712,0.052 -56.608,-0.304 -81.151,-0.618 v 80.924 h 106.827 v 59.742 h -166.918 z m -117.877,136.883 -78.264,216.945 h -57.11 v -383.362 c 19.992,2.846 40.022,5.571 60.091,8.185 v 208.472 l 69.591,-199.912 c 21.888,2.538 43.815,4.942 65.784,7.202 V -0.034 h -60.092 z m 966.682,-130.9 c 20.059,-1.536 40.089,-3.183 60.093,-4.963 V -0.034 h -60.093 z"
+       style="fill:#d8292f;fill-opacity:1;fill-rule:nonzero;stroke:none"
+       transform="matrix(1.3333333,0,0,-1.3333333,1514.6005,247.73627)"
+       clip-path="url(#clipPath2)" />
+  </g>
+</svg>
