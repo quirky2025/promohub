@@ -159,7 +159,9 @@ async function generateQuotePDF({
   const noteH = 12 + noteRendered.length * 12;
   page.drawRectangle({ x: 40, y: y - noteH + 6, width: width - 80, height: noteH, color: rgb(0.98, 0.94, 0.85) });
   noteRendered.forEach((l, i) => page.drawText(l, { x: 50, y: y - 6 - i * 12, size: 9, font: fontBold, color: NAVY }));
-  y -= noteH + 10;
+  y -= noteH + 8;
+  page.drawText('Stock and pricing are subject to availability and are confirmed at the time of order.', { x: 40, y, size: 7.5, font: fontReg, color: GREY });
+  y -= 16;
 
   if (notes) {
     page.drawText('Notes:', { x: 40, y, size: 8, font: fontBold, color: NAVY }); y -= 12;
