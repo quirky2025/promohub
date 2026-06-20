@@ -88,8 +88,8 @@ export default function CartPage() {
               {cart.length} item{cart.length !== 1 ? 's' : ''}
             </p>
           </div>
-          <Link href="/category/bags" style={{ color: 'rgba(255,255,255,.7)', fontSize: '14px', textDecoration: 'none', fontFamily: '"DM Sans", sans-serif' }}>
-            ← Continue Shopping
+          <Link href="/promotional-products" style={{ color: 'rgba(255,255,255,.7)', fontSize: '14px', textDecoration: 'none', fontFamily: '"DM Sans", sans-serif' }}>
+            ← Keep Shopping
           </Link>
         </div>
       </div>
@@ -156,8 +156,8 @@ export default function CartPage() {
 
           {/* CONTINUE SHOPPING */}
           <div style={{ paddingTop: '8px' }}>
-            <Link href="/category/bags" style={{ color: NAVY, fontSize: '14px', textDecoration: 'none', fontFamily: '"DM Sans", sans-serif', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-              ← Continue Shopping
+            <Link href="/promotional-products" style={{ color: NAVY, fontSize: '14px', textDecoration: 'none', fontFamily: '"DM Sans", sans-serif', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              ← Keep Shopping
             </Link>
           </div>
         </div>
@@ -191,8 +191,11 @@ export default function CartPage() {
               All prices in AUD · $30 flat rate shipping · ABN 95 656 714 270
             </div>
 
-            <Link href="/place-order" style={{ display: 'block', background: GOLD, color: '#fff', textAlign: 'center', padding: '16px', borderRadius: '10px', fontSize: '16px', fontWeight: 700, textDecoration: 'none', fontFamily: '"DM Sans", sans-serif', boxShadow: '0 4px 16px rgba(201,169,110,.4)', marginBottom: '12px' }}>
-              Proceed to Checkout →
+            <Link href="/place-order?pay=now" style={{ display: 'block', background: GOLD, color: '#fff', textAlign: 'center', padding: '16px', borderRadius: '10px', fontSize: '16px', fontWeight: 700, textDecoration: 'none', fontFamily: '"DM Sans", sans-serif', boxShadow: '0 4px 16px rgba(201,169,110,.4)', marginBottom: '10px' }}>
+              Checkout — Pay Now →
+            </Link>
+            <Link href="/place-order?pay=later" style={{ display: 'block', background: NAVY, color: '#fff', textAlign: 'center', padding: '16px', borderRadius: '10px', fontSize: '16px', fontWeight: 700, textDecoration: 'none', fontFamily: '"DM Sans", sans-serif', marginBottom: '12px' }}>
+              Place Order — Pay Later →
             </Link>
 
             <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', fontSize: '12px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>
@@ -216,14 +219,6 @@ export default function CartPage() {
             </div>
           </div>
 
-          {/* GET A QUOTE INSTEAD */}
-          <div style={{ marginTop: '16px', background: '#fff', borderRadius: '14px', border: '1px solid #E0DDD7', padding: '20px 24px', textAlign: 'center' }}>
-            <div style={{ fontSize: '14px', fontWeight: 600, color: NAVY, marginBottom: '6px', fontFamily: '"DM Sans", sans-serif' }}>Need a custom arrangement?</div>
-            <div style={{ fontSize: '12px', color: '#7A7570', marginBottom: '14px', fontFamily: '"DM Sans", sans-serif', lineHeight: 1.6 }}>Large orders, multiple locations, or special requirements — get a quote instead.</div>
-            <a href="mailto:hello@quirkypromo.com.au" style={{ display: 'block', background: NAVY, color: '#fff', textAlign: 'center', padding: '12px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, textDecoration: 'none', fontFamily: '"DM Sans", sans-serif' }}>
-              Get a Quote →
-            </a>
-          </div>
         </div>
       </div>
     </div>

@@ -89,6 +89,9 @@ export default function PlaceOrderPage() {
   const [cart, setCart] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('eft');
+  const [payMode, setPayMode] = useState(null);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+  useEffect(() => { const p = new URLSearchParams(window.location.search).get('pay'); if (p) setPayMode(p); if (p === 'now') setPaymentMethod('stripe'); }, []);
   const [submitting, setSubmitting] = useState(false);
   const [logoFile, setLogoFile] = useState(null);
   const [logoUrl, setLogoUrl] = useState('');
@@ -99,7 +102,9 @@ export default function PlaceOrderPage() {
   const [form, setForm] = useState({
     name: '', company: '', email: '', phone: '',
     street: '', street2: '', suburb: '', state: '', postcode: '',
+    requiredDate: '', purpose: '', comments: '',
   });
+  const [purposeOther, setPurposeOther] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -120,7 +125,7 @@ export default function PlaceOrderPage() {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  const canSubmit = form.name && form.email && form.street && form.suburb && form.state && form.postcode;
+  const canSubmit = form.name && form.email && form.street && form.suburb && form.state && form.postcode && agreeTerms;
 
   const orderData = {
     customer: form,
@@ -416,11 +421,48 @@ export default function PlaceOrderPage() {
               </div>
             </div>
 
-            {/* Logo Upload */}
+            {/* MORE FROM YOU */}
             <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px' }}>
-              <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', fontWeight: 600, color: NAVY, margin: '0 0 8px' }}>Upload Your Logo</h2>
-              <p style={{ fontSize: '13px', color: '#7A7570', margin: '0 0 20px' }}>Optional — you can also email your logo to hello@quirkypromo.com.au after placing your order.</p>
+              <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', fontWeight: 600, color: NAVY, margin: '0 0 18px' }}>More From You</h2>
 
+              <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>Required Date <span style={{ color: '#000', fontWeight: 400 }}>(when do you need it by?)</span></label>
+                <input type="date" name="requiredDate" value={form.requiredDate} onChange={handleChange} style={inputStyle} />
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>Occasion / Event <span style={{ color: '#000', fontWeight: 400 }}>(optional)</span></label>
+                <select
+                  value={purposeOther ? '__other__' : form.purpose}
+                  onChange={e => {
+                    const v = e.target.value;
+                    if (v === '__other__') { setPurposeOther(true); setForm(f => ({ ...f, purpose: '' })); }
+                    else { setPurposeOther(false); setForm(f => ({ ...f, purpose: v })); }
+                  }}
+                  style={inputStyle}
+                >
+                  <option value="">Select… (optional)</option>
+                  <option>Client / Customer Gift</option>
+                  <option>Staff / Employee Gift</option>
+                  <option>Thank You Gift</option>
+                  <option>Executive / VIP Gift</option>
+                  <option>New Starter / Onboarding Kit</option>
+                  <option>Trade Show / Expo</option>
+                  <option>Conference / Seminar</option>
+                  <option>Product Launch</option>
+                  <option>Brand Awareness / Marketing</option>
+                  <option>Promotional Giveaway</option>
+                  <option>End of Year / Christmas Gift</option>
+                  <option value="__other__">Other / Not sure</option>
+                </select>
+                {purposeOther && (
+                  <input type="text" name="purpose" value={form.purpose} onChange={handleChange} placeholder="Tell us what it's for…" style={{ ...inputStyle, marginTop: '10px' }} />
+                )}
+              </div>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>Upload Your Logo</label>
+                <p style={{ fontSize: '13px', color: '#000', margin: '0 0 12px' }}>Optional — you can also email your logo to hello@quirkypromo.com.au after placing your order.</p>
               <div
                 onClick={() => document.getElementById('logo-upload-input').click()}
                 style={{
@@ -459,6 +501,14 @@ export default function PlaceOrderPage() {
               {logoUploading && (
                 <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '13px', color: '#7A7570' }}>Uploading logo...</div>
               )}
+              </div>
+
+              <div>
+                <label style={labelStyle}>Comments</label>
+                <textarea name="comments" value={form.comments} onChange={handleChange} rows={3} placeholder="e.g. ship to multiple addresses, special requirements…" style={{ ...inputStyle, resize: 'vertical' }} />
+              </div>
+
+              <p style={{ fontSize: '12px', color: '#000', margin: '14px 0 0' }}>📦 Stock is confirmed before your order is processed.</p>
             </div>
 
             {/* Payment Method */}
@@ -467,13 +517,13 @@ export default function PlaceOrderPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
                 {/* EFT */}
-                <label style={{ cursor: 'pointer', display: 'block' }} onClick={() => { setShowStripeForm(false); setClientSecret(''); }}>
+                <label style={{ cursor: 'pointer', display: payMode !== 'now' ? 'block' : 'none' }} onClick={() => { setShowStripeForm(false); setClientSecret(''); }}>
                   <div style={{ border: `2px solid ${paymentMethod === 'eft' ? GOLD : '#E0DDD7'}`, borderRadius: '10px', padding: '16px 20px', background: paymentMethod === 'eft' ? '#FDF8F0' : '#fff', transition: 'all .15s' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: paymentMethod === 'eft' ? '14px' : 0 }}>
                       <input type="radio" name="payment" value="eft" checked={paymentMethod === 'eft'} onChange={() => setPaymentMethod('eft')} style={{ accentColor: GOLD, width: '18px', height: '18px' }} />
                       <div>
                         <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>🏦 Pay by EFT (Bank Transfer) (Bank Transfer)</div>
-                        <div style={{ fontSize: '12px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Receive Order Confirmation, Invoice sent after artwork approval</div>
+                        <div style={{ fontSize: '12px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Order Confirmation + Invoice (Awaiting Payment) sent now — pay by EFT before production</div>
                       </div>
                     </div>
                     {paymentMethod === 'eft' && (
@@ -502,7 +552,7 @@ export default function PlaceOrderPage() {
                 </label>
 
                 {/* Stripe */}
-                <label style={{ cursor: 'pointer', display: 'block' }}>
+                <label style={{ cursor: 'pointer', display: payMode !== 'later' ? 'block' : 'none' }}>
                   <div style={{ border: `2px solid ${paymentMethod === 'stripe' ? GOLD : '#E0DDD7'}`, borderRadius: '10px', padding: '16px 20px', background: paymentMethod === 'stripe' ? '#FDF8F0' : '#fff', transition: 'all .15s' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: paymentMethod === 'stripe' && showStripeForm ? '16px' : 0 }}>
                       <input type="radio" name="payment" value="stripe" checked={paymentMethod === 'stripe'} onChange={() => setPaymentMethod('stripe')} style={{ accentColor: GOLD, width: '18px', height: '18px' }} />
@@ -540,6 +590,12 @@ export default function PlaceOrderPage() {
                 {error}
               </div>
             )}
+
+            {/* Sales T&C */}
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '13px', color: '#3D3A36', fontFamily: '"DM Sans", sans-serif', cursor: 'pointer' }}>
+              <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)} style={{ accentColor: GOLD, width: '18px', height: '18px', marginTop: '1px', flexShrink: 0 }} />
+              <span>I have read and agree to the <a href="https://www.quirkypromo.com.au/sales-terms" target="_blank" rel="noopener noreferrer" style={{ color: GOLD, fontWeight: 600 }}>Sales Terms &amp; Conditions</a>.</span>
+            </label>
 
             {/* Submit buttons */}
             {!showStripeForm && (
