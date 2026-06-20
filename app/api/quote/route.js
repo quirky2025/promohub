@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
-import { resolveB2BFromRequest } from '@/lib/b2bContext';
+import { resolveB2BFromRequest, resolveOrCreateLeadFromQuote } from '@/lib/b2bContext';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -254,6 +254,7 @@ export async function POST(req) {
     const quoteNumber = await generateQuoteNumber();
 
     // ✅ Save to Supabase
+    const link = b2b.company_id ? b2b : await resolveOrCreateLeadFromQuote({ email, name, company, phone });
     await supabase.from('quotes').insert({
       quote_number: quoteNumber,
       customer_name: name,
@@ -277,7 +278,7 @@ export async function POST(req) {
       total: total || 0,
       status: 'pending',
       valid_until: validUntil,
-      ...b2b,
+      ...link,
     });
 
     // ✅ Generate PDF
