@@ -878,6 +878,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           product={product}
           colours={colours}
           decorations={decorations}
+          addonState={addonState}
           pricingTiers={pricingTiers}
           calcUnit={calcUnit}
           selectedColour={selectedColour !== null ? colours[selectedColour]?.name : ''}
@@ -892,7 +893,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   );
 }
 
-function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, selectedColour, qty, onClose }) {
+function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, selectedColour, qty, addonState, onClose }) {
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
   const STATES = ['ACT','NSW','NT','QLD','SA','TAS','VIC','WA'];
   const currentYear = new Date().getFullYear();
@@ -900,70 +901,20 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
 
   const [form, setForm] = useState({
     qty: String(qty),
-    colour: selectedColour || '',
-    brandingMethod: '',
-    printColours: '1',
-    padPositions: '1',
-    screenPositions: '1',
-    otherPositions: '1',
-    personalisationLines: '1',
-    pmsColours: '',
-    requiredDate: '',
+    requiredDate: '', purpose: '',
     street: '', street2: '', suburb: '', state: '', postcode: '',
     name: '', company: '', email: '', phone: '',
     notes: '', artworkFileName: '',
   });
   const [status, setStatus] = useState('idle');
-  const [extraSelected, setExtraSelected] = useState({});
+  const [purposeOther, setPurposeOther] = useState(false);
 
-  // Classification rules — only pad/screen print are Branding Methods
-  function isPrinting(d) {
-    if (!d.has_setup) return false;
-    const n = (d.name || '').toLowerCase();
-    if (n.includes('sample') || n.includes('production sample')) return false;
-    // Only pad print and screen print are branding methods
-    if (n.includes('pad print') || n.includes('screen print')) return true;
-    return false;
-  }
-  function isAddon(d) { return !isPrinting(d); }
-
-  // Screen print colour logic: fixed 1 colour only if detail says so
-  function isOneColourOnly(d) {
-    const detail = (d.detail || '').toLowerCase();
-    return detail.includes('one colour') || detail.includes('1 colour');
-  }
-
-  // Branding type for sub-options
-  function getBrandingType(name) {
-    const n = (name || '').toLowerCase();
-    if (n.includes('pad print')) return 'pad';
-    if (n.includes('screen print')) return 'screen';
-    if (n.includes('personalisation') || n.includes('personalization')) return 'personalisation';
-    return 'other';
-  }
-
-  // Parse detail for position hint
-  function parsePositionHint(detail) {
-    if (!detail || detail === 'EMPTY') return null;
-    const parts = detail.split('|').map(s => s.trim()).filter(Boolean);
-    if (parts.length > 1) {
-      return `${parts.length} positions available: ${parts.map((p, i) => `Position ${i+1} (${p})`).join(' · ')}`;
-    }
-    return `Print area: ${parts[0]}`;
-  }
-
-  const printingDecorations = decorations.filter(isPrinting);
-  const addonDecorations = decorations.filter(isAddon);
-  const selectedDecoration = printingDecorations.find(d => d.name === form.brandingMethod);
-  const brandingType = selectedDecoration ? getBrandingType(selectedDecoration.name) : '';
-  const positionHint = selectedDecoration ? parsePositionHint(selectedDecoration.detail) : null;
-  const oneColourOnly = selectedDecoration ? isOneColourOnly(selectedDecoration) : false;
+  // Branding carried over from the product page selection (read-only here)
+  const selectedDecos = decorations.filter(d => addonState?.[d.id]?.on);
+  const brandingSummary = selectedDecos.map(d => brandingLabel(d, addonState?.[d.id]?.setupQty)).join(' · ') || 'Unbranded';
 
   function handleChange(e) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
-  }
-  function toggleExtra(name) {
-    setExtraSelected(prev => ({ ...prev, [name]: !prev[name] }));
   }
 
   async function handleSubmit() {
@@ -982,32 +933,8 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
       return best;
     }, null) || pricingTiers[0];
 
-    // Calculate price from Quote form's own branding selections
-    let unitPrice = matchedTier ? matchedTier.base_price * MARGIN : 0;
-    const numPositions = parseInt(form.padPositions) || parseInt(form.screenPositions) || parseInt(form.otherPositions) || 1;
-    const numColours = parseInt(form.printColours) || 1;
-
-    if (form.brandingMethod) {
-      const brandingDeco = decorations.find(d => d.name === form.brandingMethod);
-      if (brandingDeco) {
-        unitPrice += brandingDeco.per_unit * MARGIN * numPositions;
-        if (brandingDeco.has_setup) {
-          unitPrice += (SETUP_FEE * numPositions / formQty) * MARGIN;
-        }
-      }
-    }
-
-    const selectedExtras = Object.keys(extraSelected).filter(k => extraSelected[k]);
-    selectedExtras.forEach(extraName => {
-      const extraDeco = decorations.find(d => d.name === extraName);
-      if (extraDeco) {
-        unitPrice += extraDeco.per_unit * MARGIN;
-        if (extraDeco.has_setup) {
-          unitPrice += (SETUP_FEE / formQty) * MARGIN;
-        }
-      }
-    });
-
+    // Price uses the SAME selection as the product page (calcUnit already includes chosen branding)
+    const unitPrice = matchedTier ? calcUnit(matchedTier.base_price, formQty) : 0;
     const subtotal = Math.round(unitPrice * formQty * 100) / 100;
     const gst = Math.round((subtotal + SHIPPING) * GST * 100) / 100;
     const total = subtotal + SHIPPING + gst;
@@ -1015,9 +942,12 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
     try {
       const payload = {
         ...form,
+        colour: selectedColour || '',
         requiredDate,
         deliveryAddress,
-        extraOptions: selectedExtras,
+        brandingMethod: selectedDecos.map(d => d.name).join(', '),
+        brandingSummary,
+        extraOptions: selectedDecos.map(d => d.name),
         productName: product.name,
         productSku: product.supplier_sku,
         unitPrice,
@@ -1026,9 +956,6 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
         gst,
         total,
         qty: formQty,
-        padPositions: numPositions,
-        padColours: numColours,
-        screenPositions: numPositions,
       };
       const { data: { session: _qs } } = await supabase.auth.getSession();
       const res = await fetch('/api/quote', {
@@ -1096,232 +1023,30 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
         ) : (
           <div style={{ padding: '24px 28px 28px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
-            {/* SECTION 1: PRODUCT */}
+            {/* YOUR SELECTION — carried over from the product page */}
             <div>
-              <SectionHead num={1} text="Product Details" />
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
+              <SectionHead num={1} text="Your Selection" />
+              <div style={{ background: '#F8F7F4', border: '1px solid #E0DDD7', borderRadius: '12px', padding: '16px 18px' }}>
+                <div style={{ fontSize: '14px', color: '#1B2A4A', lineHeight: 1.6, fontFamily: '"DM Sans", sans-serif' }}>
+                  <strong>{product.name}</strong>
+                  {selectedColour ? <> · {selectedColour}</> : null}
+                  {' · '}{brandingSummary}
+                </div>
+                <div style={{ marginTop: '14px', maxWidth: '200px' }}>
                   <label style={labelStyle}>Quantity *</label>
                   <input name="qty" type="text" inputMode="numeric" value={form.qty} onChange={handleChange}
-                    placeholder={`e.g. ${product.min_qty} units (min. ${product.min_qty})`}
+                    placeholder={`min. ${product.min_qty}`}
                     style={{ ...inputStyle, fontFamily: '"DM Mono", monospace' }} />
                 </div>
-                <div>
-                  <label style={labelStyle}>Colour *</label>
-                  {colours.length > 0 ? (
-                    <select name="colour" value={form.colour} onChange={handleChange} style={selectStyle}>
-                      <option value="">Select a colour</option>
-                      {colours.map((c, i) => <option key={i} value={c.name}>{c.name}</option>)}
-                    </select>
-                  ) : (
-                    <input name="colour" value={form.colour} onChange={handleChange} placeholder="e.g. Navy" style={inputStyle} />
-                  )}
+                <div style={{ marginTop: '8px', fontSize: '11px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
+                  Colour & branding follow your selection on the product page. Need changes? Note them below.
                 </div>
               </div>
             </div>
 
-            {/* SECTION 2: BRANDING */}
-            {printingDecorations.length > 0 && (
-              <div style={{ borderTop: '1px solid #F0EEED', paddingTop: '20px' }}>
-                <SectionHead num={2} text="Branding Method" />
-
-                <div style={{ marginBottom: '12px' }}>
-                  <label style={labelStyle}>Select Method</label>
-                  <select name="brandingMethod" value={form.brandingMethod} onChange={handleChange} style={selectStyle}>
-                    <option value="">No branding / Unbranded</option>
-                    {printingDecorations.map(d => (
-                      <option key={d.id} value={d.name}>{d.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Position hint */}
-                {form.brandingMethod && positionHint && (
-                  <div style={{ background: '#F8F7F4', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '10px 14px', fontSize: '12px', color: '#1B2A4A', marginBottom: '12px', fontFamily: '"DM Sans", sans-serif', lineHeight: 1.5 }}>
-                    📍 {positionHint}
-                    <span style={{ color: '#7A7570' }}> — need extra positions? Note in Additional Notes.</span>
-                  </div>
-                )}
-
-                {/* PAD PRINT: positions + colour count */}
-                {form.brandingMethod && brandingType === 'pad' && (
-                  <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '14px 16px', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {(() => {
-                      const d = printingDecorations.find(dec => dec.name === form.brandingMethod);
-                      const maxPos = d?.detail && d.detail !== 'EMPTY' ? d.detail.split('|').filter(Boolean).length : 1;
-                      return maxPos > 1 ? (
-                        <div>
-                          <label style={labelStyle}>Number of Positions</label>
-                          <select name="padPositions" value={form.padPositions || '1'} onChange={handleChange} style={selectStyle}>
-                            {Array.from({ length: maxPos }, (_, i) => i + 1).map(n => (
-                              <option key={n} value={n}>{n} position{n > 1 ? 's' : ''}</option>
-                            ))}
-                          </select>
-                        </div>
-                      ) : null;
-                    })()}
-                    <div>
-                      <label style={labelStyle}>Number of Print Colours</label>
-                      <select name="printColours" value={form.printColours} onChange={handleChange} style={selectStyle}>
-                        {['1','2','3','4'].map(n => <option key={n} value={n}>{n} colour{n > '1' ? 's' : ''}</option>)}
-                      </select>
-                    </div>
-                  </div>
-                )}
-
-                {/* SCREEN PRINT: positions + colour */}
-                {form.brandingMethod && brandingType === 'screen' && (
-                  <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '14px 16px', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {(() => {
-                      const d = printingDecorations.find(dec => dec.name === form.brandingMethod);
-                      const maxPos = d?.detail && d.detail !== 'EMPTY' ? d.detail.split('|').filter(Boolean).length : 1;
-                      return maxPos > 1 ? (
-                        <div>
-                          <label style={labelStyle}>Number of Positions</label>
-                          <select name="screenPositions" value={form.screenPositions || '1'} onChange={handleChange} style={selectStyle}>
-                            {Array.from({ length: maxPos }, (_, i) => i + 1).map(n => (
-                              <option key={n} value={n}>{n} position{n > 1 ? 's' : ''}</option>
-                            ))}
-                          </select>
-                        </div>
-                      ) : null;
-                    })()}
-                    {oneColourOnly ? (
-                      <div style={{ fontSize: '13px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>
-                        Screen Print: <strong style={{ color: '#1B2A4A' }}>1 colour only</strong>
-                      </div>
-                    ) : (
-                      <div>
-                        <label style={labelStyle}>Number of Print Colours</label>
-                        <select name="printColours" value={form.printColours} onChange={handleChange} style={selectStyle}>
-                          {['1','2','3','4'].map(n => <option key={n} value={n}>{n} colour{n > '1' ? 's' : ''}</option>)}
-                        </select>
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* PERSONALISATION: lines */}
-                {form.brandingMethod && brandingType === 'personalisation' && (
-                  <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '14px 16px', marginBottom: '12px' }}>
-                    <label style={labelStyle}>Number of Lines</label>
-                    <select name="personalisationLines" value={form.personalisationLines || '1'} onChange={handleChange} style={selectStyle}>
-                      {['1','2','3','4','5'].map(n => <option key={n} value={n}>{n} line{n > '1' ? 's' : ''}</option>)}
-                    </select>
-                  </div>
-                )}
-
-                {/* PMS Colours */}
-                {form.brandingMethod && brandingType !== 'personalisation' && (
-                  <div>
-                    <label style={labelStyle}>PMS Colour(s)</label>
-                    <input name="pmsColours" value={form.pmsColours} onChange={handleChange}
-                      placeholder="e.g. PMS 286C, PMS 485C" style={inputStyle} />
-                    <div style={{ marginTop: '6px', fontSize: '12px', fontFamily: '"DM Sans", sans-serif' }}>
-                      <span style={{ color: '#7A7570' }}>Not sure? </span>
-                      <a href="https://www.quirkypromo.com.au/resources/pms-chart" target="_blank" rel="noopener noreferrer"
-                        style={{ color: '#C9A96E', textDecoration: 'none', fontWeight: 600 }}>
-                        View PMS Colour Chart →
-                      </a>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* SECTION 3: ADD-ONS */}
-            {addonDecorations.length > 0 && (
-              <div style={{ borderTop: '1px solid #F0EEED', paddingTop: '20px' }}>
-                <SectionHead num={3} text="Add-ons & Extras" />
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {addonDecorations.map(d => (
-                    <label key={d.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '10px 14px', border: `1.5px solid ${extraSelected[d.name] ? '#C9A96E' : '#E0DDD7'}`, borderRadius: '8px', background: extraSelected[d.name] ? '#FDF8F0' : '#fff', transition: 'all .15s' }}>
-                      <input type="checkbox" checked={!!extraSelected[d.name]} onChange={() => toggleExtra(d.name)}
-                        style={{ width: '16px', height: '16px', accentColor: '#C9A96E', cursor: 'pointer', flexShrink: 0 }} />
-                      <div>
-                        <div style={{ fontSize: '13px', fontWeight: 600, color: '#1B2A4A', fontFamily: '"DM Sans", sans-serif' }}>{d.name}</div>
-                        {d.detail && d.detail !== 'EMPTY' && (
-                          <div style={{ fontSize: '11px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>{d.detail}</div>
-                        )}
-                      </div>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* SECTION 4: DELIVERY & ARTWORK */}
+            {/* SECTION 2: YOUR DETAILS (contact) */}
             <div style={{ borderTop: '1px solid #F0EEED', paddingTop: '20px' }}>
-              <SectionHead num={printingDecorations.length > 0 ? (addonDecorations.length > 0 ? 4 : 3) : (addonDecorations.length > 0 ? 3 : 2)} text="Delivery & Artwork" />
-
-              {/* Required Date — calendar picker, AU format display */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={labelStyle}>Required Date</label>
-                <input
-                  name="requiredDate"
-                  type="date"
-                  value={form.requiredDate}
-                  onChange={handleChange}
-                  style={inputStyle}
-                  min={new Date().toISOString().split('T')[0]}
-                />
-                {form.requiredDate && (
-                  <div style={{ marginTop: '6px', fontSize: '12px', color: '#1B2A4A', fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}>
-                    📅 {new Date(form.requiredDate + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
-                  </div>
-                )}
-              </div>
-
-              {/* Delivery Address */}
-              <div style={{ marginBottom: '14px' }}>
-                <label style={labelStyle}>Delivery Address</label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <input name="street" value={form.street} onChange={handleChange}
-                    placeholder="Address Line 1 (e.g. 123 George Street)" style={inputStyle} />
-                  <input name="street2" value={form.street2 || ''} onChange={handleChange}
-                    placeholder="Address Line 2 (Suite, Level, Unit — optional)" style={inputStyle} />
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    <input name="suburb" value={form.suburb} onChange={handleChange}
-                      placeholder="Suburb" style={inputStyle} />
-                    <select name="state" value={form.state} onChange={handleChange} style={selectStyle}>
-                      <option value="">State / Territory</option>
-                      {STATES.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                    <input name="postcode" value={form.postcode} onChange={handleChange}
-                      placeholder="Postcode" style={{ ...inputStyle, fontFamily: '"DM Mono", monospace' }} />
-                    <input value="Australia" readOnly style={{ ...inputStyle, background: '#F8F7F4', color: '#9CA3AF', cursor: 'not-allowed' }} />
-                  </div>
-                </div>
-                <div style={{ marginTop: '6px', fontSize: '11px', color: '#9CA3AF', fontFamily: '"DM Sans", sans-serif' }}>
-                  Need delivery to multiple locations? Please note in Additional Notes.
-                </div>
-              </div>
-
-              {/* Upload Artwork */}
-              <div>
-                <label style={labelStyle}>Upload Artwork <span style={{ color: '#B0AAA3', fontWeight: 400, textTransform: 'none', fontSize: '11px' }}>(AI, PDF, PNG, JPG, EPS)</span></label>
-                <div style={{ border: '1.5px dashed #C9A96E', borderRadius: '8px', padding: '16px', textAlign: 'center', background: '#FDF8F0', cursor: 'pointer' }}
-                  onClick={() => document.getElementById('artworkUpload').click()}>
-                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>🎨</div>
-                  <div style={{ fontSize: '13px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Click to upload your logo / artwork</div>
-                  <div style={{ fontSize: '11px', color: '#B0AAA3', marginTop: '3px', fontFamily: '"DM Sans", sans-serif' }}>or email to hello@quirkypromo.com.au after submitting</div>
-                  <input id="artworkUpload" type="file" accept=".ai,.pdf,.png,.jpg,.jpeg,.eps,.svg" style={{ display: 'none' }}
-                    onChange={e => {
-                      const file = e.target.files[0];
-                      if (file) setForm(prev => ({ ...prev, artworkFileName: file.name }));
-                    }} />
-                </div>
-                {form.artworkFileName && (
-                  <div style={{ marginTop: '6px', fontSize: '12px', color: '#2D6A4F', fontFamily: '"DM Sans", sans-serif' }}>✅ {form.artworkFileName}</div>
-                )}
-              </div>
-            </div>
-
-            {/* SECTION 5: YOUR DETAILS */}
-            <div style={{ borderTop: '1px solid #F0EEED', paddingTop: '20px' }}>
-              <SectionHead num={printingDecorations.length > 0 ? (addonDecorations.length > 0 ? 5 : 4) : (addonDecorations.length > 0 ? 4 : 3)} text="Your Details" />
+              <SectionHead num={2} text="Your Details" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
@@ -1343,18 +1068,110 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
                     <input name="phone" value={form.phone} onChange={handleChange} placeholder="04xx xxx xxx" style={{ ...inputStyle, fontFamily: '"DM Mono", monospace' }} />
                   </div>
                 </div>
-                <div>
-                  <label style={labelStyle}>Additional Notes</label>
-                  <textarea name="notes" value={form.notes} onChange={handleChange}
-                    placeholder="e.g. Need 2 print positions, specific requirements, multiple delivery locations..."
-                    rows={3} style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.6' }} />
+              </div>
+            </div>
+
+            {/* SECTION 3: DELIVERY ADDRESS */}
+            <div style={{ borderTop: '1px solid #F0EEED', paddingTop: '20px' }}>
+              <SectionHead num={3} text="Delivery Address" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <input name="street" value={form.street} onChange={handleChange}
+                  placeholder="Address Line 1 (e.g. 123 George Street)" style={inputStyle} />
+                <input name="street2" value={form.street2 || ''} onChange={handleChange}
+                  placeholder="Address Line 2 (Suite, Level, Unit — optional)" style={inputStyle} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <input name="suburb" value={form.suburb} onChange={handleChange}
+                    placeholder="Suburb" style={inputStyle} />
+                  <select name="state" value={form.state} onChange={handleChange} style={selectStyle}>
+                    <option value="">State / Territory</option>
+                    {STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
                 </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <input name="postcode" value={form.postcode} onChange={handleChange}
+                    placeholder="Postcode" style={{ ...inputStyle, fontFamily: '"DM Mono", monospace' }} />
+                  <input value="Australia" readOnly style={{ ...inputStyle, background: '#F8F7F4', color: '#9CA3AF', cursor: 'not-allowed' }} />
+                </div>
+              </div>
+              <div style={{ marginTop: '6px', fontSize: '11px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
+                Need delivery to multiple locations? Please note in More From You.
+              </div>
+            </div>
+
+            {/* SECTION 4: MORE FROM YOU */}
+            <div style={{ borderTop: '1px solid #F0EEED', paddingTop: '20px' }}>
+              <SectionHead num={4} text="More From You" />
+
+              <div style={{ marginBottom: '14px' }}>
+                <label style={labelStyle}>Required Date</label>
+                <input name="requiredDate" type="date" value={form.requiredDate} onChange={handleChange}
+                  style={inputStyle} min={new Date().toISOString().split('T')[0]} />
+                {form.requiredDate && (
+                  <div style={{ marginTop: '6px', fontSize: '12px', color: '#1B2A4A', fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}>
+                    📅 {new Date(form.requiredDate + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ marginBottom: '14px' }}>
+                <label style={labelStyle}>Occasion / Event <span style={{ color: '#000', fontWeight: 400 }}>(optional)</span></label>
+                <select
+                  value={purposeOther ? '__other__' : form.purpose}
+                  onChange={e => {
+                    const v = e.target.value;
+                    if (v === '__other__') { setPurposeOther(true); setForm(f => ({ ...f, purpose: '' })); }
+                    else { setPurposeOther(false); setForm(f => ({ ...f, purpose: v })); }
+                  }}
+                  style={selectStyle}
+                >
+                  <option value="">Select… (optional)</option>
+                  <option>Client / Customer Gift</option>
+                  <option>Staff / Employee Gift</option>
+                  <option>Thank You Gift</option>
+                  <option>Executive / VIP Gift</option>
+                  <option>New Starter / Onboarding Kit</option>
+                  <option>Trade Show / Expo</option>
+                  <option>Conference / Seminar</option>
+                  <option>Product Launch</option>
+                  <option>Brand Awareness / Marketing</option>
+                  <option>Promotional Giveaway</option>
+                  <option>End of Year / Christmas Gift</option>
+                  <option value="__other__">Other / Not sure</option>
+                </select>
+                {purposeOther && (
+                  <input type="text" name="purpose" value={form.purpose} onChange={handleChange} placeholder="Tell us what it's for…" style={{ ...inputStyle, marginTop: '10px' }} />
+                )}
+              </div>
+
+              <div style={{ marginBottom: '14px' }}>
+                <label style={labelStyle}>Upload Artwork <span style={{ color: '#000', fontWeight: 400, textTransform: 'none', fontSize: '11px' }}>(AI, PDF, PNG, JPG, EPS)</span></label>
+                <div style={{ border: '1.5px dashed #C9A96E', borderRadius: '8px', padding: '16px', textAlign: 'center', background: '#FDF8F0', cursor: 'pointer' }}
+                  onClick={() => document.getElementById('artworkUpload').click()}>
+                  <div style={{ fontSize: '20px', marginBottom: '4px' }}>🎨</div>
+                  <div style={{ fontSize: '13px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>Click to upload your logo / artwork</div>
+                  <div style={{ fontSize: '11px', color: '#000', marginTop: '3px', fontFamily: '"DM Sans", sans-serif' }}>or email to hello@quirkypromo.com.au after submitting</div>
+                  <input id="artworkUpload" type="file" accept=".ai,.pdf,.png,.jpg,.jpeg,.eps,.svg" style={{ display: 'none' }}
+                    onChange={e => {
+                      const file = e.target.files[0];
+                      if (file) setForm(prev => ({ ...prev, artworkFileName: file.name }));
+                    }} />
+                </div>
+                {form.artworkFileName && (
+                  <div style={{ marginTop: '6px', fontSize: '12px', color: '#2D6A4F', fontFamily: '"DM Sans", sans-serif' }}>✅ {form.artworkFileName}</div>
+                )}
+              </div>
+
+              <div>
+                <label style={labelStyle}>Additional Notes</label>
+                <textarea name="notes" value={form.notes} onChange={handleChange}
+                  placeholder="e.g. Need 2 print positions, specific requirements, multiple delivery locations..."
+                  rows={3} style={{ ...inputStyle, resize: 'vertical', lineHeight: '1.6' }} />
               </div>
             </div>
 
             {/* Validation hint */}
             {!canSubmit && (
-              <div style={{ textAlign: 'center', fontSize: '12px', color: '#B0AAA3', fontFamily: '"DM Sans", sans-serif' }}>
+              <div style={{ textAlign: 'center', fontSize: '12px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
                 Please fill in your name and email to submit
               </div>
             )}
