@@ -90,6 +90,7 @@ export default function PlaceOrderPage() {
   const [loaded, setLoaded] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('eft');
   const [payMode, setPayMode] = useState(null);
+  const [agreeTerms, setAgreeTerms] = useState(false);
   useEffect(() => { const p = new URLSearchParams(window.location.search).get('pay'); if (p) setPayMode(p); if (p === 'now') setPaymentMethod('stripe'); }, []);
   const [submitting, setSubmitting] = useState(false);
   const [logoFile, setLogoFile] = useState(null);
@@ -101,6 +102,7 @@ export default function PlaceOrderPage() {
   const [form, setForm] = useState({
     name: '', company: '', email: '', phone: '',
     street: '', street2: '', suburb: '', state: '', postcode: '',
+    requiredDate: '', comments: '',
   });
   const router = useRouter();
 
@@ -122,7 +124,7 @@ export default function PlaceOrderPage() {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  const canSubmit = form.name && form.email && form.street && form.suburb && form.state && form.postcode;
+  const canSubmit = form.name && form.email && form.street && form.suburb && form.state && form.postcode && agreeTerms;
 
   const orderData = {
     customer: form,
@@ -418,6 +420,19 @@ export default function PlaceOrderPage() {
               </div>
             </div>
 
+            {/* Required Date + Comments */}
+            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px' }}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>Required Date <span style={{ color: '#7A7570', fontWeight: 400 }}>(when do you need it by?)</span></label>
+                <input type="date" name="requiredDate" value={form.requiredDate} onChange={handleChange} style={inputStyle} />
+              </div>
+              <div>
+                <label style={labelStyle}>Comments</label>
+                <textarea name="comments" value={form.comments} onChange={handleChange} rows={3} placeholder="e.g. ship to multiple addresses, special requirements…" style={{ ...inputStyle, resize: 'vertical' }} />
+              </div>
+              <p style={{ fontSize: '12px', color: '#7A7570', margin: '12px 0 0' }}>📦 Stock is confirmed before your order is processed.</p>
+            </div>
+
             {/* Logo Upload */}
             <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px' }}>
               <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', fontWeight: 600, color: NAVY, margin: '0 0 8px' }}>Upload Your Logo</h2>
@@ -542,6 +557,12 @@ export default function PlaceOrderPage() {
                 {error}
               </div>
             )}
+
+            {/* Sales T&C */}
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '13px', color: '#3D3A36', fontFamily: '"DM Sans", sans-serif', cursor: 'pointer' }}>
+              <input type="checkbox" checked={agreeTerms} onChange={e => setAgreeTerms(e.target.checked)} style={{ accentColor: GOLD, width: '18px', height: '18px', marginTop: '1px', flexShrink: 0 }} />
+              <span>I have read and agree to the <a href="https://www.quirkypromo.com.au/sales-terms" target="_blank" rel="noopener noreferrer" style={{ color: GOLD, fontWeight: 600 }}>Sales Terms &amp; Conditions</a>.</span>
+            </label>
 
             {/* Submit buttons */}
             {!showStripeForm && (
