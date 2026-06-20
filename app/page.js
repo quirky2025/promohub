@@ -37,12 +37,15 @@ const TESTIMONIALS = [
   { quote: 'We have used Lily and the Quirky team for several years now for our promotional and offshore product sourcing. She always does her best to find the right solution at the right price and on deadline, and handles the whole import and customs process with ease.', name: 'Matt', role: 'Account Manager' },
   { quote: 'Hornsby Mazda always receives fantastic service from Lily. She is very quick, efficient, and professional with every order we place. We are consistently impressed by her attention to detail and responsiveness.', name: 'Adam', role: 'Retail Sales Manager, Hornsby Mazda' },
 ];
-const CLOUD = 'https://res.cloudinary.com/dyz9r0fm7/image/upload/h_88';
+// Trusted-by logos: static files in public/logos/ (off Cloudinary). Each sits in a
+// fixed box so all logos render at a similar visual size regardless of aspect ratio.
 const BRANDS = [
-  ['NSW Government', '/v1780103113/nsw-gov-logo_tfwp9l.png'], ['Kintsugi Heroes', '/v1780103111/KintsugiHeroes_Primary_black_cmmnoe.png'],
-  ['Ultra Violette', '/v1780102503/UV_Master_Logo_440x_-_Copy_ofyma5.svg'], ['Netflix', '/v1780102502/Netflix_Logo_PMS_copy_kgit7s.svg'],
-  ['Mazda', '/v1780102501/mazda_lvip9m.svg'], ['Hyegrove Willoughby', '/v1780102498/Hyegrove_Willoughby_Logo_sv8z7n.svg'],
-  ['Foxtel', '/v1780102498/foxtel-logo-2020_-_Copy_-_Copy_pwfskq.svg'], ['Barker College', '/v1780102496/barker-logo-tagline-red_s5paps.svg'],
+  ['Netflix', '/logos/Netflix.svg'], ['Mazda', '/logos/mazda.svg'],
+  ['Foxtel', '/logos/foxtel.svg'], ['Ultra Violette', '/logos/UV.svg'],
+  ['Northern Beaches Council', '/logos/logo-nbc.svg'], ['Hyegrove Willoughby', '/logos/Hyegrove_Willoughby.svg'],
+  ['Barker College', '/logos/barker.svg'], ['ACRF', '/logos/ACRF.svg'],
+  ['CMDA', '/logos/CMDAHorizontal.svg'], ['IGNITE', '/logos/IGNITE.svg'],
+  ['NCL', '/logos/NCL.svg'],
 ];
 const jsonLd = { '@context': 'https://schema.org', '@graph': [
   { '@type': 'Organization', '@id': SITE + '/#org', name: 'QuirkyPromo', url: SITE, description: 'Custom promotional products, branded merchandise and corporate gifts in Australia.' },
@@ -196,7 +199,11 @@ export default async function Home() {
           <h2 style={{ fontFamily: serif, fontSize: 30, fontWeight: 700, color: NAVY, margin: 0 }}>Trusted by leading Australian brands</h2>
           <div style={{ color: MUTED, fontSize: 14, marginTop: 4 }}>From ASX-listed companies to government departments and fast-growing startups</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 40, justifyContent: 'center', alignItems: 'center', marginTop: 34 }}>
-            {BRANDS.map(([name, src]) => (<img key={name} src={CLOUD + src} alt={name} style={{ height: 38, opacity: .75, objectFit: 'contain' }} />))}
+            {BRANDS.map(([name, src]) => (
+              <span key={name} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 150, height: 46 }}>
+                <img src={src} alt={name} loading="lazy" decoding="async" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', opacity: .8 }} />
+              </span>
+            ))}
           </div>
           <div style={{ fontSize: 12.5, color: MUTED, marginTop: 26 }}>+ many more Australian businesses, government departments, and education institutions</div>
         </div>
