@@ -218,7 +218,7 @@ export async function POST(req) {
       brandingMethod, padPositions, padColours, screenPositions, otherPositions, personalisationLines,
       pmsColours, extraOptions,
       requiredDate, deliveryAddress, artworkFileName,
-      notes,
+      notes, purpose,
       productName, productSku,
       unitPrice, subtotal, shipping, gst, total,
     } = body;
@@ -236,8 +236,8 @@ export async function POST(req) {
       return 'other';
     }
 
-    let brandingSummary = brandingMethod || 'None / Unbranded';
-    if (brandingMethod) {
+    let brandingSummary = body.brandingSummary || brandingMethod || 'None / Unbranded';
+    if (!body.brandingSummary && brandingMethod) {
       const bt = getBrandingType(brandingMethod);
       if (bt === 'pad') brandingSummary = `${brandingMethod} — ${padPositions} position(s), ${padColours} colour(s)`;
       else if (bt === 'screen') brandingSummary = `${brandingMethod} — ${screenPositions} position(s), 1 colour`;
@@ -252,6 +252,9 @@ export async function POST(req) {
 
     // Quote number
     const quoteNumber = await generateQuoteNumber();
+
+    // Fold Occasion / Event into notes (no extra column needed)
+    const notesCombined = (purpose ? `Occasion / Event: ${purpose}\n` : '') + (notes || '');
 
     // ✅ Save to Supabase
     const link = b2b.company_id ? b2b : await resolveOrCreateLeadFromQuote({ email, name, company, phone });
@@ -271,7 +274,7 @@ export async function POST(req) {
       delivery_address: deliveryAddress || '',
       required_date: requiredDate || '',
       artwork_filename: artworkFileName || '',
-      notes: notes || '',
+      notes: notesCombined,
       subtotal: subtotal || 0,
       gst: gst || 0,
       shipping: shipping || 30,
@@ -298,7 +301,7 @@ export async function POST(req) {
       total: total || 0,
       deliveryAddress: deliveryAddress || '',
       requiredDate: requiredDate || '',
-      notes: notes || '',
+      notes: notesCombined,
     });
 
     const pdfBase64 = pdfBuffer.toString('base64');
