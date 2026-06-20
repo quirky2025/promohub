@@ -46,10 +46,9 @@ export default function AdminDashboard() {
           <nav style={{ display: 'flex', gap: '4px' }}>
             {[
               { label: 'Dashboard', href: '/admin' },
-              { label: 'Leads', href: '/admin/leads' },
+              { label: 'Enquiries & Quotes', href: '/admin/leads' },
               { label: 'Artworks', href: '/admin/artworks' },
               { label: 'Orders', href: '/admin/orders' },
-              { label: 'Quotes', href: '/admin/quotes' },
               { label: 'Products', href: '/admin/products' },
               { label: 'Sourcing', href: '/admin/sourcing' },
             ].map(item => (
@@ -71,7 +70,7 @@ export default function AdminDashboard() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
           <StatCard title="Total Orders" value={stats?.orders || '—'} sub="All time" href="/admin/orders" />
           <StatCard title="Pending Artworks" value={stats?.artworks_pending || '—'} sub="Awaiting mockup" color="#C9A96E" href="/admin/artworks" />
-          <StatCard title="Pending Quotes" value={stats?.quotes_pending || '—'} sub="Awaiting response" href="/admin/quotes" />
+          <StatCard title="Pending Quotes" value={stats?.quotes_pending || '—'} sub="Awaiting response" href="/admin/leads" />
           <StatCard title="Total Revenue" value={stats?.revenue ? `$${stats.revenue.toLocaleString()}` : '—'} sub="Excl. GST" color="#2D6A4F" href="/admin/orders" />
         </div>
 
@@ -80,10 +79,9 @@ export default function AdminDashboard() {
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', color: NAVY, margin: '0 0 16px' }}>Quick Actions</h2>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             {[
-              { label: '🎯 Leads', href: '/admin/leads', color: NAVY },
+              { label: '🎯 Enquiries & Quotes', href: '/admin/leads', color: NAVY },
               { label: '🎨 Upload Mockup', href: '/admin/artworks', color: GOLD },
               { label: '📦 View Orders', href: '/admin/orders', color: NAVY },
-              { label: '💬 View Quotes', href: '/admin/quotes', color: NAVY },
               { label: '🛍️ Edit Products', href: '/admin/products', color: NAVY },
               { label: '🏭 Sourcing Requests', href: '/admin/sourcing', color: NAVY },
             ].map(a => (
