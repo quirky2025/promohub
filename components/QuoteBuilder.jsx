@@ -24,6 +24,8 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
   const [customColour, setCustomColour] = useState(false);
   const [addon, setAddon] = useState({});
   const [override, setOverride] = useState('');
+  const [leadTime, setLeadTime] = useState('7');
+  const [disc, setDisc] = useState('');
   const [requiredDate, setRequiredDate] = useState('');
   const [delivery, setDelivery] = useState('');
   const [notes, setNotes] = useState('');
@@ -33,7 +35,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
   useEffect(() => {
     if (open) {
       setCust({ name: prefill?.name || '', company: prefill?.company || '', email: prefill?.email || '', phone: prefill?.phone || '' });
-      setQ(''); setResults([]); setProduct(null); setQty(''); setColour(''); setCustomColour(false); setAddon({}); setOverride(''); setRequiredDate(''); setDelivery(''); setNotes(''); setStatus('idle'); setError('');
+      setQ(''); setResults([]); setProduct(null); setQty(''); setColour(''); setCustomColour(false); setAddon({}); setOverride(''); setLeadTime('7'); setDisc(''); setRequiredDate(''); setDelivery(''); setNotes(''); setStatus('idle'); setError('');
     }
   }, [open, prefill]);
 
@@ -79,7 +81,8 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
     });
   }
   const unitPrice = override !== '' ? (parseFloat(override) || 0) : Math.round(autoUnit * 100) / 100;
-  const subtotal = Math.round(unitPrice * nQty * 100) / 100;
+  const discPct = parseFloat(disc) || 0;
+  const subtotal = Math.round(unitPrice * nQty * (1 - discPct / 100) * 100) / 100;
   const gst = Math.round((subtotal + SHIPPING) * GST * 100) / 100;
   const total = subtotal + SHIPPING + gst;
   const brandingSummary = brandingDecos.map(d => brandingLabel(d, addon[d.id]?.setupQty)).join(' · ') || 'Unbranded';
@@ -99,6 +102,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
           requiredDate: rd, deliveryAddress: delivery, artworkFileName: '', notes,
           productName: product.name, productSku: product.supplier_sku || '',
           status: 'quote_sent',
+          leadTimeDays: parseInt(leadTime) || 7, disc: discPct,
           unitPrice, subtotal, shipping: SHIPPING, gst, total,
         }),
       });
@@ -206,6 +210,17 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
                   <div>
                     <div style={lbl}>Unit price (override)</div>
                     <input type="number" step="0.01" value={override} onChange={e => setOverride(e.target.value)} placeholder={aud(autoUnit).replace('$', '')} style={{ ...inp, fontFamily: '"DM Mono", monospace' }} />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                  <div>
+                    <div style={lbl}>Lead time (business days)</div>
+                    <input type="number" min="1" value={leadTime} onChange={e => setLeadTime(e.target.value)} style={{ ...inp, fontFamily: '"DM Mono", monospace' }} />
+                  </div>
+                  <div>
+                    <div style={lbl}>Discount %</div>
+                    <input type="number" step="0.01" min="0" value={disc} onChange={e => setDisc(e.target.value)} placeholder="0" style={{ ...inp, fontFamily: '"DM Mono", monospace' }} />
                   </div>
                 </div>
 
