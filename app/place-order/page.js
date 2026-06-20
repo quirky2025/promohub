@@ -89,6 +89,8 @@ export default function PlaceOrderPage() {
   const [cart, setCart] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('eft');
+  const [payMode, setPayMode] = useState(null);
+  useEffect(() => { const p = new URLSearchParams(window.location.search).get('pay'); if (p) setPayMode(p); if (p === 'now') setPaymentMethod('stripe'); }, []);
   const [submitting, setSubmitting] = useState(false);
   const [logoFile, setLogoFile] = useState(null);
   const [logoUrl, setLogoUrl] = useState('');
@@ -467,13 +469,13 @@ export default function PlaceOrderPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
 
                 {/* EFT */}
-                <label style={{ cursor: 'pointer', display: 'block' }} onClick={() => { setShowStripeForm(false); setClientSecret(''); }}>
+                <label style={{ cursor: 'pointer', display: payMode !== 'now' ? 'block' : 'none' }} onClick={() => { setShowStripeForm(false); setClientSecret(''); }}>
                   <div style={{ border: `2px solid ${paymentMethod === 'eft' ? GOLD : '#E0DDD7'}`, borderRadius: '10px', padding: '16px 20px', background: paymentMethod === 'eft' ? '#FDF8F0' : '#fff', transition: 'all .15s' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: paymentMethod === 'eft' ? '14px' : 0 }}>
                       <input type="radio" name="payment" value="eft" checked={paymentMethod === 'eft'} onChange={() => setPaymentMethod('eft')} style={{ accentColor: GOLD, width: '18px', height: '18px' }} />
                       <div>
                         <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>🏦 Pay by EFT (Bank Transfer) (Bank Transfer)</div>
-                        <div style={{ fontSize: '12px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Receive Order Confirmation, Invoice sent after artwork approval</div>
+                        <div style={{ fontSize: '12px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Order Confirmation + Invoice (Awaiting Payment) sent now — pay by EFT before production</div>
                       </div>
                     </div>
                     {paymentMethod === 'eft' && (
@@ -502,7 +504,7 @@ export default function PlaceOrderPage() {
                 </label>
 
                 {/* Stripe */}
-                <label style={{ cursor: 'pointer', display: 'block' }}>
+                <label style={{ cursor: 'pointer', display: payMode !== 'later' ? 'block' : 'none' }}>
                   <div style={{ border: `2px solid ${paymentMethod === 'stripe' ? GOLD : '#E0DDD7'}`, borderRadius: '10px', padding: '16px 20px', background: paymentMethod === 'stripe' ? '#FDF8F0' : '#fff', transition: 'all .15s' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: paymentMethod === 'stripe' && showStripeForm ? '16px' : 0 }}>
                       <input type="radio" name="payment" value="stripe" checked={paymentMethod === 'stripe'} onChange={() => setPaymentMethod('stripe')} style={{ accentColor: GOLD, width: '18px', height: '18px' }} />
