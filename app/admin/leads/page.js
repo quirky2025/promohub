@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import QuoteBuilder from '@/components/QuoteBuilder';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -53,6 +54,8 @@ export default function AdminDealsPage() {
   const [noteDraft, setNoteDraft] = useState('');
   const [lostReason, setLostReason] = useState('');
   const [saving, setSaving] = useState(false);
+  const [builderOpen, setBuilderOpen] = useState(false);
+  const [builderPrefill, setBuilderPrefill] = useState(null);
   const router = useRouter();
 
   const fetchDeals = useCallback(async () => {
@@ -130,7 +133,10 @@ export default function AdminDealsPage() {
       <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '28px 32px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '18px' }}>
           <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', fontWeight: 600, color: NAVY, margin: 0 }}>Enquiries &amp; Quotes <span style={{ fontSize: '15px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>· Local Stock</span></h1>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search customer / email / product…" style={{ width: '280px', padding: '9px 14px', border: '1px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', background: '#fff', outline: 'none' }} />
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search customer / email / product…" style={{ width: '260px', padding: '9px 14px', border: '1px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', background: '#fff', outline: 'none' }} />
+            <button onClick={() => { setBuilderPrefill(null); setBuilderOpen(true); }} style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '10px 16px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>＋ New Quote</button>
+          </div>
         </div>
 
 
@@ -214,7 +220,7 @@ export default function AdminDealsPage() {
                   </div>
 
                   {selected.kind === 'enquiry' && (
-                    <button onClick={() => alert('Build Quote — coming in the next step (Phase 2): pick a product, auto-price, send PDF.')} style={{ width: '100%', background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '14px' }}>＋ Build Quote (next)</button>
+                    <button onClick={() => { setBuilderPrefill({ name: selected.customer_name, company: selected.customer_company, email: selected.customer_email, phone: detail.record?.phone || '' }); setBuilderOpen(true); }} style={{ width: '100%', background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '14px' }}>＋ Build Quote</button>
                   )}
 
                   <div style={{ fontSize: '11px', color: '#7A7570', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Internal note</div>
@@ -235,6 +241,8 @@ export default function AdminDealsPage() {
           )}
         </div>
       </div>
+
+      <QuoteBuilder open={builderOpen} onClose={() => setBuilderOpen(false)} prefill={builderPrefill} onSent={() => { setBuilderOpen(false); fetchDeals(); }} />
     </div>
   );
 }
