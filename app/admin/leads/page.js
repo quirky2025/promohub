@@ -53,17 +53,15 @@ export default function AdminDealsPage() {
   const [noteDraft, setNoteDraft] = useState('');
   const [lostReason, setLostReason] = useState('');
   const [saving, setSaving] = useState(false);
-  const [dbg, setDbg] = useState(null);
   const router = useRouter();
 
   const fetchDeals = useCallback(async () => {
     setLoading(true);
-    let res, data = {};
-    try { res = await fetch('/api/admin/deals'); data = await res.json().catch(() => ({})); }
-    catch (e) { data = { error: String(e) }; }
+    const res = await fetch('/api/admin/deals');
+    if (res.status === 401) { router.push('/admin/login'); return; }
+    const data = await res.json();
     setDeals(data.deals || []);
     setCounts(data.counts || {});
-    setDbg({ status: res ? res.status : 'fetch-failed', quotes: data._debug?.quotes, enquiries: data._debug?.enquiries, error: data.error });
     setLoading(false);
   }, [router]);
 
@@ -135,9 +133,6 @@ export default function AdminDealsPage() {
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search customer / email / product…" style={{ width: '280px', padding: '9px 14px', border: '1px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', background: '#fff', outline: 'none' }} />
         </div>
 
-        {dbg && (
-          <div style={{ fontSize: '12px', color: dbg.error || dbg.status !== 200 ? '#A32D2D' : '#7A7570', marginBottom: '10px', fontFamily: '"DM Mono", monospace' }}>debug · HTTP {String(dbg.status)} · quotes: {String(dbg.quotes)} · enquiries: {String(dbg.enquiries)}{dbg.error ? ` · error: ${dbg.error}` : ''}</div>
-        )}
 
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '18px' }}>
           {tabs.map(t => {

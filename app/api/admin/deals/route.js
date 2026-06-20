@@ -25,10 +25,7 @@ export async function GET(request) {
       db.from('quotes').select('*').limit(1000),
       db.from('quote_requests').select('*').limit(1000),
     ]);
-    const _debug = {
-      quotes: qRes.error ? `ERR: ${qRes.error.message}` : (qRes.data || []).length,
-      enquiries: eRes.error ? `ERR: ${eRes.error.message}` : (eRes.data || []).length,
-    };
+    if (qRes.error && eRes.error) return Response.json({ error: qRes.error.message }, { status: 500 });
 
     const quotes = (qRes.data || []).map(q => ({
       id: q.id, kind: 'quote',
@@ -65,7 +62,7 @@ export async function GET(request) {
     counts.enquiry = deals.filter(d => d.kind === 'enquiry').length;
     counts.quote = deals.filter(d => d.kind === 'quote').length;
 
-    return Response.json({ deals, counts, statuses: STATUSES, _debug });
+    return Response.json({ deals, counts, statuses: STATUSES });
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
   }
