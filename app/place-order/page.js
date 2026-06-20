@@ -102,8 +102,9 @@ export default function PlaceOrderPage() {
   const [form, setForm] = useState({
     name: '', company: '', email: '', phone: '',
     street: '', street2: '', suburb: '', state: '', postcode: '',
-    requiredDate: '', comments: '',
+    requiredDate: '', purpose: '', comments: '',
   });
+  const [purposeOther, setPurposeOther] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -420,24 +421,48 @@ export default function PlaceOrderPage() {
               </div>
             </div>
 
-            {/* Required Date + Comments */}
+            {/* MORE FROM YOU */}
             <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px' }}>
+              <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', fontWeight: 600, color: NAVY, margin: '0 0 18px' }}>More From You</h2>
+
               <div style={{ marginBottom: '16px' }}>
-                <label style={labelStyle}>Required Date <span style={{ color: '#7A7570', fontWeight: 400 }}>(when do you need it by?)</span></label>
+                <label style={labelStyle}>Required Date <span style={{ color: '#000', fontWeight: 400 }}>(when do you need it by?)</span></label>
                 <input type="date" name="requiredDate" value={form.requiredDate} onChange={handleChange} style={inputStyle} />
               </div>
-              <div>
-                <label style={labelStyle}>Comments</label>
-                <textarea name="comments" value={form.comments} onChange={handleChange} rows={3} placeholder="e.g. ship to multiple addresses, special requirements…" style={{ ...inputStyle, resize: 'vertical' }} />
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>Occasion / Event <span style={{ color: '#000', fontWeight: 400 }}>(optional)</span></label>
+                <select
+                  value={purposeOther ? '__other__' : form.purpose}
+                  onChange={e => {
+                    const v = e.target.value;
+                    if (v === '__other__') { setPurposeOther(true); setForm(f => ({ ...f, purpose: '' })); }
+                    else { setPurposeOther(false); setForm(f => ({ ...f, purpose: v })); }
+                  }}
+                  style={inputStyle}
+                >
+                  <option value="">Select… (optional)</option>
+                  <option>Client / Customer Gift</option>
+                  <option>Staff / Employee Gift</option>
+                  <option>Thank You Gift</option>
+                  <option>Executive / VIP Gift</option>
+                  <option>New Starter / Onboarding Kit</option>
+                  <option>Trade Show / Expo</option>
+                  <option>Conference / Seminar</option>
+                  <option>Product Launch</option>
+                  <option>Brand Awareness / Marketing</option>
+                  <option>Promotional Giveaway</option>
+                  <option>End of Year / Christmas Gift</option>
+                  <option value="__other__">Other / Not sure</option>
+                </select>
+                {purposeOther && (
+                  <input type="text" name="purpose" value={form.purpose} onChange={handleChange} placeholder="Tell us what it's for…" style={{ ...inputStyle, marginTop: '10px' }} />
+                )}
               </div>
-              <p style={{ fontSize: '12px', color: '#7A7570', margin: '12px 0 0' }}>📦 Stock is confirmed before your order is processed.</p>
-            </div>
 
-            {/* Logo Upload */}
-            <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '24px' }}>
-              <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', fontWeight: 600, color: NAVY, margin: '0 0 8px' }}>Upload Your Logo</h2>
-              <p style={{ fontSize: '13px', color: '#7A7570', margin: '0 0 20px' }}>Optional — you can also email your logo to hello@quirkypromo.com.au after placing your order.</p>
-
+              <div style={{ marginBottom: '16px' }}>
+                <label style={labelStyle}>Upload Your Logo</label>
+                <p style={{ fontSize: '13px', color: '#000', margin: '0 0 12px' }}>Optional — you can also email your logo to hello@quirkypromo.com.au after placing your order.</p>
               <div
                 onClick={() => document.getElementById('logo-upload-input').click()}
                 style={{
@@ -476,6 +501,14 @@ export default function PlaceOrderPage() {
               {logoUploading && (
                 <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '13px', color: '#7A7570' }}>Uploading logo...</div>
               )}
+              </div>
+
+              <div>
+                <label style={labelStyle}>Comments</label>
+                <textarea name="comments" value={form.comments} onChange={handleChange} rows={3} placeholder="e.g. ship to multiple addresses, special requirements…" style={{ ...inputStyle, resize: 'vertical' }} />
+              </div>
+
+              <p style={{ fontSize: '12px', color: '#000', margin: '14px 0 0' }}>📦 Stock is confirmed before your order is processed.</p>
             </div>
 
             {/* Payment Method */}
