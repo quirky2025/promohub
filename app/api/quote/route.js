@@ -2,6 +2,8 @@ import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 import { resolveB2BFromRequest, resolveOrCreateLeadFromQuote } from '@/lib/b2bContext';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import fs from 'fs';
+import path from 'path';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const supabase = createClient(
@@ -26,6 +28,7 @@ async function generateQuotePDF({
   qty, colour, brandingSummary, addons,
   unitPrice, subtotal, shipping, gst, total,
   deliveryAddress, requiredDate, notes,
+  docType = 'QUOTE', leadTimeDays = 7, disc = 0, totalPages = 1,
 }) {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]); // A4
@@ -42,175 +45,131 @@ async function generateQuotePDF({
   const LIGHT = rgb(0.973, 0.969, 0.957); // #F8F7F4
   const BLACK = rgb(0.1, 0.1, 0.1);
 
-  // ── HEADER BAR ──────────────────────────────────────────
-  page.drawRectangle({ x: 0, y: height - 80, width, height: 80, color: NAVY });
+  // logo image (gold box + white text on navy) — fallback to text
+  let logoImg = null;
+  try { logoImg = await pdfDoc.embedPng(fs.readFileSync(path.join(process.cwd(), 'public', 'quirky-logo-quote.png'))); } catch (e) { logoImg = null; }
 
-  // Logo text
-  page.drawText('QUIRKY', { x: 40, y: height - 45, size: 22, font: fontBold, color: WHITE });
-  page.drawText('PROMO', { x: 117, y: height - 45, size: 22, font: fontBold, color: GOLD });
-  page.drawText('quirkypromo.com.au  ·  hello@quirkypromo.com.au  ·  02 9477 4748', {
-    x: 40, y: height - 62, size: 8, font: fontReg, color: rgb(0.7, 0.7, 0.7),
-  });
+  const BORDER = rgb(0.72, 0.72, 0.72);
+  const rt = (text, xRight, yy, size, font, color) => { const w = font.widthOfTextAtSize(String(text), size); page.drawText(String(text), { x: xRight - w, y: yy, size, font, color }); };
 
-  // "QUOTE" label top right
-  page.drawText('QUOTE', { x: width - 120, y: height - 38, size: 28, font: fontBold, color: GOLD });
-  page.drawText(`${quoteNumber}`, { x: width - 120, y: height - 52, size: 9, font: fontReg, color: WHITE });
-  page.drawText(`Valid until: ${validUntil}`, { x: width - 120, y: height - 64, size: 8, font: fontReg, color: rgb(0.7, 0.7, 0.7) });
-
-  let y = height - 100;
-
-  // ── ISSUED BY + CUSTOMER ─────────────────────────────────
-  // Left: Issued by
-  page.drawText('Issued by', { x: 40, y, size: 9, font: fontBold, color: NAVY });
-  page.drawText('QuirkyPromo', { x: 40, y: y - 13, size: 9, font: fontReg, color: BLACK });
-  page.drawText('ABN: 95 656 714 270', { x: 40, y: y - 25, size: 9, font: fontReg, color: BLACK });
-  page.drawText('02 9477 4748', { x: 40, y: y - 37, size: 9, font: fontReg, color: BLACK });
-  page.drawText('hello@quirkypromo.com.au', { x: 40, y: y - 49, size: 9, font: fontReg, color: BLACK });
-
-  // Right: Customer
-  page.drawText('Customer', { x: 300, y, size: 9, font: fontBold, color: NAVY });
-  page.drawText(customer.name || '', { x: 300, y: y - 13, size: 9, font: fontBold, color: BLACK });
-  if (customer.company) page.drawText(customer.company, { x: 300, y: y - 25, size: 9, font: fontReg, color: BLACK });
-  page.drawText(customer.email || '', { x: 300, y: y - 37, size: 9, font: fontReg, color: BLACK });
-  if (customer.phone) page.drawText(customer.phone, { x: 300, y: y - 49, size: 9, font: fontReg, color: BLACK });
-  if (deliveryAddress) {
-    const da = String(deliveryAddress);
-    page.drawText('Deliver to:', { x: 300, y: y - 61, size: 8, font: fontBold, color: NAVY });
-    page.drawText(da.substring(0, 50), { x: 300, y: y - 72, size: 8, font: fontReg, color: GREY });
-    if (da.length > 50) page.drawText(da.substring(50, 100), { x: 300, y: y - 82, size: 8, font: fontReg, color: GREY });
+  // ── NAVY HEADER BAND ────────────────────────────────────
+  page.drawRectangle({ x: 0, y: height - 100, width, height: 100, color: NAVY });
+  if (logoImg) {
+    const lh = 32, lw = lh * (logoImg.width / logoImg.height);
+    page.drawImage(logoImg, { x: 40, y: height - 52, width: lw, height: lh });
+  } else {
+    page.drawText('QUIRKY', { x: 40, y: height - 46, size: 20, font: fontBold, color: WHITE });
+    page.drawText('PROMO', { x: 40 + fontBold.widthOfTextAtSize('QUIRKY', 20), y: height - 46, size: 20, font: fontBold, color: GOLD });
   }
+  page.drawText('Quirky Promo   ABN 95 656 714 270', { x: 40, y: height - 72, size: 8, font: fontReg, color: WHITE });
+  page.drawText('02 9477 4748   ·   hello@quirkypromo.com.au   ·   quirkypromo.com.au', { x: 40, y: height - 84, size: 8, font: fontReg, color: rgb(0.78, 0.81, 0.88) });
+  const dW = fontBold.widthOfTextAtSize(docType, 22);
+  page.drawText(docType, { x: width - 40 - dW, y: height - 52, size: 22, font: fontBold, color: GOLD });
+  rt(quoteNumber || '', width - 40, height - 68, 11, fontReg, WHITE);
 
-  y -= 90;
+  // ── META (right) ────────────────────────────────────────
+  let metaY = height - 120;
+  const metaRow = (label, val) => { page.drawText(label, { x: 400, y: metaY, size: 8.5, font: fontReg, color: GREY }); rt(val, width - 40, metaY, 8.5, fontReg, BLACK); metaY -= 13; };
+  metaRow('Date:', new Date().toLocaleDateString('en-AU'));
+  if (validUntil) metaRow(docType === 'QUOTE' ? 'Valid until:' : 'Date:', validUntil);
+  metaRow('Page:', `1 of ${totalPages || 1}`);
 
-  // ── DIVIDER ─────────────────────────────────────────────
-  page.drawLine({ start: { x: 40, y }, end: { x: width - 40, y }, thickness: 0.5, color: rgb(0.88, 0.87, 0.84) });
-  y -= 20;
+  // ── CUSTOMER / DELIVERY BOXES ───────────────────────────
+  let y = height - 122;
+  const gap = 14, bw = (width - 80 - gap) / 2, cdX = 40, ddX = 40 + bw + gap, bH = 82, bTop = y;
+  page.drawText('Customer Detail:', { x: cdX, y: bTop + 2, size: 8, font: fontBold, color: NAVY });
+  page.drawText('Delivery Detail:', { x: ddX, y: bTop + 2, size: 8, font: fontBold, color: NAVY });
+  page.drawRectangle({ x: cdX, y: bTop - bH, width: bw, height: bH, borderColor: BORDER, borderWidth: 0.8 });
+  page.drawRectangle({ x: ddX, y: bTop - bH, width: bw, height: bH, borderColor: BORDER, borderWidth: 0.8 });
+  let cy = bTop - 14;
+  [customer.company, customer.name, customer.email, customer.phone].filter(Boolean).forEach(l => { page.drawText(String(l).substring(0, 44), { x: cdX + 8, y: cy, size: 8.5, font: fontReg, color: BLACK }); cy -= 13; });
+  let dy = bTop - 14;
+  (deliveryAddress ? String(deliveryAddress).split(/,\s*/) : ['Same as customer']).slice(0, 5).forEach(l => { page.drawText(l.substring(0, 44), { x: ddX + 8, y: dy, size: 8.5, font: fontReg, color: BLACK }); dy -= 13; });
+  y = bTop - bH - 24;
 
-  // ── PRODUCT DETAILS ──────────────────────────────────────
-  page.drawText('PRODUCT DETAILS', { x: 40, y, size: 8, font: fontBold, color: NAVY });
-  y -= 18;
+  // ── ITEM TABLE ──────────────────────────────────────────
+  const cStock = 44, cDesc = 120, cQtyR = 360, cUnit = 368, cPriceR = 432, cDiscR = 474, cTaxR = 510, cTotR = 552;
+  const HH = 18;
+  page.drawRectangle({ x: 40, y: y - HH, width: width - 80, height: HH, color: NAVY });
+  const thy = y - HH + 6;
+  page.drawText('Stock Code', { x: cStock, y: thy, size: 7.5, font: fontBold, color: WHITE });
+  page.drawText('Description', { x: cDesc, y: thy, size: 7.5, font: fontBold, color: WHITE });
+  rt('Qty', cQtyR, thy, 7.5, fontBold, WHITE);
+  page.drawText('Unit', { x: cUnit, y: thy, size: 7.5, font: fontBold, color: WHITE });
+  rt('Price', cPriceR, thy, 7.5, fontBold, WHITE);
+  rt('Disc%', cDiscR, thy, 7.5, fontBold, WHITE);
+  rt('Tax%', cTaxR, thy, 7.5, fontBold, WHITE);
+  rt('Total Value', cTotR, thy, 7.5, fontBold, WHITE);
+  y -= HH + 4;
 
-  // Table header bar (white text on navy)
-  const HB = 18;
-  page.drawRectangle({ x: 40, y: y - HB, width: width - 80, height: HB, color: NAVY });
-  const hY = y - HB + 6;
-  page.drawText('ITEM', { x: 48, y: hY, size: 8, font: fontBold, color: WHITE });
-  page.drawText('QTY', { x: 290, y: hY, size: 8, font: fontBold, color: WHITE });
-  page.drawText('UNIT PRICE', { x: 350, y: hY, size: 8, font: fontBold, color: WHITE });
-  page.drawText('NET AMOUNT', { x: 430, y: hY, size: 8, font: fontBold, color: WHITE });
-  page.drawText('GST', { x: 515, y: hY, size: 8, font: fontBold, color: WHITE });
-  y -= HB + 6;
-
-  // Product row (sits fully below the header bar — no overlap)
+  // product row
   const addonsList = addons ? addons.split(', ').filter(Boolean) : [];
-  const hasBranding = brandingSummary && brandingSummary !== 'None / Unbranded';
-  const rowLines = 1 + (product.sku ? 1 : 0) + (colour ? 1 : 0) + (hasBranding ? 1 : 0) + addonsList.length;
-  const rowHeight = Math.max(44, rowLines * 12 + 16);
+  const hasBranding = brandingSummary && brandingSummary !== 'None / Unbranded' && brandingSummary !== 'Unbranded';
+  const descLines = [];
+  if (colour) descLines.push(`Colour: ${colour}`);
+  if (hasBranding) descLines.push(`Branding: ${brandingSummary}`);
+  addonsList.forEach(x => descLines.push(`Add-on: ${x}`));
+  const rowH = Math.max(34, 16 + descLines.length * 11 + 6);
+  page.drawRectangle({ x: 40, y: y - rowH, width: width - 80, height: rowH, color: LIGHT });
+  const r1 = y - 13;
+  page.drawText(String(product.sku || '—'), { x: cStock, y: r1, size: 8, font: fontReg, color: BLACK });
+  page.drawText(String(product.name || '').substring(0, 46), { x: cDesc, y: r1, size: 8.5, font: fontBold, color: NAVY });
+  let liny = r1 - 11;
+  descLines.forEach(l => { page.drawText(l.substring(0, 62), { x: cDesc, y: liny, size: 7.5, font: fontReg, color: GREY }); liny -= 11; });
+  rt(String(qty), cQtyR, r1, 8, fontReg, BLACK);
+  page.drawText('EA', { x: cUnit, y: r1, size: 8, font: fontReg, color: BLACK });
+  rt(`$${unitPrice.toFixed(2)}`, cPriceR, r1, 8, fontReg, BLACK);
+  rt(`${(Number(disc) || 0).toFixed(2)}`, cDiscR, r1, 8, fontReg, BLACK);
+  rt('10.00', cTaxR, r1, 8, fontReg, BLACK);
+  rt(`$${subtotal.toFixed(2)}`, cTotR, r1, 8, fontBold, NAVY);
+  y -= rowH + 2;
 
-  const rowTop = y;
-  page.drawRectangle({ x: 40, y: rowTop - rowHeight, width: width - 80, height: rowHeight, color: LIGHT });
+  // freight row
+  const fr = y - 12;
+  page.drawText('FREIGHT', { x: cStock, y: fr, size: 8, font: fontReg, color: BLACK });
+  page.drawText('Shipping & Handling', { x: cDesc, y: fr, size: 8.5, font: fontReg, color: BLACK });
+  rt('1', cQtyR, fr, 8, fontReg, BLACK);
+  page.drawText('EA', { x: cUnit, y: fr, size: 8, font: fontReg, color: BLACK });
+  rt(`$${shipping.toFixed(2)}`, cPriceR, fr, 8, fontReg, BLACK);
+  rt('0.00', cDiscR, fr, 8, fontReg, BLACK);
+  rt('10.00', cTaxR, fr, 8, fontReg, BLACK);
+  rt(`$${shipping.toFixed(2)}`, cTotR, fr, 8, fontBold, NAVY);
+  y -= 26;
+  page.drawLine({ start: { x: 40, y: y + 6 }, end: { x: width - 40, y: y + 6 }, thickness: 0.5, color: BORDER });
 
-  const nameY = rowTop - 14;
-  page.drawText(product.name || '', { x: 48, y: nameY, size: 9, font: fontBold, color: NAVY });
-  let detailY = nameY - 12;
-  if (product.sku) {
-    page.drawText(`SKU: ${product.sku}`, { x: 48, y: detailY, size: 7.5, font: fontReg, color: GREY });
-    detailY -= 12;
-  }
-  if (colour) {
-    page.drawText(`Colour: ${colour}`, { x: 48, y: detailY, size: 8, font: fontReg, color: GREY });
-    detailY -= 12;
-  }
-  if (hasBranding) {
-    page.drawText(`Branding: ${brandingSummary.substring(0, 55)}`, { x: 48, y: detailY, size: 7.5, font: fontReg, color: GREY });
-    detailY -= 12;
-  }
-  addonsList.forEach(addon => {
-    page.drawText(`Add-on: ${addon}`, { x: 48, y: detailY, size: 7.5, font: fontReg, color: GREY });
-    detailY -= 12;
-  });
-
-  page.drawText(String(qty), { x: 295, y: nameY, size: 9, font: fontReg, color: BLACK });
-  page.drawText(`$${unitPrice.toFixed(2)}`, { x: 350, y: nameY, size: 9, font: fontReg, color: BLACK });
-  page.drawText(`$${subtotal.toFixed(2)}`, { x: 430, y: nameY, size: 9, font: fontBold, color: NAVY });
-  page.drawText('10%', { x: 520, y: nameY, size: 9, font: fontReg, color: BLACK });
-  y = rowTop - rowHeight - 8;
-
-  // Shipping row
-  page.drawRectangle({ x: 40, y: y - 4, width: width - 80, height: 20, color: WHITE });
-  page.drawText('Shipping & Handling', { x: 48, y: y + 1, size: 9, font: fontReg, color: BLACK });
-  page.drawText('1', { x: 295, y: y + 1, size: 9, font: fontReg, color: BLACK });
-  page.drawText(`$${shipping.toFixed(2)}`, { x: 350, y: y + 1, size: 9, font: fontReg, color: BLACK });
-  page.drawText(`$${shipping.toFixed(2)}`, { x: 430, y: y + 1, size: 9, font: fontBold, color: NAVY });
-  page.drawText('10%', { x: 520, y: y + 1, size: 9, font: fontReg, color: BLACK });
-  y -= 30;
-
-  // ── TOTALS ───────────────────────────────────────────────
-  page.drawLine({ start: { x: 380, y: y + 10 }, end: { x: width - 40, y: y + 10 }, thickness: 0.5, color: rgb(0.88, 0.87, 0.84) });
-  y -= 4;
-
-  function totRow(label, value, bold = false) {
-    page.drawText(label, { x: 390, y, size: 9, font: bold ? fontBold : fontReg, color: bold ? NAVY : GREY });
-    page.drawText(value, { x: 490, y, size: 9, font: bold ? fontBold : fontReg, color: bold ? GOLD : BLACK });
-    y -= 16;
-  }
-
+  // ── TOTALS (right) ──────────────────────────────────────
+  y -= 6;
+  const totRow = (label, value, bold) => { page.drawText(label, { x: 380, y, size: 9, font: bold ? fontBold : fontReg, color: bold ? NAVY : GREY }); rt(value, cTotR, y, 9, bold ? fontBold : fontReg, bold ? GOLD : BLACK); y -= 15; };
   totRow('Subtotal (excl. GST)', `$${subtotal.toFixed(2)}`);
   totRow('Shipping & Handling', `$${shipping.toFixed(2)}`);
   totRow('GST (10%)', `$${gst.toFixed(2)}`);
-  page.drawLine({ start: { x: 380, y: y + 12 }, end: { x: width - 40, y: y + 12 }, thickness: 1, color: NAVY });
-  y -= 4;
+  page.drawLine({ start: { x: 378, y: y + 11 }, end: { x: width - 40, y: y + 11 }, thickness: 1, color: NAVY });
   totRow('TOTAL (incl. GST)', `$${total.toFixed(2)}`, true);
+  y -= 12;
+  if (requiredDate) { page.drawText(`Required by: ${requiredDate}`, { x: 40, y, size: 8, font: fontReg, color: GREY }); }
+  y -= 24;
 
-  y -= 20;
+  // ── NOTE (bold) ─────────────────────────────────────────
+  const noteText = docType === 'QUOTE'
+    ? `NOTE: Estimated production lead time is ${leadTimeDays} business days from artwork approval and receipt of full payment.`
+    : `NOTE: Production commences only after artwork approval and full payment have been received. Estimated lead time: ${leadTimeDays} business days.`;
+  const noteWords = noteText.split(' ');
+  const noteRendered = [];
+  { let line = ''; for (const w of noteWords) { if (fontBold.widthOfTextAtSize(line + w, 9) > width - 110) { noteRendered.push(line.trim()); line = w + ' '; } else line += w + ' '; } if (line.trim()) noteRendered.push(line.trim()); }
+  const noteH = 12 + noteRendered.length * 12;
+  page.drawRectangle({ x: 40, y: y - noteH + 6, width: width - 80, height: noteH, color: rgb(0.98, 0.94, 0.85) });
+  noteRendered.forEach((l, i) => page.drawText(l, { x: 50, y: y - 6 - i * 12, size: 9, font: fontBold, color: NAVY }));
+  y -= noteH + 10;
 
-  // ── ADDITIONAL INFO ─────────────────────────────────────
-  if (requiredDate) {
-    page.drawText(`Required by: ${requiredDate}`, { x: 40, y, size: 8, font: fontReg, color: GREY });
-    y -= 14;
-  }
   if (notes) {
-    page.drawText('Notes:', { x: 40, y, size: 8, font: fontBold, color: NAVY });
-    y -= 12;
-    // Word wrap notes
-    const words = notes.split(' ');
-    let line = '';
-    for (const word of words) {
-      if ((line + word).length > 90) {
-        page.drawText(line.trim(), { x: 40, y, size: 8, font: fontReg, color: GREY });
-        y -= 12;
-        line = word + ' ';
-      } else {
-        line += word + ' ';
-      }
-    }
-    if (line.trim()) {
-      page.drawText(line.trim(), { x: 40, y, size: 8, font: fontReg, color: GREY });
-      y -= 12;
-    }
-    y -= 8;
+    page.drawText('Notes:', { x: 40, y, size: 8, font: fontBold, color: NAVY }); y -= 12;
+    let line = ''; for (const w of String(notes).split(' ')) { if ((line + w).length > 95) { page.drawText(line.trim(), { x: 40, y, size: 8, font: fontReg, color: GREY }); y -= 12; line = w + ' '; } else line += w + ' '; } if (line.trim()) { page.drawText(line.trim(), { x: 40, y, size: 8, font: fontReg, color: GREY }); }
   }
 
-  y -= 10;
-
-  // ── WHY QUIRKYPROMO BOX ──────────────────────────────────
-  page.drawRectangle({ x: 40, y: y - 72, width: width - 80, height: 82, color: LIGHT, borderColor: rgb(0.88, 0.87, 0.84), borderWidth: 0.5 });
-  page.drawText('Why Choose QuirkyPromo?', { x: 52, y: y - 6, size: 9, font: fontBold, color: NAVY });
-const reasons = [
-  '*  Free digital proof — production only begins after your approval',
-  '*  $30 flat rate shipping Australia-wide',
-  '*  Quality guarantee — we make it right if something\'s wrong',
-  '*  Reply within 1 hour  |  02 9477 4748  |  hello@quirkypromo.com.au',
-];
-  reasons.forEach((r, i) => {
-    page.drawText(r, { x: 52, y: y - 20 - (i * 13), size: 8, font: fontReg, color: GREY });
-  });
-  y -= 90;
-
-  // ── FOOTER ───────────────────────────────────────────────
-  page.drawLine({ start: { x: 40, y: 50 }, end: { x: width - 40, y: 50 }, thickness: 0.5, color: rgb(0.88, 0.87, 0.84) });
-  page.drawText(`This quote is valid for 14 days from the date of issue (${validUntil}).`, { x: 40, y: 36, size: 7.5, font: fontReg, color: GREY });
-  page.drawText('ABN: 95 656 714 270  ·  QuirkyPromo  ·  quirkypromo.com.au', { x: 40, y: 24, size: 7.5, font: fontReg, color: GREY });
+  // ── FOOTER ──────────────────────────────────────────────
+  page.drawLine({ start: { x: 40, y: 48 }, end: { x: width - 40, y: 48 }, thickness: 0.5, color: BORDER });
+  page.drawText(docType === 'QUOTE' ? `This quote is valid until ${validUntil}.` : 'Thank you for your order.', { x: 40, y: 34, size: 7.5, font: fontReg, color: GREY });
+  page.drawText('Quirky Promo  ·  ABN 95 656 714 270  ·  quirkypromo.com.au  ·  hello@quirkypromo.com.au', { x: 40, y: 23, size: 7.5, font: fontReg, color: GREY });
 
   const pdfBytes = await pdfDoc.save();
   return Buffer.from(pdfBytes);
@@ -227,6 +186,7 @@ export async function POST(req) {
       pmsColours, extraOptions,
       requiredDate, deliveryAddress, artworkFileName,
       notes, purpose,
+      docType, leadTimeDays, disc,
       productName, productSku,
       unitPrice, subtotal, shipping, gst, total,
     } = body;
@@ -310,6 +270,9 @@ export async function POST(req) {
       deliveryAddress: deliveryAddress || '',
       requiredDate: requiredDate || '',
       notes: notesCombined,
+      docType: docType || 'QUOTE',
+      leadTimeDays: leadTimeDays || 7,
+      disc: disc || 0,
     });
 
     const pdfBase64 = pdfBuffer.toString('base64');
