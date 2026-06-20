@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { cld } from '@/lib/cloudinary';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getCart, removeFromCart, updateCartItem } from '@/lib/cart';
@@ -105,7 +106,7 @@ export default function CartPage() {
               {/* Image */}
               <div style={{ width: '100px', height: '100px', flexShrink: 0, borderRadius: '10px', border: '1px solid #E0DDD7', background: BG, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                 {item.image
-                  ? <img src={item.image} alt={item.productName} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                  ? <img src={cld(item.image, 160)} alt={item.productName} style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                   : <span style={{ fontSize: '32px' }}>📦</span>}
               </div>
 

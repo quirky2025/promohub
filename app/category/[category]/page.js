@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { cld } from '@/lib/cloudinary';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -192,7 +193,7 @@ export default function CategoryPage() {
                 >
                   <div style={{ height: '140px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                     {sub.image
-                      ? <img src={sub.image} alt={sub.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
+                      ? <img src={cld(sub.image, 300)} alt={sub.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
                       : <div style={{ color: '#C8C4BC', fontSize: '32px' }}>📦</div>}
                   </div>
                   <div style={{ padding: '12px 14px', borderTop: '1px solid #F0EEED' }}>

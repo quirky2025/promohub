@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { cld } from '@/lib/cloudinary';
 import { useRouter } from 'next/navigation';
 import { getCart, removeFromCart, updateQty } from '@/lib/cart';
 
@@ -32,7 +33,7 @@ export default function CartDrawer({ open, onClose }) {
             <div style={{ color: '#7A7570', fontSize: '14px', textAlign: 'center', marginTop: '40px' }}>Your cart is empty.</div>
           ) : items.map((it, i) => (
             <div key={it.id || i} style={{ display: 'flex', gap: '12px', padding: '12px 0', borderBottom: '1px solid #F0EEED' }}>
-              {it.image && <img src={it.image} alt="" style={{ width: '54px', height: '54px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />}
+              {it.image && <img src={cld(it.image, 120)} alt="" style={{ width: '54px', height: '54px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: '14px', fontWeight: 600, color: NAVY, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.productName}</div>
                 {it.colour ? <div style={{ fontSize: '12px', color: '#7A7570' }}>{it.colour}</div> : null}

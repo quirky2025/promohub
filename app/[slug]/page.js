@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from 'next/link';
+import { cld } from '@/lib/cloudinary';
 import { notFound } from 'next/navigation';
 import {
   getColourSwatches,
@@ -166,7 +167,7 @@ function SubcategorySection({ childPages }) {
               <article style={{ height: '100%', background: '#fff', border: '1px solid #E0DDD7', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 7px rgba(0,0,0,.04)', display: 'flex', flexDirection: 'column' }}>
                 <div style={{ height: '150px', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                   {childPage.image ? (
-                    <img src={childPage.image} alt={childPage.nav_label || childPage.h1} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '12px', boxSizing: 'border-box' }} />
+                    <img src={cld(childPage.image, 300)} alt={childPage.nav_label || childPage.h1} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '12px', boxSizing: 'border-box' }} />
                   ) : (
                     <div style={{ color: '#BEB8AF', fontSize: '13px' }}>No image</div>
                   )}
@@ -230,7 +231,7 @@ function ProductCard({ product }) {
       <article style={{ height: '100%', background: '#fff', border: '1px solid #E0DDD7', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 7px rgba(0,0,0,.05)', display: 'flex', flexDirection: 'column' }}>
         <div style={{ height: '192px', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
           {image ? (
-            <img src={image} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '13px', boxSizing: 'border-box' }} />
+            <img src={cld(image, 400)} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '13px', boxSizing: 'border-box' }} />
           ) : (
             <div style={{ color: '#BEB8AF', fontSize: '13px' }}>No image</div>
           )}

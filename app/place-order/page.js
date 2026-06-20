@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { cld } from '@/lib/cloudinary';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getCart, clearCart, removeFromCart } from '@/lib/cart';
@@ -633,7 +634,7 @@ export default function PlaceOrderPage() {
                 {cart.map(item => (
                   <div key={item.id} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                     <div style={{ width: '52px', height: '52px', flexShrink: 0, borderRadius: '6px', border: '1px solid #E0DDD7', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                      {item.image ? <img src={item.image} alt={item.productName} style={{ width: '90%', height: '90%', objectFit: 'contain' }} /> : <span>📦</span>}
+                      {item.image ? <img src={cld(item.image, 160)} alt={item.productName} style={{ width: '90%', height: '90%', objectFit: 'contain' }} /> : <span>📦</span>}
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '13px', fontWeight: 600, color: NAVY, fontFamily: '"DM Sans", sans-serif' }}>{item.productName}</div>

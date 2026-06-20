@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { cld } from '@/lib/cloudinary';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
@@ -197,7 +198,7 @@ export default function EcoPage() {
                     >
                       <div style={{ height: '190px', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
                         {img
-                          ? <img src={img} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} />
+                          ? <img src={cld(img, 400)} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} />
                           : <div style={{ fontSize: '40px', color: '#D0CCC8' }}>📦</div>}
                         {product.is_eco && (
                           <div style={{ position: 'absolute', top: '10px', left: '10px', background: '#2D6A4F', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px' }}>🌿 ECO</div>
