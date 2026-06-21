@@ -62,13 +62,18 @@ export async function POST(req) {
           <a href="mailto:${esc(email)}?subject=Re:%20your%20enquiry%20to%20QuirkyPromo" style="display:inline-block;margin-top:16px;background:#C9A96E;color:#fff;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:600;font-size:14px;">Reply to ${esc(name)}</a>
         </div></div>`;
 
-      const customerHtml = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">
-        <div style="background:#1B2A4A;padding:18px 24px;border-radius:10px 10px 0 0;"><img src="https://www.quirkypromo.com.au/quirky-logo-quote.png" alt="QuirkyPromo" height="30" style="display:block;height:30px;" /></div>
-        <div style="border:1px solid #E0DDD7;border-top:none;border-radius:0 0 10px 10px;padding:24px;">
-          <p style="font-size:16px;color:#1B2A4A;margin:0 0 12px;">Hi ${esc(name)},</p>
-          <p style="font-size:14px;color:#3D3A36;line-height:1.6;margin:0 0 14px;">Thanks for your enquiry — we've received it and a member of our team will get back to you shortly (usually within 1 hour during business hours).</p>
-          <div style="padding:14px;background:#F8F7F4;border-radius:8px;font-size:14px;color:#1B2A4A;white-space:pre-wrap;margin:0 0 16px;">${esc(message)}</div>
-          <p style="font-size:13px;color:#7A7570;margin:0;">Need to talk sooner? Call us on <strong>02 9477 4748</strong> or reply to this email.</p>
+      const customerHtml = `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#1a1a1a;">
+        <div style="padding:6px 2px;">
+          <p style="font-size:16px;color:#1B2A4A;margin:0 0 14px;">Hi ${esc(name)},</p>
+          <p style="font-size:14px;color:#3D3A36;line-height:1.7;margin:0 0 18px;">Thank you so much for reaching out — your enquiry has landed safely with us and we're already on it. One of our team will be in touch very soon (usually within the hour during business hours) with some ideas and pricing tailored to what you need.</p>
+          <p style="font-size:11px;color:#9B958E;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 6px;">Your enquiry</p>
+          <div style="border-left:3px solid #C9A96E;padding:2px 0 2px 14px;margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-style:italic;color:#5A5550;font-size:14px;line-height:1.6;white-space:pre-wrap;">${esc(message)}</div>
+          <p style="font-size:14px;color:#3D3A36;line-height:1.7;margin:0 0 18px;">In the meantime, if you'd like to chat sooner just call us on <strong>02 9477 4748</strong> or simply reply to this email — we'd love to help make your promotion a success.</p>
+          <p style="font-size:14px;color:#3D3A36;margin:0 0 4px;">Kind regards,<br><strong>QuirkyPromo Team</strong></p>
+        </div>
+        <div style="background:#1B2A4A;border-radius:8px;padding:14px 18px;margin-top:10px;">
+          <img src="https://www.quirkypromo.com.au/quirky-logo-quote.png" alt="QuirkyPromo" height="26" style="display:block;height:26px;margin-bottom:8px;" />
+          <span style="font-size:12px;color:rgba(255,255,255,0.85);">02 9477 4748 &nbsp;&middot;&nbsp; hello@quirkypromo.com.au &nbsp;&middot;&nbsp; quirkypromo.com.au</span>
         </div></div>`;
 
       await resend.emails.send({
