@@ -160,7 +160,7 @@ export async function POST(req) {
           <p style="font-size:14px;line-height:1.6;color:#3D3A36;margin:16px 0 0;">Any questions at all, just reply to this email or call us on <strong>02 9477 4748</strong> — we're always happy to help.</p>
         </div>
         <div style="padding-top:16px;border-top:1px solid #E0DDD7;margin-top:24px;">
-          <img src="https://www.quirkypromo.com.au/quirky-logo-light.png" alt="QuirkyPromo" height="34" style="height:34px;display:block;margin-bottom:12px;" />
+          <div style="font-size:20px;font-weight:800;letter-spacing:-0.3px;margin-bottom:10px;"><span style="color:#C9A96E;">Quirky</span><span style="color:#1B2A4A;">Promo</span></div>
           <p style="color:#1a1a1a;font-size:14px;margin:0 0 2px;">Kind regards,</p>
           <p style="color:#1B2A4A;font-size:15px;font-weight:700;margin:0 0 8px;">The QuirkyPromo Team</p>
           <p style="color:#3D3A36;font-size:13px;margin:0;">Tel: <strong style="color:#1B2A4A;">02 9477 4748</strong>  ·  Email: <a href="mailto:hello@quirkypromo.com.au" style="color:#C9A96E;">hello@quirkypromo.com.au</a>  ·  Web: <a href="https://www.quirkypromo.com.au" style="color:#C9A96E;">quirkypromo.com.au</a></p>
@@ -174,7 +174,7 @@ export async function POST(req) {
       from: 'QuirkyPromo <noreply@quirkypromo.com.au>',
       replyTo: 'hello@quirkypromo.com.au',
       to: [customer.email],
-      subject: `Tax Invoice — ${orderNumber}`,
+      subject: `Order Confirmation & Tax Invoice — ${orderNumber}`,
       html: emailHtml,
       attachments: [{ filename: `OrderConfirmation_${orderNumber}.pdf`, content: ocB64 }, { filename: `TaxInvoice_${orderNumber}.pdf`, content: invB64 }],
     });
