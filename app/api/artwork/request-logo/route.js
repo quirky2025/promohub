@@ -43,7 +43,7 @@ export async function POST(req) {
         </div>
         <div style="background:#F8F7F4;border-radius:10px;padding:16px 20px;margin:0 0 16px;font-size:14px;">
           <div style="font-weight:700;color:#1B2A4A;margin-bottom:8px;">Accepted file formats</div>
-          <div style="color:#7A7570;">AI, PDF, PNG, JPG, EPS or SVG — a vector file (AI, PDF or EPS) gives the best results.</div>
+          <div style="color:#000000;font-weight:700;">VECTOR FILES ONLY — AI, PDF, EPS or SVG. We cannot print from PNG or JPG.</div>
         </div>
         <p style="font-size:14px;line-height:1.6;color:#7A7570;margin:0;">Prefer email? Send your logo to <a href="mailto:hello@quirkypromo.com.au" style="color:#C9A96E;">hello@quirkypromo.com.au</a> and quote <strong>${orderNumber}</strong>. Any questions, just reply or call us on <strong style="color:#1B2A4A;">02 9477 4748</strong>.</p>
       `),
