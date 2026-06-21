@@ -159,12 +159,12 @@ export async function POST(req) {
           ${payBox}
           <p style="font-size:14px;line-height:1.6;color:#3D3A36;margin:16px 0 0;">Any questions at all, just reply to this email or call us on <strong>02 9477 4748</strong> — we're always happy to help.</p>
         </div>
-        <div style="background:#1B2A4A;border-radius:12px;padding:24px 28px;margin-top:24px;">
-          <img src="https://www.quirkypromo.com.au/quirky-logo-quote.png" alt="QuirkyPromo" height="30" style="height:30px;display:block;margin-bottom:12px;" />
-          <p style="color:#fff;font-size:14px;margin:0 0 2px;">Kind regards,</p>
-          <p style="color:#C9A96E;font-size:15px;font-weight:700;margin:0 0 10px;">The QuirkyPromo Team</p>
-          <p style="color:rgba(255,255,255,0.65);font-size:12px;margin:0;">02 9477 4748  ·  hello@quirkypromo.com.au  ·  quirkypromo.com.au</p>
-          <p style="color:rgba(255,255,255,0.4);font-size:11px;margin:8px 0 0;">ABN 95 656 714 270</p>
+        <div style="padding-top:16px;border-top:1px solid #E0DDD7;margin-top:24px;">
+          <img src="https://www.quirkypromo.com.au/quirky-logo-light.png" alt="QuirkyPromo" height="34" style="height:34px;display:block;margin-bottom:12px;" />
+          <p style="color:#1a1a1a;font-size:14px;margin:0 0 2px;">Kind regards,</p>
+          <p style="color:#1B2A4A;font-size:15px;font-weight:700;margin:0 0 8px;">The QuirkyPromo Team</p>
+          <p style="color:#3D3A36;font-size:13px;margin:0;">Tel: <strong style="color:#1B2A4A;">02 9477 4748</strong>  ·  Email: <a href="mailto:hello@quirkypromo.com.au" style="color:#C9A96E;">hello@quirkypromo.com.au</a>  ·  Web: <a href="https://www.quirkypromo.com.au" style="color:#C9A96E;">quirkypromo.com.au</a></p>
+          <p style="color:#7A7570;font-size:11px;margin:8px 0 0;">ABN 95 656 714 270</p>
         </div>
       </div>
     `;
