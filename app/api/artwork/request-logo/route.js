@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import crypto from 'crypto';
+import { quirkyEmail } from '@/lib/emailLayout';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -33,34 +34,19 @@ export async function POST(req) {
       from: 'QuirkyPromo <noreply@quirkypromo.com.au>',
       replyTo: 'hello@quirkypromo.com.au',
       to: [customerEmail],
-      subject: `Action Required: Upload Your Logo — ${orderNumber}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; color: #1a1a1a;">
-          <div style="background: #1B2A4A; padding: 28px 32px; border-radius: 12px 12px 0 0;">
-            <h1 style="color: #C9A96E; font-family: Georgia, serif; font-size: 24px; margin: 0 0 4px;">QuirkyPromo</h1>
-            <p style="color: rgba(255,255,255,0.6); font-size: 14px; margin: 0;">Logo Upload Required · ${orderNumber}</p>
-          </div>
-          <div style="background: #fff; border: 1px solid #E0DDD7; border-top: none; padding: 28px 32px; border-radius: 0 0 12px 12px;">
-            <p style="font-size: 15px; margin: 0 0 16px;">Hi ${customerName},</p>
-            <p style="font-size: 15px; margin: 0 0 24px;">Thank you for your order of <strong>${productName}</strong>! To create your artwork mockup, we need your logo file.</p>
-
-            <div style="text-align: center; margin: 32px 0;">
-              <a href="${uploadUrl}" style="display: inline-block; background: #C9A96E; color: #fff; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-weight: 700; font-size: 16px;">
-                Upload Your Logo →
-              </a>
-            </div>
-
-            <div style="background: #F8F7F4; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px; font-size: 14px;">
-              <div style="font-weight: 700; color: #1B2A4A; margin-bottom: 8px;">Accepted file formats:</div>
-              <div style="color: #7A7570;">AI, PDF, PNG, JPG, EPS, SVG</div>
-              <div style="color: #7A7570; margin-top: 8px;">For best results, please provide a vector file (AI, PDF, or EPS).</div>
-            </div>
-
-            <p style="font-size: 13px; color: #7A7570; text-align: center;">Or email your logo directly to <a href="mailto:hello@quirkypromo.com.au" style="color: #C9A96E;">hello@quirkypromo.com.au</a> with your order number <strong>${orderNumber}</strong>.</p>
-            <p style="font-size: 14px; color: #7A7570; text-align: center; margin-top: 16px;">Questions? Call us: <strong style="color: #1B2A4A;">02 9477 4748</strong></p>
-          </div>
+      subject: `One quick step for your order ${orderNumber} — upload your logo`,
+      html: quirkyEmail(`
+        <p style="font-size:15px;margin:0 0 16px;">Hi ${customerName},</p>
+        <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Thank you so much for your order of <strong>${productName}</strong> — we can't wait to get started! To create your free artwork mockup, we just need your logo file.</p>
+        <div style="text-align:center;margin:28px 0;">
+          <a href="${uploadUrl}" style="display:inline-block;background:#C9A96E;color:#fff;text-decoration:none;padding:15px 38px;border-radius:10px;font-weight:700;font-size:16px;">Upload your logo →</a>
         </div>
-      `,
+        <div style="background:#F8F7F4;border-radius:10px;padding:16px 20px;margin:0 0 16px;font-size:14px;">
+          <div style="font-weight:700;color:#1B2A4A;margin-bottom:8px;">Accepted file formats</div>
+          <div style="color:#7A7570;">AI, PDF, PNG, JPG, EPS or SVG — a vector file (AI, PDF or EPS) gives the best results.</div>
+        </div>
+        <p style="font-size:14px;line-height:1.6;color:#7A7570;margin:0;">Prefer email? Send your logo to <a href="mailto:hello@quirkypromo.com.au" style="color:#C9A96E;">hello@quirkypromo.com.au</a> and quote <strong>${orderNumber}</strong>. Any questions, just reply or call us on <strong style="color:#1B2A4A;">02 9477 4748</strong>.</p>
+      `),
     });
 
     // Notify you

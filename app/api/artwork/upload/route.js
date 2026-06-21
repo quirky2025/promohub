@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 import crypto from 'crypto';
+import { quirkyEmail } from '@/lib/emailLayout';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -102,29 +103,18 @@ export async function POST(req) {
       from: 'QuirkyPromo <noreply@quirkypromo.com.au>',
       replyTo: 'hello@quirkypromo.com.au',
       to: [customerEmail],
-      subject: `Logo Received — We're preparing your Mockup — ${orderNumber}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; color: #1a1a1a;">
-          <div style="background: #1B2A4A; padding: 28px 32px; border-radius: 12px 12px 0 0;">
-            <h1 style="color: #C9A96E; font-family: Georgia, serif; font-size: 24px; margin: 0 0 4px;">QuirkyPromo</h1>
-            <p style="color: rgba(255,255,255,0.6); font-size: 14px; margin: 0;">Logo Received · ${orderNumber}</p>
-          </div>
-          <div style="background: #fff; border: 1px solid #E0DDD7; border-top: none; padding: 28px 32px; border-radius: 0 0 12px 12px;">
-            <p style="font-size: 15px; margin: 0 0 16px;">Hi ${customerName},</p>
-            <p style="font-size: 15px; margin: 0 0 24px;">We've received your logo for <strong>${productName}</strong>. Our team is now preparing your artwork mockup and will send it to you for approval shortly.</p>
-
-            <div style="background: #F8F7F4; border-radius: 10px; padding: 16px 20px; margin: 0 0 24px; font-size: 14px;">
-              <div style="margin-bottom: 6px;"><span style="color: #7A7570;">Order Number:</span> <strong style="color: #C9A96E;">${orderNumber}</strong></div>
-              <div style="margin-bottom: 6px;"><span style="color: #7A7570;">Product:</span> <strong>${productName}</strong></div>
-              ${colour ? `<div style="margin-bottom: 6px;"><span style="color: #7A7570;">Colour:</span> <strong>${colour}</strong></div>` : ''}
-              ${qty ? `<div><span style="color: #7A7570;">Quantity:</span> <strong>${qty}</strong></div>` : ''}
-            </div>
-
-            <p style="font-size: 14px; color: #7A7570; margin: 0 0 8px;">Questions? Call us: <strong style="color: #1B2A4A;">02 9477 4748</strong></p>
-            <p style="font-size: 14px; color: #7A7570; margin: 0;">Or email: <a href="mailto:hello@quirkypromo.com.au" style="color: #C9A96E;">hello@quirkypromo.com.au</a></p>
-          </div>
+      subject: `Got it! We're preparing your mockup — ${orderNumber}`,
+      html: quirkyEmail(`
+        <p style="font-size:15px;margin:0 0 16px;">Hi ${customerName},</p>
+        <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Thank you — we've received your logo for <strong>${productName}</strong>! Our team is now putting together your artwork mockup, and we'll send it over for your approval very soon.</p>
+        <div style="background:#F8F7F4;border-radius:10px;padding:16px 20px;margin:0 0 16px;font-size:14px;">
+          <div style="margin-bottom:6px;"><span style="color:#7A7570;">Order</span> <strong style="color:#C9A96E;">${orderNumber}</strong></div>
+          <div style="margin-bottom:6px;"><span style="color:#7A7570;">Product</span> <strong>${productName}</strong></div>
+          ${colour ? `<div style="margin-bottom:6px;"><span style="color:#7A7570;">Colour</span> <strong>${colour}</strong></div>` : ''}
+          ${qty ? `<div><span style="color:#7A7570;">Quantity</span> <strong>${qty}</strong></div>` : ''}
         </div>
-      `,
+        <p style="font-size:14px;line-height:1.6;color:#7A7570;margin:0;">Sit tight — there's nothing more you need to do right now. Any questions, just reply or call us on <strong style="color:#1B2A4A;">02 9477 4748</strong>.</p>
+      `),
     });
 
     return Response.json({ success: true, token });
