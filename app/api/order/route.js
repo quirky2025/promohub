@@ -166,4 +166,28 @@ export async function POST(req) {
       </div>
     `;
 
-    // ✅ Email to cus
+    // ✅ Email to customer with PDF
+    await resend.emails.send({
+      from: 'QuirkyPromo <noreply@quirkypromo.com.au>',
+      replyTo: 'hello@quirkypromo.com.au',
+      to: [customer.email],
+      subject: paymentMethod === 'eft' ? `Order Confirmation — ${orderNumber}` : `Invoice — ${orderNumber}`,
+      html: emailHtml,
+      attachments: [{ filename: paymentMethod === 'eft' ? `OrderConfirmation_${orderNumber}.pdf` : `Invoice_${orderNumber}.pdf`, content: pdfBase64 }],
+    });
+
+    // ✅ Email to you with PDF
+    await resend.emails.send({
+      from: 'QuirkyPromo <noreply@quirkypromo.com.au>',
+      replyTo: customer.email,
+      to: ['hello@quirkypromo.com.au'],
+      subject: `New Order: ${orderNumber} — ${customer.name}`,
+      html: emailHtml,
+      attachments: [{ filename: paymentMethod === 'eft' ? `OrderConfirmation_${orderNumber}.pdf` : `Invoice_${orderNumber}.pdf`, content: pdfBase64 }],
+    });
+
+    return Response.json({ success: true, orderNumber });
+  } catch (error) {
+    return Response.json({ error: 'Failed to process order' }, { status: 500 });
+  }
+}
