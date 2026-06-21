@@ -129,7 +129,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
     decorations.forEach(d => {
       const st = addonState[d.id];
       if (!st?.on) return;
-      unit += d.per_unit * MARGIN;
+      unit += d.per_unit * (st.setupQty || 1) * MARGIN;
       if (d.has_setup) unit += (SETUP_FEE * st.setupQty / quantity) * MARGIN;
     });
     return unit;
