@@ -28,7 +28,7 @@ export async function GET(request) {
     if (qRes.error && eRes.error) return Response.json({ error: qRes.error.message }, { status: 500 });
 
     const quotes = (qRes.data || []).map(q => ({
-      id: q.id, kind: 'quote',
+      id: q.quote_number, kind: 'quote',
       reference: q.quote_number || null,
       customer_name: q.customer_name || null,
       customer_email: q.customer_email || null,
@@ -77,8 +77,9 @@ export async function PATCH(request) {
     if (!id || !kind) return Response.json({ error: 'Missing id/kind' }, { status: 400 });
     const table = kind === 'quote' ? 'quotes' : 'quote_requests';
     const noteCol = kind === 'quote' ? 'internal_notes' : 'internal_notes';
+    const idCol = kind === 'quote' ? 'quote_number' : 'id';
     const db = sourcingDb();
-    const { data: before } = await db.from(table).select('*').eq('id', id).single();
+    const { data: before } = await db.from(table).select('*').eq(idCol, id).single();
 
     let updates = {};
     if (action === 'status') {
@@ -93,7 +94,7 @@ export async function PATCH(request) {
       return Response.json({ error: 'Unsupported action' }, { status: 400 });
     }
 
-    const { data, error } = await db.from(table).update(updates).eq('id', id).select('*').single();
+    const { data, error } = await db.from(table).update(updates).eq(idCol, id).select('*').single();
     if (error) return Response.json({ error: error.message }, { status: 500 });
     await audit(db, user.email, `deal_${action}`, kind, id, before, data);
     return Response.json({ ok: true, deal: data });
