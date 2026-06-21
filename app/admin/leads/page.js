@@ -82,8 +82,12 @@ export default function AdminDealsPage() {
     setDetailLoading(true);
     setNoteDraft('');
     setLostReason(d.lost_reason || '');
-    const res = await fetch(`/api/admin/deals/detail?kind=${d.kind}&id=${d.id}`);
-    const data = await res.json();
+    let data = {};
+    try {
+      const res = await fetch(`/api/admin/deals/detail?kind=${d.kind}&id=${d.id}`);
+      data = await res.json().catch(() => ({ error: `HTTP ${res.status}` }));
+      if (!data.record) data = { error: data.error || `HTTP ${res.status} — no record` };
+    } catch (e) { data = { error: String(e) }; }
     setDetail(data);
     setNoteDraft(data.record?.internal_notes || '');
     setDetailLoading(false);
@@ -226,7 +230,9 @@ export default function AdminDealsPage() {
                 </div>
               )}
 
-              {detailLoading ? <div style={{ color: '#7A7570', fontSize: '13px' }}>Loading…</div> : detail && (
+              {detailLoading ? <div style={{ color: '#7A7570', fontSize: '13px' }}>Loading…</div> : (detail && !detail.record) ? (
+                <div style={{ color: '#A32D2D', fontSize: '13px', padding: '8px 0' }}>Couldn't load details. {detail.error || ''}</div>
+              ) : detail && (
                 <>
                   <div style={{ background: '#F8F7F4', borderRadius: '8px', padding: '12px 14px', fontSize: '13px', color: '#1B2A4A', marginBottom: '14px', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
                     {selected.kind === 'quote'
@@ -248,7 +254,7 @@ export default function AdminDealsPage() {
                     <div style={{ fontWeight: 700, color: NAVY, marginBottom: '6px' }}>Customer history{detail.company ? ` · ${detail.company.name}` : ''}</div>
                     {!detail.company ? <div style={{ color: '#9B958E' }}>Not linked to a company account.</div> : (
                       <div style={{ color: '#5A5550' }}>
-                        <div>{detail.contacts.length} contact(s) · {detail.history.quotes.length} quote(s) · {detail.history.enquiries.length} enquiry(s) · {detail.history.orders.length} order(s)</div>
+                        <div>{detail.contacts?.length || 0} contact(s) · {detail.history?.quotes?.length || 0} quote(s) · {detail.history?.enquiries?.length || 0} enquiry(s) · {detail.history?.orders?.length || 0} order(s)</div>
                       </div>
                     )}
                   </div>
