@@ -135,7 +135,10 @@ export default function AdminDealsPage() {
     { key: 'all', label: 'All' },
     { key: 'enquiry', label: 'Enquiries' },
     { key: 'quote', label: 'Quotes' },
-    ...STATUS_ORDER.map(s => ({ key: s, label: STATUS_META[s].label })),
+    { key: 'quote_sent', label: 'Quote Sent' },
+    { key: 'follow_up', label: 'Follow Up' },
+    { key: 'won', label: 'Won' },
+    { key: 'lost', label: 'Lost' },
   ];
 
   return (
