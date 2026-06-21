@@ -44,6 +44,7 @@ async function generateQuotePDF({
   const WHITE = rgb(1, 1, 1);
   const LIGHT = rgb(0.973, 0.969, 0.957); // #F8F7F4
   const BLACK = rgb(0.1, 0.1, 0.1);
+  const money = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   // logo image (gold box + white text on navy) — fallback to text
   let logoImg = null;
@@ -64,19 +65,21 @@ async function generateQuotePDF({
   const compInfo = [['ABN:', '95 656 714 270'], ['Phone:', '02 9477 4748'], ['Email:', 'hello@quirkypromo.com.au'], ['Web:', 'quirkypromo.com.au']];
   let ciY = height - 62;
   compInfo.forEach(([lab, val]) => { page.drawText(lab, { x: 40, y: ciY, size: 8, font: fontBold, color: WHITE }); page.drawText(val, { x: 40 + fontBold.widthOfTextAtSize(lab, 8) + 5, y: ciY, size: 8, font: fontReg, color: WHITE }); ciY -= 10; });
-  // QUOTE title — smaller, top-aligned with the logo
-  rt(docType, width - 40, height - 38, 16, fontBold, GOLD);
+  // QUOTE title — white, centred over the meta block (LogoLine style)
+  const META_X = 392;
+  const META_R = width - 40;
+  const docW = fontBold.widthOfTextAtSize(docType, 16);
+  page.drawText(docType, { x: (META_X + META_R) / 2 - docW / 2, y: height - 38, size: 16, font: fontBold, color: WHITE });
 
-  // Meta on the navy band, under the title — bold labels (mirrors the left side)
-  const META_X = 400;
+  // Meta under the title — label left, value right-aligned (gap between)
   const metaPairs = [
     ['Quote#:', quoteNumber || ''],
     ['Date:', new Date().toLocaleDateString('en-AU')],
     [docType === 'QUOTE' ? 'Valid until:' : 'Order date:', validUntil || ''],
     ['Page:', `1 of ${totalPages || 1}`],
   ];
-  let metaY = height - 54;
-  metaPairs.forEach(([lab, val]) => { page.drawText(lab, { x: META_X, y: metaY, size: 8, font: fontBold, color: WHITE }); page.drawText(String(val), { x: META_X + fontBold.widthOfTextAtSize(lab, 8) + 5, y: metaY, size: 8, font: fontReg, color: WHITE }); metaY -= 10; });
+  let metaY = height - 56;
+  metaPairs.forEach(([lab, val]) => { page.drawText(lab, { x: META_X, y: metaY, size: 8, font: fontBold, color: WHITE }); rt(String(val), META_R, metaY, 8, fontReg, WHITE); metaY -= 11; });
 
   // ── CUSTOMER / DELIVERY BOXES ───────────────────────────
   let y = height - 122;
@@ -122,10 +125,10 @@ async function generateQuotePDF({
   descLines.forEach(l => { page.drawText(l.substring(0, 62), { x: cDesc, y: liny, size: 7.5, font: fontReg, color: BLACK }); liny -= 11; });
   rt(String(qty), cQtyR, r1, 8, fontReg, BLACK);
   page.drawText('EA', { x: cUnit, y: r1, size: 8, font: fontReg, color: BLACK });
-  rt(`$${unitPrice.toFixed(2)}`, cPriceR, r1, 8, fontReg, BLACK);
+  rt(`${money(unitPrice)}`, cPriceR, r1, 8, fontReg, BLACK);
   rt(`${(Number(disc) || 0).toFixed(2)}`, cDiscR, r1, 8, fontReg, BLACK);
   rt('10.00', cTaxR, r1, 8, fontReg, BLACK);
-  rt(`$${subtotal.toFixed(2)}`, cTotR, r1, 8, fontBold, BLACK);
+  rt(`${money(subtotal)}`, cTotR, r1, 8, fontBold, BLACK);
   y -= rowH + 2;
 
   // freight row
@@ -134,21 +137,21 @@ async function generateQuotePDF({
   page.drawText('Shipping & Handling', { x: cDesc, y: fr, size: 8.5, font: fontReg, color: BLACK });
   rt('1', cQtyR, fr, 8, fontReg, BLACK);
   page.drawText('EA', { x: cUnit, y: fr, size: 8, font: fontReg, color: BLACK });
-  rt(`$${shipping.toFixed(2)}`, cPriceR, fr, 8, fontReg, BLACK);
+  rt(`${money(shipping)}`, cPriceR, fr, 8, fontReg, BLACK);
   rt('0.00', cDiscR, fr, 8, fontReg, BLACK);
   rt('10.00', cTaxR, fr, 8, fontReg, BLACK);
-  rt(`$${shipping.toFixed(2)}`, cTotR, fr, 8, fontBold, BLACK);
+  rt(`${money(shipping)}`, cTotR, fr, 8, fontBold, BLACK);
   y -= 26;
   page.drawLine({ start: { x: 40, y: y + 6 }, end: { x: width - 40, y: y + 6 }, thickness: 0.5, color: BORDER });
 
   // ── TOTALS (right) ──────────────────────────────────────
   y -= 6;
   const totRow = (label, value, bold, big) => { const sz = big ? 12 : 9; page.drawText(label, { x: 358, y, size: sz, font: bold ? fontBold : fontReg, color: BLACK }); rt(value, cTotR, y, sz, bold ? fontBold : fontReg, BLACK); y -= big ? 18 : 15; };
-  totRow('Subtotal (excl. GST)', `$${subtotal.toFixed(2)}`);
-  totRow('Shipping & Handling', `$${shipping.toFixed(2)}`);
-  totRow('GST (10%)', `$${gst.toFixed(2)}`);
+  totRow('Subtotal (excl. GST)', `${money(subtotal)}`);
+  totRow('Shipping & Handling', `${money(shipping)}`);
+  totRow('GST (10%)', `${money(gst)}`);
   page.drawLine({ start: { x: 378, y: y + 11 }, end: { x: width - 40, y: y + 11 }, thickness: 1, color: NAVY });
-  totRow('TOTAL (incl. GST)', `$${total.toFixed(2)}`, true, true);
+  totRow('TOTAL (incl. GST)', `${money(total)}`, true, true);
   y -= 12;
   if (requiredDate) { page.drawText(`Required by: ${requiredDate}`, { x: 40, y, size: 8, font: fontBold, color: BLACK }); }
   y -= 24;
@@ -348,13 +351,13 @@ export async function POST(req) {
       : `Hi ${name},\n\nThank you so much for your enquiry — it was great to hear from you. I've put together a quote for you, attached as a PDF.\n\nAny questions at all, just reply to this email or call me on 02 9477 4748.\n\nKind regards,\nThe QuirkyPromo Team`;
     const _msgHtml = String(_msg).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
     const customerHtml = `
-      <div style="font-family: Arial, Helvetica, sans-serif; max-width: 620px; margin: 0 auto; color: #1a1a1a;">
-        <div style="padding: 6px 2px;">
-          <div style="font-size: 15px; line-height: 1.75; color: #3D3A36; margin: 0 0 8px;">${_msgHtml}</div>
+      <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; color: #1a1a1a;">
+        <div style="background: #1B2A4A; padding: 20px 32px; border-radius: 12px 12px 0 0;">
+          <img src="https://www.quirkypromo.com.au/quirky-logo-quote.png" alt="QuirkyPromo" height="30" style="display:block;height:30px;" />
         </div>
-        <div style="background: #1B2A4A; border-radius: 8px; padding: 14px 18px; margin-top: 10px;">
-          <img src="https://www.quirkypromo.com.au/quirky-logo-quote.png" alt="QuirkyPromo" height="26" style="display:block;height:26px;margin-bottom:8px;" />
-          <span style="font-size: 12px; color: rgba(255,255,255,0.85);">02 9477 4748 &nbsp;&middot;&nbsp; hello@quirkypromo.com.au &nbsp;&middot;&nbsp; quirkypromo.com.au &nbsp;&middot;&nbsp; Quote ${quoteNumber} (valid until ${validUntil})</span>
+        <div style="background: #fff; border: 1px solid #E0DDD7; border-top: none; padding: 28px 32px; border-radius: 0 0 12px 12px;">
+          <div style="font-size: 15px; line-height: 1.75; margin: 0 0 8px;">${_msgHtml}</div>
+          <p style="font-size: 12.5px; color: #7A7570; margin: 22px 0 0; border-top: 1px solid #F0EEED; padding-top: 14px;">QuirkyPromo &middot; 02 9477 4748 &middot; hello@quirkypromo.com.au &middot; quirkypromo.com.au &middot; Quote ${quoteNumber} (valid until ${validUntil})</p>
         </div>
       </div>
     `;

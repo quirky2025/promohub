@@ -11,9 +11,10 @@ export async function GET(request) {
     const kind = searchParams.get('kind');
     if (!id || !kind) return Response.json({ error: 'Missing id/kind' }, { status: 400 });
     const table = kind === 'quote' ? 'quotes' : 'quote_requests';
+    const idCol = kind === 'quote' ? 'quote_number' : 'id';
     const db = sourcingDb();
 
-    const { data: record, error } = await db.from(table).select('*').eq('id', id).single();
+    const { data: record, error } = await db.from(table).select('*').eq(idCol, id).single();
     if (error) return Response.json({ error: error.message }, { status: 404 });
 
     let company = null, contacts = [], history = { quotes: [], enquiries: [], orders: [] }, activity = [];
@@ -21,7 +22,7 @@ export async function GET(request) {
       const [co, ct, q, e, o, act, addr] = await Promise.all([
         db.from('companies').select('*').eq('id', record.company_id).single(),
         db.from('contacts').select('id, email, first_name, last_name, title, phone, auth_user_id').eq('company_id', record.company_id),
-        db.from('quotes').select('id, quote_number, product_name, total, status, created_at').eq('company_id', record.company_id).order('created_at', { ascending: false }).limit(50),
+        db.from('quotes').select('quote_number, product_name, total, status, created_at').eq('company_id', record.company_id).order('created_at', { ascending: false }).limit(50),
         db.from('quote_requests').select('id, message, status, created_at').eq('company_id', record.company_id).order('created_at', { ascending: false }).limit(50),
         db.from('orders').select('*').eq('company_id', record.company_id).order('created_at', { ascending: false }).limit(50),
         db.from('company_activity').select('*').eq('company_id', record.company_id).order('created_at', { ascending: false }).limit(100),
