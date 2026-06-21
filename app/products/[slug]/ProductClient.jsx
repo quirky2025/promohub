@@ -911,7 +911,9 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
 
   // Branding carried over from the product page selection (read-only here)
   const selectedDecos = decorations.filter(d => addonState?.[d.id]?.on);
-  const brandingSummary = selectedDecos.map(d => brandingLabel(d, addonState?.[d.id]?.setupQty)).join(' · ') || 'Unbranded';
+  const brandingDecos = selectedDecos.filter(d => d.type !== 'addon');
+  const addonDecos = selectedDecos.filter(d => d.type === 'addon');
+  const brandingSummary = brandingDecos.map(d => brandingLabel(d, addonState?.[d.id]?.setupQty)).join(' · ') || 'Unbranded';
 
   function handleChange(e) {
     setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -945,9 +947,9 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
         colour: selectedColour || '',
         requiredDate,
         deliveryAddress,
-        brandingMethod: selectedDecos.map(d => d.name).join(', '),
+        brandingMethod: brandingDecos.map(d => d.name).join(', '),
         brandingSummary,
-        extraOptions: selectedDecos.map(d => d.name),
+        extraOptions: addonDecos.map(d => d.name),
         productName: product.name,
         productSku: product.supplier_sku,
         unitPrice,
