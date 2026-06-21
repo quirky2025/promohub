@@ -55,7 +55,7 @@ export async function POST(req) {
         `<tr><td style="padding:6px 0;color:#7A7570;width:120px;">${esc(k)}</td><td style="padding:6px 0;color:#1B2A4A;">${esc(v)}</td></tr>`).join('');
 
       const internalHtml = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">
-        <div style="background:#1B2A4A;padding:18px 24px;border-radius:10px 10px 0 0;"><span style="color:#fff;font-size:18px;font-weight:700;">New Enquiry</span></div>
+        <div style="background:#1B2A4A;padding:16px 24px;border-radius:10px 10px 0 0;"><img src="https://www.quirkypromo.com.au/quirky-logo-quote.png" alt="QuirkyPromo" height="30" style="display:block;height:30px;" /><p style="color:rgba(255,255,255,0.8);font-size:14px;margin:8px 0 0;">New Enquiry</p></div>
         <div style="border:1px solid #E0DDD7;border-top:none;border-radius:0 0 10px 10px;padding:20px 24px;">
           <table style="width:100%;font-size:14px;border-collapse:collapse;">${rows}</table>
           <div style="margin-top:14px;padding:14px;background:#F8F7F4;border-radius:8px;font-size:14px;color:#1B2A4A;white-space:pre-wrap;">${esc(message)}</div>
@@ -63,7 +63,7 @@ export async function POST(req) {
         </div></div>`;
 
       const customerHtml = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;">
-        <div style="background:#1B2A4A;padding:20px 24px;border-radius:10px 10px 0 0;"><span style="color:#fff;font-size:20px;font-weight:700;">QUIRKY<span style="color:#C9A96E;">PROMO</span></span></div>
+        <div style="background:#1B2A4A;padding:18px 24px;border-radius:10px 10px 0 0;"><img src="https://www.quirkypromo.com.au/quirky-logo-quote.png" alt="QuirkyPromo" height="30" style="display:block;height:30px;" /></div>
         <div style="border:1px solid #E0DDD7;border-top:none;border-radius:0 0 10px 10px;padding:24px;">
           <p style="font-size:16px;color:#1B2A4A;margin:0 0 12px;">Hi ${esc(name)},</p>
           <p style="font-size:14px;color:#3D3A36;line-height:1.6;margin:0 0 14px;">Thanks for your enquiry — we've received it and a member of our team will get back to you shortly (usually within 1 hour during business hours).</p>
