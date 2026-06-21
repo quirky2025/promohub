@@ -46,6 +46,7 @@ export default function AdminDashboard() {
           <nav style={{ display: 'flex', gap: '4px' }}>
             {[
               { label: 'Dashboard', href: '/admin' },
+              { label: 'Customers', href: '/admin/customers' },
               { label: 'Enquiries & Quotes', href: '/admin/leads' },
               { label: 'Artworks', href: '/admin/artworks' },
               { label: 'Orders', href: '/admin/orders' },
@@ -79,6 +80,7 @@ export default function AdminDashboard() {
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', color: NAVY, margin: '0 0 16px' }}>Quick Actions</h2>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
             {[
+              { label: '👥 Customers', href: '/admin/customers', color: NAVY },
               { label: '🎯 Enquiries & Quotes', href: '/admin/leads', color: NAVY },
               { label: '🎨 Upload Mockup', href: '/admin/artworks', color: GOLD },
               { label: '📦 View Orders', href: '/admin/orders', color: NAVY },
