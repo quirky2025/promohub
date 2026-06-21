@@ -497,8 +497,8 @@ export default function Nav() {
             <span style={{ display: 'block', width: '26px', height: '2px', background: '#fff', margin: '5px 0', borderRadius: '2px' }} />
           </button>
 
-          <Link href="/" onClick={() => setActiveDropdown(null)} className="qp-logo" style={{ fontFamily: '"Cormorant Garamond", Georgia, serif', fontSize: '36px', color: '#fff', textDecoration: 'none', letterSpacing: '4px', flexShrink: 0, fontWeight: 600, lineHeight: 1 }}>
-            QUIRKY<span style={{ color: GOLD }}>PROMO</span>
+          <Link href="/" onClick={() => setActiveDropdown(null)} className="qp-logo" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', flexShrink: 0 }}>
+            <img src="/quirky-logo-quote.png" alt="QuirkyPromo" style={{ height: '42px', width: 'auto', display: 'block' }} />
           </Link>
           <div className="qp-search" style={{ flex: 1, maxWidth: '640px', position: 'relative' }}>
             <input type="text" placeholder="Search products, brands, categories..."
