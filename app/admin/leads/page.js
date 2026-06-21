@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import QuoteBuilder from '@/components/QuoteBuilder';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -22,6 +23,8 @@ const LOST_REASONS = ['Too expensive', 'Went with another supplier', 'No budget 
 
 const aud = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+const fmtDateTime = (d) => d ? new Date(d).toLocaleString('en-AU', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+const fmtAddr = (co) => { if (!co) return ''; const a = co.billing_address; if (!a) return ''; if (typeof a === 'string') return a; try { return Object.values(a).filter(Boolean).join(', '); } catch { return ''; } };
 
 function StatusPill({ status }) {
   const m = STATUS_META[status] || STATUS_META.new;
@@ -34,6 +37,7 @@ function KindTag({ kind }) {
 
 const NAV = [
   { label: 'Dashboard', href: '/admin' },
+  { label: 'Customers', href: '/admin/customers' },
   { label: 'Enquiries & Quotes', href: '/admin/leads' },
   { label: 'Artworks', href: '/admin/artworks' },
   { label: 'Orders', href: '/admin/orders' },
@@ -53,6 +57,11 @@ export default function AdminDealsPage() {
   const [noteDraft, setNoteDraft] = useState('');
   const [lostReason, setLostReason] = useState('');
   const [saving, setSaving] = useState(false);
+  const [actType, setActType] = useState('note');
+  const [actBody, setActBody] = useState('');
+  const [actSaving, setActSaving] = useState(false);
+  const [builderOpen, setBuilderOpen] = useState(false);
+  const [builderPrefill, setBuilderPrefill] = useState(null);
   const router = useRouter();
 
   const fetchDeals = useCallback(async () => {
@@ -97,6 +106,17 @@ export default function AdminDealsPage() {
     }
   }
 
+  async function addActivity() {
+    if (!detail?.company?.id || !actBody.trim()) return;
+    setActSaving(true);
+    const res = await fetch('/api/admin/activity', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ company_id: detail.company.id, type: actType, body: actBody }) });
+    const data = await res.json();
+    setActSaving(false);
+    if (data.entry) { setDetail(prev => ({ ...prev, activity: [data.entry, ...(prev.activity || [])] })); setActBody(''); }
+  }
+
+  const ACT_LABEL = { note: 'Note', email_out: 'Email sent', email_in: 'Email received', call: 'Call', followup: 'Follow-up', stage: 'Stage' };
+
   const filtered = deals.filter(d => {
     if (['enquiry', 'quote'].includes(filter)) { if (d.kind !== filter) return false; }
     else if (filter !== 'all' && d.status !== filter) return false;
@@ -130,7 +150,10 @@ export default function AdminDealsPage() {
       <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '28px 32px' }}>
         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '18px' }}>
           <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', fontWeight: 600, color: NAVY, margin: 0 }}>Enquiries &amp; Quotes <span style={{ fontSize: '15px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>· Local Stock</span></h1>
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search customer / email / product…" style={{ width: '280px', padding: '9px 14px', border: '1px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', background: '#fff', outline: 'none' }} />
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search customer / email / product…" style={{ width: '260px', padding: '9px 14px', border: '1px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', background: '#fff', outline: 'none' }} />
+            <button onClick={() => { setBuilderPrefill(null); setBuilderOpen(true); }} style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '10px 16px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' }}>＋ New Quote</button>
+          </div>
         </div>
 
 
@@ -167,7 +190,7 @@ export default function AdminDealsPage() {
                       <td style={{ padding: '10px 14px', color: '#5A5550', maxWidth: '280px' }}><div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.summary || '—'}</div></td>
                       <td style={{ padding: '10px 14px', textAlign: 'right', color: '#5A5550', fontFamily: '"DM Mono", monospace' }}>{d.kind === 'quote' ? aud(d.total) : '—'}</td>
                       <td style={{ padding: '10px 14px' }}><StatusPill status={d.status} /></td>
-                      <td style={{ padding: '10px 14px', color: '#7A7570' }}>{fmtDate(d.created_at)}</td>
+                      <td style={{ padding: '10px 14px', color: '#7A7570', whiteSpace: 'nowrap' }}>{fmtDateTime(d.created_at)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -214,7 +237,7 @@ export default function AdminDealsPage() {
                   </div>
 
                   {selected.kind === 'enquiry' && (
-                    <button onClick={() => alert('Build Quote — coming in the next step (Phase 2): pick a product, auto-price, send PDF.')} style={{ width: '100%', background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '14px' }}>＋ Build Quote (next)</button>
+                    <button onClick={() => { setBuilderPrefill({ name: selected.customer_name, company: selected.customer_company, email: selected.customer_email, phone: detail.record?.phone || '', delivery: detail.company?.delivery_address || '' }); setBuilderOpen(true); }} style={{ width: '100%', background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '14px' }}>＋ Build Quote</button>
                   )}
 
                   <div style={{ fontSize: '11px', color: '#7A7570', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Internal note</div>
@@ -229,12 +252,39 @@ export default function AdminDealsPage() {
                       </div>
                     )}
                   </div>
+
+                  {detail.company && (
+                    <div style={{ borderTop: '1px solid #F0EEED', paddingTop: '12px', marginTop: '12px', fontSize: '13px' }}>
+                      <div style={{ fontWeight: 700, color: NAVY, marginBottom: '8px' }}>Timeline</div>
+                      <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+                        <select value={actType} onChange={e => setActType(e.target.value)} style={{ padding: '7px 8px', border: '1px solid #E0DDD7', borderRadius: '8px', fontSize: '12px', background: '#fff' }}>
+                          {Object.entries(ACT_LABEL).filter(([k]) => k !== 'stage').map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                        </select>
+                        <input value={actBody} onChange={e => setActBody(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addActivity(); }} placeholder="Log a note / email / call…" style={{ flex: 1, padding: '7px 10px', border: '1px solid #E0DDD7', borderRadius: '8px', fontSize: '12px', background: '#fff' }} />
+                        <button onClick={addActivity} disabled={actSaving || !actBody.trim()} style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '0 12px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}>Add</button>
+                      </div>
+                      <div style={{ maxHeight: '220px', overflowY: 'auto' }}>
+                        {(detail.activity || []).length === 0 ? <div style={{ color: '#9B958E', fontSize: '12px' }}>No entries yet.</div> : detail.activity.map(a => (
+                          <div key={a.id} style={{ padding: '7px 0', borderBottom: '1px solid #F6F4F1' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                              <span style={{ background: '#F1EFE8', color: '#5F5E5A', fontSize: '10px', fontWeight: 700, padding: '1px 7px', borderRadius: '5px', textTransform: 'uppercase' }}>{ACT_LABEL[a.type] || a.type}</span>
+                              <span style={{ fontSize: '11px', color: '#9B958E' }}>{fmtDate(a.created_at)}</span>
+                            </div>
+                            <div style={{ color: '#3D3A36', fontSize: '12.5px', whiteSpace: 'pre-wrap' }}>{a.body}</div>
+                            {a.author && <div style={{ fontSize: '10.5px', color: '#B0AAA3' }}>{a.author}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </>
               )}
             </div>
           )}
         </div>
       </div>
+
+      <QuoteBuilder open={builderOpen} onClose={() => setBuilderOpen(false)} prefill={builderPrefill} onSent={() => { setBuilderOpen(false); fetchDeals(); }} />
     </div>
   );
 }
