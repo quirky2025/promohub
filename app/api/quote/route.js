@@ -74,7 +74,7 @@ async function generateQuotePDF({
   // Meta under the title — label left, value right-aligned (gap between)
   const metaPairs = [
     ['Quote#:', quoteNumber || ''],
-    ['Date:', new Date().toLocaleDateString('en-AU')],
+    ['Date:', new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })],
     [docType === 'QUOTE' ? 'Valid until:' : 'Order date:', validUntil || ''],
     ['Page:', `1 of ${totalPages || 1}`],
   ];
@@ -170,10 +170,7 @@ async function generateQuotePDF({
   noteLines.forEach(l => { if (l) page.drawText(l, { x: 50, y: nY, size: 9, font: fontBold, color: BLACK }); nY -= NLH; });
   y -= noteH + 14;
 
-  if (notes) {
-    page.drawText('Notes:', { x: 40, y, size: 8, font: fontBold, color: NAVY }); y -= 12;
-    let line = ''; for (const w of String(notes).split(' ')) { if ((line + w).length > 95) { page.drawText(line.trim(), { x: 40, y, size: 8, font: fontReg, color: GREY }); y -= 12; line = w + ' '; } else line += w + ' '; } if (line.trim()) { page.drawText(line.trim(), { x: 40, y, size: 8, font: fontReg, color: GREY }); }
-  }
+  // (Notes are internal only — not shown on the customer PDF)
 
   // ── FOOTER ──────────────────────────────────────────────
   page.drawLine({ start: { x: 40, y: 48 }, end: { x: width - 40, y: 48 }, thickness: 0.5, color: BORDER });
@@ -351,13 +348,13 @@ export async function POST(req) {
       : `Hi ${name},\n\nThank you so much for your enquiry — it was great to hear from you. I've put together a quote for you, attached as a PDF.\n\nAny questions at all, just reply to this email or call me on 02 9477 4748.\n\nKind regards,\nThe QuirkyPromo Team`;
     const _msgHtml = String(_msg).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
     const customerHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 620px; margin: 0 auto; color: #1a1a1a;">
-        <div style="background: #1B2A4A; padding: 20px 32px; border-radius: 12px 12px 0 0;">
-          <img src="https://www.quirkypromo.com.au/quirky-logo-quote.png" alt="QuirkyPromo" height="30" style="display:block;height:30px;" />
+      <div style="font-family: Arial, Helvetica, sans-serif; max-width: 620px; margin: 0 auto; color: #1a1a1a;">
+        <div style="padding: 6px 2px;">
+          <div style="font-size: 15px; line-height: 1.75; color: #3D3A36; margin: 0 0 8px;">${_msgHtml}</div>
         </div>
-        <div style="background: #fff; border: 1px solid #E0DDD7; border-top: none; padding: 28px 32px; border-radius: 0 0 12px 12px;">
-          <div style="font-size: 15px; line-height: 1.75; margin: 0 0 8px;">${_msgHtml}</div>
-          <p style="font-size: 12.5px; color: #7A7570; margin: 22px 0 0; border-top: 1px solid #F0EEED; padding-top: 14px;">QuirkyPromo &middot; 02 9477 4748 &middot; hello@quirkypromo.com.au &middot; quirkypromo.com.au &middot; Quote ${quoteNumber} (valid until ${validUntil})</p>
+        <div style="background: #1B2A4A; border-radius: 8px; padding: 14px 18px; margin-top: 10px;">
+          <img src="https://www.quirkypromo.com.au/quirky-logo-quote.png" alt="QuirkyPromo" height="26" style="display:block;height:26px;margin-bottom:8px;" />
+          <span style="font-size: 12px; color: rgba(255,255,255,0.85);">02 9477 4748 &nbsp;&middot;&nbsp; hello@quirkypromo.com.au &nbsp;&middot;&nbsp; quirkypromo.com.au &nbsp;&middot;&nbsp; Quote ${quoteNumber} (valid until ${validUntil})</span>
         </div>
       </div>
     `;
