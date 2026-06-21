@@ -44,21 +44,19 @@ function OrderConfirmationContent() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px', color: '#3D3A36' }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>1.</span>
-              <span>We'll email you a <strong>free digital proof</strong> for approval</span>
+              <span>Your <strong>{isEFT ? 'Order Confirmation' : 'Tax Invoice'}</strong> has been emailed to you as a PDF</span>
             </div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>2.</span>
-              <span>You approve the artwork online (unlimited revisions)</span>
+              <span>We'll send you a <strong>free digital proof</strong> to approve (unlimited revisions)</span>
             </div>
-            {isEFT && (
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>3.</span>
-                <span>Once approved, we'll send your <strong>Invoice</strong> — pay via bank transfer</span>
-              </div>
-            )}
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-              <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>{isEFT ? '4.' : '3.'}</span>
-              <span>Production begins · Delivery 2–5 business days after dispatch</span>
+              <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>3.</span>
+              <span>{isEFT ? 'Once you approve the proof and we receive payment, production begins' : 'Once you approve the proof, production begins'}</span>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+              <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>4.</span>
+              <span>Delivery 2–5 business days after dispatch</span>
             </div>
           </div>
         </div>
@@ -77,7 +75,7 @@ function OrderConfirmationContent() {
         </p>
 
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-          <Link href="/products" style={{ background: GOLD, color: '#fff', textDecoration: 'none', padding: '14px 28px', borderRadius: '10px', fontWeight: 700, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>
+          <Link href="/" style={{ background: GOLD, color: '#fff', textDecoration: 'none', padding: '14px 28px', borderRadius: '10px', fontWeight: 700, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>
             Continue Shopping
           </Link>
           <a href="tel:0294774748" style={{ background: '#fff', color: NAVY, textDecoration: 'none', padding: '14px 28px', borderRadius: '10px', fontWeight: 600, fontSize: '15px', border: `1.5px solid ${NAVY}`, fontFamily: '"DM Sans", sans-serif' }}>
@@ -93,6 +91,4 @@ export default function OrderConfirmationPage() {
   return (
     <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>Loading...</div>}>
       <OrderConfirmationContent />
-    </Suspense>
-  );
-}
+ 
