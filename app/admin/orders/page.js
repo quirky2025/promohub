@@ -25,6 +25,19 @@ const STATUS_FLOW = [
 
 const STATUS_MAP = Object.fromEntries(STATUS_FLOW.map(s => [s.key, s]));
 
+function deriveStatus(order) {
+  const s = order.status;
+  if (s === 'cancelled') return 'cancelled';
+  if (s === 'in_production') return 'in_production';
+  if (s === 'dispatched') return 'dispatched';
+  if (s === 'delivered' || s === 'completed') return 'delivered';
+  const a = order.artwork_status;
+  if (a === 'approved') return 'artwork_approved';
+  if (a === 'mockup_sent' || a === 'changes_requested') return 'artwork_sent';
+  if (STATUS_MAP[s]) return s;
+  return 'pending';
+}
+
 const PAYMENT_STATUS = {
   paid:    { bg: '#D1FAE5', color: '#065F46', label: 'Paid' },
   unpaid:  { bg: '#FEE2E2', color: '#991B1B', label: 'Unpaid' },
@@ -45,10 +58,13 @@ export default function AdminOrdersPage() {
 
   async function fetchOrders() {
     setLoading(true);
-    let q = supabase.from('orders').select('*').order('created_at', { ascending: false });
-    if (statusFilter) q = q.eq('status', statusFilter);
-    const { data } = await q;
-    if (data) setOrders(data);
+    try {
+      const res = await fetch('/api/admin/orders', { cache: 'no-store' });
+      const data = await res.json();
+      setOrders(Array.isArray(data.orders) ? data.orders : []);
+    } catch {
+      setOrders([]);
+    }
     setLoading(false);
   }
 
@@ -88,7 +104,8 @@ export default function AdminOrdersPage() {
   const fmtDate = d => d ? new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: '2-digit' }) : null;
   const fmtDateTime = d => d ? new Date(d).toLocaleString('en-AU', { timeZone: 'Australia/Sydney', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : null;
 
-  const currentStatus = selected ? (STATUS_MAP[selected.status] || STATUS_FLOW[0]) : null;
+  const currentStatus = selected ? (STATUS_MAP[deriveStatus(selected)] || STATUS_FLOW[0]) : null;
+  const shown = statusFilter ? orders.filter(o => deriveStatus(o) === statusFilter) : orders;
 
   return (
     <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', minHeight: '100vh' }}>
@@ -120,7 +137,7 @@ export default function AdminOrdersPage() {
         <div style={{ width: selected ? '50%' : '100%', overflowY: 'auto', borderRight: '1px solid #E0DDD7', transition: 'width .2s' }}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570' }}>Loading...</div>
-          ) : orders.length === 0 ? (
+          ) : shown.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570' }}>No orders yet</div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
@@ -133,7 +150,7 @@ export default function AdminOrdersPage() {
               </thead>
               <tbody>
                 {orders.map((order, i) => {
-                  const st = STATUS_MAP[order.status] || STATUS_FLOW[0];
+                  const st = STATUS_MAP[deriveStatus(order)] || STATUS_FLOW[0];
                   const pay = PAYMENT_STATUS[order.payment_status] || PAYMENT_STATUS.pending;
                   const isSelected = selected?.id === order.id;
                   const itemCount = Array.isArray(order.items) ? order.items.length : 0;
