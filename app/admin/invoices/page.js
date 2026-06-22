@@ -10,7 +10,7 @@ const BG = '#F8F7F4';
 const NAV = [
   { label: 'Dashboard', href: '/admin' },
   { label: 'Customers', href: '/admin/customers' },
-  { label: 'Enquiries & Quotes', href: '/admin/quotes' },
+  { label: 'Enquiries & Quotes', href: '/admin/leads' },
   { label: 'Orders', href: '/admin/orders' },
   { label: 'Artworks', href: '/admin/artworks' },
   { label: 'Invoices', href: '/admin/invoices' },
