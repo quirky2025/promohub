@@ -92,6 +92,12 @@ export default function AdminProductionPage() {
         orderId: poFor.id, orderNumber: poFor.order_number || poFor.invoice_number,
         supplierId: sid || null, costSubtotal: Number(cost) || 0, freightCost: Number(freight) || 0,
         notes, status: 'sent',
+        items: (poFor.items || []).map(it => ({
+          stockCode: it.sku || it.productSku || it.stockCode || '',
+          name: it.productName || it.name || '',
+          qty: it.qty || it.quantity || 1,
+          branding: it.branding || it.brandingMethod || it.decoration_method || '',
+        })),
       }),
     });
     const data = await res.json();
@@ -103,6 +109,14 @@ export default function AdminProductionPage() {
   async function patchPo(id, body) {
     const res = await fetch('/api/admin/purchase-orders', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, ...body }) });
     if (res.ok) load(); else alert('Update failed');
+  }
+
+  async function editCost(po) {
+    const c = prompt('Product cost ($):', po.cost_subtotal ?? 0);
+    if (c === null) return;
+    const f = prompt('Freight cost ($):', po.freight_cost ?? 0);
+    if (f === null) return;
+    patchPo(po.id, { action: 'details', costSubtotal: Number(c) || 0, freightCost: Number(f) || 0 });
   }
 
   const supplierObj = (id) => suppliers.find(s => s.id === id);
@@ -159,10 +173,10 @@ export default function AdminProductionPage() {
                         : <span style={{ color: '#B0AAA3', fontSize: '11px' }}>{!isPaid(o) ? 'Awaiting payment' : 'Awaiting artwork'}</span>}
                     </td>
                     <td style={{ padding: '12px', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
-                      {po ? <span style={{ color: NAVY }}>{po.po_number} <span style={{ background: ps.bg, color: ps.color, fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '20px', marginLeft: '4px' }}>{ps.label}</span></span> : <span style={{ color: '#B0AAA3' }}>—</span>}
+                      {po ? <span><a href={`/api/admin/purchase-orders/pdf?id=${po.id}`} target="_blank" rel="noreferrer" style={{ color: NAVY, textDecoration: 'underline' }}>{po.po_number}</a> <span style={{ background: ps.bg, color: ps.color, fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '20px', marginLeft: '4px' }}>{ps.label}</span></span> : <span style={{ color: '#B0AAA3' }}>—</span>}
                     </td>
                     <td style={{ padding: '12px', color: '#5A5550' }}>{po ? <span>{supplierName(po.supplier_id)}{termsBadge(po.supplier_id)}</span> : ''}</td>
-                    <td style={{ padding: '12px', whiteSpace: 'nowrap', color: NAVY }}>{po ? money(po.cost_total) : ''}</td>
+                    <td style={{ padding: '12px', whiteSpace: 'nowrap', color: NAVY }}>{po ? <span>{money(po.cost_total)} <button onClick={() => editCost(po)} style={{ background: 'none', border: 'none', color: GOLD, fontSize: '11px', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>edit</button></span> : ''}</td>
                     <td style={{ padding: '12px', whiteSpace: 'nowrap', fontSize: '12px' }}>
                       {po ? (po.supplier_invoice_number
                         ? <span style={{ color: '#5A5550' }}>{po.supplier_invoice_number}</span>
