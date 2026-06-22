@@ -49,14 +49,28 @@ export async function POST(req) {
       docRef: `AP-${art.order_number}-V1`,
     });
 
-    const fileName = `${art.order_number}_proof_${Date.now()}.pdf`;
-    const { error: upErr } = await supabase.storage
-      .from('mockups')
-      .upload(fileName, Buffer.from(pdfBytes), { contentType: 'application/pdf', upsert: true });
-    if (upErr) throw upErr;
-
-    const { data: pub } = supabase.storage.from('mockups').getPublicUrl(fileName);
-    const url = pub.publicUrl;
+    // Upload the proof PDF to Cloudinary (image/upload) so the thumbnail and the
+    // customer approval page can preview it (via the pg_1 -> jpg transform).
+    const cloud = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    let url;
+    if (cloud && preset) {
+      const form = new FormData();
+      form.append('file', new Blob([pdfBytes], { type: 'application/pdf' }), `${art.order_number}_proof.pdf`);
+      form.append('upload_preset', preset);
+      const up = await fetch(`https://api.cloudinary.com/v1_1/${cloud}/image/upload`, { method: 'POST', body: form });
+      const upData = await up.json();
+      if (!up.ok || !upData.secure_url) throw new Error('Cloudinary upload failed: ' + (upData.error?.message || up.status));
+      url = upData.secure_url;
+    } else {
+      // fallback: Supabase Storage
+      const fileName = `${art.order_number}_proof_${Date.now()}.pdf`;
+      const { error: upErr } = await supabase.storage
+        .from('mockups')
+        .upload(fileName, Buffer.from(pdfBytes), { contentType: 'application/pdf', upsert: true });
+      if (upErr) throw upErr;
+      url = supabase.storage.from('mockups').getPublicUrl(fileName).data.publicUrl;
+    }
 
     await supabase.from('artworks').update({ mockup_url: url }).eq('token', token);
 
