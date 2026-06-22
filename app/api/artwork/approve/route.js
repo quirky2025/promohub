@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
+import { PDFDocument } from 'pdf-lib';
 import { quirkyEmail } from '@/lib/emailLayout';
 import { generateApprovalCertificate } from '@/lib/certGen';
 import { generateOrderDocPDF } from '@/lib/orderDocPdf';
@@ -11,6 +12,7 @@ const supabase = createClient(
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const BANK = { name: 'Grow Your Marketing', bank: 'ANZ', bsb: '012-306', acct: '192040129' };
+const money = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 async function generateInvoiceNumber() {
   const year = String(new Date().getFullYear()).slice(2);
@@ -18,7 +20,35 @@ async function generateInvoiceNumber() {
   return `INV${year}${String((count || 0) + 1).padStart(4, '0')}`;
 }
 
-const money = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+// Combine the approved ARTWORK proof (page 1+) with the CERTIFICATE (last).
+async function buildApprovedPack(artworkUrl, certBytes) {
+  const merged = await PDFDocument.create();
+  if (artworkUrl) {
+    try {
+      const res = await fetch(artworkUrl);
+      if (res.ok) {
+        const buf = new Uint8Array(await res.arrayBuffer());
+        const looksPdf = /\.pdf($|\?)/i.test(artworkUrl) || (res.headers.get('content-type') || '').includes('pdf');
+        if (looksPdf) {
+          const a = await PDFDocument.load(buf);
+          const pages = await merged.copyPages(a, a.getPageIndices());
+          pages.forEach(p => merged.addPage(p));
+        } else {
+          let img; try { img = await merged.embedPng(buf); } catch { img = await merged.embedJpg(buf); }
+          const pg = merged.addPage([595, 842]);
+          const maxW = 515, maxH = 760;
+          let w = img.width, h = img.height; const r = Math.min(maxW / w, maxH / h);
+          w *= r; h *= r;
+          pg.drawImage(img, { x: (595 - w) / 2, y: (842 - h) / 2, width: w, height: h });
+        }
+      }
+    } catch { /* skip artwork if unavailable */ }
+  }
+  const c = await PDFDocument.load(certBytes);
+  const cPages = await merged.copyPages(c, c.getPageIndices());
+  cPages.forEach(p => merged.addPage(p));
+  return await merged.save();
+}
 
 export async function POST(req) {
   try {
@@ -42,33 +72,31 @@ export async function POST(req) {
       status: 'approved', approved_by: approvedBy, approved_at: approvedAt, ip_address: ip, notes: notes || '',
     }).eq('token', token);
 
-    // ── Approval Certificate (branded, PandaDoc-style) ──────
+    // Certificate, then combine: ARTWORK (front) + CERTIFICATE (back)
     const certBytes = await generateApprovalCertificate({
       brandLogoUrl: site + '/quirky-logo-light.png',
       refNumber: `AP-${artwork.order_number}-V1`,
       approvedOnText: approvedAtText,
       signerName: approvedBy,
       signerEmail: artwork.customer_email,
-      approvedAtText,
-      ip,
+      approvedAtText, ip,
       orderNumber: artwork.order_number,
       productName: artwork.product_name,
       version: 'V1',
     });
-    const certB64 = Buffer.from(certBytes).toString('base64');
-    const certFile = `ApprovalCertificate_${artwork.order_number}.pdf`;
+    const packBytes = await buildApprovedPack(artwork.mockup_url, certBytes);
+    const packB64 = Buffer.from(packBytes).toString('base64');
+    const packFile = `ArtworkApproval_${artwork.order_number}.pdf`;
 
     if (artwork.payment_method === 'eft') {
       const invoiceNumber = await generateInvoiceNumber();
       const { data: order } = await supabase.from('orders').select('*').eq('invoice_number', artwork.order_number).single();
-
-      const attachments = [{ filename: certFile, content: certB64 }];
+      const attachments = [{ filename: packFile, content: packB64 }];
       let amountText = '';
 
       if (order) {
         await supabase.from('orders').update({ payment_status: 'invoiced' }).eq('invoice_number', artwork.order_number);
         amountText = money(order.total);
-        // Real Tax Invoice PDF (AMOUNT DUE)
         try {
           const items = Array.isArray(order.items) ? order.items : [];
           const invBytes = await generateOrderDocPDF({
@@ -89,12 +117,12 @@ export async function POST(req) {
             paymentStatus: 'awaiting', leadTimeDays: '5–7', bank: BANK, quoteRef: order.quote_ref || '',
           });
           attachments.push({ filename: `TaxInvoice_${invoiceNumber}.pdf`, content: Buffer.from(invBytes).toString('base64') });
-        } catch (e) { /* still send cert + email body invoice if PDF fails */ }
+        } catch (e) { /* still send pack if invoice PDF fails */ }
       }
 
       const bodyHtml = `
         <p style="font-size:15px;margin:0 0 16px;">Hi ${artwork.customer_name},</p>
-        <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Thank you for approving your artwork for <strong>${artwork.product_name}</strong>! Your <strong>Tax Invoice</strong> and <strong>Approval Certificate</strong> are attached. Production begins as soon as payment is received.</p>
+        <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Thank you for approving your artwork for <strong>${artwork.product_name}</strong>! Your <strong>Tax Invoice</strong> and your <strong>approved artwork + certificate</strong> are attached. Production begins as soon as payment is received.</p>
         <div style="background:#F8F7F4;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
           <span style="color:#7A7570;">Order</span> <strong style="color:#1B2A4A;">${artwork.order_number}</strong>
           &nbsp;·&nbsp; <span style="color:#7A7570;">Invoice</span> <strong style="color:#1B2A4A;">${invoiceNumber}</strong>
@@ -127,19 +155,19 @@ export async function POST(req) {
     } else {
       const bodyHtml = `
         <p style="font-size:15px;margin:0 0 16px;">Hi ${artwork.customer_name},</p>
-        <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Your artwork for <strong>${artwork.product_name}</strong> is approved and <strong>production is now starting</strong> for order <strong>${artwork.order_number}</strong>. Your <strong>Approval Certificate</strong> is attached for your records.</p>
+        <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Your artwork for <strong>${artwork.product_name}</strong> is approved and <strong>production is now starting</strong> for order <strong>${artwork.order_number}</strong>. Your <strong>approved artwork + certificate</strong> is attached for your records.</p>
         <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">We'll let you know as soon as your order is dispatched.</p>
         <p style="font-size:14px;line-height:1.6;color:#3D3A36;margin:16px 0 0;">Any questions, just reply or call us on <strong>02 9477 4748</strong>.</p>`;
       await resend.emails.send({
         from: 'QuirkyPromo <noreply@quirkypromo.com.au>', replyTo: 'hello@quirkypromo.com.au',
         to: [artwork.customer_email], subject: `Artwork Approved — Production Starting — ${artwork.order_number}`,
-        html: quirkyEmail(bodyHtml), attachments: [{ filename: certFile, content: certB64 }],
+        html: quirkyEmail(bodyHtml), attachments: [{ filename: packFile, content: packB64 }],
       });
       await resend.emails.send({
         from: 'QuirkyPromo <noreply@quirkypromo.com.au>', replyTo: artwork.customer_email,
         to: ['hello@quirkypromo.com.au'], subject: `PRODUCTION START — ${artwork.order_number} — Approved`,
         html: quirkyEmail(`<p><strong>${artwork.customer_name}</strong> approved <strong>${artwork.product_name}</strong>. Payment already received. Ready to place supplier order.</p>`),
-        attachments: [{ filename: certFile, content: certB64 }],
+        attachments: [{ filename: packFile, content: packB64 }],
       });
     }
 
