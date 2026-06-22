@@ -73,6 +73,7 @@ export async function PATCH(request) {
       updates.cost_total = Number((subtotal + freight).toFixed(2));
       if (b.notes !== undefined) updates.notes = b.notes || null;
       if (b.supplierId !== undefined) updates.supplier_id = b.supplierId || null;
+      if (b.items !== undefined) updates.items = b.items || null;
     } else {
       return Response.json({ error: 'Unknown action' }, { status: 400 });
     }

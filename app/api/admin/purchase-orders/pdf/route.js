@@ -28,14 +28,15 @@ export async function GET(request) {
     const bytes = await generatePurchaseOrderPDF({
       poNumber: po.po_number,
       date: new Date(po.created_at || Date.now()).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
-      supplier: { name: supplier?.name || '', email: supplier?.email || '', terms: termsLabel },
-      deliverTo: order?.delivery_address || '',
-      ourRef: (po.order_number || order?.order_number || '') + (order?.job_name ? ` (${order.job_name})` : ''),
-      items,
-      subtotal: po.cost_subtotal,
+      ourRef: po.order_number || order?.order_number || '',
+      jobName: order?.job_name || order?.customer_company || '',
+      deliver: {
+        name: order?.customer_name || '',
+        phone: order?.customer_phone || '',
+        address: order?.delivery_address || '',
+      },
+      items: items.map(it => ({ stockCode: it.stockCode, name: it.name, qty: it.qty, unitCost: it.unitCost, branding: it.branding })),
       freight: po.freight_cost,
-      total: po.cost_total,
-      notes: po.notes || '',
     });
 
     return new Response(Buffer.from(bytes), {
