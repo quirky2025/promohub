@@ -211,8 +211,9 @@ export default function AdminArtworksPage() {
           <nav style={{ display: 'flex', gap: '4px' }}>
             {[
               { label: 'Dashboard', href: '/admin' },
-              { label: 'Artworks', href: '/admin/artworks' },
               { label: 'Orders', href: '/admin/orders' },
+              { label: 'Artworks', href: '/admin/artworks' },
+              { label: 'Invoices', href: '/admin/invoices' },
               { label: 'Quotes', href: '/admin/quotes' },
               { label: 'Products', href: '/admin/products' },
             ].map(item => (
