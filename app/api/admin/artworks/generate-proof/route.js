@@ -22,7 +22,11 @@ export async function POST(req) {
     const { data: tpl } = await supabase.from('product_templates').select('*').eq('stock_code', code).single();
     if (!tpl) return Response.json({ error: 'no_template', stockCode: code }, { status: 200 });
 
-    const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quirkypromo.com.au';
+    // Resolve assets against the CURRENT deployment origin (preview or prod),
+    // so it works before the branch is merged to production.
+    const host = req.headers.get('host');
+    const proto = req.headers.get('x-forwarded-proto') || 'https';
+    const site = host ? `${proto}://${host}` : (process.env.NEXT_PUBLIC_SITE_URL || 'https://www.quirkypromo.com.au');
     const templateUrl = /^https?:\/\//.test(tpl.template_url) ? tpl.template_url : site + tpl.template_url;
 
     const pdfBytes = await generateArtworkProof({
