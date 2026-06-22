@@ -4,7 +4,7 @@ import { sourcingDb } from '@/lib/sourcingDb';
 async function nextPoNumber(db) {
   const year = String(new Date().getFullYear()).slice(2);
   const { count } = await db.from('purchase_orders').select('*', { count: 'exact', head: true });
-  return `SP${year}${String((count || 0) + 1).padStart(4, '0')}`;
+  return `PO${year}${String((count || 0) + 1).padStart(4, '0')}`;
 }
 
 export async function GET(request) {

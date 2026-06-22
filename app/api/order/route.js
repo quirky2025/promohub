@@ -11,14 +11,14 @@ const supabase = createClient(
 );
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// ✅ PO260001 格式
+// ✅ Customer order / Order Confirmation number: OC260001
 async function generateOrderNumber() {
   const year = String(new Date().getFullYear()).slice(2);
   const { count } = await supabase
     .from('orders')
     .select('*', { count: 'exact', head: true });
   const num = String((count || 0) + 1).padStart(4, '0');
-  return `PO${year}${num}`;
+  return `OC${year}${num}`;
 }
 
 

@@ -28,7 +28,7 @@ export async function GET(request) {
     const bytes = await generatePurchaseOrderPDF({
       poNumber: po.po_number,
       date: new Date(po.created_at || Date.now()).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
-      ourRef: (po.order_number || order?.order_number || '').replace(/^PO/i, 'Order '),
+      ourRef: po.order_number || order?.order_number || '',
       jobName: order?.job_name || order?.customer_company || '',
       deliver: {
         company: order?.customer_company || '',
