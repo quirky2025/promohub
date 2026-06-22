@@ -63,10 +63,14 @@ function normalizeOrder(order, related) {
   const grossTotal =
     order.total_gross ?? order.total ?? order.gross_total ?? order.subtotal ?? 0;
 
+  const aw = related.artworkByNumber?.[order.order_number || order.invoice_number];
+
   return {
     ...order,
     order_number: order.order_number || order.invoice_number || '',
     display_status: normalizeStatus(order.status),
+    artwork_status: aw?.status || null,
+    artwork_mockup_url: aw?.mockup_url || null,
     total_gross: money(grossTotal),
     total_net: money(order.total_net ?? order.subtotal),
     gst_total: money(order.gst_total ?? order.gst),
@@ -175,11 +179,22 @@ export async function GET(request) {
       safeRelated(db, 'order_status_log', ids, '*', 'created_at'),
     ]);
 
+    const orderNumbers = orders.map((o) => o.order_number || o.invoice_number).filter(Boolean);
+    const artworkByNumber = {};
+    if (orderNumbers.length) {
+      const { data: aw } = await db
+        .from('artworks')
+        .select('order_number,status,mockup_url')
+        .in('order_number', orderNumbers);
+      (aw || []).forEach((a) => { artworkByNumber[a.order_number] = a; });
+    }
+
     const related = {
       itemsByOrder: groupByOrder(itemsRes.rows),
       proofsByOrder: groupByOrder(proofsRes.rows),
       approvalsByOrder: groupByOrder(approvalsRes.rows),
       statusLogByOrder: groupByOrder(statusLogRes.rows),
+      artworkByNumber,
     };
 
     let normalized = orders.map((order) => normalizeOrder(order, related));
