@@ -27,9 +27,9 @@ const STATE = {
 const money = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function payInfo(o) {
-  const gross = Number(o.total_gross ?? o.total ?? 0);
-  const paid = Number(o.amount_paid ?? 0);
-  const state = o.payment_state || (paid <= 0 ? 'awaiting' : (gross > 0 && paid >= gross) ? 'paid' : 'deposit');
+  const gross = Number(o.total_gross) || Number(o.total) || 0;
+  const paid = Number(o.amount_paid) || 0;
+  const state = paid <= 0 ? 'awaiting' : (gross > 0 && paid >= gross) ? 'paid' : 'deposit';
   return { gross, paid, balance: Math.max(gross - paid, 0), state };
 }
 

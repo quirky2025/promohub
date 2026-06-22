@@ -32,7 +32,7 @@ export async function POST(request) {
 
     // Re-read order (trigger has updated amount_paid / payment_state).
     const { data: order } = await db.from('orders').select('*').eq('id', orderId).single();
-    const gross = Number(order?.total_gross ?? order?.total ?? 0);
+    const gross = Number(order?.total_gross) || Number(order?.total) || 0;
     const paid = Number(order?.amount_paid ?? 0);
     const payment_status = gross > 0 && paid >= gross ? 'paid' : paid > 0 ? 'pending' : 'unpaid';
     await db.from('orders').update({ payment_status }).eq('id', orderId);
