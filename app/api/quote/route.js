@@ -67,7 +67,7 @@ async function generateQuotePDF({
   compInfo.forEach(([lab, val]) => { page.drawText(lab, { x: 40, y: ciY, size: 9, font: fontBold, color: WHITE }); page.drawText(val, { x: 40 + fontBold.widthOfTextAtSize(lab, 9) + 5, y: ciY, size: 9, font: fontReg, color: WHITE }); ciY -= 12; });
   const META_X = 392;
   const META_R = width - 40;
-  rt(docType, META_R, height - 44, 18, fontBold, WHITE);
+  rt(docType, META_R, height - 35, 18, fontBold, WHITE);
 
   // Meta — label left (x=392), value right-aligned (W-40)
   const metaPairs = [
