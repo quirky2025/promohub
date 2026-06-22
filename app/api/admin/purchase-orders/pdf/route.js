@@ -31,6 +31,7 @@ export async function GET(request) {
       ourRef: po.order_number || order?.order_number || '',
       jobName: order?.job_name || order?.customer_company || '',
       deliver: {
+        company: order?.customer_company || '',
         name: order?.customer_name || '',
         phone: order?.customer_phone || '',
         address: order?.delivery_address || '',
