@@ -40,7 +40,7 @@ async function generateQuotePDF({
   // Colours
   const NAVY = rgb(0.106, 0.165, 0.290);  // #1B2A4A
   const GOLD = rgb(0.788, 0.663, 0.431);  // #C9A96E
-  const GREY = rgb(0.478, 0.459, 0.439);  // #7A7570
+  const GREY = rgb(0.08, 0.08, 0.08);  // unified: all body text black
   const WHITE = rgb(1, 1, 1);
   const LIGHT = rgb(0.973, 0.969, 0.957); // #F8F7F4
   const BLACK = rgb(0.1, 0.1, 0.1);
@@ -53,33 +53,31 @@ async function generateQuotePDF({
   const BORDER = rgb(0.72, 0.72, 0.72);
   const rt = (text, xRight, yy, size, font, color) => { const w = font.widthOfTextAtSize(String(text), size); page.drawText(String(text), { x: xRight - w, y: yy, size, font, color }); };
 
-  // ── NAVY HEADER BAND ────────────────────────────────────
-  page.drawRectangle({ x: 0, y: height - 100, width, height: 100, color: NAVY });
+  // ── NAVY HEADER BAND ──── (unified standard: band 110, image logo, title 18, meta x392)
+  page.drawRectangle({ x: 0, y: height - 110, width, height: 110, color: NAVY });
   if (logoImg) {
-    const lh = 32, lw = lh * (logoImg.width / logoImg.height);
-    page.drawImage(logoImg, { x: 40, y: height - 52, width: lw, height: lh });
+    const lw = 150, lh = lw * (256 / 1400);
+    page.drawImage(logoImg, { x: 40, y: height - 42, width: lw, height: lh });
   } else {
-    page.drawText('QUIRKY', { x: 40, y: height - 46, size: 20, font: fontBold, color: WHITE });
-    page.drawText('PROMO', { x: 40 + fontBold.widthOfTextAtSize('QUIRKY', 20), y: height - 46, size: 20, font: fontBold, color: GOLD });
+    page.drawText('QUIRKY', { x: 40, y: height - 36, size: 20, font: fontBold, color: WHITE });
+    page.drawText('PROMO', { x: 112, y: height - 36, size: 20, font: fontBold, color: GOLD });
   }
   const compInfo = [['ABN:', '95 656 714 270'], ['Phone:', '02 9477 4748'], ['Email:', 'hello@quirkypromo.com.au'], ['Web:', 'quirkypromo.com.au']];
-  let ciY = height - 62;
-  compInfo.forEach(([lab, val]) => { page.drawText(lab, { x: 40, y: ciY, size: 8, font: fontBold, color: WHITE }); page.drawText(val, { x: 40 + fontBold.widthOfTextAtSize(lab, 8) + 5, y: ciY, size: 8, font: fontReg, color: WHITE }); ciY -= 10; });
-  // QUOTE title — white, centred over the meta block (LogoLine style)
+  let ciY = height - 64;
+  compInfo.forEach(([lab, val]) => { page.drawText(lab, { x: 40, y: ciY, size: 9, font: fontBold, color: WHITE }); page.drawText(val, { x: 40 + fontBold.widthOfTextAtSize(lab, 9) + 5, y: ciY, size: 9, font: fontReg, color: WHITE }); ciY -= 12; });
   const META_X = 392;
   const META_R = width - 40;
-  const docW = fontBold.widthOfTextAtSize(docType, 16);
-  page.drawText(docType, { x: (META_X + META_R) / 2 - docW / 2, y: height - 38, size: 16, font: fontBold, color: WHITE });
+  rt(docType, META_R, height - 44, 18, fontBold, WHITE);
 
-  // Meta under the title — label left, value right-aligned (gap between)
+  // Meta — label left (x=392), value right-aligned (W-40)
   const metaPairs = [
     ['Quote#:', quoteNumber || ''],
     ['Date:', new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })],
     [docType === 'QUOTE' ? 'Valid until:' : 'Order date:', validUntil || ''],
     ['Page:', `1 of ${totalPages || 1}`],
   ];
-  let metaY = height - 56;
-  metaPairs.forEach(([lab, val]) => { page.drawText(lab, { x: META_X, y: metaY, size: 8, font: fontBold, color: WHITE }); rt(String(val), META_R, metaY, 8, fontReg, WHITE); metaY -= 11; });
+  let metaY = height - 60;
+  metaPairs.forEach(([lab, val]) => { page.drawText(lab, { x: META_X, y: metaY, size: 9, font: fontBold, color: WHITE }); rt(String(val), META_R, metaY, 9, fontReg, WHITE); metaY -= 12; });
 
   // ── CUSTOMER / DELIVERY BOXES ───────────────────────────
   let y = height - 122;
