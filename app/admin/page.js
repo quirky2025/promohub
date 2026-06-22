@@ -51,6 +51,7 @@ export default function AdminDashboard() {
               { label: 'Orders', href: '/admin/orders' },
               { label: 'Artworks', href: '/admin/artworks' },
               { label: 'Invoices', href: '/admin/invoices' },
+              { label: 'Production', href: '/admin/production' },
               { label: 'Products', href: '/admin/products' },
               { label: 'Sourcing', href: '/admin/sourcing' },
             ].map(item => (
