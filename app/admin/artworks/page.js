@@ -31,10 +31,24 @@ export default function AdminArtworksPage() {
   const [mockupFile, setMockupFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState('');
+  // auto proof generator
+  const [genStock, setGenStock] = useState('');
+  const [genColour, setGenColour] = useState('');
+  const [genPrintColour, setGenPrintColour] = useState('');
+  const [genPms, setGenPms] = useState('');
+  const [generating, setGenerating] = useState(false);
+  const [generatedUrl, setGeneratedUrl] = useState('');
 
   useEffect(() => {
     loadArtworks();
   }, [filter]);
+
+  // reset the auto-proof form whenever a different artwork is opened
+  useEffect(() => {
+    setGeneratedUrl('');
+    setGenStock(selected?.stock_code || '');
+    setGenColour(''); setGenPrintColour(''); setGenPms('');
+  }, [selected]);
 
   async function loadArtworks() {
     setLoading(true);
@@ -93,6 +107,58 @@ export default function AdminArtworksPage() {
       setSelected(null);
       setMockupFile(null);
       loadArtworks();
+    }
+    setUploading(false);
+  }
+
+  async function generateProof() {
+    if (!selected) return;
+    setGenerating(true);
+    setSuccess('');
+    try {
+      const res = await fetch('/api/admin/artworks/generate-proof', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: selected.token,
+          stockCode: genStock,
+          productColour: genColour,
+          printColour: genPrintColour,
+          pms: genPms,
+        }),
+      });
+      const data = await res.json();
+      if (data.error === 'no_template') {
+        alert('No template saved for stock code "' + data.stockCode + '". Add one first (download the Trends template, save it as a product template). Auto-generate works once the template exists.');
+      } else if (data.error === 'no_stock_code') {
+        alert('Please enter the product stock code first.');
+      } else if (!res.ok || data.error) {
+        alert('Generate failed: ' + (data.error || 'unknown'));
+      } else {
+        setGeneratedUrl(data.url);
+        setSuccess('Proof generated - preview it, then send to the customer.');
+      }
+    } catch (e) {
+      alert('Generate failed: ' + e.message);
+    }
+    setGenerating(false);
+  }
+
+  async function sendGenerated() {
+    if (!generatedUrl || !selected) return;
+    setUploading(true);
+    const res = await fetch('/api/admin/artworks/send-mockup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: selected.token, mockupUrl: generatedUrl }),
+    });
+    if (res.ok) {
+      setSuccess('Proof sent to ' + selected.customer_email + '!');
+      setSelected(null);
+      setGeneratedUrl('');
+      loadArtworks();
+    } else {
+      alert('Send failed');
     }
     setUploading(false);
   }
@@ -264,6 +330,36 @@ export default function AdminArtworksPage() {
                 </div>
               </div>
             )}
+
+            {/* Auto-generate proof */}
+            <div style={{ border: '1.5px solid ' + GOLD, borderRadius: '10px', padding: '16px', background: '#FFFBF4', marginBottom: '16px' }}>
+              <div style={{ fontSize: '13px', fontWeight: 700, color: NAVY, marginBottom: '10px' }}>Generate proof automatically</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
+                <input value={genStock} onChange={e => setGenStock(e.target.value)} placeholder="Stock code (e.g. 128027)"
+                  style={{ padding: '8px 10px', border: '1px solid #E0DDD7', borderRadius: '6px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif' }} />
+                <input value={genColour} onChange={e => setGenColour(e.target.value)} placeholder="Product colour (e.g. Black)"
+                  style={{ padding: '8px 10px', border: '1px solid #E0DDD7', borderRadius: '6px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif' }} />
+                <input value={genPrintColour} onChange={e => setGenPrintColour(e.target.value)} placeholder="Print colour (e.g. White)"
+                  style={{ padding: '8px 10px', border: '1px solid #E0DDD7', borderRadius: '6px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif' }} />
+                <input value={genPms} onChange={e => setGenPms(e.target.value)} placeholder="PMS # (optional)"
+                  style={{ padding: '8px 10px', border: '1px solid #E0DDD7', borderRadius: '6px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif' }} />
+              </div>
+              <button onClick={generateProof} disabled={generating || !selected?.logo_url}
+                style={{ width: '100%', background: !selected?.logo_url ? '#C8C4BC' : NAVY, color: '#fff', border: 'none', borderRadius: '8px', padding: '10px', fontSize: '14px', fontWeight: 700, cursor: generating ? 'wait' : 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                {generating ? 'Generating...' : 'Generate Proof'}
+              </button>
+              {generatedUrl && (
+                <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between' }}>
+                  <a href={generatedUrl} target="_blank" rel="noreferrer" style={{ fontSize: '13px', color: GOLD, fontWeight: 600, textDecoration: 'none' }}>Preview generated proof</a>
+                  <button onClick={sendGenerated} disabled={uploading}
+                    style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                    {uploading ? 'Sending...' : 'Send this proof'}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div style={{ textAlign: 'center', fontSize: '12px', color: '#9CA3AF', margin: '0 0 14px' }}>- or upload a mockup manually -</div>
 
             <div onClick={() => document.getElementById('mockup-upload').click()}
               style={{ border: `2px dashed ${mockupFile ? GOLD : '#C8C4BC'}`, borderRadius: '10px', padding: '32px', textAlign: 'center', cursor: 'pointer', background: mockupFile ? '#FFFBF4' : '#F8F7F4', marginBottom: '20px' }}>
