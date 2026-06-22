@@ -214,6 +214,7 @@ export default function AdminArtworksPage() {
               { label: 'Orders', href: '/admin/orders' },
               { label: 'Artworks', href: '/admin/artworks' },
               { label: 'Invoices', href: '/admin/invoices' },
+              { label: 'Production', href: '/admin/production' },
               { label: 'Quotes', href: '/admin/quotes' },
               { label: 'Products', href: '/admin/products' },
             ].map(item => (
