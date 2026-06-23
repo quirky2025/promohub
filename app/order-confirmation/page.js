@@ -56,12 +56,10 @@ function OrderConfirmationContent() {
             </div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>4.</span>
-              <span>Estimated lead time: about <strong>5 business days</strong> from then</span>
+              <span>Estimated lead time: <strong>5–7 business days</strong>, confirmed once your artwork is approved</span>
             </div>
           </div>
         </div>
-
-
 
         {/* Stripe paid confirmation */}
         {isPaid && (
@@ -91,6 +89,6 @@ export default function OrderConfirmationPage() {
   return (
     <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>Loading...</div>}>
       <OrderConfirmationContent />
-     </Suspense>
+    </Suspense>
   );
 }

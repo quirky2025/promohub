@@ -152,8 +152,8 @@ export async function POST(req) {
           <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Here's what happens next: we'll email you a <strong>free digital proof</strong> to approve. Once you're happy with it${paymentMethod === 'eft' ? ' and payment has been received' : ''}, we'll get straight into production.</p>
           <div style="background:#F8F7F4;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
             <span style="color:#7A7570;">Order</span> <strong style="color:#1B2A4A;">${orderNumber}</strong>
-            &nbsp;·&nbsp; <span style="color:#7A7570;">Total (incl. GST)</span> <strong style="color:#1B2A4A;">${money(total)}</strong>
-            &nbsp;·&nbsp; <span style="color:#7A7570;">Status</span> <strong style="color:${paymentStatus === 'paid' ? '#2D6A4F' : '#C0392B'};">${paymentStatus === 'paid' ? 'PAID' : 'AWAITING PAYMENT'}</strong>
+            &nbsp;·&nbsp; <span style="color:#7A7570;">Status</span> <strong style="color:#2D6A4F;">✓ Order confirmed${isPaidOrder ? ' &amp; paid' : ''}</strong>
+            &nbsp;·&nbsp; <span style="color:#7A7570;">Next step</span> <strong style="color:#1B2A4A;">Artwork approval</strong>
           </div>
           ${payBox}
           <p style="font-size:14px;line-height:1.6;color:#3D3A36;margin:16px 0 0;">Any questions at all, just reply to this email or call us on <strong>02 9477 4748</strong> — we're always happy to help.</p>

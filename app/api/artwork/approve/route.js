@@ -125,10 +125,15 @@ export async function POST(req) {
         <p style="font-size:15px;margin:0 0 16px;">Hi ${artwork.customer_name},</p>
         <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Thank you for approving your artwork for <strong>${artwork.product_name}</strong>! Your <strong>Tax Invoice</strong> and your <strong>approved artwork + certificate</strong> are attached. Production begins as soon as payment is received.</p>
         <div style="background:#F8F7F4;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
+          <span style="color:#7A7570;">Status</span> <strong style="color:#2D6A4F;">✓ Artwork approved</strong>
+          &nbsp;·&nbsp; <span style="color:#7A7570;">Next step</span> <strong style="color:#1B2A4A;">Payment</strong>
+        </div>
+        <div style="background:#F8F7F4;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
           <span style="color:#7A7570;">Order</span> <strong style="color:#1B2A4A;">${artwork.order_number}</strong>
           &nbsp;·&nbsp; <span style="color:#7A7570;">Invoice</span> <strong style="color:#1B2A4A;">${invoiceNumber}</strong>
           ${amountText ? `&nbsp;·&nbsp; <span style="color:#7A7570;">Amount due</span> <strong style="color:#C0392B;">${amountText} incl. GST</strong>` : ''}
         </div>
+        <p style="font-size:13px;line-height:1.6;color:#C0392B;margin:0 0 12px;">Please note: your stock isn't reserved until payment is received — please pay promptly to lock in your stock and price.</p>
         <div style="background:#F8F7F4;border:1px solid #C9A96E;border-radius:10px;padding:16px 20px;margin:16px 0;">
           <div style="font-weight:700;color:#1B2A4A;margin-bottom:10px;">How to pay</div>
           <table style="width:100%;font-size:14px;">
