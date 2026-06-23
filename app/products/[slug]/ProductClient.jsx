@@ -16,7 +16,9 @@ const GOLD = '#C9A96E';
 const aud = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const isColourMethod = (d) => { const n = (d?.name || '').toLowerCase(); return n.includes('screen print') || n.includes('pad print'); };
 const isOneColourLocked = (d) => { const x = (d?.detail || '').toLowerCase(); return x.includes('one colour') || x.includes('1 colour'); };
-const brandingLabel = (d, setupQty) => isColourMethod(d) ? `${d.name} — ${isOneColourLocked(d) ? 1 : (setupQty || 1)} COL · 1 POS` : `${d.name} — Full Colour · 1 POS`;
+// Laser engraving / etching / debossing have no colour — show the method name only.
+const isEngravingMethod = (d) => { const n = (d?.name || '').toLowerCase(); return n.includes('laser') || n.includes('engrav') || n.includes('deboss') || n.includes('emboss') || n.includes('etch'); };
+const brandingLabel = (d, setupQty) => isEngravingMethod(d) ? d.name : isColourMethod(d) ? `${d.name} — ${isOneColourLocked(d) ? 1 : (setupQty || 1)} COL · 1 POS` : `${d.name} — Full Colour · 1 POS`;
 const MARGIN = 1.40;
 const GST = 0.10;
 const SHIPPING = 30;
