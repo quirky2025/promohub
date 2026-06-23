@@ -137,7 +137,9 @@ export default function ProductClient({ product, mainImage, colours, extraImages
     return unit;
   }, [addonState, decorations]);
 
-  const unitPrice = activeTier ? calcUnit(activeTier.base_price, qty) : 0;
+  // Round the unit price to cents FIRST, then multiply by qty — so the total
+  // always equals (displayed unit price × quantity) and matches the admin quote.
+  const unitPrice = activeTier ? Math.round(calcUnit(activeTier.base_price, qty) * 100) / 100 : 0;
   const subtotal = Math.round(unitPrice * qty * 100) / 100;
   const gstAmt = Math.round((subtotal + SHIPPING) * GST * 100) / 100;
   const grand = subtotal + SHIPPING + gstAmt;
