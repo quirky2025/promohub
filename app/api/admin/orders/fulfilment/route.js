@@ -64,7 +64,6 @@ export async function POST(request) {
       return Response.json({ error: 'Unknown action' }, { status: 400 });
     }
 
-    // Update order (tolerant of missing columns)
     const { error: upErr } = await db.from('orders').update(updates).eq('id', orderId);
     if (upErr && !/column|does not exist|could not find/i.test(upErr.message || '')) {
       return Response.json({ error: upErr.message }, { status: 500 });
