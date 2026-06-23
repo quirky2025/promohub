@@ -23,7 +23,7 @@ export async function POST(request) {
     if (!quoteId) return Response.json({ error: 'Missing quoteId' }, { status: 400 });
     const db = sourcingDb();
 
-    const { data: q, error: qErr } = await db.from('quotes').select('*').eq('id', quoteId).single();
+    const { data: q, error: qErr } = await db.from('quotes').select('*').eq('quote_number', quoteId).single();
     if (qErr || !q) return Response.json({ error: 'Quote not found' }, { status: 404 });
     if (q.converted_order_number) {
       return Response.json({ error: `Already converted to ${q.converted_order_number}` }, { status: 400 });
@@ -112,9 +112,9 @@ export async function POST(request) {
     } catch (_) { /* email/PDF failure must not block conversion */ }
 
     // Mark the quote converted.
-    let { error: uErr } = await db.from('quotes').update({ status: 'accepted', converted_order_number: orderNumber }).eq('id', quoteId);
+    let { error: uErr } = await db.from('quotes').update({ status: 'accepted', converted_order_number: orderNumber }).eq('quote_number', quoteId);
     if (uErr && /column|does not exist|could not find/i.test(uErr.message || '')) {
-      await db.from('quotes').update({ status: 'accepted' }).eq('id', quoteId);
+      await db.from('quotes').update({ status: 'accepted' }).eq('quote_number', quoteId);
     }
 
     return Response.json({ success: true, orderNumber });
