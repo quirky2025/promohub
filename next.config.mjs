@@ -340,10 +340,19 @@ function buildCategoryRedirects() {
   return [...new Map(redirects.map((item) => [item.source, item])).values()];
 }
 
+// Static one-off redirects (not category-driven).
+// /products has no index page (only /products/[slug]); send it to the main hub.
+const STATIC_REDIRECTS = [
+  ['/products', '/promotional-products'],
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async redirects() {
-    return buildCategoryRedirects();
+    return [
+      ...buildCategoryRedirects(),
+      ...STATIC_REDIRECTS.map(([source, destination]) => redirect(source, destination)),
+    ];
   },
 };
 

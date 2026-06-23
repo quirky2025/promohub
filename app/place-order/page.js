@@ -112,7 +112,7 @@ export default function PlaceOrderPage() {
     const c = getCart();
     setCart(c);
     setLoaded(true);
-    if (c.length === 0) router.push('/products');
+    if (c.length === 0) router.push('/promotional-products');
   }, []);
 
   const totalSubtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);

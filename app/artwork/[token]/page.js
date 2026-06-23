@@ -11,18 +11,23 @@ function MockupViewer({ url }) {
 
   const isPdf = url.toLowerCase().includes('.pdf');
 
-  // Use Cloudinary pg_1 transformation to render PDF first page as JPG
-  const displayUrl = isPdf
-    ? url.replace('/upload/', '/upload/pg_1/').replace(/\.pdf$/, '.jpg')
-    : url;
-
   return (
     <div>
-      <img
-        src={displayUrl}
-        alt="Artwork Mockup"
-        style={{ maxWidth: '100%', maxHeight: '600px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #E0DDD7' }}
-      />
+      {isPdf ? (
+        // PDFs render inline in the browser's native viewer — works whether the
+        // file is hosted on Cloudinary or Supabase (no transform needed).
+        <iframe
+          src={url}
+          title="Artwork Mockup"
+          style={{ width: '100%', height: '600px', borderRadius: '8px', border: '1px solid #E0DDD7', background: '#fff' }}
+        />
+      ) : (
+        <img
+          src={url}
+          alt="Artwork Mockup"
+          style={{ maxWidth: '100%', maxHeight: '600px', objectFit: 'contain', borderRadius: '8px', border: '1px solid #E0DDD7' }}
+        />
+      )}
       {isPdf && (
         <div style={{ marginTop: '16px' }}>
           <a
@@ -36,7 +41,7 @@ function MockupViewer({ url }) {
               textDecoration: 'none', fontFamily: '"DM Sans", sans-serif',
             }}
           >
-            📄 Download PDF Mockup
+            📄 Open / Download PDF Mockup
           </a>
         </div>
       )}

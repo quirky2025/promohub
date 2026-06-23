@@ -160,7 +160,7 @@ export default function CategoryPage() {
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
           <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href="/products" style={{ color: '#7A7570', textDecoration: 'none' }}>All Products</Link>
+          <Link href="/promotional-products" style={{ color: '#7A7570', textDecoration: 'none' }}>All Products</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>{categoryName}</span>
         </div>

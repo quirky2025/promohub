@@ -142,6 +142,16 @@ export default function AdminProductionPage() {
     if (res.ok) load(); else alert('Update failed');
   }
 
+  async function sendPo(po) {
+    const sup = suppliers.find(s => s.id === po.supplier_id);
+    if (!sup?.email) { alert('This supplier has no email yet. Add one in Suppliers → Edit, then send.'); return; }
+    if (!confirm(`Email ${po.po_number} to ${sup.name} (${sup.email})?`)) return;
+    const res = await fetch('/api/admin/purchase-orders', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: po.id, action: 'send' }) });
+    const data = await res.json().catch(() => ({}));
+    if (res.ok) { alert(`Sent to ${sup.email} ✅`); load(); }
+    else alert('Failed: ' + (data.error || 'unknown'));
+  }
+
   const supplierObj = (id) => suppliers.find(s => s.id === id);
   const supplierName = (id) => supplierObj(id)?.name || '—';
   const termsBadge = (id) => {
@@ -183,7 +193,7 @@ export default function AdminProductionPage() {
                         : <span style={{ color: '#B0AAA3', fontSize: '11px' }}>{!isPaid(o) ? 'Awaiting payment' : 'Awaiting artwork'}</span>}
                     </td>
                     <td style={{ padding: '12px', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
-                      {po ? <span><a href={`/api/admin/purchase-orders/pdf?id=${po.id}`} target="_blank" rel="noreferrer" style={{ color: NAVY, textDecoration: 'underline' }}>{po.po_number}</a> <span style={{ background: ps.bg, color: ps.color, fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '20px', marginLeft: '4px' }}>{ps.label}</span></span> : <span style={{ color: '#B0AAA3' }}>—</span>}
+                      {po ? <span><a href={`/api/admin/purchase-orders/pdf?id=${po.id}`} target="_blank" rel="noreferrer" style={{ color: NAVY, textDecoration: 'underline' }}>{po.po_number}</a> <span style={{ background: ps.bg, color: ps.color, fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '20px', marginLeft: '4px' }}>{ps.label}</span> <button onClick={() => sendPo(po)} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '2px 8px', fontSize: '10px', fontWeight: 700, color: NAVY, cursor: 'pointer', marginLeft: '4px', fontFamily: '"DM Sans", sans-serif' }}>✉ Send</button></span> : <span style={{ color: '#B0AAA3' }}>—</span>}
                     </td>
                     <td style={{ padding: '12px', color: '#5A5550' }}>{po ? <span>{supplierName(po.supplier_id)}{termsBadge(po.supplier_id)}</span> : ''}</td>
                     <td style={{ padding: '12px', whiteSpace: 'nowrap', color: NAVY }}>{po ? <span>{money(po.cost_total)} <button onClick={() => openEdit(o, po)} style={{ background: 'none', border: 'none', color: GOLD, fontSize: '11px', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>edit</button></span> : ''}</td>
@@ -240,6 +250,8 @@ export default function AdminProductionPage() {
             <div style={{ marginTop: '6px', marginBottom: '8px' }}>
               {lines.map((l, idx) => (
                 <div key={idx} style={{ display: 'flex', gap: '6px', marginBottom: '6px', alignItems: 'center' }}>
+                  <input value={l.stockCode} onChange={e => updateLine(idx, 'stockCode', e.target.value)} placeholder="Code"
+                    style={{ width: '78px', padding: '8px', border: '1px solid #E0DDD7', borderRadius: '6px', fontSize: '13px', boxSizing: 'border-box' }} />
                   <input value={l.name} onChange={e => updateLine(idx, 'name', e.target.value)} placeholder="Description (product / Setup / Branding)"
                     style={{ flex: 1, padding: '8px 10px', border: '1px solid #E0DDD7', borderRadius: '6px', fontSize: '13px', boxSizing: 'border-box' }} />
                   <input value={l.qty} onChange={e => updateLine(idx, 'qty', e.target.value)} type="number" placeholder="Qty"

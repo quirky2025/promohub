@@ -44,24 +44,22 @@ function OrderConfirmationContent() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px', color: '#3D3A36' }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>1.</span>
-              <span>Your <strong>Order Confirmation</strong> and <strong>Tax Invoice</strong> have been emailed to you (PDF)</span>
+              <span>Your <strong>Order Confirmation</strong>{isPaid && <> and <strong>Tax Invoice</strong></>} {isPaid ? 'have' : 'has'} been emailed to you (PDF)</span>
             </div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>2.</span>
-              <span>We'll send you a <strong>free digital proof</strong> to approve (unlimited revisions)</span>
+              <span>If you've already uploaded your logo, we'll email your <strong>free digital proof</strong> to approve shortly. If not, just reply to your confirmation email with your logo and we'll get it ready.</span>
             </div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>3.</span>
-              <span>Once you approve the proof and we receive payment, production begins</span>
+              <span>Production only begins after artwork approval and payment received</span>
             </div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>4.</span>
-              <span>Estimated lead time 5–7 business days after artwork approval and payment received</span>
+              <span>Estimated lead time: <strong>5–7 business days</strong>, confirmed once your artwork is approved</span>
             </div>
           </div>
         </div>
-
-
 
         {/* Stripe paid confirmation */}
         {isPaid && (
@@ -91,6 +89,6 @@ export default function OrderConfirmationPage() {
   return (
     <Suspense fallback={<div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>Loading...</div>}>
       <OrderConfirmationContent />
-     </Suspense>
+    </Suspense>
   );
 }
