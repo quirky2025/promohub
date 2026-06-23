@@ -28,7 +28,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
   const [custResults, setCustResults] = useState([]);
   const [addon, setAddon] = useState({});
   const [override, setOverride] = useState('');
-  const [leadTime, setLeadTime] = useState('7');
+  const [leadTime, setLeadTime] = useState('3-7');
   const [disc, setDisc] = useState('');
   const [requiredDate, setRequiredDate] = useState('');
   const [delivery, setDelivery] = useState('');
@@ -126,7 +126,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
           requiredDate: rd, deliveryAddress: delivery, artworkFileName: '', notes,
           productName: product.name, productSku: product.supplier_sku || '',
           status: 'quote_sent',
-          leadTimeDays: parseInt(leadTime) || 7, disc: discPct, customerMessage: message,
+          leadTimeDays: leadTime || '3-7', disc: discPct, customerMessage: message,
           unitPrice, subtotal, shipping: SHIPPING, gst, total,
         }),
       });
@@ -253,7 +253,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   <div>
                     <div style={lbl}>Lead time (business days)</div>
-                    <input type="number" min="1" value={leadTime} onChange={e => setLeadTime(e.target.value)} style={{ ...inp, fontFamily: '"DM Mono", monospace' }} />
+                    <input type="text" value={leadTime} onChange={e => setLeadTime(e.target.value)} placeholder="e.g. 3-7" style={{ ...inp, fontFamily: '"DM Mono", monospace' }} />
                   </div>
                   <div>
                     <div style={lbl}>Discount %</div>

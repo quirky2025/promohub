@@ -115,7 +115,7 @@ export async function POST(req) {
               lineTotal: it.subtotal != null ? it.subtotal : null,
             })),
             subtotal: order.subtotal, shipping: order.shipping, gst: order.gst, total: order.total,
-            paymentStatus: 'awaiting', leadTimeDays: '5–7', bank: BANK, quoteRef: order.quote_ref || '',
+            paymentStatus: 'awaiting', leadTimeDays: '3-7', bank: BANK, quoteRef: order.quote_ref || '',
           });
           attachments.push({ filename: `TaxInvoice_${invoiceNumber}.pdf`, content: Buffer.from(invBytes).toString('base64') });
         } catch (e) { /* still send pack if invoice PDF fails */ }

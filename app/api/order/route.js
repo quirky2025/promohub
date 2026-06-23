@@ -118,7 +118,7 @@ export async function POST(req) {
       surcharge: surcharge || 0,
       total,
       paymentStatus: paymentStatus === 'paid' ? 'paid' : 'awaiting',
-      leadTimeDays: '5–7',
+      leadTimeDays: '3-7',
       bank: QUIRKY_BANK,
     };
     const isPaidOrder = paymentStatus === 'paid';
