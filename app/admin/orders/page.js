@@ -93,6 +93,21 @@ export default function AdminOrdersPage() {
     setSaving(false);
   }
 
+  async function fulfil(action) {
+    if (!selected) return;
+    setSaving(true);
+    const res = await fetch('/api/admin/orders/fulfilment', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: selected.id, action, trackingNumber, trackingUrl }),
+    });
+    setSaving(false);
+    if (res.ok) {
+      alert(action === 'dispatch' ? 'Dispatched — customer notified ✅' : action === 'delivered' ? 'Marked delivered — customer notified ✅' : 'Feedback request sent ✅');
+      setSelected(null);
+      fetchOrders();
+    } else alert('Failed');
+  }
+
   function openDetail(order) {
     setSelected(order);
     setInternalNote(order.internal_notes || '');
@@ -292,6 +307,23 @@ export default function AdminOrdersPage() {
                   placeholder="Tracking URL..."
                   style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
               </div>
+
+              {/* Fulfilment actions */}
+              <div style={{ display: 'flex', gap: '8px', marginTop: '12px', flexWrap: 'wrap' }}>
+                <button onClick={() => fulfil('dispatch')} disabled={saving}
+                  style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '9px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                  🚚 Mark Dispatched &amp; Notify
+                </button>
+                <button onClick={() => fulfil('delivered')} disabled={saving}
+                  style={{ background: '#fff', color: NAVY, border: `1.5px solid ${NAVY}`, borderRadius: '8px', padding: '9px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                  📦 Mark Delivered &amp; Notify
+                </button>
+                <button onClick={() => fulfil('feedback')} disabled={saving}
+                  style={{ background: '#fff', color: '#7A7570', border: '1.5px solid #E0DDD7', borderRadius: '8px', padding: '9px 14px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                  💬 Send Feedback Request
+                </button>
+              </div>
+              <p style={{ fontSize: '11px', color: '#9CA3AF', margin: '8px 0 0' }}>Tip: fill tracking above before dispatching — it's included in the email. Feedback is best sent ~7 days after delivery.</p>
             </Section>
 
             {/* INTERNAL NOTES */}
