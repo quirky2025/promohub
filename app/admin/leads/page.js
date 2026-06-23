@@ -62,6 +62,7 @@ export default function AdminDealsPage() {
   const [actSaving, setActSaving] = useState(false);
   const [builderOpen, setBuilderOpen] = useState(false);
   const [builderPrefill, setBuilderPrefill] = useState(null);
+  const [converting, setConverting] = useState(false);
   const router = useRouter();
 
   const fetchDeals = useCallback(async () => {
@@ -107,6 +108,22 @@ export default function AdminDealsPage() {
       setDeals(prev => prev.map(x => (x.id === selected.id && x.kind === selected.kind) ? { ...x, status: ns, lost_reason: data.deal.lost_reason ?? x.lost_reason } : x));
       setSelected(prev => ({ ...prev, status: ns, lost_reason: data.deal.lost_reason ?? prev.lost_reason }));
       fetchDeals();
+    }
+  }
+
+  async function convertToOrder() {
+    if (!selected || selected.kind !== 'quote') return;
+    if (!confirm('Convert this quote into an order? An Order Confirmation will be emailed to the customer.')) return;
+    setConverting(true);
+    const res = await fetch('/api/admin/quotes/convert', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ quoteId: selected.id }) });
+    const data = await res.json().catch(() => ({}));
+    setConverting(false);
+    if (res.ok && data.orderNumber) {
+      alert(`Converted to order ${data.orderNumber}. Order Confirmation emailed — it's now in the Orders board.`);
+      fetchDeals();
+      openDetail(selected);
+    } else {
+      alert('Convert failed: ' + (data.error || 'unknown'));
     }
   }
 
@@ -247,6 +264,12 @@ export default function AdminDealsPage() {
 
                   {selected.kind === 'enquiry' && (
                     <button onClick={() => { setBuilderPrefill({ name: selected.customer_name, company: selected.customer_company, email: selected.customer_email, phone: detail.record?.phone || '', delivery: detail.company?.delivery_address || '' }); setBuilderOpen(true); }} style={{ width: '100%', background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', marginBottom: '14px' }}>＋ Build Quote</button>
+                  )}
+
+                  {selected.kind === 'quote' && (
+                    detail.record.converted_order_number
+                      ? <div style={{ background: '#EAF3DE', color: '#3B6D11', borderRadius: '8px', padding: '10px 14px', fontSize: '13px', fontWeight: 700, marginBottom: '14px' }}>✓ Converted to order {detail.record.converted_order_number}</div>
+                      : <button onClick={convertToOrder} disabled={converting} style={{ width: '100%', background: converting ? '#B0AAA3' : '#2D6A4F', color: '#fff', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: converting ? 'not-allowed' : 'pointer', marginBottom: '14px' }}>{converting ? 'Converting…' : '→ Convert to Order'}</button>
                   )}
 
                   <div style={{ fontSize: '11px', color: '#7A7570', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Internal note</div>
