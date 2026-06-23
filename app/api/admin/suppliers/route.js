@@ -36,3 +36,22 @@ export async function POST(request) {
     return Response.json({ error: e.message }, { status: 500 });
   }
 }
+
+export async function PATCH(request) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorized();
+  try {
+    const b = await request.json();
+    if (!b.id) return Response.json({ error: 'Missing id' }, { status: 400 });
+    const db = sourcingDb();
+    const updates = {};
+    for (const k of ['name', 'contact_name', 'email', 'phone', 'payment_terms', 'notes']) {
+      if (b[k] !== undefined) updates[k] = b[k] || null;
+    }
+    const { data, error } = await db.from('suppliers').update(updates).eq('id', b.id).select('*').single();
+    if (error) return Response.json({ error: error.message }, { status: 500 });
+    return Response.json({ supplier: data });
+  } catch (e) {
+    return Response.json({ error: e.message }, { status: 500 });
+  }
+}

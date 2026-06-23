@@ -101,7 +101,8 @@ export async function POST(req) {
           const items = Array.isArray(order.items) ? order.items : [];
           const invBytes = await generateOrderDocPDF({
             docType: 'TAX INVOICE',
-            orderNumber: invoiceNumber,
+            orderNumber: artwork.order_number,   // OC… — the order number
+            invoiceNumber,                       // INV… — the tax invoice number
             date: new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
             customer: { company: order.customer_company, name: order.customer_name, email: order.customer_email, phone: order.customer_phone },
             deliveryAddress: order.delivery_address || '',

@@ -1,5 +1,10 @@
 import { getAdminUser, unauthorized } from '@/lib/adminAuth';
 import { sourcingDb } from '@/lib/sourcingDb';
+import { Resend } from 'resend';
+import { quirkyEmail } from '@/lib/emailLayout';
+import { generatePurchaseOrderPDF } from '@/lib/poDocPdf';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function nextPoNumber(db) {
   const year = String(new Date().getFullYear()).slice(2);
@@ -42,6 +47,24 @@ export async function POST(request) {
       notes: b.notes || null,
     }).select('*').single();
     if (error) return Response.json({ error: error.message }, { status: 500 });
+
+    // Raising a PO means production has started — advance the linked order to
+    // "In Production" (unless it's already dispatched/delivered/cancelled).
+    if (b.orderId) {
+      try {
+        const { data: ord } = await db.from('orders').select('status').eq('id', b.orderId).single();
+        const advanced = ['dispatched', 'delivered', 'completed', 'cancelled'];
+        if (ord && !advanced.includes(ord.status)) {
+          const { error: e1 } = await db.from('orders')
+            .update({ status: 'in_production', production_started_at: new Date().toISOString() })
+            .eq('id', b.orderId);
+          if (e1 && /column|does not exist|could not find/i.test(e1.message || '')) {
+            await db.from('orders').update({ status: 'in_production' }).eq('id', b.orderId);
+          }
+        }
+      } catch (_) { /* non-fatal — PO still created */ }
+    }
+
     return Response.json({ purchaseOrder: data });
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
@@ -74,6 +97,50 @@ export async function PATCH(request) {
       if (b.notes !== undefined) updates.notes = b.notes || null;
       if (b.supplierId !== undefined) updates.supplier_id = b.supplierId || null;
       if (b.items !== undefined) updates.items = b.items || null;
+    } else if (b.action === 'send') {
+      // Email the PO PDF straight to the supplier's email on file.
+      const { data: po } = await db.from('purchase_orders').select('*').eq('id', b.id).single();
+      if (!po) return Response.json({ error: 'PO not found' }, { status: 404 });
+      let supplier = null, order = null;
+      if (po.supplier_id) { const r = await db.from('suppliers').select('*').eq('id', po.supplier_id).single(); supplier = r.data; }
+      if (po.order_id) { const r = await db.from('orders').select('*').eq('id', po.order_id).single(); order = r.data; }
+      if (!supplier?.email) return Response.json({ error: 'This supplier has no email — add one in Suppliers first.' }, { status: 400 });
+
+      const items = (Array.isArray(po.items) && po.items.length)
+        ? po.items
+        : (Array.isArray(order?.items)
+          ? order.items.map(it => ({ stockCode: it.sku || it.stockCode || '', name: it.productName || it.name || '', qty: it.qty || it.quantity || 1, branding: it.branding || it.brandingMethod || '' }))
+          : []);
+
+      const bytes = await generatePurchaseOrderPDF({
+        poNumber: po.po_number,
+        date: new Date(po.created_at || Date.now()).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
+        ourRef: po.order_number || order?.order_number || '',
+        jobName: order?.job_name || order?.customer_company || '',
+        deliver: {
+          company: order?.customer_company || '',
+          name: order?.customer_name || '',
+          phone: order?.customer_phone || '',
+          address: order?.delivery_address || '',
+        },
+        items: items.map(it => ({ stockCode: it.stockCode, name: it.name, qty: it.qty, unitCost: it.unitCost, branding: it.branding })),
+        freight: po.freight_cost,
+      });
+
+      const greeting = supplier.contact_name || supplier.name || 'there';
+      await resend.emails.send({
+        from: 'QuirkyPromo <noreply@quirkypromo.com.au>',
+        replyTo: 'hello@quirkypromo.com.au',
+        to: [supplier.email],
+        subject: `Purchase Order ${po.po_number} — QuirkyPromo`,
+        html: quirkyEmail(`
+          <p style="font-size:15px;margin:0 0 16px;">Hi ${greeting},</p>
+          <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Please find attached our Purchase Order <strong>${po.po_number}</strong>. Could you please confirm receipt and the expected dispatch date?</p>
+          <p style="font-size:14px;line-height:1.6;color:#3D3A36;margin:16px 0 0;">Many thanks,<br/>The QuirkyPromo Team</p>`),
+        attachments: [{ filename: `PO_${po.po_number}.pdf`, content: Buffer.from(bytes).toString('base64') }],
+      });
+
+      updates.status = 'sent';
     } else {
       return Response.json({ error: 'Unknown action' }, { status: 400 });
     }

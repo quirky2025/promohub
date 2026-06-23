@@ -15,12 +15,16 @@ const STATUS_COLORS = {
   approved: { bg: '#D1FAE5', text: '#065F46', label: 'Approved' },
 };
 
+// Vector / PDF files (logos are often .ai/.eps/.svg/.pdf) can't render in <img>.
+// For Cloudinary-hosted files, rasterise the first page to PNG so a thumbnail
+// shows. Raster images (jpg/png/webp) and non-Cloudinary URLs pass through.
 function toDisplayUrl(url) {
-  if (!url) return url;
-  if (!url.toLowerCase().includes('.pdf')) return url;
+  if (!url || typeof url !== 'string') return url;
+  if (!/\.(pdf|ai|eps|svg)(\?|$)/i.test(url)) return url;
+  if (!url.includes('/upload/')) return url;
   return url
-    .replace('/upload/', '/upload/pg_1/')
-    .replace(/\.pdf$/, '.jpg');
+    .replace('/upload/', '/upload/pg_1,f_png/')
+    .replace(/\.(pdf|ai|eps|svg)(\?|$)/i, '.png$2');
 }
 
 export default function AdminArtworksPage() {
@@ -253,7 +257,7 @@ export default function AdminArtworksPage() {
                   {art.logo_url && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Logo</div>
-                      <ProductImg src={art.logo_url} size="thumb" alt="Logo" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
+                      <ProductImg src={toDisplayUrl(art.logo_url)} size="thumb" alt="Logo" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
                       <div style={{ marginTop: '4px' }}>
                         <a href={art.logo_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: GOLD, textDecoration: 'none' }}>Download</a>
                       </div>
@@ -301,7 +305,7 @@ export default function AdminArtworksPage() {
               <div style={{ marginBottom: '20px' }}>
                 <div style={{ fontSize: '12px', color: '#7A7570', marginBottom: '8px' }}>Customer Logo:</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <ProductImg src={selected.logo_url} size="thumb" eager alt="Logo" style={{ width: '60px', height: '60px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px' }} />
+                  <ProductImg src={toDisplayUrl(selected.logo_url)} size="thumb" eager alt="Logo" style={{ width: '60px', height: '60px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px' }} />
                   <a href={selected.logo_url} target="_blank" rel="noreferrer" style={{ fontSize: '13px', color: GOLD, textDecoration: 'none', fontWeight: 600 }}>
                     Download Logo →
                   </a>

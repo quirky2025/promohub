@@ -121,35 +121,34 @@ export async function POST(req) {
       leadTimeDays: '5–7',
       bank: QUIRKY_BANK,
     };
+    const isPaidOrder = paymentStatus === 'paid';
     const ocBuffer = await generateOrderDocPDF({ ...docOpts, docType: 'ORDER CONFIRMATION' });
-    const invBuffer = await generateOrderDocPDF({ ...docOpts, docType: 'TAX INVOICE' });
     const ocB64 = ocBuffer.toString('base64');
-    const invB64 = invBuffer.toString('base64');
+    // Tax Invoice is emailed at order time ONLY when already paid (Stripe).
+    // For Pay Later / EFT, the Tax Invoice (amount due + how to pay) is sent
+    // AFTER artwork approval — not now. So order email = Order Confirmation only.
+    let invB64 = null;
+    if (isPaidOrder) {
+      const invBuffer = await generateOrderDocPDF({ ...docOpts, docType: 'TAX INVOICE' });
+      invB64 = invBuffer.toString('base64');
+    }
+    const attachments = [{ filename: `OrderConfirmation_${orderNumber}.pdf`, content: ocB64 }];
+    if (invB64) attachments.push({ filename: `TaxInvoice_${orderNumber}.pdf`, content: invB64 });
 
     // Warm customer email — no navy top bar, details live in the attached PDF.
     const money = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    const docName = 'Tax Invoice';
-    const payBox = paymentStatus === 'paid' ? `
+    // Paid (Stripe): show a payment-received note. Pay Later / EFT: no bank
+    // details here — they arrive with the Tax Invoice after proof approval.
+    const payBox = isPaidOrder ? `
           <div style="background:#F0FAF4;border:1px solid #2D6A4F;border-radius:10px;padding:14px 18px;margin:16px 0;">
             <span style="color:#2D6A4F;font-weight:700;">Payment received — thank you!</span>
-          </div>` : `
-          <div style="background:#F8F7F4;border:1px solid #C9A96E;border-radius:10px;padding:16px 20px;margin:16px 0;">
-            <div style="font-weight:700;color:#1B2A4A;margin-bottom:10px;">How to pay</div>
-            <table style="width:100%;font-size:14px;">
-              <tr><td style="color:#7A7570;padding:3px 0;">Account Name</td><td style="text-align:right;font-weight:600;">${QUIRKY_BANK.name}</td></tr>
-              <tr><td style="color:#7A7570;padding:3px 0;">Bank</td><td style="text-align:right;font-weight:600;">${QUIRKY_BANK.bank}</td></tr>
-              <tr><td style="color:#7A7570;padding:3px 0;">BSB</td><td style="text-align:right;font-weight:600;font-family:monospace;">${QUIRKY_BANK.bsb}</td></tr>
-              <tr><td style="color:#7A7570;padding:3px 0;">Account Number</td><td style="text-align:right;font-weight:600;font-family:monospace;">${QUIRKY_BANK.acct}</td></tr>
-              <tr><td style="color:#7A7570;padding:3px 0;">Reference</td><td style="text-align:right;font-weight:700;color:#C9A96E;">${orderNumber}</td></tr>
-            </table>
-            <div style="font-size:12px;color:#7A7570;margin-top:10px;">Prefer to pay by credit card? Call us on 02 9477 4748 — a 2% surcharge applies.</div>
-          </div>`;
+          </div>` : '';
 
     const emailHtml = `
       <div style="font-family:Arial,Helvetica,sans-serif;max-width:600px;margin:0 auto;color:#1a1a1a;">
         <div style="padding:8px 4px 0;">
           <p style="font-size:15px;margin:0 0 16px;">Hi ${customer.name},</p>
-          <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Thank you so much for your order — we're thrilled to be making it for you! Your <strong>Order Confirmation</strong> and <strong>Tax Invoice</strong> are attached as PDFs for your records.</p>
+          <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Thank you so much for your order — we're thrilled to be making it for you! Your <strong>Order Confirmation</strong>${isPaidOrder ? ' and <strong>Tax Invoice</strong> are attached as PDFs' : ' is attached as a PDF'} for your records.</p>
           <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Here's what happens next: we'll email you a <strong>free digital proof</strong> to approve. Once you're happy with it${paymentMethod === 'eft' ? ' and payment has been received' : ''}, we'll get straight into production.</p>
           <div style="background:#F8F7F4;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
             <span style="color:#7A7570;">Order</span> <strong style="color:#1B2A4A;">${orderNumber}</strong>
@@ -174,9 +173,9 @@ export async function POST(req) {
       from: 'QuirkyPromo <noreply@quirkypromo.com.au>',
       replyTo: 'hello@quirkypromo.com.au',
       to: [customer.email],
-      subject: `Order Confirmation & Tax Invoice — ${orderNumber}`,
+      subject: isPaidOrder ? `Order Confirmation & Tax Invoice — ${orderNumber}` : `Order Confirmation — ${orderNumber}`,
       html: emailHtml,
-      attachments: [{ filename: `OrderConfirmation_${orderNumber}.pdf`, content: ocB64 }, { filename: `TaxInvoice_${orderNumber}.pdf`, content: invB64 }],
+      attachments,
     });
 
     // ✅ Email to you with PDF
@@ -186,7 +185,7 @@ export async function POST(req) {
       to: ['hello@quirkypromo.com.au'],
       subject: `New Order: ${orderNumber} — ${customer.name}`,
       html: emailHtml,
-      attachments: [{ filename: `OrderConfirmation_${orderNumber}.pdf`, content: ocB64 }, { filename: `TaxInvoice_${orderNumber}.pdf`, content: invB64 }],
+      attachments,
     });
 
     return Response.json({ success: true, orderNumber });
