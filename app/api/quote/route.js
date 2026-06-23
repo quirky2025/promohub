@@ -28,7 +28,7 @@ async function generateQuotePDF({
   qty, colour, brandingSummary, addons,
   unitPrice, subtotal, shipping, gst, total,
   deliveryAddress, requiredDate, notes,
-  docType = 'QUOTE', leadTimeDays = 7, disc = 0, totalPages = 1,
+  docType = 'QUOTE', leadTimeDays = '3-7', disc = 0, totalPages = 1,
 }) {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]); // A4
@@ -283,7 +283,7 @@ export async function POST(req) {
       requiredDate: requiredDate || '',
       notes: notesCombined,
       docType: docType || 'QUOTE',
-      leadTimeDays: leadTimeDays || 7,
+      leadTimeDays: leadTimeDays || '3-7',
       disc: disc || 0,
     });
 

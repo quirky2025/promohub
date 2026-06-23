@@ -56,7 +56,7 @@ function OrderConfirmationContent() {
             </div>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>4.</span>
-              <span>Estimated lead time: <strong>5–7 business days</strong>, confirmed once your artwork is approved</span>
+              <span>Estimated lead time: <strong>3-7 business days</strong> (varies by branding method), confirmed once your artwork is approved</span>
             </div>
           </div>
         </div>

@@ -90,7 +90,7 @@ export async function POST(request) {
         deliveryAddress: q.delivery_address || '',
         items: items.map(it => ({ stockCode: it.sku, name: it.productName, colour: it.colour, branding: it.branding, addons: [], qty: it.qty, unit: it.unitPrice, lineTotal: it.subtotal })),
         subtotal, shipping: Number(q.shipping) || 0, gst: Number(q.gst) || 0, total: Number(q.total) || 0,
-        paymentStatus: 'awaiting', leadTimeDays: '5-7', quoteRef: q.quote_number || '',
+        paymentStatus: 'awaiting', leadTimeDays: '3-7', quoteRef: q.quote_number || '',
         docType: 'ORDER CONFIRMATION',
       });
       const body = `
