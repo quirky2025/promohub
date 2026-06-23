@@ -52,6 +52,8 @@ export default function AdminOrdersPage() {
   const [internalNote, setInternalNote] = useState('');
   const [trackingNumber, setTrackingNumber] = useState('');
   const [trackingUrl, setTrackingUrl] = useState('');
+  const [deliveryAddr, setDeliveryAddr] = useState('');
+  const [carrier, setCarrier] = useState('');
   const [saving, setSaving]           = useState(false);
 
   useEffect(() => { fetchOrders(); }, [statusFilter]);
@@ -83,14 +85,19 @@ export default function AdminOrdersPage() {
   async function saveDetails(id) {
     setSaving(true);
     const updates = {
+      delivery_address: deliveryAddr,
       internal_notes: internalNote,
       tracking_number: trackingNumber,
       tracking_url: trackingUrl,
     };
-    await supabase.from('orders').update(updates).eq('id', id);
+    const res = await fetch('/api/admin/orders/update', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...updates }),
+    });
+    setSaving(false);
+    if (!res.ok) { alert('Save failed'); return; }
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
     if (selected?.id === id) setSelected(prev => ({ ...prev, ...updates }));
-    setSaving(false);
   }
 
   async function fulfil(action) {
@@ -98,7 +105,7 @@ export default function AdminOrdersPage() {
     setSaving(true);
     const res = await fetch('/api/admin/orders/fulfilment', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ orderId: selected.id, action, trackingNumber, trackingUrl }),
+      body: JSON.stringify({ orderId: selected.id, action, trackingNumber, trackingUrl: (function(){ const m = { 'Australia Post': tn => `https://auspost.com.au/mypost/track/#/details/${tn}`, 'FedEx': tn => `https://www.fedex.com/fedextrack/?trknbr=${tn}` }; return (!trackingUrl && trackingNumber && m[carrier]) ? m[carrier](trackingNumber) : trackingUrl; })(), carrier }),
     });
     setSaving(false);
     if (res.ok) {
@@ -113,6 +120,8 @@ export default function AdminOrdersPage() {
     setInternalNote(order.internal_notes || '');
     setTrackingNumber(order.tracking_number || '');
     setTrackingUrl(order.tracking_url || '');
+    setDeliveryAddr(order.delivery_address || '');
+    setCarrier(order.carrier || '');
   }
 
   const fmt = v => v != null ? `$${Number(v).toFixed(2)}` : '—';
@@ -295,10 +304,31 @@ export default function AdminOrdersPage() {
 
             {/* DELIVERY */}
             <Section title="🚚 Delivery">
-              {selected.delivery_address && <Row label="Address" value={selected.delivery_address} />}
+              {/* Prominent, editable delivery address — CHECK before dispatch */}
+              <div style={{ background: '#FFF8EC', border: `2px solid ${GOLD}`, borderRadius: '10px', padding: '12px 14px', marginBottom: '14px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: NAVY, marginBottom: '6px' }}>
+                  📍 Delivery Address <span style={{ fontSize: '11px', fontWeight: 600, color: '#B45309' }}>— check &amp; confirm before dispatch</span>
+                </div>
+                <textarea value={deliveryAddr} onChange={e => setDeliveryAddr(e.target.value)} rows={3}
+                  placeholder="Delivery address..."
+                  style={{ width: '100%', padding: '9px 11px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', color: NAVY, outline: 'none', resize: 'vertical', lineHeight: 1.5, boxSizing: 'border-box', background: '#fff' }} />
+                <button onClick={() => saveDetails(selected.id)} disabled={saving}
+                  style={{ marginTop: '8px', background: saving ? '#B0AAA3' : NAVY, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '12px', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                  {saving ? 'Saving...' : 'Save address'}
+                </button>
+              </div>
 
-              {/* Tracking */}
-              <div style={{ marginTop: '12px' }}>
+              {/* Carrier + Tracking */}
+              <div style={{ marginTop: '4px' }}>
+                <div style={{ fontSize: '12px', color: '#7A7570', marginBottom: '6px', fontWeight: 600 }}>Carrier</div>
+                <select value={carrier} onChange={e => setCarrier(e.target.value)}
+                  style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', marginBottom: '10px', boxSizing: 'border-box', background: '#fff' }}>
+                  <option value="">Select carrier…</option>
+                  <option value="Australia Post">Australia Post</option>
+                  <option value="FedEx">FedEx</option>
+                  <option value="Direct Freight Express">Direct Freight Express</option>
+                  <option value="Courier">Other / Courier</option>
+                </select>
                 <div style={{ fontSize: '12px', color: '#7A7570', marginBottom: '6px', fontWeight: 600 }}>Tracking Details</div>
                 <input value={trackingNumber} onChange={e => setTrackingNumber(e.target.value)}
                   placeholder="Tracking number..."
