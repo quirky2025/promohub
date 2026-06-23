@@ -89,7 +89,7 @@ async function generateQuotePDF({
   let cy = bTop - 14;
   [customer.company, customer.name, customer.email, customer.phone].filter(Boolean).forEach(l => { page.drawText(String(l).substring(0, 44), { x: cdX + 8, y: cy, size: 8.5, font: fontReg, color: BLACK }); cy -= 13; });
   let dy = bTop - 14;
-  (deliveryAddress ? String(deliveryAddress).split(/,\s*/) : ['TO BE CONFIRMED']).slice(0, 5).forEach(l => { page.drawText(l.substring(0, 44), { x: ddX + 8, y: dy, size: 8.5, font: fontReg, color: BLACK }); dy -= 13; });
+  (deliveryAddress ? String(deliveryAddress).split(/\n|,\s*/).map(s => s.trim()).filter(Boolean) : ['TO BE CONFIRMED']).slice(0, 5).forEach(l => { page.drawText(l.substring(0, 44), { x: ddX + 8, y: dy, size: 8.5, font: fontReg, color: BLACK }); dy -= 13; });
   y = bTop - bH - 24;
 
   // ── ITEM TABLE ──────────────────────────────────────────
@@ -346,13 +346,14 @@ export async function POST(req) {
       : `Hi ${name},\n\nThank you so much for your enquiry — it was great to hear from you. I've put together a quote for you, attached as a PDF.\n\nAny questions at all, just reply to this email or call me on 02 9477 4748.\n\nKind regards,\nThe QuirkyPromo Team`;
     const _msgHtml = String(_msg).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>');
     const customerHtml = `
-      <div style="font-family: Arial, Helvetica, sans-serif; max-width: 620px; margin: 0 auto; color: #1a1a1a;">
-        <div style="padding: 6px 2px;">
-          <div style="font-size: 15px; line-height: 1.75; color: #3D3A36; margin: 0 0 8px;">${_msgHtml}</div>
+      <div style="font-family: Arial, Helvetica, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
+        <div style="padding: 8px 4px 0;">
+          <div style="font-size: 15px; line-height: 1.7; color: #1a1a1a; margin: 0 0 8px;">${_msgHtml}</div>
         </div>
-        <div style="background: #1B2A4A; border-radius: 8px; padding: 14px 18px; margin-top: 10px;">
-          <img src="https://www.quirkypromo.com.au/quirky-logo-quote.png" alt="QuirkyPromo" height="26" style="display:block;height:26px;margin-bottom:8px;" />
-          <span style="font-size: 12px; color: rgba(255,255,255,0.85);">02 9477 4748 &nbsp;&middot;&nbsp; hello@quirkypromo.com.au &nbsp;&middot;&nbsp; quirkypromo.com.au &nbsp;&middot;&nbsp; Quote ${quoteNumber} (valid until ${validUntil})</span>
+        <div style="padding-top:16px;border-top:1px solid #E0DDD7;margin-top:16px;">
+          <div style="font-size:20px;font-weight:800;letter-spacing:-0.3px;margin-bottom:8px;"><span style="color:#C9A96E;">Quirky</span><span style="color:#1B2A4A;">Promo</span></div>
+          <p style="color:#3D3A36;font-size:13px;margin:0;">Tel: <strong style="color:#1B2A4A;">02 9477 4748</strong>  &middot;  Email: <a href="mailto:hello@quirkypromo.com.au" style="color:#C9A96E;">hello@quirkypromo.com.au</a>  &middot;  Web: <a href="https://www.quirkypromo.com.au" style="color:#C9A96E;">quirkypromo.com.au</a></p>
+          <p style="color:#7A7570;font-size:11px;margin:8px 0 0;">Quote ${quoteNumber} &middot; valid until ${validUntil} &middot; ABN 95 656 714 270</p>
         </div>
       </div>
     `;
