@@ -36,35 +36,6 @@ export default function AdminDashboard() {
 
   return (
     <div style={{ background: '#fff', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
-      {/* Top Nav */}
-      <div style={{ background: NAVY, padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '56px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', fontWeight: 600, color: '#fff', letterSpacing: '2px' }}>
-            QUIRKY<span style={{ color: GOLD }}>PROMO</span>
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginLeft: '8px', letterSpacing: '1px' }}>ADMIN</span>
-          </span>
-          <nav style={{ display: 'flex', gap: '4px' }}>
-            {[
-              { label: 'Dashboard', href: '/admin' },
-              { label: 'Customers', href: '/admin/customers' },
-              { label: 'Enquiries & Quotes', href: '/admin/leads' },
-              { label: 'Orders', href: '/admin/orders' },
-              { label: 'Artworks', href: '/admin/artworks' },
-              { label: 'Invoices', href: '/admin/invoices' },
-              { label: 'Production', href: '/admin/production' },
-              { label: 'Products', href: '/admin/products' },
-              { label: 'Sourcing', href: '/admin/sourcing' },
-            ].map(item => (
-              <Link key={item.href} href={item.href} style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: 500 }}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-        <button onClick={handleLogout} style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', border: 'none', borderRadius: '6px', padding: '6px 14px', fontSize: '13px', cursor: 'pointer' }}>
-          Logout
-        </button>
-      </div>
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px' }}>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', fontWeight: 600, color: NAVY, margin: '0 0 24px' }}>Dashboard</h1>

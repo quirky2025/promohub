@@ -202,30 +202,6 @@ export default function AdminArtworksPage() {
 
   return (
     <div style={{ background: '#fff', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
-      <div style={{ background: NAVY, padding: '0 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '56px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', fontWeight: 600, color: '#fff', letterSpacing: '2px' }}>
-            QUIRKY<span style={{ color: GOLD }}>PROMO</span>
-            <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginLeft: '8px', letterSpacing: '1px' }}>ADMIN</span>
-          </span>
-          <nav style={{ display: 'flex', gap: '4px' }}>
-            {[
-              { label: 'Dashboard', href: '/admin' },
-              { label: 'Orders', href: '/admin/orders' },
-              { label: 'Artworks', href: '/admin/artworks' },
-              { label: 'Invoices', href: '/admin/invoices' },
-              { label: 'Production', href: '/admin/production' },
-              { label: 'Quotes', href: '/admin/quotes' },
-              { label: 'Products', href: '/admin/products' },
-            ].map(item => (
-              <Link key={item.href} href={item.href} style={{ color: item.href === '/admin/artworks' ? '#fff' : 'rgba(255,255,255,0.7)', textDecoration: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: item.href === '/admin/artworks' ? 700 : 500, background: item.href === '/admin/artworks' ? 'rgba(255,255,255,0.1)' : 'none' }}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-        <Link href="/admin/login" style={{ color: 'rgba(255,255,255,0.7)', textDecoration: 'none', fontSize: '13px' }}>Logout</Link>
-      </div>
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>

@@ -152,19 +152,6 @@ export default function AdminProductionPage() {
 
   return (
     <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', minHeight: '100vh' }}>
-      <div style={{ background: NAVY, padding: '0 32px', display: 'flex', alignItems: 'center', gap: '28px', height: '56px' }}>
-        <span style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', fontWeight: 600, color: '#fff', letterSpacing: '1px' }}>
-          QUIRKY<span style={{ color: GOLD }}>PROMO</span>
-        </span>
-        <nav style={{ display: 'flex', gap: '2px' }}>
-          {NAV.map(n => (
-            <Link key={n.href} href={n.href}
-              style={{ color: n.href === '/admin/production' ? '#fff' : 'rgba(255,255,255,0.7)', textDecoration: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '13px', fontWeight: n.href === '/admin/production' ? 700 : 500, background: n.href === '/admin/production' ? 'rgba(255,255,255,0.1)' : 'none' }}>
-              {n.label}
-            </Link>
-          ))}
-        </nav>
-      </div>
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 32px' }}>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', fontWeight: 600, color: NAVY, margin: '0 0 6px' }}>Production</h1>
