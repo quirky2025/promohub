@@ -42,7 +42,7 @@ async function generateQuotePDF({
   const GOLD = rgb(0.788, 0.663, 0.431);  // #C9A96E
   const GREY = rgb(0.08, 0.08, 0.08);  // unified: all body text black
   const WHITE = rgb(1, 1, 1);
-  const LIGHT = rgb(0.973, 0.969, 0.957); // #F8F7F4
+  const LIGHT = rgb(0.973, 0.969, 0.957); // #ffffff
   const BLACK = rgb(0.1, 0.1, 0.1);
   const money = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
@@ -334,7 +334,7 @@ export async function POST(req) {
             <tr><td style="padding: 6px 0; color: #7A7570;">Email</td><td><a href="mailto:${email}" style="color: #C9A96E;">${email}</a></td></tr>
             ${phone ? `<tr><td style="padding: 6px 0; color: #7A7570;">Phone</td><td>${phone}</td></tr>` : ''}
           </table>
-          ${notes ? `<h2 style="font-size: 14px; color: #1B2A4A; margin: 0 0 12px; padding-bottom: 10px; border-bottom: 1px solid #F0EEED; text-transform: uppercase; letter-spacing: 0.08em;">💬 Notes</h2><div style="background: #F8F7F4; border-radius: 8px; padding: 16px; font-size: 14px; color: #3D3A36; white-space: pre-wrap; margin-bottom: 24px;">${notes}</div>` : ''}
+          ${notes ? `<h2 style="font-size: 14px; color: #1B2A4A; margin: 0 0 12px; padding-bottom: 10px; border-bottom: 1px solid #F0EEED; text-transform: uppercase; letter-spacing: 0.08em;">💬 Notes</h2><div style="background: #ffffff; border-radius: 8px; padding: 16px; font-size: 14px; color: #3D3A36; white-space: pre-wrap; margin-bottom: 24px;">${notes}</div>` : ''}
           <div style="text-align: center; padding-top: 20px; border-top: 1px solid #F0EEED;">
             <a href="mailto:${email}?subject=Re: Quote ${quoteNumber} for ${encodeURIComponent(productName)}" style="display: inline-block; background: #C9A96E; color: #fff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 14px;">Reply to ${name}</a>
           </div>

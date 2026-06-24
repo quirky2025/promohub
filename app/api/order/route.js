@@ -150,7 +150,7 @@ export async function POST(req) {
           <p style="font-size:15px;margin:0 0 16px;">Hi ${customer.name},</p>
           <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Thank you so much for your order — we're thrilled to be making it for you! Your <strong>Order Confirmation</strong>${isPaidOrder ? ' and <strong>Tax Invoice</strong> are attached as PDFs' : ' is attached as a PDF'} for your records.</p>
           <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Here's what happens next: we'll email you a <strong>free digital proof</strong> to approve. Once you're happy with it${paymentMethod === 'eft' ? ' and payment has been received' : ''}, we'll get straight into production.</p>
-          <div style="background:#F8F7F4;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
+          <div style="background:#ffffff;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
             <span style="color:#7A7570;">Order</span> <strong style="color:#1B2A4A;">${orderNumber}</strong>
             &nbsp;·&nbsp; <span style="color:#7A7570;">Status</span> <strong style="color:#2D6A4F;">✓ Order confirmed${isPaidOrder ? ' &amp; paid' : ''}</strong>
             &nbsp;·&nbsp; <span style="color:#7A7570;">Next step</span> <strong style="color:#1B2A4A;">Artwork approval</strong>

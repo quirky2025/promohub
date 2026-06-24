@@ -7,7 +7,7 @@ import { absoluteUrl, SITE_URL } from '@/lib/siteUrl';
 import ProductImg from '@/components/ProductImg';
 import QuoteButton from '@/components/QuoteButton';
 
-const NAVY = '#1B2A4A', GOLD = '#C9A96E', CREAM = '#F8F7F4', LINE = '#E0DDD7', MUTED = '#000000';
+const NAVY = '#1B2A4A', GOLD = '#C9A96E', CREAM = '#ffffff', LINE = '#E0DDD7', MUTED = '#000000';
 const serif = '"Cormorant Garamond", serif';
 
 export const revalidate = 1800;

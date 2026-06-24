@@ -97,7 +97,7 @@ export async function POST(request) {
       const body = `
         <p style="font-size:15px;margin:0 0 16px;">Hi ${q.customer_name || 'there'},</p>
         <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Thank you for confirming your order from quote <strong>${q.quote_number || ''}</strong> — we're thrilled to be making it for you! Your <strong>Order Confirmation</strong> is attached as a PDF.</p>
-        <div style="background:#F8F7F4;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
+        <div style="background:#ffffff;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
           <span style="color:#7A7570;">Order</span> <strong style="color:#1B2A4A;">${orderNumber}</strong>
           &nbsp;&middot;&nbsp; <span style="color:#7A7570;">Status</span> <strong style="color:#2D6A4F;">&#10003; Order confirmed</strong>
           &nbsp;&middot;&nbsp; <span style="color:#7A7570;">Next step</span> <strong style="color:#1B2A4A;">Artwork approval</strong>
@@ -138,7 +138,7 @@ export async function POST(request) {
           <div style="text-align:center;margin:28px 0;">
             <a href="${uploadUrl}" style="display:inline-block;background:#C9A96E;color:#fff;text-decoration:none;padding:15px 38px;border-radius:10px;font-weight:700;font-size:16px;">Upload your logo &rarr;</a>
           </div>
-          <div style="background:#F8F7F4;border-radius:10px;padding:16px 20px;margin:0 0 16px;font-size:14px;">
+          <div style="background:#ffffff;border-radius:10px;padding:16px 20px;margin:0 0 16px;font-size:14px;">
             <div style="font-weight:700;color:#1B2A4A;margin-bottom:8px;">Accepted file formats</div>
             <div style="color:#000000;font-weight:700;">VECTOR FILES ONLY — AI, PDF, EPS or SVG. We cannot print from PNG or JPG.</div>
           </div>

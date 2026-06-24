@@ -32,14 +32,14 @@ function OrderConfirmationContent() {
         </p>
 
         {orderNumber && (
-          <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '12px 20px', margin: '16px 0 24px', display: 'inline-block' }}>
+          <div style={{ background: '#ffffff', borderRadius: '10px', padding: '12px 20px', margin: '16px 0 24px', display: 'inline-block' }}>
             <span style={{ fontSize: '13px', color: '#7A7570' }}>Order Number: </span>
             <span style={{ fontSize: '16px', fontWeight: 700, color: NAVY, fontFamily: '"DM Mono", monospace' }}>{orderNumber}</span>
           </div>
         )}
 
         {/* What happens next */}
-        <div style={{ background: '#F8F7F4', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', textAlign: 'left' }}>
+        <div style={{ background: '#ffffff', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', textAlign: 'left' }}>
           <div style={{ fontWeight: 700, color: NAVY, marginBottom: '12px', fontSize: '15px' }}>📋 What happens next?</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px', color: '#3D3A36' }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>

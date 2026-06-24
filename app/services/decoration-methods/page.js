@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
-const BG = '#F8F7F4';
+const BG = '#ffffff';
 
 const METHODS = [
   {
@@ -579,7 +579,7 @@ export default function DecorationMethodsPage() {
                     ))}
                   </div>
 
-                  <div style={{ marginTop: '20px', background: '#F8F7F4', borderRadius: '8px', padding: '16px' }}>
+                  <div style={{ marginTop: '20px', background: '#ffffff', borderRadius: '8px', padding: '16px' }}>
                     <div style={{ fontSize: '12px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '10px' }}>📐 Artwork Requirements</div>
                     {method.artwork.map((a, i) => (
                       <div key={i} style={{ display: 'flex', gap: '10px', marginBottom: '8px' }}>
