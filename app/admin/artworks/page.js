@@ -252,7 +252,13 @@ export default function AdminArtworksPage() {
                   {art.mockup_url && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Mockup</div>
-                      <ProductImg src={toDisplayUrl(art.mockup_url)} size="thumb" alt="Mockup" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
+                      {/\.pdf(\?|$)/i.test(art.mockup_url) ? (
+                        <a href={art.mockup_url} target="_blank" rel="noreferrer" title="Open mockup" style={{ display: 'block', width: '100px', height: '120px', margin: '0 auto', border: '1px solid #E0DDD7', borderRadius: '8px', overflow: 'hidden', background: '#fff' }}>
+                          <iframe src={`${art.mockup_url}#toolbar=0&navpanes=0&view=FitH`} title="Mockup" style={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none' }} />
+                        </a>
+                      ) : (
+                        <ProductImg src={toDisplayUrl(art.mockup_url)} size="thumb" alt="Mockup" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
+                      )}
                       <div style={{ marginTop: '4px' }}>
                         <a href={art.mockup_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: GOLD, textDecoration: 'none' }}>View</a>
                       </div>
