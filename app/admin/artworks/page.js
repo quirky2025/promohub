@@ -152,7 +152,22 @@ export default function AdminArtworksPage() {
     setUploading(false);
   }
 
+  async function resendUploadLink(art) {
+    if (!confirm(`Resend the "upload your logo" link to ${art.customer_email}?`)) return;
+    const res = await fetch('/api/admin/artworks/send-upload-link', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: art.token }) });
+    if (res.ok) { alert(`Upload link resent to ${art.customer_email} ✅`); }
+    else { const d = await res.json().catch(() => ({})); alert('Failed: ' + (d.error || 'unknown')); }
+  }
+
   function getActionButton(art) {
+    if (art.status === 'awaiting_logo') {
+      return (
+        <button onClick={() => resendUploadLink(art)}
+          style={{ background: '#fff', color: NAVY, border: `1.5px solid ${NAVY}`, borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap' }}>
+          ✉ Resend upload link
+        </button>
+      );
+    }
     if (art.status === 'logo_received') {
       return (
         <button onClick={() => { setSelected(art); setMockupFile(null); setSuccess(''); }}
@@ -252,7 +267,13 @@ export default function AdminArtworksPage() {
                   {art.mockup_url && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Mockup</div>
-                      <ProductImg src={toDisplayUrl(art.mockup_url)} size="thumb" alt="Mockup" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
+                      {/\.pdf(\?|$)/i.test(art.mockup_url) ? (
+                        <a href={art.mockup_url} target="_blank" rel="noreferrer" title="Open mockup" style={{ display: 'block', width: '100px', height: '120px', margin: '0 auto', border: '1px solid #E0DDD7', borderRadius: '8px', overflow: 'hidden', background: '#fff' }}>
+                          <iframe src={`${art.mockup_url}#toolbar=0&navpanes=0&view=FitH`} title="Mockup" style={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none' }} />
+                        </a>
+                      ) : (
+                        <ProductImg src={toDisplayUrl(art.mockup_url)} size="thumb" alt="Mockup" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
+                      )}
                       <div style={{ marginTop: '4px' }}>
                         <a href={art.mockup_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: GOLD, textDecoration: 'none' }}>View</a>
                       </div>
