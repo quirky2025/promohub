@@ -350,7 +350,7 @@ export default function AdminArtworksPage() {
             <div style={{ textAlign: 'center', fontSize: '12px', color: '#9CA3AF', margin: '0 0 14px' }}>- or upload a mockup manually -</div>
 
             <div onClick={() => document.getElementById('mockup-upload').click()}
-              style={{ border: `2px dashed ${mockupFile ? GOLD : '#C8C4BC'}`, borderRadius: '10px', padding: '32px', textAlign: 'center', cursor: 'pointer', background: mockupFile ? '#FFFBF4' : '#F8F7F4', marginBottom: '20px' }}>
+              style={{ border: `2px dashed ${mockupFile ? GOLD : '#C8C4BC'}`, borderRadius: '10px', padding: '32px', textAlign: 'center', cursor: 'pointer', background: mockupFile ? '#FFFBF4' : '#ffffff', marginBottom: '20px' }}>
               <input id="mockup-upload" type="file" accept="image/*,.pdf" style={{ display: 'none' }}
                 onChange={e => { if (e.target.files[0]) setMockupFile(e.target.files[0]); }} />
               {mockupFile ? (

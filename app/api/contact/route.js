@@ -42,7 +42,7 @@ export async function POST(request) {
               </tr>
             </table>
           </div>
-          <div style="background: #F8F7F4; padding: 20px; text-align: center; border: 1px solid #E0DDD7; border-top: none;">
+          <div style="background: #ffffff; padding: 20px; text-align: center; border: 1px solid #E0DDD7; border-top: none;">
             <p style="margin: 0; font-size: 12px; color: #B0AAA3;">Sent from quirkypromo.com.au contact form</p>
           </div>
         </div>

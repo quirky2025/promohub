@@ -122,7 +122,7 @@ export default function ArtworkPage() {
         <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 24px' }}>
           Thank you, <strong>{name}</strong>! Your approval has been recorded and a confirmation has been emailed to you.
         </p>
-        <div style={{ background: '#F8F7F4', borderRadius: '10px', padding: '16px', fontSize: '14px', color: '#7A7570' }}>
+        <div style={{ background: '#ffffff', borderRadius: '10px', padding: '16px', fontSize: '14px', color: '#7A7570' }}>
           {artwork?.payment_method === 'eft'
             ? 'Your Invoice will arrive shortly. Production begins once payment is received.'
             : "Production is now starting. We'll notify you when your order is dispatched."}
@@ -217,7 +217,7 @@ export default function ArtworkPage() {
                     style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none', resize: 'vertical' }} />
                 </div>
 
-                <div style={{ background: '#F8F7F4', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontSize: '12px', color: '#7A7570' }}>
+                <div style={{ background: '#ffffff', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontSize: '12px', color: '#7A7570' }}>
                   By clicking "I Approve This Artwork", you confirm that you have reviewed the mockup and approve it for production. This approval is legally binding.
                 </div>
 

@@ -114,7 +114,7 @@ export default function UploadLogoPage() {
               padding: '48px 32px',
               textAlign: 'center',
               cursor: 'pointer',
-              background: logoFile ? '#FFFBF4' : '#F8F7F4',
+              background: logoFile ? '#FFFBF4' : '#ffffff',
               marginBottom: '24px',
               transition: 'all .2s',
             }}>

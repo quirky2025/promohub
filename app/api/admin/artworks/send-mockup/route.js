@@ -31,7 +31,7 @@ export async function POST(req) {
     const bodyHtml = `
       <p style="font-size:15px;margin:0 0 16px;">Hi ${artwork.customer_name},</p>
       <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Your artwork proof for <strong>${artwork.product_name}</strong> is ready for review. Please take a look and approve it so we can get started.</p>
-      <div style="background:#F8F7F4;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
+      <div style="background:#ffffff;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
         <span style="color:#7A7570;">Order</span> <strong style="color:#1B2A4A;">${artwork.order_number}</strong>
         &nbsp;·&nbsp; <span style="color:#7A7570;">Product</span> <strong style="color:#1B2A4A;">${artwork.product_name}</strong>
       </div>

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
-const BG = '#F8F7F4';
+const BG = '#ffffff';
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
 
 const NAV = [

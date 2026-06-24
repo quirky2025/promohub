@@ -153,7 +153,7 @@ export default function CategoryPage() {
   const seo = SEO_CONTENT[categoryKey] || null;
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#F8F7F4', color: '#1a1a1a' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#ffffff', color: '#1a1a1a' }}>
 
       {/* BREADCRUMB */}
       <div className="qp-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
@@ -187,7 +187,7 @@ export default function CategoryPage() {
           <div className="qp-subcat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px' }}>
             {subcategories.map(sub => (
               <Link key={sub.name} href={`/category/${category}/${slugify(sub.name)}`} style={{ textDecoration: 'none' }}>
-                <div style={{ background: '#F8F7F4', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', cursor: 'pointer', transition: 'box-shadow .2s, transform .2s' }}
+                <div style={{ background: '#ffffff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', cursor: 'pointer', transition: 'box-shadow .2s, transform .2s' }}
                   onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,.1)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                   onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
                 >
@@ -286,7 +286,7 @@ export default function CategoryPage() {
                         onMouseLeave={() => setHoveredId(null)}
                         style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', boxShadow: isHovered ? '0 8px 24px rgba(0,0,0,.1)' : '0 2px 6px rgba(0,0,0,.05)', transform: isHovered ? 'translateY(-2px)' : 'none', transition: 'box-shadow .2s, transform .2s', height: '100%', display: 'flex', flexDirection: 'column' }}
                       >
-                        <div style={{ height: '190px', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+                        <div style={{ height: '190px', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
                           {img
                             ? <ProductImg src={img} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} />
                             : <div style={{ fontSize: '40px', color: '#D0CCC8' }}>📦</div>}
@@ -350,7 +350,7 @@ export default function CategoryPage() {
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: '40px', padding: '24px 28px', background: '#F8F7F4', borderRadius: '12px', borderLeft: `4px solid ${GOLD}` }}>
+            <div style={{ marginTop: '40px', padding: '24px 28px', background: '#ffffff', borderRadius: '12px', borderLeft: `4px solid ${GOLD}` }}>
               <p style={{ margin: 0, fontSize: '14px', color: '#3D3A36', lineHeight: 1.8 }}>
                 <strong>Ready to get started?</strong> Browse our full range above, or contact our team at{' '}
                 <a href="mailto:hello@quirkypromo.com.au" style={{ color: GOLD, fontWeight: 600 }}>hello@quirkypromo.com.au</a>{' '}

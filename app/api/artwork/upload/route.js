@@ -60,7 +60,7 @@ export async function POST(req) {
           <div style="background: #fff; border: 1px solid #E0DDD7; border-top: none; padding: 20px 28px; border-radius: 0 0 12px 12px;">
             <p style="font-size: 15px;"><strong>${customerName}</strong> has uploaded their logo for order <strong style="color: #C9A96E;">${orderNumber}</strong>.</p>
 
-            <div style="background: #F8F7F4; border-radius: 10px; padding: 16px 20px; margin: 16px 0; font-size: 14px;">
+            <div style="background: #ffffff; border-radius: 10px; padding: 16px 20px; margin: 16px 0; font-size: 14px;">
               <div style="margin-bottom: 6px;"><span style="color: #7A7570;">Product:</span> <strong>${productName}</strong></div>
               ${colour ? `<div style="margin-bottom: 6px;"><span style="color: #7A7570;">Colour:</span> <strong>${colour}</strong></div>` : ''}
               ${qty ? `<div style="margin-bottom: 6px;"><span style="color: #7A7570;">Quantity:</span> <strong>${qty}</strong></div>` : ''}
@@ -107,7 +107,7 @@ export async function POST(req) {
       html: quirkyEmail(`
         <p style="font-size:15px;margin:0 0 16px;">Hi ${customerName},</p>
         <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Thank you — we've received your logo for <strong>${productName}</strong>! Our team is now putting together your artwork mockup, and we'll send it over for your approval very soon.</p>
-        <div style="background:#F8F7F4;border-radius:10px;padding:16px 20px;margin:0 0 16px;font-size:14px;">
+        <div style="background:#ffffff;border-radius:10px;padding:16px 20px;margin:0 0 16px;font-size:14px;">
           <div style="margin-bottom:6px;"><span style="color:#7A7570;">Order</span> <strong style="color:#C9A96E;">${orderNumber}</strong></div>
           <div style="margin-bottom:6px;"><span style="color:#7A7570;">Product</span> <strong>${productName}</strong></div>
           ${colour ? `<div style="margin-bottom:6px;"><span style="color:#7A7570;">Colour</span> <strong>${colour}</strong></div>` : ''}

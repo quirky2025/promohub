@@ -3,7 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import { getFirstImage, getLowestPrice } from '@/lib/urlPages';
 import ProductImg from '@/components/ProductImg';
-const NAVY = '#1B2A4A', GOLD = '#C9A96E', GOLD_DK = '#B2925A', CREAM = '#F8F7F4', LINE = '#E0DDD7', MUTED = '#000000';
+const NAVY = '#1B2A4A', GOLD = '#C9A96E', GOLD_DK = '#B2925A', CREAM = '#ffffff', LINE = '#E0DDD7', MUTED = '#000000';
 const SITE = 'https://www.quirkypromo.com.au';
 const serif = '"Cormorant Garamond", serif';
 

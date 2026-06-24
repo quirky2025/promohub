@@ -204,7 +204,7 @@ export default function AdminProductsPage() {
           <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
-                <tr style={{ background: '#F8F7F4', borderBottom: '1px solid #E0DDD7' }}>
+                <tr style={{ background: '#ffffff', borderBottom: '1px solid #E0DDD7' }}>
                   {['', 'Product', 'Category', 'Subcategory', 'Brand', 'Eco', 'New', 'Sale', 'Actions'].map(h => (
                     <th key={h} style={{ padding: '12px 16px', textAlign: ['Eco', 'New', 'Sale', ''].includes(h) ? 'center' : 'left', color: NAVY, fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>{h}</th>
                   ))}
@@ -243,14 +243,14 @@ export default function AdminProductsPage() {
             {products.length > PAGE_SIZE && (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '24px', borderTop: '1px solid #E0DDD7' }}>
                 <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                  style={{ padding: '8px 16px', border: '1.5px solid #E0DDD7', borderRadius: '6px', background: currentPage === 1 ? '#F8F7F4' : '#fff', color: currentPage === 1 ? '#B0AAA3' : NAVY, cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 600 }}>
+                  style={{ padding: '8px 16px', border: '1.5px solid #E0DDD7', borderRadius: '6px', background: currentPage === 1 ? '#ffffff' : '#fff', color: currentPage === 1 ? '#B0AAA3' : NAVY, cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 600 }}>
                   ← Prev
                 </button>
                 <span style={{ fontSize: '13px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>
                   Page {currentPage} of {Math.ceil(products.length / PAGE_SIZE)} ({products.length} products)
                 </span>
                 <button onClick={() => setCurrentPage(p => Math.min(Math.ceil(products.length / PAGE_SIZE), p + 1))} disabled={currentPage === Math.ceil(products.length / PAGE_SIZE)}
-                  style={{ padding: '8px 16px', border: '1.5px solid #E0DDD7', borderRadius: '6px', background: currentPage === Math.ceil(products.length / PAGE_SIZE) ? '#F8F7F4' : '#fff', color: currentPage === Math.ceil(products.length / PAGE_SIZE) ? '#B0AAA3' : NAVY, cursor: currentPage === Math.ceil(products.length / PAGE_SIZE) ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 600 }}>
+                  style={{ padding: '8px 16px', border: '1.5px solid #E0DDD7', borderRadius: '6px', background: currentPage === Math.ceil(products.length / PAGE_SIZE) ? '#ffffff' : '#fff', color: currentPage === Math.ceil(products.length / PAGE_SIZE) ? '#B0AAA3' : NAVY, cursor: currentPage === Math.ceil(products.length / PAGE_SIZE) ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 600 }}>
                   Next →
                 </button>
               </div>
@@ -369,7 +369,7 @@ export default function AdminProductsPage() {
                       </div>
                     )}
                   </div>
-                  <div style={{ display: 'flex', gap: '24px', padding: '16px', background: '#F8F7F4', borderRadius: '10px' }}>
+                  <div style={{ display: 'flex', gap: '24px', padding: '16px', background: '#ffffff', borderRadius: '10px' }}>
                     {[
                       { field: 'is_eco', label: '🌿 Eco Product' },
                       { field: 'is_new_arrival', label: '✨ New Arrival' },
@@ -404,7 +404,7 @@ export default function AdminProductsPage() {
                       </div>
                     ))}
                     <button onClick={addFeature}
-                      style={{ background: '#F8F7F4', color: NAVY, border: '1.5px dashed #C8C4BC', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', width: '100%' }}>
+                      style={{ background: '#ffffff', color: NAVY, border: '1.5px dashed #C8C4BC', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', width: '100%' }}>
                       + Add Feature
                     </button>
                   </div>

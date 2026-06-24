@@ -415,7 +415,7 @@ export default function PlaceOrderPage() {
                   </div>
                   <div>
                     <label style={labelStyle}>Country</label>
-                    <input value="Australia" readOnly style={{ ...inputStyle, background: '#F8F7F4', color: '#9CA3AF', cursor: 'not-allowed' }} />
+                    <input value="Australia" readOnly style={{ ...inputStyle, background: '#ffffff', color: '#9CA3AF', cursor: 'not-allowed' }} />
                   </div>
                 </div>
               </div>
@@ -471,7 +471,7 @@ export default function PlaceOrderPage() {
                   padding: '32px',
                   textAlign: 'center',
                   cursor: 'pointer',
-                  background: logoFile ? '#FFFBF4' : '#F8F7F4',
+                  background: logoFile ? '#FFFBF4' : '#ffffff',
                   transition: 'all .2s',
                 }}>
                 <input
@@ -527,7 +527,7 @@ export default function PlaceOrderPage() {
                       </div>
                     </div>
                     {paymentMethod === 'eft' && (
-                      <div style={{ background: '#F8F7F4', borderRadius: '8px', padding: '14px 16px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif' }}>
+                      <div style={{ background: '#ffffff', borderRadius: '8px', padding: '14px 16px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif' }}>
                         <div style={{ fontWeight: 700, color: NAVY, marginBottom: '10px' }}>Bank Transfer Details:</div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', color: '#000' }}>
                           {[
@@ -632,7 +632,7 @@ export default function PlaceOrderPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '20px' }}>
                 {cart.map(item => (
                   <div key={item.id} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                    <div style={{ width: '52px', height: '52px', flexShrink: 0, borderRadius: '6px', border: '1px solid #E0DDD7', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                    <div style={{ width: '52px', height: '52px', flexShrink: 0, borderRadius: '6px', border: '1px solid #E0DDD7', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                       {item.image ? <img src={cld(item.image, 160)} alt={item.productName} style={{ width: '90%', height: '90%', objectFit: 'contain' }} /> : <span>📦</span>}
                     </div>
                     <div style={{ flex: 1 }}>

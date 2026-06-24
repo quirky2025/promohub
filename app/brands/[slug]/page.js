@@ -124,7 +124,7 @@ export default function BrandPage() {
   const selectStyle = { padding: '10px 16px', borderRadius: '8px', border: '1px solid #E0DDD7', fontSize: '14px', color: NAVY, background: '#fff', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' };
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#F8F7F4', color: '#1a1a1a' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#ffffff', color: '#1a1a1a' }}>
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
           <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
@@ -190,7 +190,7 @@ export default function BrandPage() {
                   <Link key={product.id} href={`/products/${product.slug}`} style={{ textDecoration: 'none' }}>
                     <div onMouseEnter={() => setHoveredId(product.id)} onMouseLeave={() => setHoveredId(null)}
                       style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', boxShadow: isHovered ? '0 8px 24px rgba(0,0,0,.1)' : '0 2px 6px rgba(0,0,0,.05)', transform: isHovered ? 'translateY(-2px)' : 'none', transition: 'box-shadow .2s, transform .2s', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                      <div style={{ height: '190px', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+                      <div style={{ height: '190px', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
                         {img ? <ProductImg src={img} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} /> : <div style={{ fontSize: '40px', color: '#D0CCC8' }}>📦</div>}
                         {product.is_eco && (<div style={{ position: 'absolute', top: '10px', left: '10px', background: '#2D6A4F', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px' }}>🌿 ECO</div>)}
                       </div>

@@ -51,7 +51,7 @@ export async function POST(request) {
         const name = order.customer_name || 'there';
         const bodyHtml = `
           <p style="font-size:15px;margin:0 0 16px;">Hi ${name},</p>
-          <div style="background:#F8F7F4;border-radius:10px;padding:14px 18px;margin:0 0 16px;font-size:14px;">
+          <div style="background:#ffffff;border-radius:10px;padding:14px 18px;margin:0 0 16px;font-size:14px;">
             <span style="color:#7A7570;">Order</span> <strong style="color:#1B2A4A;">${orderNo}</strong>
             &nbsp;·&nbsp; <span style="color:#7A7570;">Status</span> <strong style="color:#2D6A4F;">✓ Payment received</strong>
             &nbsp;·&nbsp; <span style="color:#7A7570;">Next step</span> <strong style="color:#1B2A4A;">Production</strong>

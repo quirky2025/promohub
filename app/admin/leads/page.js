@@ -7,7 +7,7 @@ import QuoteBuilder from '@/components/QuoteBuilder';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
-const BG = '#F8F7F4';
+const BG = '#ffffff';
 
 const STATUS_META = {
   new:         { label: 'New',         bg: '#E6F1FB', color: '#0C447C' },
@@ -254,7 +254,7 @@ export default function AdminDealsPage() {
                 <div style={{ color: '#A32D2D', fontSize: '13px', padding: '8px 0' }}>Couldn't load details. {detail.error || ''}</div>
               ) : detail && (
                 <>
-                  <div style={{ background: '#F8F7F4', borderRadius: '8px', padding: '12px 14px', fontSize: '13px', color: '#1B2A4A', marginBottom: '14px', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+                  <div style={{ background: '#ffffff', borderRadius: '8px', padding: '12px 14px', fontSize: '13px', color: '#1B2A4A', marginBottom: '14px', whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
                     {selected.kind === 'quote'
                       ? <>{detail.record.product_name} · qty {detail.record.quantity}{detail.record.colour ? ` · ${detail.record.colour}` : ''}<br />{detail.record.branding_summary || ''}<br /><strong>{aud(detail.record.total)}</strong> incl. GST{detail.record.quote_number ? ` · ${detail.record.quote_number}` : ''}</>
                       : (detail.record.message || '—')}

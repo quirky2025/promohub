@@ -24,7 +24,7 @@ export async function POST(req) {
       subject: `Changes Requested — ${artwork.order_number} — ${artwork.customer_name}`,
       html: quirkyEmail(`
         <p style="font-size:15px;margin:0 0 12px;"><strong>${name}</strong> requested changes to the artwork.</p>
-        <div style="background:#F8F7F4;border-radius:10px;padding:14px 18px;margin:0 0 16px;font-size:14px;">
+        <div style="background:#ffffff;border-radius:10px;padding:14px 18px;margin:0 0 16px;font-size:14px;">
           <div><span style="color:#7A7570;">Order</span> <strong style="color:#1B2A4A;">${artwork.order_number}</strong></div>
           <div><span style="color:#7A7570;">Product</span> <strong style="color:#1B2A4A;">${artwork.product_name}</strong></div>
           <div><span style="color:#7A7570;">Customer</span> <strong style="color:#1B2A4A;">${name}</strong> (${artwork.customer_email})</div>
