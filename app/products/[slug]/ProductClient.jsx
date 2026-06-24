@@ -974,8 +974,9 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
     } catch { setStatus('error'); }
   }
 
-  function handleBackdrop(e) {
-    if (e.target === e.currentTarget) onClose();
+  function handleBackdrop() {
+    // Backdrop clicks intentionally do NOT close the modal — stops a half-filled
+    // quote being lost to an accidental click outside. Use the ✕ button to close.
   }
 
   const inputStyle = {

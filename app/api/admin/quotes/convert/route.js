@@ -3,6 +3,7 @@ import { sourcingDb } from '@/lib/sourcingDb';
 import { Resend } from 'resend';
 import { quirkyEmail } from '@/lib/emailLayout';
 import { generateOrderDocPDF } from '@/lib/orderDocPdf';
+import crypto from 'crypto';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -110,6 +111,39 @@ export async function POST(request) {
         attachments: [{ filename: `OrderConfirmation_${orderNumber}.pdf`, content: ocBuffer.toString('base64') }],
       });
     } catch (_) { /* email/PDF failure must not block conversion */ }
+
+    // Create an Artwork record + email the customer to upload their logo, so the
+    // converted order appears in the Artworks board and we can produce the mockup.
+    try {
+      const token = crypto.randomBytes(32).toString('hex');
+      await db.from('artworks').insert({
+        order_number: orderNumber,
+        customer_name: q.customer_name,
+        customer_email: q.customer_email,
+        product_name: q.product_name || 'Product',
+        status: 'awaiting_logo',
+        token,
+        payment_method: 'eft',
+      });
+      const uploadUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/upload/${token}`;
+      await resend.emails.send({
+        from: 'QuirkyPromo <noreply@quirkypromo.com.au>', replyTo: 'hello@quirkypromo.com.au',
+        to: [q.customer_email],
+        subject: `One quick step for your order ${orderNumber} — upload your logo`,
+        html: quirkyEmail(`
+          <p style="font-size:15px;margin:0 0 16px;">Hi ${q.customer_name},</p>
+          <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Thank you so much for your order of <strong>${q.product_name || 'your product'}</strong> — we can't wait to get started! To create your free artwork mockup, we just need your logo file.</p>
+          <div style="text-align:center;margin:28px 0;">
+            <a href="${uploadUrl}" style="display:inline-block;background:#C9A96E;color:#fff;text-decoration:none;padding:15px 38px;border-radius:10px;font-weight:700;font-size:16px;">Upload your logo &rarr;</a>
+          </div>
+          <div style="background:#F8F7F4;border-radius:10px;padding:16px 20px;margin:0 0 16px;font-size:14px;">
+            <div style="font-weight:700;color:#1B2A4A;margin-bottom:8px;">Accepted file formats</div>
+            <div style="color:#000000;font-weight:700;">VECTOR FILES ONLY — AI, PDF, EPS or SVG. We cannot print from PNG or JPG.</div>
+          </div>
+          <p style="font-size:14px;line-height:1.6;color:#7A7570;margin:0;">Prefer email? Send your logo to <a href="mailto:hello@quirkypromo.com.au" style="color:#C9A96E;">hello@quirkypromo.com.au</a> and quote <strong>${orderNumber}</strong>.</p>
+        `),
+      });
+    } catch (_) { /* non-fatal — order already created */ }
 
     // Mark the quote converted.
     let { error: uErr } = await db.from('quotes').update({ status: 'accepted', converted_order_number: orderNumber }).eq('quote_number', quoteId);

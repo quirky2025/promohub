@@ -93,7 +93,6 @@ export default function QuoteModal({ open, onClose, source = 'homepage' }) {
 
   return (
     <div
-      onClick={handleClose}
       style={{
         position: 'fixed', inset: 0, zIndex: 1000,
         background: 'rgba(27,42,74,.55)', backdropFilter: 'blur(3px)',
