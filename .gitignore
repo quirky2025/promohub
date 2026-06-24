@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# image-migration pre-gen artifacts — R2-only, never commit
+_migrate/
+pregen-webp.log

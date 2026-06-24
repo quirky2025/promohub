@@ -17,7 +17,7 @@ export default function CartDrawer({ open, onClose }) {
   function go(href) { if (onClose) onClose(); router.push(href); }
   function remove(it) { setItems(removeFromCart(it.id)); }
   function changeQty(it, delta) { const q = Math.max(1, (Number(it.qty) || 1) + delta); setItems(updateQty(it.id, q)); }
-  const qtyBtn = { background: '#F8F7F4', border: 'none', width: '26px', height: '26px', fontSize: '15px', lineHeight: 1, cursor: 'pointer', color: NAVY };
+  const qtyBtn = { background: '#ffffff', border: 'none', width: '26px', height: '26px', fontSize: '15px', lineHeight: 1, cursor: 'pointer', color: NAVY };
 
   return (
     <>

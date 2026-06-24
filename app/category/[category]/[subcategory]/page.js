@@ -159,7 +159,7 @@ export default function SubcategoryPage() {
   const seoBlurb = SUB_SEO[subcategoryKey] || null;
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#F8F7F4' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#ffffff' }}>
 
       {/* BREADCRUMB */}
       <div className="qp-sub-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
@@ -266,7 +266,7 @@ export default function SubcategoryPage() {
                         onMouseLeave={() => setHoveredId(null)}
                         style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', boxShadow: isHovered ? '0 8px 24px rgba(0,0,0,.1)' : '0 2px 6px rgba(0,0,0,.05)', transform: isHovered ? 'translateY(-2px)' : 'none', transition: 'box-shadow .2s, transform .2s', height: '100%', display: 'flex', flexDirection: 'column' }}
                       >
-                        <div style={{ height: '190px', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
+                        <div style={{ height: '190px', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', position: 'relative' }}>
                           {img
                             ? <ProductImg src={img} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '12px' }} />
                             : <div style={{ fontSize: '40px', color: '#D0CCC8' }}>📦</div>}
@@ -330,7 +330,7 @@ export default function SubcategoryPage() {
               About Custom Printed {subName}
             </h2>
             <p style={{ fontSize: '15px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 28px' }}>{seoBlurb}</p>
-            <div style={{ padding: '20px 24px', background: '#F8F7F4', borderRadius: '12px', borderLeft: `4px solid ${GOLD}` }}>
+            <div style={{ padding: '20px 24px', background: '#ffffff', borderRadius: '12px', borderLeft: `4px solid ${GOLD}` }}>
               <p style={{ margin: 0, fontSize: '14px', color: '#3D3A36', lineHeight: 1.8 }}>
                 <strong>Need help choosing?</strong> Contact our team at{' '}
                 <a href="mailto:hello@quirkypromo.com.au" style={{ color: GOLD, fontWeight: 600 }}>hello@quirkypromo.com.au</a>{' '}

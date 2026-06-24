@@ -59,7 +59,7 @@ export async function POST(req) {
         <div style="background:#1B2A4A;padding:16px 24px;border-radius:10px 10px 0 0;"><img src="https://www.quirkypromo.com.au/quirky-logo-quote.png" alt="QuirkyPromo" height="30" style="display:block;height:30px;" /><p style="color:rgba(255,255,255,0.8);font-size:14px;margin:8px 0 0;">New Enquiry</p></div>
         <div style="border:1px solid #E0DDD7;border-top:none;border-radius:0 0 10px 10px;padding:20px 24px;">
           <table style="width:100%;font-size:14px;border-collapse:collapse;">${rows}</table>
-          <div style="margin-top:14px;padding:14px;background:#F8F7F4;border-radius:8px;font-size:14px;color:#1B2A4A;white-space:pre-wrap;">${esc(message)}</div>
+          <div style="margin-top:14px;padding:14px;background:#ffffff;border-radius:8px;font-size:14px;color:#1B2A4A;white-space:pre-wrap;">${esc(message)}</div>
           <a href="mailto:${esc(email)}?subject=Re:%20your%20enquiry%20to%20QuirkyPromo" style="display:inline-block;margin-top:16px;background:#C9A96E;color:#fff;text-decoration:none;padding:11px 24px;border-radius:8px;font-weight:600;font-size:14px;">Reply to ${esc(name)}</a>
         </div></div>`;
 

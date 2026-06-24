@@ -154,7 +154,7 @@ const st = {
   card: {
     width: '100%',
     maxWidth: 380,
-    background: '#F8F7F4',
+    background: '#ffffff',
     borderRadius: 12,
     padding: '36px 32px',
     boxShadow: '0 18px 50px rgba(0,0,0,0.35)',

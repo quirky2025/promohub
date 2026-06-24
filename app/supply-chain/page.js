@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
-const BG = '#F8F7F4';
+const BG = '#ffffff';
 
 const MODULES = [
   {

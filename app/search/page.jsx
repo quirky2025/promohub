@@ -102,7 +102,7 @@ function SearchResults() {
                 onMouseEnter={e => e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,.12)'}
                 onMouseLeave={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,.06)'}
               >
-                <div style={{ aspectRatio: '1', background: '#F8F7F4', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                <div style={{ aspectRatio: '1', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                   {img
                     ? <ProductImg src={img} alt={product.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
                     : <div style={{ color: '#B0AAA3', fontSize: '13px' }}>No image</div>

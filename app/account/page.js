@@ -107,7 +107,7 @@ export default function AccountPage() {
     return (
       <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead><tr style={{ background: '#F8F7F4', borderBottom: `1px solid ${BORDER}` }}>
+          <thead><tr style={{ background: '#ffffff', borderBottom: `1px solid ${BORDER}` }}>
             {['Order', 'Date', 'Total', 'Payment', 'Status'].map(h => (
               <th key={h} style={{ padding: '11px 14px', fontSize: '11px', fontWeight: 700, color: MUTED, textAlign: 'left', textTransform: 'uppercase', letterSpacing: '.07em' }}>{h}</th>
             ))}
@@ -181,7 +181,7 @@ export default function AccountPage() {
               {SECTIONS.map(([key, label]) => (
                 <button key={key} onClick={() => setSection(key)}
                   style={{ display: 'block', width: '100%', textAlign: 'left', padding: '9px 12px', fontSize: '14px', cursor: 'pointer',
-                    background: section === key ? '#F8F7F4' : 'none', color: section === key ? NAVY : '#3a3a3a',
+                    background: section === key ? '#ffffff' : 'none', color: section === key ? NAVY : '#3a3a3a',
                     border: 'none', borderLeft: section === key ? `3px solid ${GOLD}` : '3px solid transparent',
                     borderRadius: '0 8px 8px 0', fontWeight: section === key ? 700 : 500, fontFamily: '"DM Sans", sans-serif' }}>
                   {label}{key === 'cart' ? '' : ''}
@@ -230,7 +230,7 @@ export default function AccountPage() {
               <><h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', color: NAVY, margin: '0 0 18px' }}>My Quotes</h1>
                 {quotes.length ? (
                   <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse' }}><thead><tr style={{ background: '#F8F7F4', borderBottom: `1px solid ${BORDER}` }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}><thead><tr style={{ background: '#ffffff', borderBottom: `1px solid ${BORDER}` }}>
                       {['Quote', 'Date', 'Product', 'Qty', 'Total', 'Status'].map(h => <th key={h} style={{ padding: '11px 14px', fontSize: '11px', fontWeight: 700, color: MUTED, textAlign: 'left', textTransform: 'uppercase' }}>{h}</th>)}
                     </tr></thead><tbody>
                       {quotes.map((q, i) => (

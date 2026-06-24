@@ -728,7 +728,7 @@ export default function Nav() {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { setMobileOpen(false); handleSearch(e); } }}
-                  style={{ width: '100%', padding: '11px 40px 11px 14px', borderRadius: '8px', border: '1px solid #D8D2C6', background: '#F8F7F4', color: '#1a1a1a', fontSize: '15px', outline: 'none', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
+                  style={{ width: '100%', padding: '11px 40px 11px 14px', borderRadius: '8px', border: '1px solid #D8D2C6', background: '#ffffff', color: '#1a1a1a', fontSize: '15px', outline: 'none', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
                 <span onClick={() => { setMobileOpen(false); handleSearchClick(); }} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9A958C', fontSize: '17px', cursor: 'pointer' }}>🔍</span>
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
@@ -836,7 +836,7 @@ const mSub = {
 };
 const mLine = { borderBottom: '1px solid #F2F0ED' };
 const mAccountBtn = {
-  flex: 1, textAlign: 'center', background: '#F8F7F4', border: '1px solid #E6E1D8',
+  flex: 1, textAlign: 'center', background: '#ffffff', border: '1px solid #E6E1D8',
   borderRadius: '8px', padding: '11px 0', fontSize: '14px', fontWeight: 600,
   color: NAVY, fontFamily: '"DM Sans", sans-serif', cursor: 'pointer',
 };

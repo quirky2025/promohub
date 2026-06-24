@@ -31,7 +31,7 @@ export async function POST(request) {
       if (b.trackingNumber !== undefined) updates.tracking_number = b.trackingNumber || null;
       if (b.trackingUrl !== undefined) updates.tracking_url = b.trackingUrl || null;
       const trackLine = b.trackingNumber
-        ? `<div style="background:#F8F7F4;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
+        ? `<div style="background:#ffffff;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
              <span style="color:#7A7570;">Carrier</span> <strong style="color:#1B2A4A;">${b.carrier || 'Courier'}</strong>
              &nbsp;·&nbsp; <span style="color:#7A7570;">Tracking</span> <strong style="color:#1B2A4A;">${b.trackingNumber}</strong>
              ${b.trackingUrl ? `<div style="margin-top:8px;"><a href="${b.trackingUrl}" style="color:#C9A96E;">Track your parcel →</a></div>` : ''}
