@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { MARGIN } from '@/lib/pricing';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import QuoteModal from '@/components/QuoteModal';
@@ -9,7 +10,6 @@ import ProductImg from '@/components/ProductImg';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
-const MARGIN = 1.40;
 const PAGE_SIZE = 24;
 
 const PRICE_RANGES = [

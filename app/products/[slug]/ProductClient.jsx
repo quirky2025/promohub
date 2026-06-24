@@ -10,19 +10,12 @@ import { getColourHex } from '@/lib/colourSwatch';
 import { slugify } from '@/lib/slug';
 import { colourImageAlt, cleanColour } from '@/lib/colourName';
 import ProductImg from '@/components/ProductImg';
+import { uploadImage } from '@/lib/imageHost';
+import { MARGIN, GST, SHIPPING, SETUP_FEE, brandingLabel, isColourMethod, isOneColourLocked } from '@/lib/pricing';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 const aud = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const isColourMethod = (d) => { const n = (d?.name || '').toLowerCase(); return n.includes('screen print') || n.includes('pad print'); };
-const isOneColourLocked = (d) => { const x = (d?.detail || '').toLowerCase(); return x.includes('one colour') || x.includes('1 colour'); };
-// Laser engraving / etching / debossing have no colour — show the method name only.
-const isEngravingMethod = (d) => { const n = (d?.name || '').toLowerCase(); return n.includes('laser') || n.includes('engrav') || n.includes('deboss') || n.includes('emboss') || n.includes('etch'); };
-const brandingLabel = (d, setupQty) => isEngravingMethod(d) ? d.name : isColourMethod(d) ? `${d.name} — ${isOneColourLocked(d) ? 1 : (setupQty || 1)} COL · 1 POS` : `${d.name} — Full Colour · 1 POS`;
-const MARGIN = 1.40;
-const GST = 0.10;
-const SHIPPING = 30;
-const SETUP_FEE = 40;
 const TABS = ['Description', 'Sample Policy', 'Mockups & Artwork', 'Shipping & Delivery', 'Ordering Process'];
 
 // ── colourImageAlt imported from lib/colourName (shared with 4B variant logic) ──
@@ -908,7 +901,7 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
     requiredDate: '', purpose: '',
     street: '', street2: '', suburb: '', state: '', postcode: '',
     name: '', company: '', email: '', phone: '',
-    notes: '', artworkFileName: '',
+    notes: '', artworkFileName: '', artworkUrl: '', artworkUploading: false,
   });
   const [status, setStatus] = useState('idle');
   const [purposeOther, setPurposeOther] = useState(false);
@@ -1158,13 +1151,18 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
                   <div style={{ fontSize: '13px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>Click to upload your logo / artwork</div>
                   <div style={{ fontSize: '11px', color: '#000', marginTop: '3px', fontFamily: '"DM Sans", sans-serif' }}>or email to hello@quirkypromo.com.au after submitting</div>
                   <input id="artworkUpload" type="file" accept=".ai,.pdf,.png,.jpg,.jpeg,.eps,.svg" style={{ display: 'none' }}
-                    onChange={e => {
+                    onChange={async e => {
                       const file = e.target.files[0];
-                      if (file) setForm(prev => ({ ...prev, artworkFileName: file.name }));
+                      if (!file) return;
+                      setForm(prev => ({ ...prev, artworkFileName: file.name, artworkUrl: '', artworkUploading: true }));
+                      try {
+                        const url = await uploadImage(file);
+                        setForm(prev => ({ ...prev, artworkUrl: url, artworkUploading: false }));
+                      } catch { setForm(prev => ({ ...prev, artworkUploading: false })); }
                     }} />
                 </div>
                 {form.artworkFileName && (
-                  <div style={{ marginTop: '6px', fontSize: '12px', color: '#2D6A4F', fontFamily: '"DM Sans", sans-serif' }}>✅ {form.artworkFileName}</div>
+                  <div style={{ marginTop: '6px', fontSize: '12px', color: form.artworkUploading ? '#92400E' : '#2D6A4F', fontFamily: '"DM Sans", sans-serif' }}>{form.artworkUploading ? '⏳ Uploading… ' : '✅ '}{form.artworkFileName}</div>
                 )}
               </div>
 

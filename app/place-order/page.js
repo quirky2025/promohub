@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getCart, clearCart, removeFromCart } from '@/lib/cart';
 import { supabase } from '@/lib/supabase';
+import { SHIPPING, GST } from '@/lib/pricing';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -18,8 +19,6 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
-const SHIPPING = 30;
-const GST = 0.10;
 const STRIPE_SURCHARGE = 0.02;
 const STATES = ['ACT','NSW','NT','QLD','SA','TAS','VIC','WA'];
 

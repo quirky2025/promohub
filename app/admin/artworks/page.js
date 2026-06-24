@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ProductImg from '@/components/ProductImg';
+import { displayThumb, uploadImage } from '@/lib/imageHost';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -15,17 +16,9 @@ const STATUS_COLORS = {
   approved: { bg: '#D1FAE5', text: '#065F46', label: 'Approved' },
 };
 
-// Vector / PDF files (logos are often .ai/.eps/.svg/.pdf) can't render in <img>.
-// For Cloudinary-hosted files, rasterise the first page to PNG so a thumbnail
-// shows. Raster images (jpg/png/webp) and non-Cloudinary URLs pass through.
-function toDisplayUrl(url) {
-  if (!url || typeof url !== 'string') return url;
-  if (!/\.(pdf|ai|eps|svg)(\?|$)/i.test(url)) return url;
-  if (!url.includes('/upload/')) return url;
-  return url
-    .replace('/upload/', '/upload/pg_1,f_png/')
-    .replace(/\.(pdf|ai|eps|svg)(\?|$)/i, '.png$2');
-}
+// Thumbnail transform centralised in lib/imageHost.js (one place to change
+// when the image host changes).
+const toDisplayUrl = displayThumb;
 
 export default function AdminArtworksPage() {
   const [artworks, setArtworks] = useState([]);
@@ -87,16 +80,8 @@ export default function AdminArtworksPage() {
       }
       mockupUrl = pdfData.url;
     } else {
-      // Image → Cloudinary
-      const formData = new FormData();
-      formData.append('file', mockupFile);
-      formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
-      const cloudRes = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: 'POST', body: formData }
-      );
-      const cloudData = await cloudRes.json();
-      mockupUrl = cloudData.secure_url;
+      // Image → hosted via centralised uploader (lib/imageHost.js)
+      mockupUrl = await uploadImage(mockupFile);
     }
 
     // Save and send to customer

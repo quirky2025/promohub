@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import { uploadImage } from '@/lib/imageHost';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -31,16 +32,8 @@ export default function UploadLogoPage() {
     setError('');
 
     try {
-      // Upload to Cloudinary
-      const formData = new FormData();
-      formData.append('file', logoFile);
-      formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
-      const cloudRes = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: 'POST', body: formData }
-      );
-      const cloudData = await cloudRes.json();
-      const logoUrl = cloudData.secure_url;
+      // Upload via centralised uploader (lib/imageHost.js)
+      const logoUrl = await uploadImage(logoFile);
 
       // Trigger mockup generation
       await fetch('/api/artwork/upload', {

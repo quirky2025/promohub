@@ -116,17 +116,19 @@ export async function POST(request) {
     // converted order appears in the Artworks board and we can produce the mockup.
     try {
       const token = crypto.randomBytes(32).toString('hex');
+      const hasLogo = !!q.artwork_url;
       await db.from('artworks').insert({
         order_number: orderNumber,
         customer_name: q.customer_name,
         customer_email: q.customer_email,
         product_name: q.product_name || 'Product',
-        status: 'awaiting_logo',
+        status: hasLogo ? 'logo_received' : 'awaiting_logo',
+        logo_url: q.artwork_url || null,
         token,
         payment_method: 'eft',
       });
       const uploadUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/upload/${token}`;
-      await resend.emails.send({
+      if (!hasLogo) await resend.emails.send({
         from: 'QuirkyPromo <noreply@quirkypromo.com.au>', replyTo: 'hello@quirkypromo.com.au',
         to: [q.customer_email],
         subject: `One quick step for your order ${orderNumber} — upload your logo`,

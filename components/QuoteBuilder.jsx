@@ -1,16 +1,10 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
+import { MARGIN, GST, SHIPPING, SETUP_FEE, brandingLabel, isColourMethod, isOneColourLocked } from '@/lib/pricing';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
-const MARGIN = 1.40, GST = 0.10, SHIPPING = 30, SETUP_FEE = 40;
 const aud = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-const isColourMethod = (d) => { const n = (d?.name || '').toLowerCase(); return n.includes('screen print') || n.includes('pad print'); };
-const isOneColourLocked = (d) => { const x = (d?.detail || '').toLowerCase(); return x.includes('one colour') || x.includes('1 colour'); };
-// Laser engraving / etching / debossing have no colour — show the method name only.
-const isEngravingMethod = (d) => { const n = (d?.name || '').toLowerCase(); return n.includes('laser') || n.includes('engrav') || n.includes('deboss') || n.includes('emboss') || n.includes('etch'); };
-const brandingLabel = (d, setupQty) => isEngravingMethod(d) ? d.name : isColourMethod(d) ? `${d.name} — ${isOneColourLocked(d) ? 1 : (setupQty || 1)} COL · 1 POS` : `${d.name} — Full Colour · 1 POS`;
 
 const inp = { width: '100%', padding: '9px 12px', border: '1px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', background: '#fff', boxSizing: 'border-box', outline: 'none', fontFamily: '"DM Sans", sans-serif' };
 const lbl = { fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '5px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.06em' };
