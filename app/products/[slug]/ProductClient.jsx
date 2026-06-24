@@ -384,7 +384,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
           {pricingTiers.length > 0 && (
             <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
-              <div style={{ background: '#ffffff', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Unbranded Pricing (excl. GST)</div>
+              <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Unbranded Pricing (excl. GST)</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#FAFAF8' }}>
@@ -410,7 +410,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             <div>
               <StepLabel num={brandingStep} text="Add Branding Options" />
               <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
-                <div style={{ background: '#ffffff', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Branding & Decoration</div>
+                <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Branding & Decoration</div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ background: '#FAFAF8' }}>
@@ -468,7 +468,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             <div>
               <StepLabel num={addonStep} text="Select Add-on Options" />
               <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
-                <div style={{ background: '#ffffff', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Add-ons & Extras</div>
+                <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Add-ons & Extras</div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   {addonDecorations.map(d => {
                     const st = addonState[d.id] || { on: false, setupQty: 1 };
@@ -499,7 +499,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
           {pricingTiers.length > 0 && (
             <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
-              <div style={{ background: '#ffffff', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Price Summary</div>
+              <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Price Summary</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#FAFAF8' }}>
@@ -622,7 +622,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
                     {/* Dimensions below materials */}
                     {product.dimensions && (
-                      <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', borderLeft: `3px solid #E0DDD7` }}>
+                      <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', borderLeft: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Dimensions</div>
                         <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{product.dimensions}</div>
                       </div>
@@ -1239,9 +1239,9 @@ function SpecGroup({ title, children, defaultOpen = true }) {
   if (!hasContent) return null;
   return (
     <div style={{ marginBottom: '8px', border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
-      <button onClick={() => setOpen(o => !o)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: '#ffffff', border: 'none', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: '13px', color: NAVY, textAlign: 'left' }}>
+      <button onClick={() => setOpen(o => !o)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: NAVY, border: 'none', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: '13px', color: '#ffffff', textAlign: 'left' }}>
         <span>{title}</span>
-        <span style={{ fontSize: '16px', color: '#1a1a1a', transition: 'transform .2s', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
+        <span style={{ fontSize: '16px', color: '#ffffff', transition: 'transform .2s', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
       </button>
       {open && (
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -1453,7 +1453,7 @@ function SizeChartTable({ sizeChart }) {
   if (!sizeChart || !Array.isArray(sizeChart.sizes) || !sizeChart.sizes.length) return null;
   return (
     <div style={{ border: '1.5px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '14px' }}>
-      <div style={{ background: '#ffffff', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>
+      <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>
         Size Chart {sizeChart.unit ? `(${sizeChart.unit})` : ''}
       </div>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
