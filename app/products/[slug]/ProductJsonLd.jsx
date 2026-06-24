@@ -10,10 +10,10 @@
 // the product's pricing tiers — no per-colour price, no per-colour SKU). Fewer
 // than 2 ready variants -> unchanged plain Product (4A behaviour).
 import { supabase } from '@/lib/supabase';
+import { MARGIN } from '@/lib/pricing';
 import { absoluteUrl } from '@/lib/siteUrl';
 import { slugify } from '@/lib/slug';
 
-const MARGIN = 1.4;            // displayed price = base_price * margin (matches PDP, ex-GST)
 const BRAND_FALLBACK = 'QuirkyPromo';
 
 // Resolve a category/subcategory to its flat canonical URL via url_pages.

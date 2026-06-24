@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { MARGIN } from '@/lib/pricing';
 import { cld } from '@/lib/cloudinary';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
@@ -10,7 +11,6 @@ import ProductImg from '@/components/ProductImg';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
-const MARGIN = 1.40;
 const PAGE_SIZE = 24;
 
 const CROSS_CATEGORY_ONLY = ['Note Pads', 'Promotional', 'Personal Care', 'Travel', 'Drinkware Presentation'];

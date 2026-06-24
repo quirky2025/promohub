@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { MARGIN } from '@/lib/pricing';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
@@ -9,7 +10,6 @@ import ProductImg from '@/components/ProductImg';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
-const MARGIN = 1.40;
 const PAGE_SIZE = 24;
 
 // SEO blurbs per subcategory(键为 normalizeSlug 后的标准形)

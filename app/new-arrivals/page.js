@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState, useCallback, useMemo } from 'react';
+import { MARGIN } from '@/lib/pricing';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import ProductImg from '@/components/ProductImg';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
-const MARGIN = 1.40;
 const PAGE_SIZE = 24;
 
 // 价格区间档位 (label + 判定函数)
