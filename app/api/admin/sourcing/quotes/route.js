@@ -28,7 +28,7 @@ export async function GET(request) {
 
   if (factoryId) query = query.eq('factory_id', factoryId);
   if (exactProduct) query = query.eq('product_name', exactProduct);
-  else if (product) query = query.ilike('product_name', `%${product}%`);
+  else if (product) query = query.or(`product_name.ilike.%${product}%,product_code.ilike.%${product}%`);
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

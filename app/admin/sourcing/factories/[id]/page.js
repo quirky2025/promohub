@@ -4,6 +4,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import ColourSwatches from '@/components/ColourSwatches';
+import { parseColours } from '@/lib/colourCards';
 
 const PRINTING = ['丝印', 'UV打印', '激光雕刻', '热转印', '刺绣', '烫金', '数码印刷', '无印刷'];
 const CHANNEL_LABEL = { express: 'Express 快递', air: 'Air 空运', sea: 'Sea 海运' };
@@ -149,6 +151,14 @@ export default function FactoryDetailPage() {
                   ))}
                 </tbody>
               </table>
+              {q.available_colours && (
+                <div style={{ marginTop: 8 }}>
+                  <span className="srcx-muted" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>
+                    可选颜色({parseColours(q.available_colours).length}):
+                  </span>
+                  <ColourSwatches codes={q.available_colours} showCode />
+                </div>
+              )}
               {q.notes && <p className="srcx-muted" style={{ margin: '6px 0 0' }}>备注:{q.notes}</p>}
             </div>
           ))}
