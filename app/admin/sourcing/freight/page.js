@@ -1,231 +1,233 @@
 // app/admin/sourcing/freight/page.js
+// Freight rate engine: global FX + default margin, a live multi-option comparison
+// calculator (Express auto-cheapest + Air + Sea), and the forwarder rate-sheet reference.
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
 
-const CHANNELS = [
-  { key: 'express', label: 'Express 快递专线', hint: '最快,适合急单/小货' },
-  { key: 'air', label: 'Air 空运', hint: '中速,中等重量' },
-  { key: 'sea', label: 'Sea 海运', hint: '最便宜,大货走这个' },
-];
-
 const fmt = (v, d = 2) =>
-  v == null || Number.isNaN(Number(v))
-    ? '—'
+  v == null || Number.isNaN(Number(v)) ? '—'
     : Number(v).toLocaleString('en-AU', { minimumFractionDigits: d, maximumFractionDigits: d });
 
-export default function FreightPage() {
-  const [rates, setRates] = useState([]);
-  const [current, setCurrent] = useState({});
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({
-    channel: 'sea', forwarder: '', rate_per_kg: '', currency: 'RMB',
-    min_charge_kg: '', transit_days: '', effective_date: new Date().toISOString().slice(0, 10),
-    notes: '',
-  });
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+const GOODS = [
+  { v: 'class1', l: '一类 (纺织/灯具/钳…) ¥1/kg' },
+  { v: 'class2', l: '二类 (包/杯/鞋/玩具…) ¥2/kg' },
+  { v: 'class3', l: '三类 (电器/蓝牙…) ¥3/kg' },
+  { v: 'special', l: '特殊 (U盘/手表/PCB) ¥3/件' },
+  { v: 'high_value', l: '高价值 (单询)' },
+];
+const CARRIER_LABEL = {
+  dhl: '香港 DHL', ups: '香港 UPS', fedex: '内地 FedEx', air: '空派', sea: '海派',
+};
+const CH_LABEL = { express: 'Express 快递', air: 'Air 空派', sea: 'Sea 海派' };
 
-  // 试算器
-  const [calc, setCalc] = useState({ weight: '', fx: '' });
+export default function FreightEnginePage() {
+  const [data, setData] = useState(null);
+  const [settings, setSettings] = useState({ fx_rate_rmb_to_aud: '', default_margin: '', fx_rate_source: '' });
+  const [savingS, setSavingS] = useState(false);
+  const [calc, setCalc] = useState({
+    actualKg: '', cartonL: '', cartonW: '', cartonH: '', cartonCount: '1',
+    qty: '', goodsClass: 'class1', postcode: '', declaredValueAud: '', longestCm: '',
+  });
+  const [result, setResult] = useState(null);
+  const [calcing, setCalcing] = useState(false);
 
   async function load() {
-    const res = await fetch('/api/admin/sourcing/freight');
-    const data = await res.json();
-    setRates(data.rates || []);
-    setCurrent(data.current || {});
+    const res = await fetch('/api/admin/sourcing/freight-engine');
+    const d = await res.json();
+    setData(d);
+    if (d.settings) setSettings({
+      fx_rate_rmb_to_aud: d.settings.fx_rate_rmb_to_aud ?? '',
+      default_margin: d.settings.default_margin ?? '',
+      fx_rate_source: d.settings.fx_rate_source ?? '',
+    });
   }
   useEffect(() => { load(); }, []);
 
-  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
-
-  async function save() {
-    setError('');
-    if (!form.rate_per_kg) { setError('每kg单价必填'); return; }
-    setSaving(true);
-    const res = await fetch('/api/admin/sourcing/freight', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
+  async function saveSettings() {
+    setSavingS(true);
+    const res = await fetch('/api/admin/sourcing/freight-engine', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'settings', ...settings }),
     });
-    const data = await res.json();
-    setSaving(false);
-    if (!res.ok) { setError(data.error || '保存失败'); return; }
-    setShowForm(false);
-    setForm({ ...form, forwarder: '', rate_per_kg: '', min_charge_kg: '', transit_days: '', notes: '' });
-    load();
+    setSavingS(false);
+    if (res.ok) load();
+    else alert('保存失败');
   }
 
-  async function remove(id) {
-    if (!confirm('删除这条运价记录?')) return;
-    await fetch(`/api/admin/sourcing/freight?id=${id}`, { method: 'DELETE' });
-    load();
+  async function runCalc() {
+    setCalcing(true); setResult(null);
+    const input = {
+      actualKg: Number(calc.actualKg) || 0,
+      cartonL: Number(calc.cartonL) || 0, cartonW: Number(calc.cartonW) || 0, cartonH: Number(calc.cartonH) || 0,
+      cartonCount: Number(calc.cartonCount) || 1,
+      qty: Number(calc.qty) || 0, goodsClass: calc.goodsClass,
+      postcode: Number(calc.postcode) || null,
+      declaredValueAud: Number(calc.declaredValueAud) || 0,
+      longestCm: Number(calc.longestCm) || 0, pieces: Number(calc.cartonCount) || 1,
+    };
+    const res = await fetch('/api/admin/sourcing/freight-engine', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'calc', input }),
+    });
+    const d = await res.json();
+    setResult(d);
+    setCalcing(false);
   }
 
-  const historyByChannel = useMemo(() => {
-    const map = { express: [], air: [], sea: [] };
-    for (const r of rates) {
-      if (current[r.channel]?.id !== r.id) map[r.channel]?.push(r);
-    }
-    return map;
-  }, [rates, current]);
+  const set = (k) => (e) => setCalc({ ...calc, [k]: e.target.value });
+  const sheetsByChannel = useMemo(() => {
+    const m = { express: [], air: [], sea: [] };
+    for (const s of data?.sheets || []) m[s.channel]?.push(s);
+    return m;
+  }, [data]);
+  const rowsOf = (sid) => (data?.rows || []).filter((r) => r.rate_sheet_id === sid);
 
-  // 试算:每kg运费换算 AUD
-  function rateAud(r) {
-    if (!r) return null;
-    const v = Number(r.rate_per_kg);
-    if (r.currency === 'AUD') return v;
-    const fx = Number(calc.fx);
-    return fx ? v * fx : null;
+  function rowDesc(r) {
+    if (r.pricing_model === 'flat_per_kg') return `${fmt(r.weight_from, 0)}–${r.weight_to ? fmt(r.weight_to, 0) : '∞'}kg · ¥${fmt(r.kg_rate)}/kg`;
+    if (r.pricing_model === 'lookup_total') return `≤${fmt(r.weight_to, 1)}kg · ¥${fmt(r.flat_price)}/票`;
+    if (r.pricing_model === 'first_additional') return `0–${fmt(r.weight_to, 0)}kg · 首${fmt(r.first_weight_unit, 1)}¥${fmt(r.first_weight_price)} +续${fmt(r.additional_weight_unit, 1)}¥${fmt(r.additional_weight_price)}`;
+    return '';
   }
 
   return (
     <div>
-      <div className="srcx-row" style={{ justifyContent: 'space-between', marginBottom: 14 }}>
-        <h1 className="srcx-h1" style={{ margin: 0 }}>国际运费价格</h1>
-        <button className="srcx-btn srcx-btn-gold" onClick={() => setShowForm(!showForm)}>
-          {showForm ? '收起' : '+ 更新运价'}
-        </button>
-      </div>
-      <p className="srcx-muted" style={{ marginTop: -6 }}>
-        运价更新 = 插入新记录,旧的自动变历史。录价页的"到岸价试算"取这里各渠道的最新一条。
+      <h1 className="srcx-h1" style={{ marginBottom: 4 }}>国际运费引擎</h1>
+      <p className="srcx-muted" style={{ marginTop: 0 }}>
+        全局汇率 + 实时比价(Express 自动选最便宜)+ 货代费率总览。费率来自 freight_engine seed,改价/版本在下一步加。
       </p>
 
-      {showForm && (
-        <div className="srcx-card" style={{ borderColor: '#c9a45c' }}>
-          <h2>录入新运价</h2>
-          <div className="srcx-grid srcx-grid-3">
-            <div className="srcx-field">
-              <label>渠道 *</label>
-              <select value={form.channel} onChange={set('channel')}>
-                {CHANNELS.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
-              </select>
-            </div>
-            <div className="srcx-field">
-              <label>货代 / 线路名称</label>
-              <input value={form.forwarder} onChange={set('forwarder')} placeholder="如:XX物流 墨尔本海派" />
-            </div>
-            <div className="srcx-field">
-              <label>生效日期</label>
-              <input type="date" value={form.effective_date} onChange={set('effective_date')} />
-            </div>
+      {/* GLOBAL SETTINGS */}
+      <div className="srcx-card" style={{ borderColor: '#c9a45c' }}>
+        <h2>全局设置(单一来源)</h2>
+        <div className="srcx-grid srcx-grid-3">
+          <div className="srcx-field">
+            <label>汇率 RMB → AUD *</label>
+            <input type="number" step="0.0001" value={settings.fx_rate_rmb_to_aud}
+              onChange={(e) => setSettings({ ...settings, fx_rate_rmb_to_aud: e.target.value })} placeholder="如 0.2100" />
           </div>
-          <div className="srcx-grid srcx-grid-3" style={{ marginTop: 12 }}>
-            <div className="srcx-field">
-              <label>每kg单价 *</label>
-              <input type="number" step="0.01" value={form.rate_per_kg} onChange={set('rate_per_kg')} />
-            </div>
-            <div className="srcx-field">
-              <label>币种</label>
-              <select value={form.currency} onChange={set('currency')}>
-                <option value="RMB">RMB</option>
-                <option value="AUD">AUD</option>
-              </select>
-            </div>
-            <div className="srcx-field">
-              <label>最低计费重 (kg)</label>
-              <input type="number" step="0.1" value={form.min_charge_kg} onChange={set('min_charge_kg')} />
-            </div>
+          <div className="srcx-field">
+            <label>目录默认 MARGIN(INDENT 上架用)</label>
+            <input type="number" step="0.01" value={settings.default_margin}
+              onChange={(e) => setSettings({ ...settings, default_margin: e.target.value })} placeholder="如 1.40" />
           </div>
-          <div className="srcx-grid srcx-grid-2" style={{ marginTop: 12 }}>
-            <div className="srcx-field">
-              <label>时效(天)</label>
-              <input value={form.transit_days} onChange={set('transit_days')} placeholder="如:25-35" />
-            </div>
-            <div className="srcx-field">
-              <label>备注</label>
-              <input value={form.notes} onChange={set('notes')} placeholder="带电/敏感货加价之类" />
-            </div>
+          <div className="srcx-field">
+            <label>汇率来源/备注</label>
+            <input value={settings.fx_rate_source}
+              onChange={(e) => setSettings({ ...settings, fx_rate_source: e.target.value })} placeholder="如 银行 2026-06-25" />
           </div>
-          {error && <p className="srcx-error">{error}</p>}
-          <button className="srcx-btn" onClick={save} disabled={saving} style={{ marginTop: 14 }}>
-            {saving ? '保存中…' : '保存运价'}
-          </button>
         </div>
-      )}
-
-      {/* 三渠道当前价 */}
-      <div className="srcx-grid srcx-grid-3">
-        {CHANNELS.map((c) => {
-          const r = current[c.key];
-          return (
-            <div key={c.key} className="srcx-card" style={{ marginBottom: 0 }}>
-              <h2 style={{ marginBottom: 4 }}>{c.label}</h2>
-              <p className="srcx-muted" style={{ margin: '0 0 10px' }}>{c.hint}</p>
-              {r ? (
-                <>
-                  <div style={{ fontSize: 26, fontWeight: 700 }} className="srcx-num">
-                    {r.currency === 'AUD' ? '$' : '¥'}{fmt(r.rate_per_kg)}
-                    <span className="srcx-muted" style={{ fontSize: 13, fontWeight: 400 }}> /kg</span>
-                  </div>
-                  <p className="srcx-muted" style={{ margin: '6px 0 0' }}>
-                    {r.forwarder || '未填货代'}
-                    {r.transit_days && ` · ${r.transit_days} 天`}
-                    {r.min_charge_kg != null && ` · 最低 ${r.min_charge_kg}kg`}
-                  </p>
-                  <p className="srcx-muted" style={{ margin: '2px 0 0' }}>
-                    生效 {r.effective_date}
-                  </p>
-                  {historyByChannel[c.key]?.length > 0 && (
-                    <details style={{ marginTop: 8 }}>
-                      <summary className="srcx-link" style={{ cursor: 'pointer' }}>
-                        历史({historyByChannel[c.key].length})
-                      </summary>
-                      {historyByChannel[c.key].map((h) => (
-                        <div key={h.id} className="srcx-muted" style={{ marginTop: 6, fontSize: 13 }}>
-                          {h.effective_date}:{h.currency === 'AUD' ? '$' : '¥'}{fmt(h.rate_per_kg)}/kg
-                          {h.forwarder && `(${h.forwarder})`}{' '}
-                          <button className="srcx-link srcx-link-danger" onClick={() => remove(h.id)}>删</button>
-                        </div>
-                      ))}
-                    </details>
-                  )}
-                </>
-              ) : (
-                <p className="srcx-muted">还没录,点右上角「+ 更新运价」</p>
-              )}
-            </div>
-          );
-        })}
+        <button className="srcx-btn srcx-btn-gold" onClick={saveSettings} disabled={savingS} style={{ marginTop: 12 }}>
+          {savingS ? '保存中…' : '保存全局设置'}
+        </button>
+        {data?.settings?.fx_rate_updated_at && (
+          <p className="srcx-muted" style={{ margin: '8px 0 0' }}>汇率更新于 {new Date(data.settings.fx_rate_updated_at).toLocaleString('en-AU')}</p>
+        )}
       </div>
 
-      {/* 快速试算 */}
-      <div className="srcx-card" style={{ marginTop: 18 }}>
-        <h2>运费快速试算</h2>
-        <div className="srcx-row">
-          <div className="srcx-field" style={{ width: 180 }}>
-            <label>货物总重 (kg)</label>
-            <input type="number" step="0.1" value={calc.weight}
-              onChange={(e) => setCalc({ ...calc, weight: e.target.value })} />
-          </div>
-          <div className="srcx-field" style={{ width: 180 }}>
-            <label>汇率 RMB→AUD(运价为RMB时换算用)</label>
-            <input type="number" step="0.0001" value={calc.fx} placeholder="如 0.2150"
-              onChange={(e) => setCalc({ ...calc, fx: e.target.value })} />
-          </div>
+      {/* LIVE COMPARISON CALCULATOR */}
+      <div className="srcx-card">
+        <h2>运费比价计算器</h2>
+        <p className="srcx-muted" style={{ marginTop: -4 }}>填箱规+重量,自动算计费重,列出各方式价格(Express 自动选最省),你挑。</p>
+        <div className="srcx-grid srcx-grid-3">
+          <div className="srcx-field"><label>实重 kg</label><input type="number" step="0.1" value={calc.actualKg} onChange={set('actualKg')} /></div>
+          <div className="srcx-field"><label>数量(件)</label><input type="number" value={calc.qty} onChange={set('qty')} /></div>
+          <div className="srcx-field"><label>目的邮编</label><input value={calc.postcode} onChange={set('postcode')} placeholder="如 2000" /></div>
         </div>
-        {Number(calc.weight) > 0 && (
-          <table className="srcx-table" style={{ marginTop: 10, maxWidth: 560 }}>
-            <thead>
-              <tr><th>渠道</th><th>每kg (AUD)</th><th>运费总价 (AUD)</th><th>时效</th></tr>
-            </thead>
-            <tbody className="srcx-num">
-              {CHANNELS.map((c) => {
-                const r = current[c.key];
-                const perKg = rateAud(r);
-                const w = Math.max(Number(calc.weight), Number(r?.min_charge_kg) || 0);
+        <div className="srcx-grid srcx-grid-4" style={{ marginTop: 12 }}>
+          <div className="srcx-field"><label>箱 长 cm</label><input type="number" step="0.1" value={calc.cartonL} onChange={set('cartonL')} /></div>
+          <div className="srcx-field"><label>箱 宽 cm</label><input type="number" step="0.1" value={calc.cartonW} onChange={set('cartonW')} /></div>
+          <div className="srcx-field"><label>箱 高 cm</label><input type="number" step="0.1" value={calc.cartonH} onChange={set('cartonH')} /></div>
+          <div className="srcx-field"><label>箱数</label><input type="number" value={calc.cartonCount} onChange={set('cartonCount')} /></div>
+        </div>
+        <div className="srcx-grid srcx-grid-3" style={{ marginTop: 12 }}>
+          <div className="srcx-field"><label>品类</label>
+            <select value={calc.goodsClass} onChange={set('goodsClass')}>{GOODS.map((g) => <option key={g.v} value={g.v}>{g.l}</option>)}</select>
+          </div>
+          <div className="srcx-field"><label>申报货值 AUD(算关税用,可空)</label><input type="number" value={calc.declaredValueAud} onChange={set('declaredValueAud')} /></div>
+          <div className="srcx-field"><label>单边最长 cm(算超长,可空)</label><input type="number" value={calc.longestCm} onChange={set('longestCm')} /></div>
+        </div>
+        <button className="srcx-btn" onClick={runCalc} disabled={calcing} style={{ marginTop: 14 }}>
+          {calcing ? '计算中…' : '比价'}
+        </button>
+
+        {result?.blacklisted && (
+          <p className="srcx-error" style={{ marginTop: 12 }}>邮编 {result.postcode} 在不可派送黑名单 —— 无服务/单询。</p>
+        )}
+
+        {result && !result.blacklisted && (
+          <div style={{ marginTop: 16 }}>
+            {/* by-channel summary cards */}
+            <div className="srcx-grid srcx-grid-3">
+              {['express', 'air', 'sea'].map((ch) => {
+                const r = result.byChannel?.[ch];
+                const isCheapest = result.cheapest && r && result.cheapest.carrier === r.carrier && result.cheapest.service === r.service && result.cheapest.channel === r.channel;
                 return (
-                  <tr key={c.key}>
-                    <td>{c.label}</td>
-                    <td>{perKg != null ? `$${fmt(perKg)}` : '—'}</td>
-                    <td><strong>{perKg != null ? `$${fmt(perKg * w)}` : '—'}</strong></td>
-                    <td className="srcx-muted">{r?.transit_days ? `${r.transit_days} 天` : '—'}</td>
-                  </tr>
+                  <div key={ch} className="srcx-card" style={{ margin: 0, borderColor: isCheapest ? '#0F6E56' : undefined, borderWidth: isCheapest ? 2 : 1 }}>
+                    <h2 style={{ marginBottom: 2 }}>{CH_LABEL[ch]}{isCheapest && <span style={{ color: '#0F6E56', fontSize: 12, marginLeft: 6 }}>最省 ✓</span>}</h2>
+                    {r ? (
+                      <>
+                        <div className="srcx-num" style={{ fontSize: 24, fontWeight: 700 }}>${fmt(r.freightAud)}</div>
+                        <p className="srcx-muted" style={{ margin: '4px 0 0' }}>
+                          {CARRIER_LABEL[r.carrier] || r.carrier}{r.service ? ` · ${String(r.service).toUpperCase()}` : ''} · 计费重 {fmt(r.chargeableKg, 1)}kg
+                        </p>
+                        <p className="srcx-muted" style={{ margin: '2px 0 0', fontSize: 12 }}>¥{fmt(r.totalRmb)} × {fmt(result.fx, 4)}{r.taxInclusive ? ' · 含税' : ' · 不含税'}</p>
+                      </>
+                    ) : <p className="srcx-muted">此方式不可用(超重量档/不接)</p>}
+                  </div>
                 );
               })}
-            </tbody>
-          </table>
+            </div>
+
+            {/* full sorted list */}
+            <table className="srcx-table" style={{ marginTop: 14 }}>
+              <thead><tr><th>方式 / 承运商</th><th>计费重</th><th>RMB</th><th>AUD</th><th>/件</th></tr></thead>
+              <tbody className="srcx-num">
+                {result.valid?.map((r, i) => (
+                  <tr key={i} style={{ background: i === 0 ? '#E1F5EE' : undefined }}>
+                    <td>{CH_LABEL[r.channel]} · {CARRIER_LABEL[r.carrier] || r.carrier}{r.service ? ` ${String(r.service).toUpperCase()}` : ''}{i === 0 ? '  ← 最省' : ''}</td>
+                    <td>{fmt(r.chargeableKg, 1)}kg</td>
+                    <td>¥{fmt(r.totalRmb)}</td>
+                    <td><strong>${fmt(r.freightAud)}</strong></td>
+                    <td>{Number(calc.qty) > 0 ? `$${fmt(r.freightAud / Number(calc.qty))}` : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {result.invalid?.length > 0 && (
+              <p className="srcx-muted" style={{ marginTop: 6, fontSize: 12 }}>
+                跳过:{result.invalid.map((r) => `${CARRIER_LABEL[r.carrier] || r.carrier}(${r.reason})`).join('、')}
+              </p>
+            )}
+          </div>
         )}
+      </div>
+
+      {/* RATE SHEET REFERENCE */}
+      <div className="srcx-card">
+        <h2>货代费率总览</h2>
+        {['express', 'air', 'sea'].map((ch) => (
+          <div key={ch} style={{ marginBottom: 14 }}>
+            <h3 style={{ margin: '8px 0' }}>{CH_LABEL[ch]}</h3>
+            {sheetsByChannel[ch].map((s) => (
+              <details key={s.id} style={{ marginBottom: 6 }}>
+                <summary className="srcx-link" style={{ cursor: 'pointer', fontWeight: 600 }}>
+                  {s.name} {s.tax_inclusive ? '· 含税' : '· 不含税'} · v{s.version}
+                </summary>
+                <div style={{ paddingLeft: 14, marginTop: 6 }}>
+                  {rowsOf(s.id).map((r) => (
+                    <div key={r.id} className="srcx-muted" style={{ fontSize: 13, marginBottom: 2 }}>
+                      {r.destination_zone ? `${r.destination_zone} ` : ''}{r.postcode_from ? `[${r.postcode_from}-${r.postcode_to}] ` : ''}{rowDesc(r)}
+                    </div>
+                  ))}
+                </div>
+              </details>
+            ))}
+          </div>
+        ))}
+        <p className="srcx-muted" style={{ fontSize: 12 }}>
+          品类附加费:一类¥1 / 二类¥2 / 三类¥3 /kg · 特殊¥3/件。超重/超长叠加。不含税渠道申报&gt;1000AUD加120AUD清关+15%关税。
+        </p>
       </div>
     </div>
   );
