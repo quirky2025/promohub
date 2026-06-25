@@ -66,6 +66,10 @@ export async function POST(request) {
       exchange_rate: Number(body.exchange_rate),
       est_unit_weight_g: body.est_unit_weight_g ? Number(body.est_unit_weight_g) : null,
       domestic_freight_rmb: body.domestic_freight_rmb ? Number(body.domestic_freight_rmb) : null,
+      units_per_carton: body.units_per_carton ? Number(body.units_per_carton) : null,
+      carton_length_cm: body.carton_length_cm ? Number(body.carton_length_cm) : null,
+      carton_width_cm: body.carton_width_cm ? Number(body.carton_width_cm) : null,
+      carton_height_cm: body.carton_height_cm ? Number(body.carton_height_cm) : null,
       notes: body.notes?.trim() || null,
     })
     .select('id')
