@@ -71,6 +71,7 @@ export async function POST(request) {
       carton_length_cm: body.carton_length_cm ? Number(body.carton_length_cm) : null,
       carton_width_cm: body.carton_width_cm ? Number(body.carton_width_cm) : null,
       carton_height_cm: body.carton_height_cm ? Number(body.carton_height_cm) : null,
+      available_colours: body.available_colours?.trim() || null,
       notes: body.notes?.trim() || null,
     })
     .select('id')
