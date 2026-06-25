@@ -1005,6 +1005,16 @@ export default function SourcingCostingPage() {
             />
           </Section>
 
+          <Section title="运费比价(实时引擎)">
+            <FreightCompare
+              form={form}
+              onApply={(opt) => {
+                updatePriceBreak(form.selectedPriceBreakId, 'internationalShippingRmb', String(Math.round((opt.totalRmb || 0) * 100) / 100));
+                update('selectedFreightMode', opt.channel);
+              }}
+            />
+          </Section>
+
           <Section title="Freight Options">
             <div style={{ display: 'grid', gap: 12 }}>
               {form.freightOptions.map((option, index) => (
@@ -1445,6 +1455,89 @@ function ReconciliationPanel({ selectedSheet, actual, setActual, actualSummary, 
             {saving ? 'Saving...' : 'Save Actuals'}
           </button>
         </>
+      )}
+    </div>
+  );
+}
+
+function FreightCompare({ form, onApply }) {
+  const [postcode, setPostcode] = useState('');
+  const [goodsClass, setGoodsClass] = useState('class1');
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const qty = Math.max(0, Math.ceil(Number(form.quantity) || 0));
+  const upc = Math.max(0, Math.ceil(Number(form.unitsPerCarton) || 0));
+  const cartonCount = upc > 0 ? Math.ceil(qty / upc) : 0;
+  const actualKg = (Number(form.grossWeightKgPerCarton) || 0) * cartonCount;
+  const CARRIER = { dhl: '香港DHL', ups: '香港UPS', fedex: '内地FedEx', air: '空派', sea: '海派' };
+  const f2 = (v) => (v == null ? '—' : Number(v).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
+  async function run() {
+    setLoading(true); setResult(null);
+    const input = {
+      actualKg,
+      cartonL: Number(form.cartonLengthCm) || 0,
+      cartonW: Number(form.cartonWidthCm) || 0,
+      cartonH: Number(form.cartonHeightCm) || 0,
+      cartonCount, pieces: cartonCount,
+      qty, goodsClass,
+      postcode: Number(postcode) || null,
+      fxRate: Number(form.exchangeRateEst) || null,
+    };
+    const res = await fetch('/api/admin/sourcing/freight-engine', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'calc', input }),
+    });
+    setResult(await res.json());
+    setLoading(false);
+  }
+
+  return (
+    <div>
+      <p className="srcx-muted" style={{ marginTop: 0 }}>
+        用箱规/重量(数量 {qty}、{cartonCount} 箱、实重 {f2(actualKg)}kg)+ 邮编 + 品类实时比价。选一个「用此」→ 写进当前选中价格档的「国际运费 RMB」。
+      </p>
+      <div className="srcx-row" style={{ gap: 12, flexWrap: 'wrap' }}>
+        <div className="srcx-field" style={{ width: 140 }}>
+          <label>目的邮编</label>
+          <input value={postcode} onChange={(e) => setPostcode(e.target.value)} placeholder="如 2000" />
+        </div>
+        <div className="srcx-field" style={{ width: 220 }}>
+          <label>品类</label>
+          <select value={goodsClass} onChange={(e) => setGoodsClass(e.target.value)}>
+            <option value="class1">一类 ¥1/kg</option>
+            <option value="class2">二类 ¥2/kg</option>
+            <option value="class3">三类 ¥3/kg</option>
+            <option value="special">特殊 ¥3/件</option>
+          </select>
+        </div>
+        <div className="srcx-field" style={{ display: 'flex', alignItems: 'flex-end' }}>
+          <button className="srcx-btn" onClick={run} disabled={loading || !cartonCount}>{loading ? '计算中…' : '比价'}</button>
+        </div>
+      </div>
+      {!cartonCount && <p className="srcx-muted" style={{ fontSize: 12 }}>请先在上方填「每箱数量」「箱规」「每箱毛重」。</p>}
+      {result?.blacklisted && <p className="srcx-error">邮编 {result.postcode} 不可派送(黑名单)。</p>}
+      {result && !result.blacklisted && (
+        <table className="srcx-table" style={{ marginTop: 10 }}>
+          <thead><tr><th>方式 / 承运商</th><th>计费重</th><th>RMB</th><th>AUD</th><th></th></tr></thead>
+          <tbody className="srcx-num">
+            {result.valid?.map((r, i) => (
+              <tr key={i} style={{ background: i === 0 ? '#E1F5EE' : undefined }}>
+                <td>{CARRIER[r.carrier] || r.carrier}{r.service ? ` ${String(r.service).toUpperCase()}` : ''}{i === 0 ? ' ← 最省' : ''}</td>
+                <td>{f2(r.chargeableKg)}kg</td>
+                <td>¥{f2(r.totalRmb)}</td>
+                <td><strong>${f2(r.freightAud)}</strong></td>
+                <td><button className="srcx-btn srcx-btn-gold" style={{ padding: '2px 10px', fontSize: 12 }} onClick={() => onApply(r)}>用此</button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+      {result && !result.blacklisted && (
+        <p className="srcx-muted" style={{ fontSize: 12, marginTop: 6 }}>
+          海/空含税:本地费/关税留空;Express 不含税:记得在下方填关税 15% + 清关 120AUD。写入的是 RMB 运费,整单 ×汇率折 AUD。
+        </p>
       )}
     </div>
   );
