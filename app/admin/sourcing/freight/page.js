@@ -75,6 +75,20 @@ export default function FreightEnginePage() {
     setCalcing(false);
   }
 
+  const [hist, setHist] = useState(null); // { rowId, list }
+  async function saveRate(rowId, field, value) {
+    const res = await fetch('/api/admin/sourcing/freight-engine', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rowId, field, value }),
+    });
+    if (res.ok) load(); else alert('改价失败');
+  }
+  async function showHistory(rowId) {
+    const res = await fetch(`/api/admin/sourcing/freight-engine?history=${rowId}`);
+    const d = await res.json();
+    setHist({ rowId, list: d.history || [] });
+  }
+
   const set = (k) => (e) => setCalc({ ...calc, [k]: e.target.value });
   const sheetsByChannel = useMemo(() => {
     const m = { express: [], air: [], sea: [] };
@@ -216,9 +230,7 @@ export default function FreightEnginePage() {
                 </summary>
                 <div style={{ paddingLeft: 14, marginTop: 6 }}>
                   {rowsOf(s.id).map((r) => (
-                    <div key={r.id} className="srcx-muted" style={{ fontSize: 13, marginBottom: 2 }}>
-                      {r.destination_zone ? `${r.destination_zone} ` : ''}{r.postcode_from ? `[${r.postcode_from}-${r.postcode_to}] ` : ''}{rowDesc(r)}
-                    </div>
+                    <RateRow key={r.id} r={r} onSave={saveRate} onHistory={showHistory} />
                   ))}
                 </div>
               </details>
@@ -229,6 +241,60 @@ export default function FreightEnginePage() {
           品类附加费:一类¥1 / 二类¥2 / 三类¥3 /kg · 特殊¥3/件。超重/超长叠加。不含税渠道申报&gt;1000AUD加120AUD清关+15%关税。
         </p>
       </div>
+
+      {hist && (
+        <div onClick={() => setHist(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: '#fff', borderRadius: 12, padding: 20, maxWidth: 440, width: '90%', maxHeight: '70vh', overflowY: 'auto' }}>
+            <h2 style={{ marginTop: 0 }}>改价历史</h2>
+            {hist.list.length === 0 ? <p className="srcx-muted">这一档还没改过价。</p> : (
+              <table className="srcx-table">
+                <thead><tr><th>日期</th><th>字段</th><th>旧 → 新</th></tr></thead>
+                <tbody className="srcx-num">{hist.list.map((h) => (
+                  <tr key={h.id}><td>{new Date(h.changed_at).toLocaleDateString('en-AU')}</td><td>{h.field}</td><td>{fmt(h.old_value)} → <strong>{fmt(h.new_value)}</strong></td></tr>
+                ))}</tbody>
+              </table>
+            )}
+            <button className="srcx-btn" onClick={() => setHist(null)} style={{ marginTop: 12 }}>关闭</button>
+          </div>
+        </div>
+      )}
     </div>
+  );
+}
+
+function RateRow({ r, onSave, onHistory }) {
+  const fmt2 = (v) => (v == null || v === '' ? '' : Number(v));
+  const fields = r.pricing_model === 'flat_per_kg' ? [['kg_rate', '¥/kg']]
+    : r.pricing_model === 'lookup_total' ? [['flat_price', '¥/票']]
+    : [['first_weight_price', '首¥'], ['additional_weight_price', '续¥']];
+  const band = r.pricing_model === 'first_additional'
+    ? `0–${Number(r.weight_to)}kg`
+    : r.pricing_model === 'lookup_total' ? `≤${Number(r.weight_to)}kg`
+    : `${Number(r.weight_from)}–${r.weight_to ? Number(r.weight_to) : '∞'}kg`;
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, fontSize: 13, flexWrap: 'wrap' }}>
+      <span className="srcx-muted" style={{ minWidth: 150 }}>
+        {r.destination_zone ? `${r.destination_zone} ` : ''}{r.postcode_from ? `[${r.postcode_from}-${r.postcode_to}] ` : ''}{band}
+      </span>
+      {fields.map(([f, label]) => (
+        <EditPrice key={f} rowId={r.id} field={f} label={label} initial={fmt2(r[f])} onSave={onSave} />
+      ))}
+      <button className="srcx-link" onClick={() => onHistory(r.id)} style={{ fontSize: 12 }}>历史</button>
+    </div>
+  );
+}
+
+function EditPrice({ rowId, field, label, initial, onSave }) {
+  const [v, setV] = useState(initial);
+  const [saving, setSaving] = useState(false);
+  const changed = String(v) !== String(initial);
+  async function go() { setSaving(true); await onSave(rowId, field, v); setSaving(false); }
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+      <span className="srcx-muted" style={{ fontSize: 12 }}>{label}</span>
+      <input value={v} onChange={(e) => setV(e.target.value)} type="number" step="0.01"
+        style={{ width: 78, padding: '3px 6px', border: '1px solid #E0DDD7', borderRadius: 6, fontSize: 13 }} />
+      {changed && <button className="srcx-btn srcx-btn-gold" onClick={go} disabled={saving} style={{ padding: '2px 8px', fontSize: 12 }}>{saving ? '…' : '存'}</button>}
+    </span>
   );
 }
