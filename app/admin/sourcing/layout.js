@@ -10,6 +10,7 @@ import './sourcing.css';
 const TABS = [
   { href: '/admin/sourcing', label: '询盘 / 请求', exact: true },
   { href: '/admin/sourcing/factories', label: '工厂管理' },
+  { href: '/admin/sourcing/costing', label: '计价 / 报价' },
   { href: '/admin/sourcing/quotes', label: '报价检索' },
   { href: '/admin/sourcing/trends', label: '价格趋势' },
   { href: '/admin/sourcing/freight', label: '运费价格' },
