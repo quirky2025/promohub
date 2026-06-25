@@ -163,7 +163,7 @@ export default function FactoryDetailPage() {
 function QuoteForm({ factoryId, names, freight, onSaved }) {
   const today = new Date().toISOString().slice(0, 10);
   const [head, setHead] = useState({
-    quote_date: today, product_name: '', product_spec: '',
+    quote_date: today, product_code: '', product_name: '', product_spec: '',
     printing_method: '', lead_time_days: '', exchange_rate: '',
     est_unit_weight_g: '', domestic_freight_rmb: '', notes: '',
     units_per_carton: '', carton_length_cm: '', carton_width_cm: '', carton_height_cm: '',
@@ -225,10 +225,14 @@ function QuoteForm({ factoryId, names, freight, onSaved }) {
   return (
     <div className="srcx-card" style={{ borderColor: '#c9a45c' }}>
       <h2>录入报价</h2>
-      <div className="srcx-grid srcx-grid-3">
+      <div className="srcx-grid srcx-grid-4">
         <div className="srcx-field">
           <label>报价日期 *</label>
           <input type="date" value={head.quote_date} onChange={set('quote_date')} />
+        </div>
+        <div className="srcx-field">
+          <label>产品编号</label>
+          <input value={head.product_code} onChange={set('product_code')} placeholder="如 JH21001" />
         </div>
         <div className="srcx-field">
           <label>产品名称 *(输入时会提示已有名字,尽量复用)</label>
