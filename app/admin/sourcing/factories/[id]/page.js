@@ -167,6 +167,7 @@ function QuoteForm({ factoryId, names, freight, onSaved }) {
     printing_method: '', lead_time_days: '', exchange_rate: '',
     est_unit_weight_g: '', domestic_freight_rmb: '', notes: '',
     units_per_carton: '', carton_length_cm: '', carton_width_cm: '', carton_height_cm: '',
+    available_colours: '',
   });
   const [tiers, setTiers] = useState([{ quantity: '', rmb: '', aud: '' }]);
   const [saving, setSaving] = useState(false);
@@ -265,7 +266,7 @@ function QuoteForm({ factoryId, names, freight, onSaved }) {
             onChange={set('exchange_rate')} placeholder="如 0.2150" />
         </div>
       </div>
-      <div className="srcx-grid srcx-grid-3" style={{ marginTop: 12 }}>
+      <div className="srcx-grid srcx-grid-4" style={{ marginTop: 12 }}>
         <div className="srcx-field">
           <label>预估单件毛重(克)— 用于算国际运费</label>
           <input type="number" step="0.1" value={head.est_unit_weight_g}
@@ -275,6 +276,10 @@ function QuoteForm({ factoryId, names, freight, onSaved }) {
           <label>预估国内运费(RMB,这票总价)</label>
           <input type="number" step="0.01" value={head.domestic_freight_rmb}
             onChange={set('domestic_freight_rmb')} placeholder="工厂→货代仓,如 200" />
+        </div>
+        <div className="srcx-field">
+          <label>可选颜色 Available colours</label>
+          <input value={head.available_colours} onChange={set('available_colours')} placeholder="如 Navy, Black, Grey" />
         </div>
         <div className="srcx-field">
           <label>备注</label>
