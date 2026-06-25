@@ -292,6 +292,9 @@ export default function SourcingCostingPage() {
   const [reconciling, setReconciling] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [factoryProducts, setFactoryProducts] = useState([]);
+  const [loadedTiers, setLoadedTiers] = useState([]);
+  const [pickedQuoteId, setPickedQuoteId] = useState('');
 
   const summary = useMemo(() => calculateSourcingEstimate(form), [form]);
   const actualSummary = useMemo(() => {
@@ -313,6 +316,15 @@ export default function SourcingCostingPage() {
     // Initial URL context only; re-running would overwrite an in-progress costing table.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // When a factory is selected, load its quoted products so you can pick one to pre-fill.
+  useEffect(() => {
+    if (!form.factoryId) { setFactoryProducts([]); return; }
+    fetch(`/api/admin/sourcing/quotes?factory_id=${form.factoryId}`)
+      .then((r) => r.json())
+      .then((d) => setFactoryProducts(d.quotes || []))
+      .catch(() => setFactoryProducts([]));
+  }, [form.factoryId]);
 
   async function loadFactories() {
     const res = await fetch('/api/admin/sourcing/factories');
@@ -423,6 +435,50 @@ export default function SourcingCostingPage() {
       })),
     }));
     setMessage(`Loaded made-to-order product: ${product.name}`);
+  }
+
+  // Pick one of the factory's quoted products → pre-fill the costing form from it.
+  function pickProduct(quoteId) {
+    setPickedQuoteId(quoteId);
+    if (!quoteId) return;
+    const q = factoryProducts.find((x) => String(x.id) === String(quoteId));
+    if (!q) return;
+    const tiers = (q.quote_tiers || []).slice().sort((a, b) => Number(a.quantity) - Number(b.quantity));
+    setLoadedTiers(tiers);
+    const qty = Number(tiers[0]?.quantity) || 500;
+    const gw = q.est_unit_weight_g && q.units_per_carton
+      ? Math.round((Number(q.est_unit_weight_g) * Number(q.units_per_carton) / 1000) * 1000) / 1000
+      : '';
+    setForm((cur) => ({
+      ...cur,
+      productName: q.product_code ? `${q.product_code} ${q.product_name}` : (q.product_name || ''),
+      productSpec: q.product_spec || cur.productSpec,
+      incoterm: 'EXW',
+      exwUnitRmb: tiers[0] ? String(tiers[0].exw_unit_price_rmb) : cur.exwUnitRmb,
+      quantity: qty,
+      unitsPerCarton: q.units_per_carton ?? cur.unitsPerCarton,
+      cartonLengthCm: q.carton_length_cm ?? cur.cartonLengthCm,
+      cartonWidthCm: q.carton_width_cm ?? cur.cartonWidthCm,
+      cartonHeightCm: q.carton_height_cm ?? cur.cartonHeightCm,
+      grossWeightKgPerCarton: gw === '' ? cur.grossWeightKgPerCarton : gw,
+      exchangeRateEst: q.exchange_rate ? String(q.exchange_rate) : cur.exchangeRateEst,
+      productionLeadTimeDays: q.lead_time_days ?? cur.productionLeadTimeDays,
+      chinaLocalFreightRmb: q.domestic_freight_rmb ?? cur.chinaLocalFreightRmb,
+      priceBreaks: defaultPriceBreaks(qty),
+      selectedPriceBreakId: `pb-${qty}-air`,
+    }));
+  }
+
+  // Apply a quantity tier (sets quantity + matching EXW).
+  function applyTier(t) {
+    const qty = Number(t.quantity);
+    setForm((cur) => ({
+      ...cur,
+      quantity: qty,
+      exwUnitRmb: String(t.exw_unit_price_rmb),
+      priceBreaks: defaultPriceBreaks(qty),
+      selectedPriceBreakId: `pb-${qty}-air`,
+    }));
   }
 
   function update(key, value) {
@@ -831,12 +887,20 @@ export default function SourcingCostingPage() {
       <div className="srcx-grid" style={{ gridTemplateColumns: 'minmax(0, 1.15fr) minmax(360px, .85fr)', alignItems: 'start' }}>
         <div>
           <Section title="Factory Quote">
-            <div className="srcx-grid srcx-grid-3">
+            <div className="srcx-grid srcx-grid-4">
               <Field label="Factory">
                 <select value={form.factoryId} onChange={(event) => update('factoryId', event.target.value)}>
                   <option value="">Manual / not selected</option>
                   {factories.map((factory) => (
                     <option key={factory.id} value={factory.id}>{factory.name}</option>
+                  ))}
+                </select>
+              </Field>
+              <Field label="选产品(自动带入)">
+                <select value={pickedQuoteId} onChange={(event) => pickProduct(event.target.value)} disabled={!form.factoryId}>
+                  <option value="">{form.factoryId ? '— 选已报价产品 —' : '先选工厂'}</option>
+                  {factoryProducts.map((p) => (
+                    <option key={p.id} value={p.id}>{p.product_code ? `${p.product_code} · ` : ''}{p.product_name}</option>
                   ))}
                 </select>
               </Field>
@@ -847,6 +911,16 @@ export default function SourcingCostingPage() {
                 <input value={form.productSpec} onChange={(event) => update('productSpec', event.target.value)} />
               </Field>
             </div>
+            {loadedTiers.length > 0 && (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 8 }}>
+                <span className="srcx-muted" style={{ fontSize: 12 }}>数量档(点一下套用 EXW):</span>
+                {loadedTiers.map((t) => (
+                  <button key={t.id || t.quantity} type="button" className="srcx-btn srcx-btn-ghost srcx-btn-sm" onClick={() => applyTier(t)}>
+                    {Number(t.quantity).toLocaleString()} → ¥{t.exw_unit_price_rmb}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="srcx-grid srcx-grid-3" style={{ marginTop: 12 }}>
               <Field label="Quantity">
                 <input type="number" value={form.quantity} onChange={(event) => update('quantity', event.target.value)} />
