@@ -22,8 +22,41 @@ async function loadAll(db) {
 
 export async function GET(request) {
   if (!(await isAdmin(request))) return unauthorized();
-  const data = await loadAll(sourcingDb());
+  const db = sourcingDb();
+  const { searchParams } = new URL(request.url);
+  const histRow = searchParams.get('history');
+  if (histRow) {
+    const { data } = await db.from('freight_rate_row_history').select('*').eq('rate_row_id', histRow).order('changed_at', { ascending: false });
+    return NextResponse.json({ history: data || [] });
+  }
+  const data = await loadAll(db);
   return NextResponse.json(data);
+}
+
+// Update ONE price field on ONE weight-band row, and log the change to history.
+export async function PATCH(request) {
+  if (!(await isAdmin(request))) return unauthorized();
+  const db = sourcingDb();
+  const { rowId, field, value, note } = await request.json();
+  const ALLOWED = ['kg_rate', 'first_weight_price', 'additional_weight_price', 'flat_price', 'min_charge'];
+  if (!rowId || !ALLOWED.includes(field)) return NextResponse.json({ error: 'bad field' }, { status: 400 });
+
+  const { data: row, error: e1 } = await db.from('freight_rate_rows').select('*').eq('id', rowId).maybeSingle();
+  if (e1 || !row) return NextResponse.json({ error: 'row not found' }, { status: 404 });
+  const oldVal = row[field];
+  const newVal = value === '' || value == null ? null : Number(value);
+
+  const { error: e2 } = await db.from('freight_rate_rows').update({ [field]: newVal }).eq('id', rowId);
+  if (e2) return NextResponse.json({ error: e2.message }, { status: 500 });
+
+  const { data: sheet } = await db.from('freight_rate_sheets').select('carrier,service,channel').eq('id', row.rate_sheet_id).maybeSingle();
+  await db.from('freight_rate_row_history').insert({
+    rate_row_id: rowId, rate_sheet_id: row.rate_sheet_id,
+    carrier: sheet?.carrier, service: sheet?.service, channel: sheet?.channel,
+    destination_zone: row.destination_zone, weight_from: row.weight_from, weight_to: row.weight_to,
+    field, old_value: oldVal, new_value: newVal, note: note || null,
+  });
+  return NextResponse.json({ ok: true, rowId, field, oldVal, newVal });
 }
 
 export async function POST(request) {
