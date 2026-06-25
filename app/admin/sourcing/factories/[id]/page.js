@@ -166,6 +166,7 @@ function QuoteForm({ factoryId, names, freight, onSaved }) {
     quote_date: today, product_name: '', product_spec: '',
     printing_method: '', lead_time_days: '', exchange_rate: '',
     est_unit_weight_g: '', domestic_freight_rmb: '', notes: '',
+    units_per_carton: '', carton_length_cm: '', carton_width_cm: '', carton_height_cm: '',
   });
   const [tiers, setTiers] = useState([{ quantity: '', rmb: '', aud: '' }]);
   const [saving, setSaving] = useState(false);
@@ -274,6 +275,25 @@ function QuoteForm({ factoryId, names, freight, onSaved }) {
         <div className="srcx-field">
           <label>备注</label>
           <input value={head.notes} onChange={set('notes')} />
+        </div>
+      </div>
+
+      <div className="srcx-grid srcx-grid-4" style={{ marginTop: 12 }}>
+        <div className="srcx-field">
+          <label>箱长 cm</label>
+          <input type="number" step="0.1" value={head.carton_length_cm} onChange={set('carton_length_cm')} placeholder="如 40" />
+        </div>
+        <div className="srcx-field">
+          <label>箱宽 cm</label>
+          <input type="number" step="0.1" value={head.carton_width_cm} onChange={set('carton_width_cm')} placeholder="如 30" />
+        </div>
+        <div className="srcx-field">
+          <label>箱高 cm</label>
+          <input type="number" step="0.1" value={head.carton_height_cm} onChange={set('carton_height_cm')} placeholder="如 25" />
+        </div>
+        <div className="srcx-field">
+          <label>每箱数量 *(算箱数/体积重)</label>
+          <input type="number" value={head.units_per_carton} onChange={set('units_per_carton')} placeholder="如 60" />
         </div>
       </div>
 
