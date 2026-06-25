@@ -5,6 +5,7 @@ import {
   FREIGHT_MODES,
   calculateActualProfit,
   calculateSourcingEstimate,
+  calculatePriceBreak,
 } from '@/lib/sourcingCosting';
 
 const DEFAULT_FREIGHT_OPTIONS = [
@@ -481,6 +482,19 @@ export default function SourcingCostingPage() {
     }));
   }
 
+  // Fill Express/Air/Sea price-break rows from the freight comparison so the three options differ.
+  function applyModes(byMode) {
+    setForm((cur) => ({
+      ...cur,
+      priceBreaks: cur.priceBreaks.map((row) => {
+        const fr = byMode?.[row.shippingMode];
+        return fr && fr.totalRmb != null
+          ? { ...row, internationalShippingRmb: String(Math.round(Number(fr.totalRmb) * 100) / 100) }
+          : row;
+      }),
+    }));
+  }
+
   function update(key, value) {
     setForm((current) => ({ ...current, [key]: value }));
   }
@@ -816,7 +830,7 @@ export default function SourcingCostingPage() {
         text(shipLabel(row.shippingMode), 178, y, 8.5);
         wrapped(deliveryPlan, 236, y, 24, 8.2);
         wrapped(leadTime, 346, y, 14, 8.2);
-        text(currency(row.quoteUnitExGstAud, 4), 410, y, 8.2);
+        text(currency(row.quoteUnitExGstAud, 2), 410, y, 8.2);
         text(currency(row.quoteExGstAud), 466, y, 8.2);
         text(currency(row.quoteIncGstAud), 524, y, 8.2, { bold: true });
         y -= rowHeight;
@@ -1079,14 +1093,8 @@ export default function SourcingCostingPage() {
             />
           </Section>
 
-          <Section title="运费比价(实时引擎)">
-            <FreightCompare
-              form={form}
-              onApply={(opt) => {
-                updatePriceBreak(form.selectedPriceBreakId, 'internationalShippingRmb', String(Math.round((opt.totalRmb || 0) * 100) / 100));
-                update('selectedFreightMode', opt.channel);
-              }}
-            />
+          <Section title="📋 报价计算(易读版)">
+            <CleanQuote form={form} update={update} applyModes={applyModes} />
           </Section>
 
           <Section title="Freight Options">
@@ -1273,6 +1281,9 @@ function PriceBreakMatrix({ rows, calculatedRows, selectedId, validUntil, onChan
                     <button className={selected ? 'srcx-btn srcx-btn-sm srcx-btn-gold' : 'srcx-btn srcx-btn-sm srcx-btn-ghost'} onClick={() => onSelect(row)}>
                       {selected ? 'Selected' : 'Use'}
                     </button>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: '#1B2A4A', marginTop: 4, whiteSpace: 'nowrap' }}>
+                      {({ express: 'Express 快递', air: 'Air 空运', sea: 'Sea 海运' }[row.shippingMode] || row.shippingMode || 'Air')}
+                    </div>
                   </td>
                   <td style={{ textAlign: 'center' }}>
                     <input
@@ -1330,7 +1341,7 @@ function PriceBreakMatrix({ rows, calculatedRows, selectedId, validUntil, onChan
                   <td className="srcx-num">{rmb(calc.unitCostRmb, 4)}</td>
                   <td className="srcx-num">{currency(calc.quoteTotalCostAud)}</td>
                   <td><MatrixInput value={row.marginPct} step="0.1" onChange={(value) => onChange(row.id, 'marginPct', value)} /></td>
-                  <td className="srcx-num">{currency(calc.quoteUnitExGstAud, 4)}</td>
+                  <td className="srcx-num">{currency(calc.quoteUnitExGstAud, 2)}</td>
                   <td className="srcx-num">{currency(calc.quoteExGstAud)}</td>
                   <td>{validUntil || '-'}</td>
                   <td>
@@ -1421,7 +1432,7 @@ function SummaryPanel({ summary, form }) {
           <Breakdown label="Customer quote ex GST" value={summary.quoteExGstAud} bold />
           <Breakdown label="GST" value={summary.quoteGstAud} />
           <Breakdown label="Customer quote inc GST" value={summary.quoteIncGstAud} bold />
-          <Breakdown label="Unit ex GST" value={summary.quoteUnitExGstAud} digits={4} />
+          <Breakdown label="Unit ex GST" value={summary.quoteUnitExGstAud} digits={2} />
           <Breakdown label="Estimated profit" value={summary.estimatedProfitAud} bold green />
         </tbody>
       </table>
@@ -1612,6 +1623,144 @@ function FreightCompare({ form, onApply }) {
         <p className="srcx-muted" style={{ fontSize: 12, marginTop: 6 }}>
           海/空含税:本地费/关税留空;Express 不含税:记得在下方填关税 15% + 清关 120AUD。写入的是 RMB 运费,整单 ×汇率折 AUD。
         </p>
+      )}
+    </div>
+  );
+}
+
+// Clean vertical costing view: factory EXW → CN local → international shipping (3 options)
+// → local AUD → total AUD → margin → customer price, with a 3-way freight comparison.
+function CleanQuote({ form, update, applyModes }) {
+  const [postcode, setPostcode] = useState('');
+  const [goodsClass, setGoodsClass] = useState('class1');
+  const [freight, setFreight] = useState(null); // byChannel { express, air, sea }
+  const [loading, setLoading] = useState(false);
+  const [pickMode, setPickMode] = useState('sea');
+
+  const f2 = (v, d = 2) => (v == null || Number.isNaN(Number(v)) ? '—' : Number(v).toLocaleString('en-AU', { minimumFractionDigits: d, maximumFractionDigits: d }));
+  const qty = Math.max(1, Math.ceil(Number(form.quantity) || 0));
+  const upc = Math.max(0, Math.ceil(Number(form.unitsPerCarton) || 0));
+  const cartonCount = upc > 0 ? Math.ceil(qty / upc) : 0;
+  const actualKg = (Number(form.grossWeightKgPerCarton) || 0) * cartonCount;
+  const fx = (Number(form.exchangeRateEst) || 0) * (1 + (Number(form.fxBufferPct) || 0) / 100);
+  const marginPct = Number(form.targetMarginPct) || 0;
+  const exwTotal = (Number(form.exwUnitRmb) || 0) * qty;
+  const cnLocal = (Number(form.chinaLocalFreightRmb) || 0) + (Number(form.chinaDocumentFeesRmb) || 0) + (Number(form.chinaOtherFeesRmb) || 0);
+  const localAud = (Number(form.localChargesAudEst) || 0) + (Number(form.clearanceAudEst) || 0) + (Number(form.localDeliveryAudEst) || 0);
+
+  async function calcFreight() {
+    setLoading(true);
+    const input = {
+      actualKg, cartonL: Number(form.cartonLengthCm) || 0, cartonW: Number(form.cartonWidthCm) || 0, cartonH: Number(form.cartonHeightCm) || 0,
+      cartonCount, pieces: cartonCount, qty, goodsClass, postcode: Number(postcode) || null, fxRate: fx || null,
+    };
+    try {
+      const res = await fetch('/api/admin/sourcing/freight-engine', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'calc', input }) });
+      const d = await res.json();
+      setFreight(d.byChannel || null);
+      setPickMode(d.byChannel?.sea ? 'sea' : d.byChannel?.air ? 'air' : 'express');
+    } catch { setFreight(null); }
+    setLoading(false);
+  }
+
+  function priceForMode(mode) {
+    const fr = freight?.[mode];
+    if (!fr || fr.totalRmb == null) return null;
+    const row = { quantity: qty, exwUnitRmb: form.exwUnitRmb, shippingMode: mode, internationalShippingRmb: fr.totalRmb };
+    const c = calculatePriceBreak(row, form, fx);
+    return { freightRmb: Number(fr.totalRmb), unit: c.quoteUnitExGstAud, total: c.quoteExGstAud, landedUnit: c.quoteUnitExGstAud ? c.quoteTotalCostAud / qty : 0 };
+  }
+
+  const MODES = [
+    { k: 'express', label: 'Express 快递', t: '5–7天' },
+    { k: 'air', label: 'Air 空运', t: '6–10天' },
+    { k: 'sea', label: 'Sea 海运', t: '20–30天' },
+  ];
+  const priced = MODES.map((m) => ({ ...m, p: priceForMode(m.k) })).filter((m) => m.p);
+  const cheapestK = priced.slice().sort((a, b) => a.p.unit - b.p.unit)[0]?.k;
+  const sel = priceForMode(pickMode);
+
+  const bh = (bg) => ({ padding: '7px 13px', fontSize: 11, fontWeight: 700, letterSpacing: '.5px', color: '#fff', background: bg });
+  const blk = { border: '1px solid #E0DDD7', borderRadius: 12, margin: '0 0 11px', overflow: 'hidden' };
+  const ln = { display: 'flex', justifyContent: 'space-between', padding: '8px 13px', fontSize: 13.5 };
+
+  return (
+    <div>
+      <p className="srcx-muted" style={{ marginTop: 0 }}>
+        数量 {qty}、{cartonCount} 箱、实重 {f2(actualKg)}kg。填邮编 + 品类 → 算运费 → 下面竖着看每块成本 + 三种运费客户价。
+      </p>
+      <div className="srcx-row" style={{ gap: 12, flexWrap: 'wrap', marginBottom: 12 }}>
+        <div className="srcx-field" style={{ width: 130 }}><label>目的邮编</label><input value={postcode} onChange={(e) => setPostcode(e.target.value)} placeholder="2000" /></div>
+        <div className="srcx-field" style={{ width: 200 }}><label>品类</label>
+          <select value={goodsClass} onChange={(e) => setGoodsClass(e.target.value)}>
+            <option value="class1">一类 ¥1/kg</option><option value="class2">二类 ¥2/kg</option>
+            <option value="class3">三类 ¥3/kg</option><option value="special">特殊 ¥3/件</option>
+          </select>
+        </div>
+        <div className="srcx-field" style={{ display: 'flex', alignItems: 'flex-end' }}>
+          <button className="srcx-btn" onClick={calcFreight} disabled={loading || !cartonCount}>{loading ? '算运费中…' : '算运费'}</button>
+        </div>
+      </div>
+      {!cartonCount && <p className="srcx-muted" style={{ fontSize: 12 }}>请先在上方填「每箱数量」「箱规」「每箱毛重」。</p>}
+
+      <div style={blk}><div style={bh('#9A3324')}>① 工厂 FACTORY · RMB</div>
+        <div style={ln}><span className="srcx-muted">EXW 单价 × 数量</span><span style={{ fontWeight: 700, color: '#1B2A4A' }}>¥{f2(Number(form.exwUnitRmb) || 0, 4)} × {qty} = ¥{f2(exwTotal)}</span></div>
+      </div>
+      <div style={blk}><div style={bh('#9A3324')}>② 中国端费用 CN LOCAL · RMB</div>
+        <div style={ln}><span className="srcx-muted">内陆运费 + 单证 + 杂费</span><span style={{ fontWeight: 700, color: '#1B2A4A' }}>¥{f2(cnLocal)}</span></div>
+        <div style={{ ...ln, background: '#F4F3F0', fontWeight: 700 }}><span>中国端小计</span><span>¥{f2(exwTotal + cnLocal)}</span></div>
+      </div>
+      <div style={blk}><div style={bh('#1B2A4A')}>③ 国际运费 INTERNATIONAL · RMB(选一个)</div>
+        {freight ? MODES.map((m) => {
+          const fr = freight[m.k];
+          const on = pickMode === m.k;
+          return (
+            <div key={m.k} onClick={() => fr && setPickMode(m.k)} style={{ ...ln, cursor: fr ? 'pointer' : 'default', background: on ? '#E1F5EE' : undefined, opacity: fr ? 1 : 0.45 }}>
+              <span>{on ? '● ' : '○ '}{m.label} · {m.t}{cheapestK === m.k ? ' · 最省' : ''}</span>
+              <span style={{ fontWeight: 700, color: '#1B2A4A' }}>{fr ? `¥${f2(fr.totalRmb)}` : '不可用'}</span>
+            </div>
+          );
+        }) : <div style={{ ...ln, color: '#8a857e' }}>点上面「算运费」后这里出现 Express / Air / Sea 三个价</div>}
+      </div>
+      <div style={blk}><div style={bh('#C9A96E')}>④ 本地费用 LOCAL · AUD</div>
+        <div style={ln}><span className="srcx-muted">清关/派送/其它(常为0)</span><span style={{ fontWeight: 700, color: '#1B2A4A' }}>A${f2(localAud)}</span></div>
+      </div>
+      <div style={blk}><div style={bh('#0F6E56')}>⑤ 合计 → AUD(按选中的 {MODES.find((m) => m.k === pickMode)?.label || ''})</div>
+        <div style={ln}><span className="srcx-muted">(① + ② + ③) × 汇率 {f2(fx, 4)} + ④</span><span style={{ fontWeight: 700, color: '#1B2A4A' }}>到岸 /个 A${sel ? f2(sel.landedUnit) : '—'}</span></div>
+      </div>
+      <div style={blk}><div style={bh('#0F6E56')}>⑥ MARGIN</div>
+        <div className="srcx-row" style={{ gap: 14, padding: '8px 13px', flexWrap: 'wrap' }}>
+          <div className="srcx-field" style={{ width: 130 }}><label>毛利率 %</label>
+            <input type="number" step="0.5" value={form.targetMarginPct} onChange={(e) => update('targetMarginPct', e.target.value)} />
+          </div>
+          <div className="srcx-field" style={{ width: 130 }}><label>或 倍数 ×</label>
+            <input type="number" step="0.01" value={marginPct > 0 && marginPct < 100 ? (1 / (1 - marginPct / 100)).toFixed(2) : ''}
+              onChange={(e) => { const m = Number(e.target.value); update('targetMarginPct', m > 1 ? String(Math.round((1 - 1 / m) * 10000) / 100) : '0'); }} placeholder="1.40" />
+          </div>
+        </div>
+      </div>
+
+      <div style={{ background: '#1B2A4A', borderRadius: 12, padding: 14, display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 0 12px' }}>
+        <span style={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>⑦ 客户单价(选中 {MODES.find((m) => m.k === pickMode)?.label || ''},excl. GST)</span>
+        <span style={{ color: '#C9A96E', fontSize: 22, fontWeight: 700 }}>A${sel ? f2(sel.unit) : '—'} /个</span>
+      </div>
+
+      {priced.length > 0 && (
+        <>
+          <p className="srcx-muted" style={{ fontSize: 12, fontWeight: 700, margin: '0 0 6px' }}>三种运费的客户报价(并排比):</p>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+            {priced.map((m) => (
+              <div key={m.k} style={{ flex: 1, border: m.k === cheapestK ? '2px solid #0F6E56' : '1px solid #E0DDD7', borderRadius: 10, padding: 10, textAlign: 'center', background: m.k === cheapestK ? '#F2FBF7' : '#fff' }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: m.k === cheapestK ? '#0F6E56' : '#5a5550' }}>{m.label}{m.k === cheapestK ? ' ✓' : ''}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#1B2A4A' }}>A${f2(m.p.unit)}</div>
+                <div style={{ fontSize: 11, color: '#8a857e' }}>/个 · 总 A${f2(m.p.total)}</div>
+              </div>
+            ))}
+          </div>
+          <button className="srcx-btn srcx-btn-gold" onClick={() => applyModes(freight)}>
+            ✓ 用这三种运费出报价(填入下方明细 + PDF 三个选项)
+          </button>
+        </>
       )}
     </div>
   );
