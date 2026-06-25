@@ -59,6 +59,7 @@ export async function POST(request) {
     .insert({
       factory_id: body.factory_id,
       quote_date: body.quote_date || new Date().toISOString().slice(0, 10),
+      product_code: body.product_code?.trim() || null,
       product_name: body.product_name.trim(),
       product_spec: body.product_spec?.trim() || null,
       printing_method: body.printing_method?.trim() || null,
