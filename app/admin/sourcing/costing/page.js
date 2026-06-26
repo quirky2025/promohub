@@ -720,9 +720,26 @@ export default function SourcingCostingPage() {
       const pale = rgb(0.98, 0.96, 0.91);
       const font = await pdf.embedFont(StandardFonts.Helvetica);
       const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
+      const white = rgb(1, 1, 1);
+
+      // Standard QuirkyPromo letterhead logo (per DOC_STANDARDS.md).
+      let logoImg = null;
+      try {
+        const lr = await fetch('/quirky-logo-quote.png');
+        if (lr.ok) logoImg = await pdf.embedPng(await lr.arrayBuffer());
+      } catch { logoImg = null; }
+
+      const W = pageSize[0];
+      const H = pageSize[1];
 
       let page = pdf.addPage(pageSize);
       let y = 790;
+
+      const rightText = (value, rightX, yy, size, opts = {}) => {
+        const f = opts.bold ? bold : font;
+        const w = f.widthOfTextAtSize(cleanText(value), size);
+        text(value, rightX - w, yy, size, opts);
+      };
 
       function addPageIfNeeded(required = 40) {
         if (y - required > 40) return;
@@ -754,30 +771,48 @@ export default function SourcingCostingPage() {
         return used + 16;
       }
 
-      text('QuirkyPromo', margin, y, 24, { bold: true, color: navy });
-      text('Customer Quote', 430, y + 4, 18, { bold: true, color: gold });
-      y -= 30;
-      page.drawLine({ start: { x: margin, y }, end: { x: 553, y }, thickness: 1, color: line });
-      y -= 24;
-
+      // ===== Standard navy letterhead (per DOC_STANDARDS.md — must match Quote/OC/Invoice/PO) =====
+      page.drawRectangle({ x: 0, y: H - 110, width: W, height: 110, color: navy });
+      if (logoImg) {
+        page.drawImage(logoImg, { x: 40, y: H - 42, width: 150, height: 150 * 256 / 1400 });
+      } else {
+        text('QUIRKY PROMO', 40, H - 36, 18, { bold: true, color: white });
+      }
+      const contact = [['ABN:', '95 656 714 270'], ['Phone:', '02 9477 4748'], ['Email:', 'hello@quirkypromo.com.au'], ['Web:', 'quirkypromo.com.au']];
+      let cy = H - 64;
+      contact.forEach(([lab, val]) => {
+        text(lab, 40, cy, 9, { bold: true, color: white });
+        text(val, 40 + bold.widthOfTextAtSize(lab, 9) + 6, cy, 9, { color: white });
+        cy -= 12;
+      });
+      rightText('QUOTE', W - 40, H - 35, 18, { bold: true, color: gold });
       const quoteNumber = form.quoteNumber || defaultQuoteNumber();
-      text(`Quote #: ${quoteNumber}`, margin, y, 10, { bold: true });
-      text(`Date: ${form.quoteDate || todayString()}`, 240, y, 10);
-      text(`Valid until: ${summary.validUntil || '-'}`, 390, y, 10, { bold: true });
-      y -= 24;
+      const meta = [
+        ['Quote #:', quoteNumber],
+        ['Date:', form.quoteDate || todayString()],
+        ['Valid until:', summary.validUntil || '-'],
+        ['Page:', '1 of 1'],
+      ];
+      let my = H - 60;
+      meta.forEach(([lab, val]) => {
+        text(lab, 392, my, 9, { bold: true, color: white });
+        rightText(val, W - 40, my, 9, { color: white });
+        my -= 12;
+      });
 
+      y = H - 110 - 24;
+
+      // ===== Customer Detail + Delivery Detail boxes =====
       const defaultAddress = form.quoteDeliveryAddress || 'To be confirmed';
-      const multipleAddressRows = pdfRows.some((row) =>
-        cleanText(row.deliveryAddress).trim() &&
-        cleanText(row.deliveryAddress).trim() !== cleanText(defaultAddress).trim()
-      );
-      const deliveryBasis = multipleAddressRows
-        ? 'Pricing is based on the delivery address and delivery plan shown for each option.'
-        : `Pricing is based on delivery to: ${defaultAddress}`;
-
-      const leftUsed = labelValue('Customer', [form.customerCompany, form.customerContact, form.customerEmail].filter(Boolean).join('\n'), margin, y, 230);
-      const rightUsed = labelValue('Delivery Basis', deliveryBasis, 315, y, 230);
-      y -= Math.max(leftUsed, rightUsed) + 10;
+      const boxTop = y;
+      const boxH = 92;
+      page.drawRectangle({ x: margin, y: boxTop - boxH, width: 250, height: boxH, borderColor: line, borderWidth: 1 });
+      page.drawRectangle({ x: 303, y: boxTop - boxH, width: 250, height: boxH, borderColor: line, borderWidth: 1 });
+      text('Customer Detail:', margin + 12, boxTop - 16, 10, { bold: true, color: navy });
+      wrapped([form.customerCompany, form.customerContact, form.customerEmail, form.customerPhone].filter(Boolean).join('\n') || '-', margin + 12, boxTop - 34, 40, 9.5);
+      text('Delivery Detail:', 303 + 12, boxTop - 16, 10, { bold: true, color: navy });
+      wrapped(defaultAddress, 303 + 12, boxTop - 34, 40, 9.5);
+      y = boxTop - boxH - 18;
 
       addPageIfNeeded(120);
       page.drawRectangle({ x: margin, y: y - 86, width: 511, height: 96, borderColor: line, color: pale, borderWidth: 1 });
@@ -790,49 +825,34 @@ export default function SourcingCostingPage() {
       y -= logoUsed + 18;
 
       addPageIfNeeded(150);
-      text('Quote Options', margin, y, 14, { bold: true, color: navy });
-      y -= 20;
-      const columns = [
-        ['Option', 42, 94],
-        ['Qty', 136, 42],
-        ['Freight', 178, 58],
-        ['Delivery Plan', 236, 110],
-        ['Lead Time', 346, 64],
-        ['Unit ex GST', 410, 56],
-        ['Total ex GST', 466, 58],
-        ['Total inc GST', 524, 28],
-      ];
+      text('Quote Options', margin, y, 13, { bold: true, color: navy });
+      y -= 18;
       page.drawRectangle({ x: margin, y: y - 18, width: 511, height: 20, color: navy });
-      columns.forEach(([label, x]) => text(label, x, y - 12, 7.2, { bold: true, color: rgb(1, 1, 1) }));
+      text('Shipping', 48, y - 12, 8, { bold: true, color: white });
+      text('Lead time', 150, y - 12, 8, { bold: true, color: white });
+      text('Qty', 286, y - 12, 8, { bold: true, color: white });
+      rightText('Unit ex GST', 400, y - 12, 8, { bold: true, color: white });
+      rightText('Subtotal ex GST', 478, y - 12, 8, { bold: true, color: white });
+      rightText('Total inc GST', 551, y - 12, 8, { bold: true, color: white });
       y -= 24;
 
+      const transitMap = { express: '5-7', air: '6-10', sea: '20-30' };
+      const prodDays = form.productionLeadTimeDays;
       pdfRows.forEach((row, index) => {
-        addPageIfNeeded(54);
-        const optionName = [
-          row.recommended ? 'Recommended' : null,
-          row.customerOptionLabel || `${shipLabel(row.shippingMode)} option`,
-        ].filter(Boolean).join(' - ');
-        const rowAddress = row.deliveryAddress || defaultAddress;
-        const deliveryPlan = [
-          row.deliveryPlanNote,
-          multipleAddressRows || row.deliveryAddress ? `To: ${rowAddress}` : null,
-        ].filter(Boolean).join(' | ') || 'Delivery to quoted address';
-        const leadTime = row.customerLeadTime || row.leadTimeLabel || 'To be confirmed';
-        const rowHeight = Math.max(
-          34,
-          12 + Math.max(wrapWords(optionName, 18).length, wrapWords(deliveryPlan, 24).length, wrapWords(leadTime, 14).length) * 11
-        );
+        addPageIfNeeded(40);
+        const mode = row.shippingMode;
+        const ship = row.customerOptionLabel || shipLabel(mode);
+        const lead = [prodDays ? `Production ${prodDays} days` : null, `${shipLabel(mode)} ${transitMap[mode] || '?'} days`].filter(Boolean).join(' + ');
+        const rowHeight = 30;
         if (index % 2 === 0) {
           page.drawRectangle({ x: margin, y: y - rowHeight + 8, width: 511, height: rowHeight, color: rgb(0.99, 0.985, 0.965) });
         }
-        wrapped(optionName, 42, y, 18, 8.5, { bold: row.recommended });
-        text(String(row.quantity || ''), 136, y, 8.5);
-        text(shipLabel(row.shippingMode), 178, y, 8.5);
-        wrapped(deliveryPlan, 236, y, 24, 8.2);
-        wrapped(leadTime, 346, y, 14, 8.2);
-        text(currency(row.quoteUnitExGstAud, 2), 410, y, 8.2);
-        text(currency(row.quoteExGstAud), 466, y, 8.2);
-        text(currency(row.quoteIncGstAud), 524, y, 8.2, { bold: true });
+        text(ship, 48, y, 8.5, { bold: row.recommended });
+        text(lead, 150, y, 8 );
+        text(String(row.quantity || ''), 286, y, 8.5);
+        rightText(currency(row.quoteUnitExGstAud, 2), 400, y, 8.5);
+        rightText(currency(row.quoteExGstAud), 478, y, 8.5);
+        rightText(currency(row.quoteIncGstAud), 551, y, 8.5, { bold: true });
         y -= rowHeight;
       });
 
