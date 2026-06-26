@@ -28,6 +28,24 @@ export default function AdminSourcingPage() {
   const [statusFilter, setStatusFilter] = useState('');
   const [internalNote, setInternalNote] = useState('');
   const [saving, setSaving] = useState(false);
+  const EMPTY_ADD = { companyName: '', name: '', email: '', phone: '', productName: '', productDescription: '', quantity: '', targetPrice: '', inHandsDate: '', freightPreference: '', deliveryState: '', deliveryAddress: '', notes: '' };
+  const [adding, setAdding] = useState(false);
+  const [addForm, setAddForm] = useState(EMPTY_ADD);
+  const [addSaving, setAddSaving] = useState(false);
+  const [addError, setAddError] = useState('');
+  const setA = (k) => (e) => setAddForm((f) => ({ ...f, [k]: e.target.value }));
+
+  async function submitNewRequest() {
+    setAddError('');
+    if (!addForm.companyName.trim() || !addForm.name.trim() || !addForm.email.trim() || !addForm.productName.trim() || !addForm.quantity) {
+      setAddError('公司、联系人、邮箱、产品、数量为必填'); return;
+    }
+    setAddSaving(true);
+    const res = await fetch('/api/admin/sourcing/requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(addForm) });
+    setAddSaving(false);
+    if (!res.ok) { const d = await res.json().catch(() => ({})); setAddError(d.error || '保存失败'); return; }
+    setAdding(false); setAddForm(EMPTY_ADD); fetchRequests();
+  }
 
   useEffect(() => {
     fetchRequests();
@@ -82,6 +100,10 @@ export default function AdminSourcingPage() {
           <span style={{ background: GOLD, color: '#fff', fontSize: '12px', fontWeight: 700, padding: '3px 10px', borderRadius: '20px' }}>{requests.length}</span>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
+          <button onClick={() => { setAddForm(EMPTY_ADD); setAddError(''); setAdding(true); }}
+            style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 700, fontFamily: '"DM Sans", sans-serif', background: GOLD, color: '#fff' }}>
+            + 新建询盘
+          </button>
           {['', 'new', 'in_progress', 'quoted', 'closed_won', 'closed_lost'].map(s => (
             <button key={s} onClick={() => setStatusFilter(s)}
               style={{ padding: '6px 14px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '12px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif', background: statusFilter === s ? GOLD : 'rgba(255,255,255,.1)', color: '#fff' }}>
@@ -131,7 +153,11 @@ export default function AdminSourcingPage() {
                       <td style={{ padding: '12px 16px' }}>
                         <span style={{ background: st.bg, color: st.color, fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{st.label}</span>
                       </td>
-                      <td style={{ padding: '12px 16px' }}>
+                      <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                        <Link href={`/admin/sourcing/costing?request=${req.id}`} onClick={e => e.stopPropagation()}
+                          style={{ color: NAVY, fontSize: '12px', fontWeight: 700, textDecoration: 'none', marginRight: 12 }}>
+                          出报价 →
+                        </Link>
                         <a href={`mailto:${req.email}?subject=Re: Sourcing Quote — ${req.company_name}`}
                           onClick={e => e.stopPropagation()}
                           style={{ color: GOLD, fontSize: '12px', fontWeight: 600, textDecoration: 'none' }}>
@@ -229,6 +255,41 @@ export default function AdminSourcingPage() {
           </div>
         )}
       </div>
+
+      {adding && (
+        <div onClick={e => e.target === e.currentTarget && setAdding(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 1000, padding: '40px 20px', overflowY: 'auto' }}>
+          <div style={{ background: '#fff', borderRadius: '16px', padding: '26px', maxWidth: '640px', width: '100%', fontFamily: '"DM Sans", sans-serif' }}>
+            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: NAVY, margin: '0 0 4px' }}>新建询盘</h2>
+            <p style={{ fontSize: '13px', color: '#7A7570', margin: '0 0 16px' }}>客户电话/邮件直接问价时手动录一条。保存后点该条的「出报价 →」即可带入计价页。</p>
+            {[['companyName', '公司名称 *'], ['name', '联系人 *'], ['email', '邮箱 *'], ['phone', '电话'], ['productName', '产品 *'], ['quantity', '数量 *']].map(([k, label]) => (
+              <div key={k} style={{ display: 'inline-block', width: '50%', padding: '0 6px 12px', boxSizing: 'border-box' }}>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY }}>{label}</label>
+                <input value={addForm[k]} onChange={setA(k)} style={{ width: '100%', padding: '9px 11px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', margin: '5px 0 0', boxSizing: 'border-box' }} />
+              </div>
+            ))}
+            <div style={{ padding: '0 6px 12px' }}>
+              <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY }}>产品需求 / 描述</label>
+              <textarea value={addForm.productDescription} onChange={setA('productDescription')} rows={3} style={{ width: '100%', padding: '9px 11px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', margin: '5px 0 0', boxSizing: 'border-box', resize: 'vertical' }} />
+            </div>
+            {[['targetPrice', '目标价'], ['inHandsDate', '要货日期'], ['deliveryState', '州/地区'], ['deliveryAddress', '送货地址']].map(([k, label]) => (
+              <div key={k} style={{ display: 'inline-block', width: '50%', padding: '0 6px 12px', boxSizing: 'border-box' }}>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY }}>{label}</label>
+                <input type={k === 'inHandsDate' ? 'date' : 'text'} value={addForm[k]} onChange={setA(k)} style={{ width: '100%', padding: '9px 11px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', margin: '5px 0 0', boxSizing: 'border-box' }} />
+              </div>
+            ))}
+            <div style={{ padding: '0 6px 12px' }}>
+              <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY }}>备注</label>
+              <textarea value={addForm.notes} onChange={setA('notes')} rows={2} style={{ width: '100%', padding: '9px 11px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', margin: '5px 0 0', boxSizing: 'border-box', resize: 'vertical' }} />
+            </div>
+            {addError && <p style={{ color: '#C0392B', fontSize: '13px', margin: '0 6px 10px' }}>{addError}</p>}
+            <div style={{ display: 'flex', gap: '10px', padding: '0 6px' }}>
+              <button onClick={submitNewRequest} disabled={addSaving} style={{ flex: 1, background: addSaving ? '#B0AAA3' : '#2D6A4F', color: '#fff', border: 'none', borderRadius: '8px', padding: '12px', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>{addSaving ? '保存中…' : '保存询盘'}</button>
+              <button onClick={() => setAdding(false)} style={{ background: '#fff', color: '#7A7570', border: '1.5px solid #E0DDD7', borderRadius: '8px', padding: '12px 18px', fontSize: '14px', cursor: 'pointer' }}>取消</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
