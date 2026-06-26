@@ -33,7 +33,24 @@ export default function AdminSourcingPage() {
   const [addForm, setAddForm] = useState(EMPTY_ADD);
   const [addSaving, setAddSaving] = useState(false);
   const [addError, setAddError] = useState('');
+  const [customers, setCustomers] = useState([]);
+  useEffect(() => {
+    fetch('/api/admin/customers').then((r) => r.json()).then((d) => setCustomers(d.customers || [])).catch(() => {});
+  }, []);
   const setA = (k) => (e) => setAddForm((f) => ({ ...f, [k]: e.target.value }));
+
+  function onCompanyChange(value) {
+    const match = customers.find((c) => (c.name || '').toLowerCase() === value.trim().toLowerCase());
+    setAddForm((f) => ({
+      ...f,
+      companyName: value,
+      ...(match ? {
+        email: f.email || match.primary_email || '',
+        phone: f.phone || match.phone || '',
+        deliveryAddress: f.deliveryAddress || match.delivery_address || '',
+      } : {}),
+    }));
+  }
 
   async function submitNewRequest() {
     setAddError('');
@@ -262,7 +279,13 @@ export default function AdminSourcingPage() {
           <div style={{ background: '#fff', borderRadius: '16px', padding: '26px', maxWidth: '640px', width: '100%', fontFamily: '"DM Sans", sans-serif' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: NAVY, margin: '0 0 4px' }}>新建询盘</h2>
             <p style={{ fontSize: '13px', color: '#7A7570', margin: '0 0 16px' }}>客户电话/邮件直接问价时手动录一条。保存后点该条的「出报价 →」即可带入计价页。</p>
-            {[['companyName', '公司名称 *'], ['name', '联系人 *'], ['email', '邮箱 *'], ['phone', '电话'], ['productName', '产品 *'], ['quantity', '数量 *']].map(([k, label]) => (
+            <div style={{ display: 'inline-block', width: '50%', padding: '0 6px 12px', boxSizing: 'border-box' }}>
+              <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY }}>公司名称 *(联想已有客户)</label>
+              <input value={addForm.companyName} onChange={(e) => onCompanyChange(e.target.value)} list="srcx-customer-names" placeholder="输入即提示客户库"
+                style={{ width: '100%', padding: '9px 11px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', margin: '5px 0 0', boxSizing: 'border-box' }} />
+              <datalist id="srcx-customer-names">{customers.map((c) => <option key={c.id} value={c.name} />)}</datalist>
+            </div>
+            {[['name', '联系人 *'], ['email', '邮箱 *'], ['phone', '电话'], ['productName', '产品 *'], ['quantity', '数量 *']].map(([k, label]) => (
               <div key={k} style={{ display: 'inline-block', width: '50%', padding: '0 6px 12px', boxSizing: 'border-box' }}>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY }}>{label}</label>
                 <input value={addForm[k]} onChange={setA(k)} style={{ width: '100%', padding: '9px 11px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', margin: '5px 0 0', boxSizing: 'border-box' }} />
