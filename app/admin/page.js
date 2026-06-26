@@ -59,6 +59,7 @@ export default function AdminDashboard() {
               { label: '📦 View Orders', href: '/admin/orders', color: NAVY },
               { label: '🛍️ Edit Products', href: '/admin/products', color: NAVY },
               { label: '🏭 Sourcing Requests', href: '/admin/sourcing', color: NAVY },
+              { label: '💰 Finance', href: '/admin/finance', color: NAVY },
             ].map(a => (
               <Link key={a.href} href={a.href} style={{ background: a.color, color: '#fff', textDecoration: 'none', padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: 600 }}>
                 {a.label}
