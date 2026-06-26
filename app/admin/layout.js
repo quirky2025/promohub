@@ -19,6 +19,7 @@ const DOMAINS = [
   ] },
   { key: 'finance', label: 'Finance', tabs: [
     { label: 'Invoices', href: '/admin/invoices' },
+    { label: '记账 / 利润表', href: '/admin/finance' },
   ] },
   { key: 'sourcing', label: 'Sourcing', tabs: [
     { label: 'Sourcing', href: '/admin/sourcing' },
