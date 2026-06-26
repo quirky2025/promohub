@@ -41,6 +41,30 @@ export async function POST(request) {
     const payment_status = gross > 0 && paid >= gross ? 'paid' : paid > 0 ? 'pending' : 'unpaid';
     await db.from('orders').update({ payment_status }).eq('id', orderId);
 
+    // Mirror this cash receipt into the Finance bank ledger so the customer
+    // payment shows up as income (科目 sales_local, GST = amount/11) without
+    // re-typing it. NON-FATAL: must never block payment recording — e.g. before
+    // the finance schema (bank_transactions) has been applied in production.
+    try {
+      const gstAud = Math.round((amt / 11) * 100) / 100;
+      await db.from('bank_transactions').insert({
+        txn_date: new Date().toISOString().slice(0, 10),
+        direction: 'in',
+        amount_aud: amt,
+        gst_aud: gstAud,
+        business_line: 'local_stock',
+        category: 'sales_local',
+        counterparty: order?.customer_company || order?.customer_name || null,
+        description: `Customer payment · ${order?.order_number || orderNumber || ''}${note ? ' · ' + note : ''}`,
+        reference: order?.order_number || orderNumber || null,
+        reconciled: true,
+        source: 'system',
+        linked_type: 'order',
+        linked_id: orderId,
+        created_by: user.email,
+      });
+    } catch (_) { /* finance ledger is optional / may not exist yet */ }
+
     // When this payment tips the order into FULLY PAID (not on a deposit, and
     // only on the transition — so it doesn't resend if recorded again), email
     // the customer: payment received → next step is production.
