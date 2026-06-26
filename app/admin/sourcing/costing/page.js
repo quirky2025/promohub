@@ -1079,38 +1079,28 @@ export default function SourcingCostingPage() {
             </div>
           </Section>
 
-          <Section title="Quote Pricing Matrix">
-            <PriceBreakMatrix
-              rows={form.priceBreaks}
-              calculatedRows={summary.priceBreaks || []}
-              selectedId={form.selectedPriceBreakId}
-              validUntil={summary.validUntil}
-              onChange={updatePriceBreak}
-              onSelect={selectPriceBreak}
-              onRemove={removePriceBreak}
-              onAdd={addPriceBreak}
-              onAddFreightSet={addFreightSetFromRow}
-            />
-          </Section>
-
           <Section title="📋 报价计算(易读版)">
             <CleanQuote form={form} update={update} applyModes={applyModes} />
           </Section>
 
-          <Section title="Freight Options">
-            <div style={{ display: 'grid', gap: 12 }}>
-              {form.freightOptions.map((option, index) => (
-                <FreightOption
-                  key={option.mode}
-                  option={option}
-                  selected={form.selectedFreightMode === option.mode}
-                  summary={summary.freightOptions.find((row) => row.mode === option.mode)}
-                  onSelect={() => update('selectedFreightMode', option.mode)}
-                  onChange={(key, value) => updateFreight(index, key, value)}
-                />
-              ))}
-            </div>
-          </Section>
+          <details style={{ margin: '0 0 14px' }}>
+            <summary style={{ cursor: 'pointer', fontWeight: 700, color: '#5a5550', padding: '10px 0' }}>
+              ⚙ 高级明细(报价档矩阵 + 运费选项)—— 平时不用看,易读版会自动填好
+            </summary>
+            <Section title="Quote Pricing Matrix">
+              <PriceBreakMatrix
+                rows={form.priceBreaks}
+                calculatedRows={summary.priceBreaks || []}
+                selectedId={form.selectedPriceBreakId}
+                validUntil={summary.validUntil}
+                onChange={updatePriceBreak}
+                onSelect={selectPriceBreak}
+                onRemove={removePriceBreak}
+                onAdd={addPriceBreak}
+                onAddFreightSet={addFreightSetFromRow}
+              />
+            </Section>
+          </details>
 
           <Section title="Notes">
             <div className="srcx-grid srcx-grid-2">
