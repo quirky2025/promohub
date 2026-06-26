@@ -3,14 +3,13 @@ import { sourcingDb } from '@/lib/sourcingDb';
 import { Resend } from 'resend';
 import { quirkyEmail } from '@/lib/emailLayout';
 import { generateOrderDocPDF } from '@/lib/orderDocPdf';
+import { nextOrderNumber as allocOrderNumber } from '@/lib/docNumbers';
 import crypto from 'crypto';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 async function nextOrderNumber(db) {
-  const year = String(new Date().getFullYear()).slice(2);
-  const { count } = await db.from('orders').select('*', { count: 'exact', head: true });
-  return `OC${year}${String((count || 0) + 1).padStart(4, '0')}`;
+  return allocOrderNumber(db);
 }
 
 // Convert an accepted quote into a confirmed order (Pay Later / EFT).
