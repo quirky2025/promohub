@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { generateOrderDocPDF, QUIRKY_BANK } from '@/lib/orderDocPdf';
+import { nextOrderNumber } from '@/lib/docNumbers';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const supabase = createClient(
@@ -12,13 +13,10 @@ const supabase = createClient(
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ✅ Customer order / Order Confirmation number: OC260001
+// Delegates to the shared allocator so OC numbers are unique across both
+// local-stock orders and sourcing orders.
 async function generateOrderNumber() {
-  const year = String(new Date().getFullYear()).slice(2);
-  const { count } = await supabase
-    .from('orders')
-    .select('*', { count: 'exact', head: true });
-  const num = String((count || 0) + 1).padStart(4, '0');
-  return `OC${year}${num}`;
+  return nextOrderNumber(supabase);
 }
 
 
