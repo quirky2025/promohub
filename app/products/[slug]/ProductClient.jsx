@@ -661,7 +661,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               )}
 
               {activeTab === 'Sample Policy' && (
-                <div>
+                <div style={{ maxWidth: '760px' }}>
                   <p style={{ margin: '0 0 16px', fontSize: '15px', color: '#1a1a1a', lineHeight: 1.7 }}>
                     Before committing to a bulk order, we offer several ways to help you verify quality, colour, and branding — so you can order with complete confidence.
                   </p>
@@ -715,7 +715,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               )}
 
               {activeTab === 'Mockups & Artwork' && (
-                <div>
+                <div style={{ maxWidth: '760px' }}>
                   <div style={{ marginBottom: '20px' }}>
                     <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 10px' }}>Wondering what your logo will look like on the product?</h3>
                     <p style={{ margin: '0 0 10px', color: '#1a1a1a', lineHeight: 1.7 }}>
@@ -748,11 +748,10 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               )}
 
               {activeTab === 'Shipping & Delivery' && (
-                <div>
-                  <div className="qp-pdp-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+                <div style={{ maxWidth: '760px' }}>
+                  <div className="qp-pdp-2col" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', marginBottom: '20px' }}>
                     {[
                       { icon: '🚚', title: 'Flat Rate Shipping', value: '$30 per domestic address, Australia-wide' },
-                      { icon: '🏭', title: 'Production Time', value: '3-7 business days after proof approval' },
                     ].map(c => (
                       <div key={c.title} style={{ padding: '14px', background: '#ffffff', borderRadius: '10px', borderTop: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '22px', marginBottom: '6px' }}>{c.icon}</div>
@@ -804,7 +803,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               )}
 
               {activeTab === 'Ordering Process' && (
-                <div>
+                <div style={{ maxWidth: '760px' }}>
                   <p style={{ margin: '0 0 20px', color: '#1a1a1a', fontSize: '14px' }}>Four simple steps from quote to delivery — your branded products, done right.</p>
                   <div className="qp-steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
                     {[
