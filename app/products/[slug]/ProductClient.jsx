@@ -803,7 +803,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               )}
 
               {activeTab === 'Ordering Process' && (
-                <div style={{ maxWidth: '760px' }}>
+                <div>
                   <p style={{ margin: '0 0 20px', color: '#1a1a1a', fontSize: '14px' }}>Four simple steps from quote to delivery — your branded products, done right.</p>
                   <div className="qp-steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
                     {[
