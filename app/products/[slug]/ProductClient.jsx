@@ -284,9 +284,6 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 )}
             <div style={{ fontSize: '12px', color: '#1a1a1a', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku}</div>
             <h1 className="qp-pdp-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.name}</h1>
-            <div style={{ fontSize: '14px', color: GOLD, fontWeight: 500, minHeight: '22px' }}>
-              {selectedColour !== null ? `Colour: ${colours[selectedColour]?.name}` : ''}
-            </div>
             {product.seo_description && (
               <p style={{ fontSize: '14px', color: '#1a1a1a', lineHeight: 1.7, margin: '12px 0 0', fontFamily: '"DM Sans", sans-serif' }}>
                 {product.seo_description}
@@ -316,7 +313,12 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           )}
           {colours.length > 0 && (
             <div>
-              <StepLabel num={mainColourStep} text={`Choose ${product.colour_label || 'Product Colour'} *`} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <StepLabel num={mainColourStep} text={`Choose ${product.colour_label || 'Product Colour'} *`} />
+                {selectedColour !== null && (
+                  <span style={{ fontSize: '14px', color: GOLD, fontWeight: 500, fontFamily: '"DM Sans", sans-serif' }}>{colours[selectedColour]?.name}</span>
+                )}
+              </div>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
                 {colours.map((c, i) => {
                   const hex = resolveColourHex(c);
