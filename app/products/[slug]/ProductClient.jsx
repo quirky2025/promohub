@@ -284,6 +284,9 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 )}
             <div style={{ fontSize: '12px', color: '#1a1a1a', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku}</div>
             <h1 className="qp-pdp-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.name}</h1>
+            <div style={{ fontSize: '14px', color: GOLD, fontWeight: 500, minHeight: '22px' }}>
+              {selectedColour !== null ? `Colour: ${colours[selectedColour]?.name}` : ''}
+            </div>
             {product.seo_description && (
               <p style={{ fontSize: '14px', color: '#1a1a1a', lineHeight: 1.7, margin: '12px 0 0', fontFamily: '"DM Sans", sans-serif' }}>
                 {product.seo_description}
@@ -313,12 +316,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           )}
           {colours.length > 0 && (
             <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <StepLabel num={mainColourStep} text={`Choose ${product.colour_label || 'Product Colour'} *`} />
-                {selectedColour !== null && (
-                  <span style={{ fontSize: '14px', color: GOLD, fontWeight: 500, fontFamily: '"DM Sans", sans-serif' }}>{colours[selectedColour]?.name}</span>
-                )}
-              </div>
+              <StepLabel num={mainColourStep} text={`Choose ${product.colour_label || 'Product Colour'} *`} />
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
                 {colours.map((c, i) => {
                   const hex = resolveColourHex(c);
@@ -1259,7 +1257,7 @@ function NotebookSpecs({ product }) {
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Air Freight, after artwork approval)` : 'Indent order (Air Freight) — enquire for lead time')
     : product.indent_type === 'indent_sea'
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
-    : 'Production: 3-7 business days (after artwork approval)';
+    : `Production: ${product.supplier === 'PromoBrands' ? '7-10' : '3-7'} business days (after artwork approval)`;
   return (
     <div>
       <SpecGroup title="📓 Notebook" defaultOpen={true}>
@@ -1313,7 +1311,7 @@ function FlatSpecTable({ product }) {
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Air Freight, after artwork approval)` : 'Indent order (Air Freight) — enquire for lead time')
     : product.indent_type === 'indent_sea'
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
-    : 'Production: 3-7 business days (after artwork approval)';
+    : `Production: ${product.supplier === 'PromoBrands' ? '7-10' : '3-7'} business days (after artwork approval)`;
 // 通用 specs 表(Technology 起所有抓了 specs 的产品)— 必须放在 Drinkware 判断之前
   const specRows = Array.isArray(product.specs) ? product.specs.filter(s => s && s.name && s.value) : [];
   if (specRows.length > 0) {
