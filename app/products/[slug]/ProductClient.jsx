@@ -257,15 +257,15 @@ export default function ProductClient({ product, mainImage, colours, extraImages
         <div className="qp-pdp-left" style={{ position: 'sticky', top: '70px' }}>
           <div style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '16px', width: '100%', aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '12px' }}>
             {bigImage
-              ? <ProductImg src={bigImage} alt={mainAlt} size="detail" eager style={{ width: '85%', height: '85%', objectFit: 'contain' }} />
+              ? <ProductImg src={bigImage} alt={mainAlt} size="detail" eager style={{ width: '94%', height: '94%', objectFit: 'contain' }} />
               : <div style={{ color: '#1a1a1a', fontSize: '14px' }}>No image available</div>
             }
           </div>
           {bottomImages.length >= 1 && (
-            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
               {bottomImages.map((src, i) => (
                 <div key={i} onClick={() => handleBottomThumb(i)} style={{ cursor: 'pointer', flexShrink: 0 }}>
-                  <div style={{ width: '80px', height: '80px', borderRadius: '10px', border: leftIdx === i && selectedColour === null ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: leftIdx === i && selectedColour === null ? `0 2px 8px rgba(201,169,110,.3)` : 'none' }}>
+                  <div style={{ width: '100%', aspectRatio: '1', borderRadius: '10px', border: leftIdx === i && selectedColour === null ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: leftIdx === i && selectedColour === null ? `0 2px 8px rgba(201,169,110,.3)` : 'none' }}>
                     <ProductImg src={src} alt={i === 0 ? mainAlt : galleryAlt} size="thumb" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                   </div>
                 </div>
@@ -275,7 +275,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
         </div>
 
         {/* RIGHT */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
             {product.indent_type && (
   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '8px', background: product.indent_type === 'indent_air' ? '#FFF8E7' : '#EFF6FF', color: product.indent_type === 'indent_air' ? '#92400E' : '#1E40AF', border: product.indent_type === 'indent_air' ? '1px solid #FCD34D' : '1px solid #93C5FD' }}>
@@ -571,11 +571,18 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             <span style={{ fontSize: '20px' }}>💬</span> Get a Quote / Ask a Question
           </button>
 
-          <div className="qp-pdp-benefits" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+
+        </div>
+      </div>
+
+      <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '40px 40px 8px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <div className="qp-pdp-benefits" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px', marginBottom: '24px' }}>
             {[
               { icon: '🎨', title: 'Free Digital Proof', sub: 'See it before we make it' },
               { icon: '🚚', title: '$30 Flat Shipping', sub: 'Australia-wide, no surprises' },
               { icon: '✅', title: 'Quality Guarantee', sub: 'We stand behind every order' },
+              { icon: '🏆', title: "13 Years' Experience", sub: "You're in good hands" },
             ].map(b => (
               <div key={b.title} style={{ background: '#fff', border: `1.5px solid ${GOLD}40`, borderRadius: '12px', padding: '16px 10px', textAlign: 'center', borderTop: `3px solid ${GOLD}` }}>
                 <div style={{ fontSize: '26px', marginBottom: '8px' }}>{b.icon}</div>
@@ -595,63 +602,66 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
             <div style={{ padding: '24px', fontSize: '14px', lineHeight: '1.8', color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' }}>
               {activeTab === 'Description' && (
-  <div>
-    {product.features && Array.isArray(product.features) && product.features.length > 0 && (
-                    <div style={{ marginBottom: '24px' }}>
-                      <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 12px' }}>Features</h3>
-                      <ul style={{ margin: 0, paddingLeft: '20px' }}>
-                        {product.features.filter(f => f).map((f, i) => (
-                          <li key={i} style={{ marginBottom: '6px', color: '#1a1a1a' }}>{f}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {product.description && (
-                    <div style={{ marginBottom: '24px' }}>
-                      <p style={{ margin: 0, color: '#1a1a1a', lineHeight: 1.7 }}>{product.description}</p>
-                    </div>
-                  )}
-                  <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '20px' }}>
-                    <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 16px' }}>Specifications</h3>
+                <div className="qp-desc-3col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '32px', alignItems: 'start' }}>
 
-                    {/* Materials highlighted at top */}
+                  <div>
+                    {product.features && Array.isArray(product.features) && product.features.length > 0 && (
+                      <div style={{ marginBottom: '20px' }}>
+                        <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 12px' }}>Features</h3>
+                        <ul style={{ margin: 0, paddingLeft: '20px' }}>
+                          {product.features.filter(f => f).map((f, i) => (
+                            <li key={i} style={{ marginBottom: '6px', color: '#1a1a1a' }}>{f}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                     {product.materials && (
-                      <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', borderLeft: `3px solid ${GOLD}` }}>
+                      <div style={{ marginBottom: '12px', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #E0DDD7', borderLeft: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Materials</div>
                         <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{product.materials}</div>
                       </div>
                     )}
-
-                    {/* Dimensions below materials */}
                     {product.dimensions && (
-                      <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', borderLeft: `3px solid ${GOLD}` }}>
+                      <div style={{ marginBottom: '12px', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #E0DDD7', borderLeft: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Dimensions</div>
                         <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{product.dimensions}</div>
                       </div>
                     )}
+                    {decorations.length > 0 && (
+                      <div style={{ marginTop: '8px' }}>
+                        <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 12px' }}>Branding</h3>
+                        {decorations.map(d => (
+                          <div key={d.id} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #F0EEED' }}>
+                            <div style={{ fontWeight: 600, color: NAVY }}>{d.name}</div>
+                            {d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#1a1a1a', fontSize: '13px' }}>{d.detail}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
+                  <div>
                     {product.cover_type || product.ruling ? (
                       <NotebookSpecs product={product} />
                     ) : (
                       <FlatSpecTable product={product} />
                     )}
                   </div>
-                  {decorations.length > 0 && (
-                    <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '20px', marginTop: '20px' }}>
-                      <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 16px' }}>Decoration Options</h3>
-                      {decorations.map(d => (
-                        <div key={d.id} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #F0EEED' }}>
-                          <div style={{ fontWeight: 600, color: NAVY }}>{d.name}</div>
-                          {d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#1a1a1a', fontSize: '13px' }}>{d.detail}</div>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+
+                  <div>
+                    {product.description && (
+                      <div>
+                        <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 12px' }}>Description</h3>
+                        <p style={{ margin: 0, color: '#1a1a1a', lineHeight: 1.7 }}>{product.description}</p>
+                      </div>
+                    )}
+                  </div>
+
                 </div>
               )}
 
               {activeTab === 'Sample Policy' && (
-                <div>
+                <div style={{ maxWidth: '760px' }}>
                   <p style={{ margin: '0 0 16px', fontSize: '15px', color: '#1a1a1a', lineHeight: 1.7 }}>
                     Before committing to a bulk order, we offer several ways to help you verify quality, colour, and branding — so you can order with complete confidence.
                   </p>
@@ -705,7 +715,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               )}
 
               {activeTab === 'Mockups & Artwork' && (
-                <div>
+                <div style={{ maxWidth: '760px' }}>
                   <div style={{ marginBottom: '20px' }}>
                     <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 10px' }}>Wondering what your logo will look like on the product?</h3>
                     <p style={{ margin: '0 0 10px', color: '#1a1a1a', lineHeight: 1.7 }}>
@@ -738,11 +748,10 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               )}
 
               {activeTab === 'Shipping & Delivery' && (
-                <div>
-                  <div className="qp-pdp-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+                <div style={{ maxWidth: '760px' }}>
+                  <div className="qp-pdp-2col" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', marginBottom: '20px' }}>
                     {[
                       { icon: '🚚', title: 'Flat Rate Shipping', value: '$30 per domestic address, Australia-wide' },
-                      { icon: '🏭', title: 'Production Time', value: '3-7 business days after proof approval' },
                     ].map(c => (
                       <div key={c.title} style={{ padding: '14px', background: '#ffffff', borderRadius: '10px', borderTop: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '22px', marginBottom: '6px' }}>{c.icon}</div>
@@ -1294,7 +1303,7 @@ function NotebookSpecs({ product }) {
           {product.pen_refillable === true && <SpecRow label="Refillable" value="✓ Yes" />}
         </SpecGroup>
       )}
-      <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+      <SpecGroup title="📦 Packaging & Order Info" defaultOpen={true}>
         {product.includes_gift_box === true && <SpecRow label="Gift Box" value={product.gift_box ? `✓ Included (${product.gift_box})` : '✓ Included'} />}
         {product.notebook_includes && <SpecRow label="Includes" value={product.notebook_includes} />}
         {product.packing && <SpecRow label="Packaging" value={product.packing} />}
@@ -1315,7 +1324,7 @@ function FlatSpecTable({ product }) {
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
     : `Production: ${product.supplier === 'PromoBrands' ? '7-10' : '3-7'} business days (after artwork approval)`;
 // 通用 specs 表(Technology 起所有抓了 specs 的产品)— 必须放在 Drinkware 判断之前
-  const specRows = Array.isArray(product.specs) ? product.specs.filter(s => s && s.name && s.value) : [];
+  const specRows = Array.isArray(product.specs) ? product.specs.filter(s => s && s.name && s.value && !/lead\s*time/i.test(s.name)) : [];
   if (specRows.length > 0) {
     return (
       <div>
@@ -1329,7 +1338,7 @@ function FlatSpecTable({ product }) {
           ))}
         </SpecGroup>
 
-        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={true}>
           {product.gift_box && product.gift_box !== 'None' && <SpecRow label="Gift Box" value={product.includes_gift_box ? `✓ Included (${product.gift_box})` : `Optional (${product.gift_box})`} />}
           {product.packing && <SpecRow label="Packaging" value={product.packing} />}
           {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
@@ -1364,7 +1373,7 @@ function FlatSpecTable({ product }) {
           {product.straw_included === true && <SpecRow label="Straw" value="✓ Included" />}
         </SpecGroup>
 
-        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={true}>
           {product.gift_box && product.gift_box !== 'None' && <SpecRow label="Gift Box" value={product.includes_gift_box ? `✓ Included (${product.gift_box})` : `Optional (${product.gift_box})`} />}
           {product.packing && <SpecRow label="Packaging" value={product.packing} />}
           {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
@@ -1389,7 +1398,7 @@ function FlatSpecTable({ product }) {
           {product.pen_refillable === true && <SpecRow label="Refillable" value="✓ Yes" />}
         </SpecGroup>
 
-        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={true}>
           {product.gift_box && product.gift_box !== 'None' && <SpecRow label="Gift Box" value={product.includes_gift_box ? `✓ Included (${product.gift_box})` : `Optional (${product.gift_box})`} />}
           {product.packing && <SpecRow label="Packaging" value={product.packing} />}
           {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
@@ -1482,6 +1491,7 @@ function SizeChartTable({ sizeChart }) {
           }
           .qp-pdp-h1 { font-size: 26px !important; }
           .qp-pdp-benefits { grid-template-columns: 1fr !important; }
+          .qp-desc-3col { grid-template-columns: 1fr !important; gap: 24px !important; }
           .qp-pdp-2col { grid-template-columns: 1fr !important; }
           .qp-pdp-left { position: static !important; top: auto !important; }
         }
