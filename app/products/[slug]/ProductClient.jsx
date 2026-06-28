@@ -1259,7 +1259,7 @@ function NotebookSpecs({ product }) {
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Air Freight, after artwork approval)` : 'Indent order (Air Freight) — enquire for lead time')
     : product.indent_type === 'indent_sea'
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
-    : 'Production: 3-7 business days (after artwork approval)';
+    : `Production: ${product.supplier === 'PromoBrands' ? '7-10' : '3-7'} business days (after artwork approval)`;
   return (
     <div>
       <SpecGroup title="📓 Notebook" defaultOpen={true}>
@@ -1313,7 +1313,7 @@ function FlatSpecTable({ product }) {
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Air Freight, after artwork approval)` : 'Indent order (Air Freight) — enquire for lead time')
     : product.indent_type === 'indent_sea'
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
-    : 'Production: 3-7 business days (after artwork approval)';
+    : `Production: ${product.supplier === 'PromoBrands' ? '7-10' : '3-7'} business days (after artwork approval)`;
 // 通用 specs 表(Technology 起所有抓了 specs 的产品)— 必须放在 Drinkware 判断之前
   const specRows = Array.isArray(product.specs) ? product.specs.filter(s => s && s.name && s.value) : [];
   if (specRows.length > 0) {
