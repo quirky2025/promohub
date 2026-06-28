@@ -1303,7 +1303,7 @@ function NotebookSpecs({ product }) {
           {product.pen_refillable === true && <SpecRow label="Refillable" value="✓ Yes" />}
         </SpecGroup>
       )}
-      <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+      <SpecGroup title="📦 Packaging & Order Info" defaultOpen={true}>
         {product.includes_gift_box === true && <SpecRow label="Gift Box" value={product.gift_box ? `✓ Included (${product.gift_box})` : '✓ Included'} />}
         {product.notebook_includes && <SpecRow label="Includes" value={product.notebook_includes} />}
         {product.packing && <SpecRow label="Packaging" value={product.packing} />}
@@ -1338,7 +1338,7 @@ function FlatSpecTable({ product }) {
           ))}
         </SpecGroup>
 
-        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={true}>
           {product.gift_box && product.gift_box !== 'None' && <SpecRow label="Gift Box" value={product.includes_gift_box ? `✓ Included (${product.gift_box})` : `Optional (${product.gift_box})`} />}
           {product.packing && <SpecRow label="Packaging" value={product.packing} />}
           {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
@@ -1373,7 +1373,7 @@ function FlatSpecTable({ product }) {
           {product.straw_included === true && <SpecRow label="Straw" value="✓ Included" />}
         </SpecGroup>
 
-        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={true}>
           {product.gift_box && product.gift_box !== 'None' && <SpecRow label="Gift Box" value={product.includes_gift_box ? `✓ Included (${product.gift_box})` : `Optional (${product.gift_box})`} />}
           {product.packing && <SpecRow label="Packaging" value={product.packing} />}
           {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
@@ -1398,7 +1398,7 @@ function FlatSpecTable({ product }) {
           {product.pen_refillable === true && <SpecRow label="Refillable" value="✓ Yes" />}
         </SpecGroup>
 
-        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={false}>
+        <SpecGroup title="📦 Packaging & Order Info" defaultOpen={true}>
           {product.gift_box && product.gift_box !== 'None' && <SpecRow label="Gift Box" value={product.includes_gift_box ? `✓ Included (${product.gift_box})` : `Optional (${product.gift_box})`} />}
           {product.packing && <SpecRow label="Packaging" value={product.packing} />}
           {product.min_qty && <SpecRow label="Min. Order Qty" value={`${product.min_qty} units`} />}
