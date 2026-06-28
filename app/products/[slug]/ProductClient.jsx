@@ -10,12 +10,19 @@ import { getColourHex } from '@/lib/colourSwatch';
 import { slugify } from '@/lib/slug';
 import { colourImageAlt, cleanColour } from '@/lib/colourName';
 import ProductImg from '@/components/ProductImg';
-import { uploadImage } from '@/lib/imageHost';
-import { MARGIN, GST, SHIPPING, SETUP_FEE, brandingLabel, isColourMethod, isOneColourLocked } from '@/lib/pricing';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 const aud = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const isColourMethod = (d) => { const n = (d?.name || '').toLowerCase(); return n.includes('screen print') || n.includes('pad print'); };
+const isOneColourLocked = (d) => { const x = (d?.detail || '').toLowerCase(); return x.includes('one colour') || x.includes('1 colour'); };
+// Laser engraving / etching / debossing have no colour — show the method name only.
+const isEngravingMethod = (d) => { const n = (d?.name || '').toLowerCase(); return n.includes('laser') || n.includes('engrav') || n.includes('deboss') || n.includes('emboss') || n.includes('etch'); };
+const brandingLabel = (d, setupQty) => isEngravingMethod(d) ? d.name : isColourMethod(d) ? `${d.name} — ${isOneColourLocked(d) ? 1 : (setupQty || 1)} COL · 1 POS` : `${d.name} — Full Colour · 1 POS`;
+const MARGIN = 1.40;
+const GST = 0.10;
+const SHIPPING = 30;
+const SETUP_FEE = 40;
 const TABS = ['Description', 'Sample Policy', 'Mockups & Artwork', 'Shipping & Delivery', 'Ordering Process'];
 
 // ── colourImageAlt imported from lib/colourName (shared with 4B variant logic) ──
@@ -284,9 +291,6 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 )}
             <div style={{ fontSize: '12px', color: '#1a1a1a', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku}</div>
             <h1 className="qp-pdp-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.name}</h1>
-            <div style={{ fontSize: '14px', color: GOLD, fontWeight: 500, minHeight: '22px' }}>
-              {selectedColour !== null ? `Colour: ${colours[selectedColour]?.name}` : ''}
-            </div>
             {product.seo_description && (
               <p style={{ fontSize: '14px', color: '#1a1a1a', lineHeight: 1.7, margin: '12px 0 0', fontFamily: '"DM Sans", sans-serif' }}>
                 {product.seo_description}
@@ -316,7 +320,12 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           )}
           {colours.length > 0 && (
             <div>
-              <StepLabel num={mainColourStep} text={`Choose ${product.colour_label || 'Product Colour'} *`} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                <StepLabel num={mainColourStep} text={`Choose ${product.colour_label || 'Product Colour'} *`} />
+                {selectedColour !== null && (
+                  <span style={{ fontSize: '14px', color: GOLD, fontWeight: 500, fontFamily: '"DM Sans", sans-serif' }}>{colours[selectedColour]?.name}</span>
+                )}
+              </div>
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '12px' }}>
                 {colours.map((c, i) => {
                   const hex = resolveColourHex(c);
@@ -384,7 +393,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
           {pricingTiers.length > 0 && (
             <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
-              <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Unbranded Pricing (excl. GST)</div>
+              <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Unbranded Pricing (excl. GST)</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#FAFAF8' }}>
@@ -410,7 +419,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             <div>
               <StepLabel num={brandingStep} text="Add Branding Options" />
               <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
-                <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Branding & Decoration</div>
+                <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Branding & Decoration</div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ background: '#FAFAF8' }}>
@@ -468,7 +477,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             <div>
               <StepLabel num={addonStep} text="Select Add-on Options" />
               <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
-                <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Add-ons & Extras</div>
+                <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Add-ons & Extras</div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                   {addonDecorations.map(d => {
                     const st = addonState[d.id] || { on: false, setupQty: 1 };
@@ -499,7 +508,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
           {pricingTiers.length > 0 && (
             <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
-              <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Price Summary</div>
+              <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Price Summary</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#FAFAF8' }}>
@@ -614,7 +623,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
                     {/* Materials highlighted at top */}
                     {product.materials && (
-                      <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', borderLeft: `3px solid ${GOLD}` }}>
+                      <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#F8F7F4', borderRadius: '8px', borderLeft: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Materials</div>
                         <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{product.materials}</div>
                       </div>
@@ -622,7 +631,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
                     {/* Dimensions below materials */}
                     {product.dimensions && (
-                      <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', borderLeft: `3px solid ${GOLD}` }}>
+                      <div style={{ marginBottom: '16px', padding: '12px 16px', background: '#F8F7F4', borderRadius: '8px', borderLeft: `3px solid #E0DDD7` }}>
                         <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Dimensions</div>
                         <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{product.dimensions}</div>
                       </div>
@@ -682,7 +691,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                       ]
                     },
                   ].map(s => (
-                    <div key={s.num} style={{ marginBottom: '20px', padding: '16px', background: '#ffffff', borderRadius: '10px', borderLeft: `3px solid ${GOLD}` }}>
+                    <div key={s.num} style={{ marginBottom: '20px', padding: '16px', background: '#F8F7F4', borderRadius: '10px', borderLeft: `3px solid ${GOLD}` }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                         <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: NAVY, color: '#fff', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{s.num}</div>
                         <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"Cormorant Garamond", serif' }}>{s.title}</div>
@@ -711,7 +720,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                     </p>
                     <p style={{ margin: 0, fontWeight: 700, color: NAVY }}>No surprises. No guesswork. Just confidence.</p>
                   </div>
-                  <div style={{ padding: '16px', background: '#ffffff', borderRadius: '10px', borderLeft: `3px solid ${NAVY}`, marginBottom: '20px' }}>
+                  <div style={{ padding: '16px', background: '#F8F7F4', borderRadius: '10px', borderLeft: `3px solid ${NAVY}`, marginBottom: '20px' }}>
                     <h4 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '17px', color: NAVY, margin: '0 0 10px' }}>How It Works</h4>
                     <p style={{ margin: 0, color: '#1a1a1a', fontSize: '13px', lineHeight: 1.7 }}>
                       Once your order is confirmed, our design team creates a digital mockup showing your logo on the product and sends it to you for approval. <strong>Production only begins after you give us the green light in writing.</strong>
@@ -742,7 +751,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                       { icon: '🚚', title: 'Flat Rate Shipping', value: '$30 per domestic address, Australia-wide' },
                       { icon: '🏭', title: 'Production Time', value: '3-7 business days after proof approval' },
                     ].map(c => (
-                      <div key={c.title} style={{ padding: '14px', background: '#ffffff', borderRadius: '10px', borderTop: `3px solid ${GOLD}` }}>
+                      <div key={c.title} style={{ padding: '14px', background: '#F8F7F4', borderRadius: '10px', borderTop: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '22px', marginBottom: '6px' }}>{c.icon}</div>
                         <div style={{ fontSize: '12px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>{c.title}</div>
                         <div style={{ fontSize: '13px', color: '#1a1a1a' }}>{c.value}</div>
@@ -759,7 +768,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                           { region: '🏙 Perth', time: '5–7 business days' },
                           { region: '🌾 Rural Regions', time: '5–15 business days' },
                         ].map((r, i) => (
-                          <tr key={i} style={{ background: i % 2 === 0 ? '#ffffff' : '#fff' }}>
+                          <tr key={i} style={{ background: i % 2 === 0 ? '#F8F7F4' : '#fff' }}>
                             <td style={{ padding: '10px 14px', color: '#1a1a1a' }}>{r.region}</td>
                             <td style={{ padding: '10px 14px', fontWeight: 600, color: NAVY, textAlign: 'right' }}>{r.time}</td>
                           </tr>
@@ -800,12 +809,12 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                         num: 1, icon: '🛒', title: 'Place Your Order',
                         content: (
                           <div>
-                            <div style={{ background: '#ffffff', borderRadius: '6px', padding: '8px 10px', marginBottom: '6px', border: '1px solid #E0DDD7' }}>
+                            <div style={{ background: '#F8F7F4', borderRadius: '6px', padding: '8px 10px', marginBottom: '6px', border: '1px solid #E0DDD7' }}>
                               <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '2px' }}>Add to Cart</div>
                               <div style={{ fontSize: '11px', color: '#1a1a1a' }}>Select colour & qty, pay by EFT or credit card</div>
                             </div>
                             <div style={{ textAlign: 'center', fontSize: '11px', color: '#1a1a1a', margin: '4px 0' }}>— or —</div>
-                            <div style={{ background: '#ffffff', borderRadius: '6px', padding: '8px 10px', border: '1px solid #E0DDD7' }}>
+                            <div style={{ background: '#F8F7F4', borderRadius: '6px', padding: '8px 10px', border: '1px solid #E0DDD7' }}>
                               <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '2px' }}>Get a Quote</div>
                               <div style={{ fontSize: '11px', color: '#1a1a1a' }}>For custom requirements or large orders</div>
                             </div>
@@ -816,7 +825,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                       { num: 3, icon: '⚙️', title: 'Approve & Produce', desc: 'Review and approve your proof. Once confirmed in writing, production begins immediately.' },
                       { num: 4, icon: '📦', title: 'Delivery', desc: 'Your branded products are dispatched Australia-wide. $30 flat rate, tracked to your door.' },
                     ].map(s => (
-                      <div key={s.num} style={{ background: '#ffffff', borderRadius: '10px', padding: '14px', border: '1px solid #E0DDD7', borderTop: `3px solid ${GOLD}`, position: 'relative' }}>
+                      <div key={s.num} style={{ background: '#F8F7F4', borderRadius: '10px', padding: '14px', border: '1px solid #E0DDD7', borderTop: `3px solid ${GOLD}`, position: 'relative' }}>
                         <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: GOLD, color: '#fff', fontSize: '10px', fontWeight: 700, borderRadius: '20px', padding: '2px 10px' }}>Step {s.num}</div>
                         <div style={{ fontSize: '22px', textAlign: 'center', margin: '8px 0 6px' }}>{s.icon}</div>
                         <div style={{ fontWeight: 700, color: NAVY, fontSize: '13px', textAlign: 'center', marginBottom: '8px', fontFamily: '"DM Sans", sans-serif' }}>{s.title}</div>
@@ -847,7 +856,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                 const price = getSimilarLowestPrice(p);
                 return (
                   <Link key={p.id} href={`/products/${p.slug}`} style={{ textDecoration: 'none' }}>
-                    <div style={{ background: '#ffffff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', transition: 'box-shadow .2s, transform .2s' }}
+                    <div style={{ background: '#F8F7F4', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', transition: 'box-shadow .2s, transform .2s' }}
                       onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,.1)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
                     >
@@ -901,7 +910,7 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
     requiredDate: '', purpose: '',
     street: '', street2: '', suburb: '', state: '', postcode: '',
     name: '', company: '', email: '', phone: '',
-    notes: '', artworkFileName: '', artworkUrl: '', artworkUploading: false,
+    notes: '', artworkFileName: '',
   });
   const [status, setStatus] = useState('idle');
   const [purposeOther, setPurposeOther] = useState(false);
@@ -1026,7 +1035,7 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
             {/* YOUR SELECTION — carried over from the product page */}
             <div>
               <SectionHead num={1} text="Your Selection" />
-              <div style={{ background: '#ffffff', border: '1px solid #E0DDD7', borderRadius: '12px', padding: '16px 18px' }}>
+              <div style={{ background: '#F8F7F4', border: '1px solid #E0DDD7', borderRadius: '12px', padding: '16px 18px' }}>
                 <div style={{ fontSize: '14px', color: '#1B2A4A', lineHeight: 1.6, fontFamily: '"DM Sans", sans-serif' }}>
                   <strong>{product.name}</strong>
                   {selectedColour ? <> · {selectedColour}</> : null}
@@ -1090,7 +1099,7 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   <input name="postcode" value={form.postcode} onChange={handleChange}
                     placeholder="Postcode" style={{ ...inputStyle, fontFamily: '"DM Mono", monospace' }} />
-                  <input value="Australia" readOnly style={{ ...inputStyle, background: '#ffffff', color: '#1a1a1a', cursor: 'not-allowed' }} />
+                  <input value="Australia" readOnly style={{ ...inputStyle, background: '#F8F7F4', color: '#1a1a1a', cursor: 'not-allowed' }} />
                 </div>
               </div>
               <div style={{ marginTop: '6px', fontSize: '11px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
@@ -1151,18 +1160,13 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
                   <div style={{ fontSize: '13px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>Click to upload your logo / artwork</div>
                   <div style={{ fontSize: '11px', color: '#000', marginTop: '3px', fontFamily: '"DM Sans", sans-serif' }}>or email to hello@quirkypromo.com.au after submitting</div>
                   <input id="artworkUpload" type="file" accept=".ai,.pdf,.png,.jpg,.jpeg,.eps,.svg" style={{ display: 'none' }}
-                    onChange={async e => {
+                    onChange={e => {
                       const file = e.target.files[0];
-                      if (!file) return;
-                      setForm(prev => ({ ...prev, artworkFileName: file.name, artworkUrl: '', artworkUploading: true }));
-                      try {
-                        const url = await uploadImage(file);
-                        setForm(prev => ({ ...prev, artworkUrl: url, artworkUploading: false }));
-                      } catch { setForm(prev => ({ ...prev, artworkUploading: false })); }
+                      if (file) setForm(prev => ({ ...prev, artworkFileName: file.name }));
                     }} />
                 </div>
                 {form.artworkFileName && (
-                  <div style={{ marginTop: '6px', fontSize: '12px', color: form.artworkUploading ? '#92400E' : '#2D6A4F', fontFamily: '"DM Sans", sans-serif' }}>{form.artworkUploading ? '⏳ Uploading… ' : '✅ '}{form.artworkFileName}</div>
+                  <div style={{ marginTop: '6px', fontSize: '12px', color: '#2D6A4F', fontFamily: '"DM Sans", sans-serif' }}>✅ {form.artworkFileName}</div>
                 )}
               </div>
 
@@ -1239,9 +1243,9 @@ function SpecGroup({ title, children, defaultOpen = true }) {
   if (!hasContent) return null;
   return (
     <div style={{ marginBottom: '8px', border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
-      <button onClick={() => setOpen(o => !o)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: NAVY, border: 'none', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: '13px', color: '#ffffff', textAlign: 'left' }}>
+      <button onClick={() => setOpen(o => !o)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 16px', background: '#F8F7F4', border: 'none', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', fontWeight: 700, fontSize: '13px', color: NAVY, textAlign: 'left' }}>
         <span>{title}</span>
-        <span style={{ fontSize: '16px', color: '#ffffff', transition: 'transform .2s', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
+        <span style={{ fontSize: '16px', color: '#1a1a1a', transition: 'transform .2s', display: 'inline-block', transform: open ? 'rotate(180deg)' : 'none' }}>▾</span>
       </button>
       {open && (
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -1445,7 +1449,7 @@ function SpecRow({ label, value }) {
   );
 }
 
-const qtyBtnStyle = { width: '38px', height: '42px', background: '#ffffff', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' };
+const qtyBtnStyle = { width: '38px', height: '42px', background: '#F8F7F4', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' };
 const thStyle = { fontSize: '11px', fontWeight: 600, padding: '8px 10px', textAlign: 'center', color: '#1a1a1a', borderBottom: '1px solid #E0DDD7', fontFamily: '"DM Sans", sans-serif' };
 const tdStyle = { padding: '8px 10px', fontSize: '13px', textAlign: 'center', fontFamily: '"DM Sans", sans-serif' };
 const tdLabelStyle = { padding: '8px 12px', fontSize: '12px', color: '#1a1a1a', fontWeight: 500, background: '#FAFAF8', fontFamily: '"DM Sans", sans-serif' };
@@ -1453,7 +1457,7 @@ function SizeChartTable({ sizeChart }) {
   if (!sizeChart || !Array.isArray(sizeChart.sizes) || !sizeChart.sizes.length) return null;
   return (
     <div style={{ border: '1.5px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '14px' }}>
-      <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>
+      <div style={{ background: '#F8F7F4', padding: '10px 14px', fontSize: '12px', fontWeight: 700, borderBottom: '1px solid #E0DDD7', color: '#000000', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>
         Size Chart {sizeChart.unit ? `(${sizeChart.unit})` : ''}
       </div>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
