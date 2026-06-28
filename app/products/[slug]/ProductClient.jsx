@@ -257,15 +257,15 @@ export default function ProductClient({ product, mainImage, colours, extraImages
         <div className="qp-pdp-left" style={{ position: 'sticky', top: '70px' }}>
           <div style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '16px', width: '100%', aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '12px' }}>
             {bigImage
-              ? <ProductImg src={bigImage} alt={mainAlt} size="detail" eager style={{ width: '85%', height: '85%', objectFit: 'contain' }} />
+              ? <ProductImg src={bigImage} alt={mainAlt} size="detail" eager style={{ width: '94%', height: '94%', objectFit: 'contain' }} />
               : <div style={{ color: '#1a1a1a', fontSize: '14px' }}>No image available</div>
             }
           </div>
           {bottomImages.length >= 1 && (
-            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '4px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
               {bottomImages.map((src, i) => (
                 <div key={i} onClick={() => handleBottomThumb(i)} style={{ cursor: 'pointer', flexShrink: 0 }}>
-                  <div style={{ width: '80px', height: '80px', borderRadius: '10px', border: leftIdx === i && selectedColour === null ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: leftIdx === i && selectedColour === null ? `0 2px 8px rgba(201,169,110,.3)` : 'none' }}>
+                  <div style={{ width: '100%', aspectRatio: '1', borderRadius: '10px', border: leftIdx === i && selectedColour === null ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', boxShadow: leftIdx === i && selectedColour === null ? `0 2px 8px rgba(201,169,110,.3)` : 'none' }}>
                     <ProductImg src={src} alt={i === 0 ? mainAlt : galleryAlt} size="thumb" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                   </div>
                 </div>
@@ -275,7 +275,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
         </div>
 
         {/* RIGHT */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
             {product.indent_type && (
   <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '8px', background: product.indent_type === 'indent_air' ? '#FFF8E7' : '#EFF6FF', color: product.indent_type === 'indent_air' ? '#92400E' : '#1E40AF', border: product.indent_type === 'indent_air' ? '1px solid #FCD34D' : '1px solid #93C5FD' }}>
@@ -585,6 +585,11 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             ))}
           </div>
 
+        </div>
+      </div>
+
+      <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '40px 40px 8px' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', background: '#fff' }}>
             <div className="qp-pdp-tabs" style={{ display: 'flex', borderBottom: '1px solid #E0DDD7' }}>
               {TABS.map(tab => (
