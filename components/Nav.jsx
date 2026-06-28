@@ -609,6 +609,7 @@ export default function Nav() {
           <Link href="/sustainability" onClick={() => setActiveDropdown(null)} style={{ ...navLinkStyle, color: '#2D6A4F', fontWeight: 600 }}>🌿 Eco</Link>
           <Link href="/new-arrivals" onClick={() => setActiveDropdown(null)} style={navLinkStyle}>New Arrivals</Link>
           <Link href="/sale" onClick={() => setActiveDropdown(null)} style={{ ...navLinkStyle, color: '#C0392B', fontWeight: 600 }}>Sale</Link>
+          <Link href="/australian-made-promotional-products-australia" onClick={() => setActiveDropdown(null)} style={navLinkStyle}>Australian Made</Link>
 
           {/* INDENT - Click */}
           <div style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center' }}>
@@ -792,6 +793,7 @@ export default function Nav() {
               <button onClick={() => go('/sustainability')} style={{ ...mItem, color: '#2D6A4F' }}>🌿 Eco</button>
               <button onClick={() => go('/new-arrivals')} style={mItem}>New Arrivals</button>
               <button onClick={() => go('/sale')} style={{ ...mItem, color: '#C0392B' }}>Sale</button>
+              <button onClick={() => go('/australian-made-promotional-products-australia')} style={mItem}>Australian Made</button>
 
               {/* Made to Order */}
               <div style={mSection}>Made to Order</div>
