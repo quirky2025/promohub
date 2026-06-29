@@ -106,6 +106,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
         .select(`id, name, slug, min_qty, product_colours(id, name, hex, images, sort_order), pricing_tiers(base_price)`)
         .ilike('subcategory', product.subcategory)
         .eq('status', 'active')
+        .eq('is_published', true)
         .neq('id', product.id)
         .limit(4);
       if (data) setSimilarProducts(data);
