@@ -388,9 +388,11 @@ export default function Nav() {
       if (error || !data || data.length === 0) return; // 失败时保留后备清单
       const map = {};
       data.forEach(({ category, subcategory }) => {
+        if (!category || !String(category).trim()) return;
         if (HIDDEN_LEGACY_CATEGORIES.has(category)) return;
         const homeCategory = CROSS_CATEGORY_HOME[subcategory];
         if (homeCategory && homeCategory !== category) return;
+        if (!subcategory || !String(subcategory).trim()) return;
         if (!map[category]) map[category] = new Set();
         map[category].add(subcategory);
       });
