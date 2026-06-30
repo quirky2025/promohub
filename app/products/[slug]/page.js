@@ -151,7 +151,9 @@ export default async function ProductPage({ params, searchParams }) {
     ? (Array.isArray(imageSource.images) ? imageSource.images : Object.values(imageSource.images))
     : [];
 
-  const sortedImages = [...rawImages].sort((a, b) => extractImgNum(a) - extractImgNum(b));
+  const sortedImages = product.supplier === 'PromoBrands'
+    ? [...rawImages]
+    : [...rawImages].sort((a, b) => extractImgNum(a) - extractImgNum(b));
 
   // ── SPLIT IMAGES ──
   // [0] = main hero image; [1..colourCount] = per-colour pool; rest = extras
@@ -170,7 +172,9 @@ export default async function ProductPage({ params, searchParams }) {
 
   // 色块系产品(所有颜色都自带或都无图,不吃图池)→ 图池整体让位给主图轮播
   const poolUsed = colours.some(c => c.image && colourImages.includes(c.image));
-  const finalExtras = poolUsed ? extraImages : sortedImages.slice(1);
+  const finalExtras = product.supplier === 'PromoBrands'
+    ? sortedImages.slice(1)
+    : (poolUsed ? extraImages : sortedImages.slice(1));
 
   // ── 4B-3: SSR pre-select colour from ?colour=<colour_slug> ──
   // colourSlug() is the SAME function the 4B-2 backfill used, so the slug here is
