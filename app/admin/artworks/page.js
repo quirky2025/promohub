@@ -28,6 +28,7 @@ export default function AdminArtworksPage() {
   const [mockupFile, setMockupFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [success, setSuccess] = useState('');
+  const [logoUploading, setLogoUploading] = useState(false);
   // auto proof generator
   const [genStock, setGenStock] = useState('');
   const [genColour, setGenColour] = useState('');
@@ -98,6 +99,27 @@ export default function AdminArtworksPage() {
       loadArtworks();
     }
     setUploading(false);
+  }
+
+  async function uploadCustomerLogo(file) {
+    if (!file || !selected) return;
+    setLogoUploading(true);
+    try {
+      const up = await uploadImage(file);
+      if (!up || !up.logo_url) { alert('Upload failed'); setLogoUploading(false); return; }
+      const res = await fetch('/api/admin/artworks/set-logo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: selected.token, logoUrl: up.logo_url, logoPngUrl: up.logo_png_url }),
+      });
+      if (!res.ok) { alert('Save failed'); setLogoUploading(false); return; }
+      setSelected({ ...selected, logo_url: up.logo_url, logo_png_url: up.logo_png_url, status: 'logo_received' });
+      setSuccess('Customer logo uploaded.');
+      loadArtworks();
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+    setLogoUploading(false);
   }
 
   async function generateProof() {
@@ -318,6 +340,16 @@ export default function AdminArtworksPage() {
                 </div>
               </div>
             )}
+
+            {/* Admin: upload / replace customer logo (e.g. emailed to us) */}
+            <div style={{ marginBottom: '16px' }}>
+              <div onClick={() => document.getElementById('cust-logo-upload').click()}
+                style={{ border: '1.5px dashed #C8C4BC', borderRadius: '10px', padding: '14px', textAlign: 'center', cursor: 'pointer', background: '#ffffff', fontSize: '13px', color: NAVY, fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}>
+                <input id="cust-logo-upload" type="file" accept=".ai,.eps,.pdf,.svg,image/*" style={{ display: 'none' }}
+                  onChange={e => { if (e.target.files[0]) uploadCustomerLogo(e.target.files[0]); }} />
+                {logoUploading ? 'Uploading & converting…' : (selected.logo_url ? '↻ Replace customer logo' : '⬆ Upload customer logo (AI / EPS / PDF / SVG)')}
+              </div>
+            </div>
 
             {/* Auto-generate proof */}
             <div style={{ border: '1.5px solid ' + GOLD, borderRadius: '10px', padding: '16px', background: '#FFFBF4', marginBottom: '16px' }}>
