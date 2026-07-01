@@ -101,6 +101,26 @@ export default function AdminArtworksPage() {
     setUploading(false);
   }
 
+  async function uploadCustomerLogoFor(art, file) {
+    if (!file || !art) return;
+    setLogoUploading(true);
+    try {
+      const up = await uploadImage(file);
+      if (!up || !up.logo_url) { alert('Upload failed'); setLogoUploading(false); return; }
+      const res = await fetch('/api/admin/artworks/set-logo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: art.token, logoUrl: up.logo_url, logoPngUrl: up.logo_png_url }),
+      });
+      if (!res.ok) { alert('Save failed'); setLogoUploading(false); return; }
+      setSuccess('Customer logo uploaded for ' + art.order_number);
+      loadArtworks();
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+    setLogoUploading(false);
+  }
+
   async function uploadCustomerLogo(file) {
     if (!file || !selected) return;
     setLogoUploading(true);
@@ -276,15 +296,27 @@ export default function AdminArtworksPage() {
                     )}
                   </div>
 
-                  {art.logo_url && (
-                    <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Logo</div>
-                      <ProductImg src={(art.logo_png_url || art.logo_url)} size="thumb" alt="Logo" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
-                      <div style={{ marginTop: '4px' }}>
-                        <a href={art.logo_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: GOLD, textDecoration: 'none' }}>Download</a>
-                      </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Logo</div>
+                    {art.logo_url ? (
+                      <>
+                        <ProductImg src={(art.logo_png_url || art.logo_url)} size="thumb" alt="Logo" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
+                        <div style={{ marginTop: '4px' }}>
+                          <a href={art.logo_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: GOLD, textDecoration: 'none' }}>Download</a>
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{ width: '80px', height: '80px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #C8C4BC', borderRadius: '8px', color: '#C8C4BC', fontSize: '24px' }}>—</div>
+                    )}
+                    <div style={{ marginTop: '6px' }}>
+                      <button onClick={() => document.getElementById('list-logo-' + art.id).click()}
+                        style={{ background: 'none', border: '1px solid #C8C4BC', borderRadius: '6px', padding: '3px 8px', fontSize: '11px', color: NAVY, cursor: 'pointer', fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}>
+                        {art.logo_url ? '↻ Replace' : '⬆ Upload'}
+                      </button>
+                      <input id={'list-logo-' + art.id} type="file" accept=".ai,.eps,.pdf,.svg,image/*" style={{ display: 'none' }}
+                        onChange={e => { if (e.target.files[0]) uploadCustomerLogoFor(art, e.target.files[0]); }} />
                     </div>
-                  )}
+                  </div>
 
                   {art.mockup_url && (
                     <div style={{ textAlign: 'center' }}>
