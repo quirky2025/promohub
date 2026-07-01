@@ -32,7 +32,7 @@ export async function POST(req) {
     const pdfBytes = await generateArtworkProof({
       brandLogoUrl: site + '/quirky-logo-light.png',
       templateUrl,
-      customerLogoUrl: art.logo_url,
+      customerLogoUrl: art.logo_png_url || art.logo_url,
       box: { x: tpl.box_x, y: tpl.box_y, w: tpl.box_w, h: tpl.box_h },
       orderNumber: art.order_number,
       date: new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),

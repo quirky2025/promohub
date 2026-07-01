@@ -14,7 +14,7 @@ export async function POST(req) {
     const body = await req.json();
     const {
       orderNumber, customerName, customerEmail,
-      productName, productImageUrl, logoUrl,
+      productName, productImageUrl, logoUrl, logoPngUrl,
       paymentMethod, brandingSummary, colour, qty, token: existingToken,
     } = body;
 
@@ -25,6 +25,7 @@ export async function POST(req) {
     if (existingToken) {
       await supabase.from('artworks').update({
         logo_url: logoUrl,
+        logo_png_url: logoPngUrl,
         product_image_url: productImageUrl || '',
         status: 'logo_received',
       }).eq('token', existingToken);
@@ -36,6 +37,7 @@ export async function POST(req) {
         product_name: productName,
         product_image_url: productImageUrl || '',
         logo_url: logoUrl,
+        logo_png_url: logoPngUrl,
         mockup_url: '',
         status: 'logo_received',
         token,
@@ -70,7 +72,7 @@ export async function POST(req) {
 
             <div style="margin: 20px 0; text-align: center;">
               <p style="color: #7A7570; font-size: 13px; margin-bottom: 8px;">Customer Logo:</p>
-              <img src="${logoUrl}" alt="Customer Logo" style="max-width: 300px; max-height: 200px; border: 1px solid #E0DDD7; border-radius: 8px; padding: 10px; background: #fff;" />
+              <img src="${logoPngUrl || logoUrl}" alt="Customer Logo" style="max-width: 300px; max-height: 200px; border: 1px solid #E0DDD7; border-radius: 8px; padding: 10px; background: #fff;" />
             </div>
 
             <div style="margin: 16px 0;">

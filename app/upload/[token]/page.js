@@ -33,7 +33,10 @@ export default function UploadLogoPage() {
 
     try {
       // Upload via centralised uploader (lib/imageHost.js)
-      const logoUrl = await uploadImage(logoFile);
+      const up = await uploadImage(logoFile);
+      if (!up || !up.logo_url) throw new Error('upload failed');
+      const logoUrl = up.logo_url;
+      const logoPngUrl = up.logo_png_url;
 
       // Trigger mockup generation
       await fetch('/api/artwork/upload', {
@@ -46,6 +49,7 @@ export default function UploadLogoPage() {
           productName: artwork.product_name,
           productImageUrl: artwork.product_image_url || '',
           logoUrl,
+          logoPngUrl,
           paymentMethod: artwork.payment_method,
           token,
         }),
