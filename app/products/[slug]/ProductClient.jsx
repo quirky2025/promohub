@@ -1168,7 +1168,7 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
                       if (!file) return;
                       setForm(prev => ({ ...prev, artworkFileName: file.name, artworkUrl: '', artworkUploading: true }));
                       try {
-                        const url = await uploadImage(file);
+                        const url = (await uploadImage(file))?.logo_url;
                         setForm(prev => ({ ...prev, artworkUrl: url, artworkUploading: false }));
                       } catch { setForm(prev => ({ ...prev, artworkUploading: false })); }
                     }} />

@@ -81,7 +81,7 @@ export default function AdminArtworksPage() {
       mockupUrl = pdfData.url;
     } else {
       // Image → hosted via centralised uploader (lib/imageHost.js)
-      mockupUrl = await uploadImage(mockupFile);
+      mockupUrl = (await uploadImage(mockupFile))?.logo_url;
     }
 
     // Save and send to customer
@@ -257,7 +257,7 @@ export default function AdminArtworksPage() {
                   {art.logo_url && (
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Logo</div>
-                      <ProductImg src={toDisplayUrl(art.logo_url)} size="thumb" alt="Logo" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
+                      <ProductImg src={(art.logo_png_url || art.logo_url)} size="thumb" alt="Logo" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
                       <div style={{ marginTop: '4px' }}>
                         <a href={art.logo_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: GOLD, textDecoration: 'none' }}>Download</a>
                       </div>
@@ -311,7 +311,7 @@ export default function AdminArtworksPage() {
               <div style={{ marginBottom: '20px' }}>
                 <div style={{ fontSize: '12px', color: '#7A7570', marginBottom: '8px' }}>Customer Logo:</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <ProductImg src={toDisplayUrl(selected.logo_url)} size="thumb" eager alt="Logo" style={{ width: '60px', height: '60px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px' }} />
+                  <ProductImg src={(selected.logo_png_url || selected.logo_url)} size="thumb" eager alt="Logo" style={{ width: '60px', height: '60px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px' }} />
                   <a href={selected.logo_url} target="_blank" rel="noreferrer" style={{ fontSize: '13px', color: GOLD, textDecoration: 'none', fontWeight: 600 }}>
                     Download Logo →
                   </a>
