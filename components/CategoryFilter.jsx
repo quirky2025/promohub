@@ -20,6 +20,7 @@ const GOLD = '#C9A96E';
 
 export default function CategoryFilter({ products = [], category, includeType = true }) {
   const [selected, setSelected] = useState({});
+  const [filterOpen, setFilterOpen] = useState(false);
   const facets = useMemo(() => computeFacets(products, category, { includeType }), [products, category, includeType]);
   const filtered = useMemo(() => applyFilters(products, category, selected, { includeType }), [products, category, selected, includeType]);
 
@@ -37,8 +38,12 @@ export default function CategoryFilter({ products = [], category, includeType = 
 
   return (
     <div className="qp-cat-layout" style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
-      <style>{`@media (max-width: 768px){ .qp-cat-layout{ flex-direction: column; gap: 16px; } .qp-cat-filter{ width: 100% !important; } }`}</style>
-      <div className="qp-cat-filter" style={{ width: '240px', flexShrink: 0 }}>
+      <style>{`.qp-cat-toggle{ display: none !important; } @media (max-width: 768px){ .qp-cat-layout{ flex-direction: column; gap: 16px; } .qp-cat-filter{ width: 100% !important; display: none; } .qp-cat-filter.qp-cat-open{ display: block; } .qp-cat-toggle{ display: flex !important; justify-content: space-between; align-items: center; } }`}</style>
+      <button className="qp-cat-toggle" onClick={() => setFilterOpen(o => !o)} style={{ width: '100%', padding: '12px 16px', background: '#fff', border: '1.5px solid #C8C4BC', borderRadius: '10px', fontSize: '14px', fontWeight: 700, color: '#1B2A4A', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+        <span>Filters ({filtered.length})</span>
+        <span>{filterOpen ? '▲' : '▼'}</span>
+      </button>
+      <div className={`qp-cat-filter${filterOpen ? ' qp-cat-open' : ''}`} style={{ width: '240px', flexShrink: 0 }}>
         <FilterSidebar facets={facets} selected={selected} onToggle={onToggle} onClear={clearAll} resultCount={filtered.length} />
       </div>
       <div style={{ flex: 1 }}>
