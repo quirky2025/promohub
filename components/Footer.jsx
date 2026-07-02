@@ -92,9 +92,7 @@ export default function Footer() {
  
           {/* LOGO IN COL 4 */}
           <div style={{ marginTop: '32px' }}>
-            <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: '#fff', letterSpacing: '3px', marginBottom: '10px', fontWeight: 600 }}>
-              QUIRKY<span style={{ color: GOLD }}>PROMO</span>
-            </div>
+            <img src="/quirky-logo-quote.png" alt="QuirkyPromo" style={{ height: '42px', width: 'auto', display: 'block', marginBottom: '12px' }} />
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,.7)', lineHeight: '1.8', margin: '0 0 12px', fontFamily: '"DM Sans", sans-serif' }}>
               Premium promotional products for Australian businesses.
             </p>

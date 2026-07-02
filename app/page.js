@@ -169,7 +169,8 @@ export default async function Home() {
       <section style={{ padding: '52px 0' }}>
         <div style={wrap}>
           <h2 style={{ ...h2, textAlign: 'center' }}>How ordering works</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, marginTop: 26 }}>
+          <style>{`@media (max-width: 768px){ .qp-home-steps{ grid-template-columns: 1fr 1fr !important; } .qp-home-testi{ grid-template-columns: 1fr !important; } }`}</style>
+          <div className="qp-home-steps" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20, marginTop: 26 }}>
             {HELP.map(([t, s]) => (<div key={t} style={{ textAlign: 'center' }}><h4 style={{ fontSize: 14, color: NAVY, fontWeight: 600, margin: 0 }}>{t}</h4><p style={{ fontSize: 12.5, color: MUTED, margin: '4px 0 0' }}>{s}</p></div>))}
           </div>
         </div>
@@ -180,7 +181,7 @@ export default async function Home() {
         <div style={wrap}>
           <h2 style={{ fontFamily: serif, fontSize: 34, fontWeight: 700, color: '#fff', margin: 0 }}>What our clients say</h2>
           <div style={{ color: 'rgba(255,255,255,.6)', fontSize: 14, marginTop: 4 }}>Trusted by leading Australian organisations</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 26, marginTop: 38 }}>
+          <div className="qp-home-testi" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 26, marginTop: 38 }}>
             {TESTIMONIALS.map((t) => (
               <div key={t.name}>
                 <div style={{ color: GOLD, letterSpacing: 3, fontSize: 14 }}>★★★★★</div>

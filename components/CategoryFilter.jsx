@@ -36,8 +36,9 @@ export default function CategoryFilter({ products = [], category, includeType = 
   function clearAll() { setSelected({}); }
 
   return (
-    <div style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
-      <div style={{ width: '240px', flexShrink: 0 }}>
+    <div className="qp-cat-layout" style={{ display: 'flex', gap: '32px', alignItems: 'flex-start' }}>
+      <style>{`@media (max-width: 768px){ .qp-cat-layout{ flex-direction: column; gap: 16px; } .qp-cat-filter{ width: 100% !important; } }`}</style>
+      <div className="qp-cat-filter" style={{ width: '240px', flexShrink: 0 }}>
         <FilterSidebar facets={facets} selected={selected} onToggle={onToggle} onClear={clearAll} resultCount={filtered.length} />
       </div>
       <div style={{ flex: 1 }}>

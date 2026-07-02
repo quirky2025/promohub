@@ -386,7 +386,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           </div>
 
           {pricingTiers.length > 0 && (
-            <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
+            <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflowX: 'auto' }}>
               <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Unbranded Pricing (excl. GST)</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
@@ -412,7 +412,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           {brandingDecorations.length > 0 && (
             <div>
               <StepLabel num={brandingStep} text="Add Branding Options" />
-              <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
+              <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflowX: 'auto', marginTop: '10px' }}>
                 <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Branding & Decoration</div>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
@@ -501,7 +501,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           )}
 
           {pricingTiers.length > 0 && (
-            <div style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden' }}>
+            <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflowX: 'auto' }}>
               <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Price Summary</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
@@ -633,8 +633,8 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                         <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 12px' }}>Branding</h3>
                         {decorations.map(d => (
                           <div key={d.id} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #F0EEED' }}>
-                            <div style={{ fontWeight: 600, color: NAVY }}>{d.name}</div>
-                            {d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#1a1a1a', fontSize: '13px' }}>{d.detail}</div>}
+                            <div style={{ fontSize: '13px', fontWeight: 500, color: '#3a3a3a' }}>{d.name}</div>
+                            {d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#7A7570', fontSize: '12px', marginTop: '2px' }}>{d.detail}</div>}
                           </div>
                         ))}
                       </div>
@@ -1491,7 +1491,9 @@ function SizeChartTable({ sizeChart }) {
             padding: 20px 16px 48px !important;
           }
           .qp-pdp-h1 { font-size: 26px !important; }
-          .qp-pdp-benefits { grid-template-columns: 1fr !important; }
+          .qp-pdp-benefits { grid-template-columns: 1fr 1fr !important; }
+          .qp-pdp-tabs { overflow-x: auto; }
+          .qp-pdp-tabs button { flex: 0 0 auto !important; }
           .qp-desc-3col { grid-template-columns: 1fr !important; gap: 24px !important; }
           .qp-pdp-2col { grid-template-columns: 1fr !important; }
           .qp-pdp-left { position: static !important; top: auto !important; }
