@@ -820,8 +820,9 @@ const navLinkStyle = {
 
 // 移动端抽屉样式(无底色,靠字重+留白分层,参考清爽风格)
 const mSection = {
-  padding: '24px 20px 8px', fontSize: '19px', fontWeight: 700, color: NAVY,
-  fontFamily: '"Cormorant Garamond", Georgia, serif', letterSpacing: '0.3px',
+  padding: '12px 20px', fontSize: '12px', fontWeight: 700, color: '#fff',
+  fontFamily: '"DM Sans", sans-serif', letterSpacing: '1.2px', textTransform: 'uppercase',
+  background: NAVY, marginTop: '6px',
 };
 const mItem = {
   width: '100%', textAlign: 'left', background: 'none', border: 'none',
