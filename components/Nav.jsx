@@ -715,9 +715,7 @@ export default function Nav() {
 
             {/* 抽屉头部 */}
             <div style={{ background: NAVY, padding: '18px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 2 }}>
-              <span style={{ fontFamily: '"Cormorant Garamond", Georgia, serif', fontSize: '24px', color: '#fff', letterSpacing: '2px', fontWeight: 600 }}>
-                QUIRKY<span style={{ color: GOLD }}>PROMO</span>
-              </span>
+              <img src="/quirky-logo-quote.png" alt="QuirkyPromo" style={{ height: '38px', width: 'auto', display: 'block' }} />
               <button onClick={() => setMobileOpen(false)} aria-label="Close"
                 style={{ background: 'none', border: 'none', color: '#fff', fontSize: '28px', cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>×</button>
             </div>

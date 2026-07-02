@@ -1492,8 +1492,8 @@ function SizeChartTable({ sizeChart }) {
           }
           .qp-pdp-h1 { font-size: 26px !important; }
           .qp-pdp-benefits { grid-template-columns: 1fr 1fr !important; }
-          .qp-pdp-tabs { overflow-x: auto; }
-          .qp-pdp-tabs button { flex: 0 0 auto !important; }
+          .qp-pdp-tabs { overflow-x: auto; flex-wrap: nowrap !important; }
+          .qp-pdp-tabs button { flex: 0 0 auto !important; white-space: nowrap; }
           .qp-desc-3col { grid-template-columns: 1fr !important; gap: 24px !important; }
           .qp-pdp-2col { grid-template-columns: 1fr !important; }
           .qp-pdp-left { position: static !important; top: auto !important; }
