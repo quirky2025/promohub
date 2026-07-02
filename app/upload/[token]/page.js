@@ -33,7 +33,7 @@ export default function UploadLogoPage() {
 
     try {
       // Upload via centralised uploader (lib/imageHost.js)
-      const up = await uploadImage(logoFile);
+      const up = await uploadImage(logoFile, artwork.order_number, 'logo');
       if (!up || !up.logo_url) throw new Error('upload failed');
       const logoUrl = up.logo_url;
       const logoPngUrl = up.logo_png_url;

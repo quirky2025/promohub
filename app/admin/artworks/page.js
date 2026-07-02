@@ -82,7 +82,7 @@ export default function AdminArtworksPage() {
       mockupUrl = pdfData.url;
     } else {
       // Image → hosted via centralised uploader (lib/imageHost.js)
-      mockupUrl = (await uploadImage(mockupFile))?.logo_url;
+      mockupUrl = (await uploadImage(mockupFile, selected?.order_number, 'mockup'))?.logo_url;
     }
 
     // Save and send to customer
@@ -103,9 +103,10 @@ export default function AdminArtworksPage() {
 
   async function uploadCustomerLogoFor(art, file) {
     if (!file || !art) return;
+    const _upOrder = art.order_number;
     setLogoUploading(true);
     try {
-      const up = await uploadImage(file);
+      const up = await uploadImage(file, _upOrder, 'logo');
       if (!up || !up.logo_url) { alert('Upload failed'); setLogoUploading(false); return; }
       const res = await fetch('/api/admin/artworks/set-logo', {
         method: 'POST',
@@ -123,9 +124,10 @@ export default function AdminArtworksPage() {
 
   async function uploadCustomerLogo(file) {
     if (!file || !selected) return;
+    const _upOrder = selected.order_number;
     setLogoUploading(true);
     try {
-      const up = await uploadImage(file);
+      const up = await uploadImage(file, _upOrder, 'logo');
       if (!up || !up.logo_url) { alert('Upload failed'); setLogoUploading(false); return; }
       const res = await fetch('/api/admin/artworks/set-logo', {
         method: 'POST',
