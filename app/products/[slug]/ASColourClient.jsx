@@ -252,7 +252,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
               </div>
             )}
             <div style={{ fontSize: '12px', color: '#000000', marginTop: '4px' }}>Blank garments are not sold — every order includes your logo.</div>
-            {product.short_desc && <p style={{ fontSize: '14px', lineHeight: 1.7, margin: '12px 0 0' }}>{product.short_desc}</p>}
+            {product.seo_description && <p style={{ fontSize: '14px', lineHeight: 1.7, margin: '12px 0 0' }}>{product.seo_description}</p>}
           </div>
 
           {/* STEP 1 colour dots */}
@@ -467,6 +467,10 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
           )}
 
           {/* actions */}
+          <div style={{ fontSize: '13px', color: '#000', fontWeight: 500 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span aria-hidden="true">🕒</span> Production: 7–10 business days (after artwork approval)</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}><span aria-hidden="true">⚡</span> Rush order available — <button onClick={() => setQuoteOpen(true)} style={{ background: 'none', border: 'none', color: GOLD, fontWeight: 600, cursor: 'pointer', padding: 0, font: 'inherit', textDecoration: 'underline' }}>ask us for a faster turnaround</button>.</div>
+          </div>
           <button onClick={canAdd ? handleAdd : undefined} disabled={!canAdd}
             style={{ width: '100%', background: canAdd ? GOLD : '#C8C4BC', color: '#fff', border: 'none', borderRadius: '12px', padding: '18px', fontSize: '18px', fontWeight: 700, cursor: canAdd ? 'pointer' : 'not-allowed', fontFamily: FONT, boxShadow: canAdd ? '0 4px 16px rgba(201,169,110,.4)' : 'none' }}>
             {added ? '✅ Added to Cart!' : !isValidQty ? 'Enter quantity to see pricing' : (colours.length > 0 && selectedColour === null) ? 'Choose a colour to continue' : job.poa ? 'Request a quote for pricing' : `Add to Cart  —  ${aud(grand)} incl. GST`}
@@ -539,6 +543,10 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                                 <td style={{ padding: '9px 12px', color: '#000000', lineHeight: 1.6 }}>{x.name === 'Care' ? String(x.value).split(/\.\s+/).map((t) => t.trim().replace(/\.$/, '')).filter(Boolean).map((t, j) => <div key={j} style={{ marginBottom: '2px' }}>{t}</div>) : x.value}</td>
                               </tr>
                             ))}
+                            <tr style={{ borderBottom: '1px solid #F0EEED' }}>
+                              <td style={{ padding: '9px 12px', fontWeight: 600, color: NAVY, background: '#FAFAF8', verticalAlign: 'top', whiteSpace: 'nowrap' }}>Lead time</td>
+                              <td style={{ padding: '9px 12px', color: '#000000', lineHeight: 1.6, fontWeight: 500 }}>7–10 business days (after artwork approval)</td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
