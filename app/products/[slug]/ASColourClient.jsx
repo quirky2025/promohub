@@ -43,9 +43,15 @@ const CAT_SINGULAR = { 'T-Shirts': 'T-shirt', 'Tees': 'T-shirt', 'Hoodies': 'Hoo
 const TYPE_WORD = /\s+(tee|t-shirt|hoodie|singlet|polo|jumper|jacket|crew|sweatshirt|sweat|tank|vest|cap|hat|tote|bag)$/i;
 function fullTitle(product) {
   const brand = (product.brand || 'AS Colour').trim();
-  const core = (product.name || '').replace(TYPE_WORD, '').trim() || (product.name || '');
+  const name = (product.name || '').trim();
   const g = (product.gender || '').trim();
-  const gender = g && !/unisex/i.test(g) ? g.replace(/s$/, '') + "'s" : '';
+  const isMW = /^(men|women)('?s)?$/i.test(g);
+  // 只有 Men/Women 才做「去尾词 + 性别所有格 + 品类」;其它(unisex/kids/包/帽)= 品牌 + 原名
+  if (!isMW) {
+    return name.toLowerCase().startsWith(brand.toLowerCase()) ? name : (brand + ' ' + name).trim();
+  }
+  const core = name.replace(TYPE_WORD, '').trim() || name;
+  const gender = g.replace(/s$/, '') + "'s";
   const cat = CAT_SINGULAR[product.category] || (product.category || '').replace(/s$/, '');
   return [brand, core, gender, cat].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
 }
