@@ -38,6 +38,18 @@ function resolveHex(c) {
   return (c && c.hex && c.hex !== '') ? c.hex : (getASHex(c && c.name) || getColourHex(c && c.name) || '#CFCFCF');
 }
 
+// 完整标题:品牌 + 名(去尾部通用词) + 性别所有格 + 品类单数。
+const CAT_SINGULAR = { 'T-Shirts': 'T-shirt', 'Tees': 'T-shirt', 'Hoodies': 'Hoodie', 'Singlets': 'Singlet', 'Polos': 'Polo', 'Jumpers': 'Jumper', 'Sweatshirts': 'Sweatshirt', 'Jackets': 'Jacket', 'Vests': 'Vest', 'Tanks': 'Tank', 'Bags': 'Bag', 'Hats': 'Hat', 'Caps': 'Cap' };
+const TYPE_WORD = /\s+(tee|t-shirt|hoodie|singlet|polo|jumper|jacket|crew|sweatshirt|sweat|tank|vest|cap|hat|tote|bag)$/i;
+function fullTitle(product) {
+  const brand = (product.brand || 'AS Colour').trim();
+  const core = (product.name || '').replace(TYPE_WORD, '').trim() || (product.name || '');
+  const g = (product.gender || '').trim();
+  const gender = g && !/unisex/i.test(g) ? g.replace(/s$/, '') + "'s" : '';
+  const cat = CAT_SINGULAR[product.category] || (product.category || '').replace(/s$/, '');
+  return [brand, core, gender, cat].filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+}
+
 const POSITION_OPTIONS = {
   apparel: ['Left Chest', 'Right Chest', 'Front / Centre', 'Back', 'Nape', 'Left Sleeve', 'Right Sleeve'],
   hats: ['Front', 'Side', 'Back'],
@@ -156,7 +168,9 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
 
   function posLabel(p) {
     const mlabel = (availMethods.find((m) => m.key === p.method)?.label || p.method).replace(' (Direct to Garment)', '').replace(' (Direct to Film)', '');
-    const extra = p.method === 'screen_print' ? ` ${p.colours}c` : (needsSize(p.method) && effSize(p) ? ` ${effSize(p)}` : '');
+    const szOpt = (SIZE_OPTS[p.method] || []).find(([k]) => k === effSize(p));
+    const szTxt = szOpt ? szOpt[1].split(' ')[0] : effSize(p);
+    const extra = p.method === 'screen_print' ? ` ${p.colours}c` : (needsSize(p.method) && szTxt ? ` ${szTxt}` : '');
     return `${p.position} (${mlabel}${extra})`;
   }
 
@@ -224,7 +238,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
               SOLD PRINTED ONLY · MIN {minQty}
             </div>
             <div style={{ fontSize: '12px', color: '#000000', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku} · {product.brand}</div>
-            <h1 className="qp-pdp-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.name}</h1>
+            <h1 className="qp-pdp-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{fullTitle(product)}</h1>
             {fromPrice != null && (
               <div style={{ fontSize: '15px', color: NAVY, fontWeight: 700, margin: '6px 0 0' }}>
                 From <span style={{ color: GOLD, fontSize: '22px' }}>{money(fromPrice)}</span>
@@ -508,12 +522,12 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                     )}
                   </div>
                   <div>
-                    {Array.isArray(product.specs) && product.specs.filter((x) => x && x.name && x.value).length > 0 && (
+                    {Array.isArray(product.specs) && product.specs.filter((x) => x && x.name && x.value && x.name !== 'Credentials').length > 0 && (
                       <div style={{ border: '1px solid #E0DDD7', borderRadius: '8px', overflow: 'hidden' }}>
                         <div style={{ background: NAVY, padding: '9px 12px', fontSize: '12px', fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Product Details</div>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                           <tbody>
-                            {product.specs.filter((x) => x && x.name && x.value).map((x, i) => (
+                            {product.specs.filter((x) => x && x.name && x.value && x.name !== 'Credentials').map((x, i) => (
                               <tr key={i} style={{ borderBottom: '1px solid #F0EEED' }}>
                                 <td style={{ padding: '9px 12px', fontWeight: 600, color: NAVY, background: '#FAFAF8', verticalAlign: 'top', whiteSpace: 'nowrap' }}>{x.name}</td>
                                 <td style={{ padding: '9px 12px', color: '#000000', lineHeight: 1.6 }}>{x.name === 'Care' ? String(x.value).split(/\.\s+/).map((t) => t.trim().replace(/\.$/, '')).filter(Boolean).map((t, j) => <div key={j} style={{ marginBottom: '2px' }}>{t}</div>) : x.value}</td>
