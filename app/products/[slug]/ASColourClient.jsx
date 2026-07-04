@@ -23,6 +23,8 @@ const GOLD = '#C9A96E';
 const FONT = '"DM Sans", sans-serif';
 
 const LABEL_TO_KEY = { 'Screen Print': 'screen_print', 'DTG': 'dtg', 'DTF': 'dtf', 'Embroidery': 'embroidery' };
+const CRED_LABEL = { amfori: 'amfori', vegan: 'Vegan', upf50plus: 'UPF 50+', australian_cotton: 'Australian Cotton' };
+const CRED_ASSET = { amfori: '/credentials/cert-amfori.webp', vegan: '/credentials/cert-vegan.webp', upf50plus: '/credentials/upf50plus.svg', australian_cotton: '/credentials/australian_cotton.svg' };
 
 // ⚠ 必须与 page.js 的 decoType 逐字一致 → "from $X" 分类 = JSON-LD offer 分类。
 function decoType(product) {
@@ -127,6 +129,11 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
   const matStr = `${(product.material_tags || []).join(' ')} ${product.name || ''}`.toLowerCase();
   const poly = /poly|polyester/.test(matStr);
   const fleece = /fleece/.test(matStr);
+  const credentials = useMemo(() => {
+    const sp = (Array.isArray(product.specs) ? product.specs : []).find((x) => x && x.name === 'Credentials');
+    if (!sp || !sp.value) return [];
+    return String(sp.value).split(',').map((t) => t.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')).filter(Boolean).map((k) => ({ key: k, label: CRED_LABEL[k] || k.replace(/_/g, ' '), src: CRED_ASSET[k] || ('/credentials/' + k + '.svg') }));
+  }, [product.specs]);
   const longSleeve = /long ?sleeve|l\/s|crew(?!.*neck tee)/.test(`${product.name || ''} ${product.subcategory || ''}`.toLowerCase());
 
   const jobPositions = positions.map((p) => ({ method: p.method, colours: p.colours, sizeKey: effSize(p), shade: p.shade }));
@@ -135,8 +142,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
 
   const decoPerUnit = job.poa ? 0 : job.perUnit;
   const decoSetup = job.poa ? 0 : job.setup;
-  const marginX = product.margin || 1.4;
-  const addonPerUnit = FINISHING.reduce((sum, a) => addons[a.key] ? sum + (((a.per_unit_fleece && fleece) ? a.per_unit_fleece : a.per_unit)) : sum, 0) * marginX;
+  const addonPerUnit = FINISHING.reduce((sum, a) => addons[a.key] ? sum + a.per_unit : sum, 0);
   const addonTotal = addonPerUnit * totalQty;
   const exGst = garmentSubtotal + decoPerUnit * totalQty + decoSetup + addonTotal;
   const gstAmt = (exGst + SHIPPING) * GST;
@@ -380,7 +386,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
               <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Add-ons &amp; Extras (optional)</div>
               <div style={{ padding: '14px', background: '#fff', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {FINISHING.map((a) => {
-                  const price = ((a.per_unit_fleece && fleece) ? a.per_unit_fleece : a.per_unit) * marginX;
+                  const price = a.per_unit;
                   return (
                     <label key={a.key} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#1a1a1a', cursor: 'pointer' }}>
                       <input type="checkbox" checked={!!addons[a.key]} onChange={() => toggleAddon(a.key)} />
@@ -483,10 +489,14 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                         </ul>
                       </div>
                     )}
-                    {Array.isArray(product.material_tags) && product.material_tags.length > 0 && (
-                      <div style={{ marginBottom: '12px', padding: '12px 16px', background: '#fff', borderRadius: '8px', border: '1px solid #E0DDD7', borderLeft: `3px solid ${GOLD}` }}>
-                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Material</div>
-                        <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{product.material_tags.join(', ')}</div>
+                    {credentials.length > 0 && (
+                      <div style={{ marginTop: '4px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px' }}>Credentials</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px', alignItems: 'center' }}>
+                          {credentials.map((c) => (
+                            <img key={c.key} src={c.src} alt={c.label} title={c.label} style={{ height: '46px', width: 'auto', objectFit: 'contain' }} />
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -499,7 +509,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                             {product.specs.filter((x) => x && x.name && x.value).map((x, i) => (
                               <tr key={i} style={{ borderBottom: '1px solid #F0EEED' }}>
                                 <td style={{ padding: '9px 12px', fontWeight: 600, color: NAVY, background: '#FAFAF8', verticalAlign: 'top', whiteSpace: 'nowrap' }}>{x.name}</td>
-                                <td style={{ padding: '9px 12px', color: '#1a1a1a', lineHeight: 1.6 }}>{x.value}</td>
+                                <td style={{ padding: '9px 12px', color: '#1a1a1a', lineHeight: 1.6 }}>{x.name === 'Care' ? String(x.value).split(/\.\s+/).map((t) => t.trim().replace(/\.$/, '')).filter(Boolean).map((t, j) => <div key={j} style={{ marginBottom: '2px' }}>{t}</div>) : x.value}</td>
                               </tr>
                             ))}
                           </tbody>
