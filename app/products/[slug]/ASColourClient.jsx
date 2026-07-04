@@ -108,7 +108,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
   const fromPrice = startingUnitPrice(garmentBase, type);
   const garmentUnit = (size) => (sizePricing[size] != null ? Number(sizePricing[size]) : baseSell);
 
-  const [sizeQty, setSizeQty] = useState({});
+  const [sizeQty, setSizeQty] = useState(() => (Array.isArray(sizes) && sizes.length === 1) ? { [sizes[0]]: (product.min_qty || MIN_QTY) } : {});
   const setQtyFor = (size, val) => setSizeQty((p) => ({ ...p, [size]: Math.max(0, parseInt(val, 10) || 0) }));
   const totalQty = sizes.reduce((s, sz) => s + (sizeQty[sz] || 0), 0);
   const garmentSubtotal = sizes.reduce((s, sz) => s + (sizeQty[sz] || 0) * garmentUnit(sz), 0);
@@ -284,7 +284,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
 
           {/* STEP 2 quantity + folded size guide */}
           <div>
-            <div style={{ marginBottom: '12px' }}><StepLabel num={2} text="Enter Quantity per Size *" /></div>
+            <div style={{ marginBottom: '12px' }}><StepLabel num={2} text={sizes.length === 1 ? "Enter Quantity *" : "Enter Quantity per Size *"} /></div>
             {measurements.length > 0 && (
               <button onClick={() => setShowGuide((v) => !v)} style={{ background: 'none', border: 'none', color: GOLD, fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: 0, textDecoration: 'underline', fontFamily: FONT, marginBottom: '10px' }}>
                 {showGuide ? 'Hide size chart ▲' : 'Size chart ▼'}
@@ -313,19 +313,27 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                 </div>
               </div>
             )}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {sizes.map((s) => {
-                const surcharge = sizePricing[s] != null && Number(sizePricing[s]) !== baseSell;
-                return (
-                  <div key={s} style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>{s}</div>
-                    <input type="number" min="0" value={sizeQty[s] || ''} onChange={(e) => setQtyFor(s, e.target.value)} placeholder="0"
-                      style={{ width: '58px', padding: '8px 4px', border: '1.5px solid #C8C4BC', borderRadius: '8px', fontSize: '15px', fontWeight: 600, textAlign: 'center', fontFamily: FONT, outline: 'none', background: '#fff', color: NAVY, boxSizing: 'border-box' }} />
-                    <div style={{ fontSize: '10px', color: surcharge ? '#B45309' : '#000000', marginTop: '3px' }}>{money(garmentUnit(s))}{surcharge ? ' ▲' : ''}</div>
-                  </div>
-                );
-              })}
-            </div>
+            {sizes.length === 1 ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+                <input type="number" min={minQty} value={sizeQty[sizes[0]] || ''} onChange={(e) => setQtyFor(sizes[0], e.target.value)} placeholder={String(minQty)}
+                  style={{ width: '140px', padding: '14px 12px', border: '1.5px solid #C8C4BC', borderRadius: '10px', fontSize: '26px', fontWeight: 700, textAlign: 'center', fontFamily: FONT, outline: 'none', background: '#fff', color: NAVY, boxSizing: 'border-box' }} />
+                <div style={{ fontSize: '13px', color: '#000000', fontWeight: 500 }}>{money(garmentUnit(sizes[0]))} / unit · min {minQty}</div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                {sizes.map((s) => {
+                  const surcharge = sizePricing[s] != null && Number(sizePricing[s]) !== baseSell;
+                  return (
+                    <div key={s} style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 700, color: NAVY, marginBottom: '5px' }}>{s}</div>
+                      <input type="number" min="0" value={sizeQty[s] || ''} onChange={(e) => setQtyFor(s, e.target.value)} placeholder="0"
+                        style={{ width: '68px', padding: '11px 6px', border: '1.5px solid #C8C4BC', borderRadius: '10px', fontSize: '18px', fontWeight: 700, textAlign: 'center', fontFamily: FONT, outline: 'none', background: '#fff', color: NAVY, boxSizing: 'border-box' }} />
+                      <div style={{ fontSize: '11px', color: surcharge ? '#B45309' : '#000000', marginTop: '4px' }}>{money(garmentUnit(s))}{surcharge ? ' ▲' : ''}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
             <div style={{ fontSize: '13px', marginTop: '10px' }}>Total: <strong style={{ color: NAVY }}>{totalQty}</strong> units {totalQty > 0 && !qtyOk && <span style={{ color: '#C0392B' }}>(minimum {minQty})</span>}</div>
           </div>
 
