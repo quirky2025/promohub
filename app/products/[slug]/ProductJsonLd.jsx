@@ -35,7 +35,7 @@ async function resolveCategoryUrl(type, category, subcategory) {
   return { url: absoluteUrl(path), fallback: true };
 }
 
-export default async function ProductJsonLd({ product, images = [], pricingTiers = [] }) {
+export default async function ProductJsonLd({ product, images = [], pricingTiers = [], offerPrice = null }) {
   // Data-quality gate (§D): need a published product with a name and an image.
   if (!product?.name) return null;
   const imgs = (images || []).filter(Boolean);
@@ -54,14 +54,26 @@ export default async function ProductJsonLd({ product, images = [], pricingTiers
     .map((p) => +(p * MARGIN).toFixed(2));
   const lowPrice = prices.length ? Math.min(...prices).toFixed(2) : null;
   const highPrice = prices.length ? Math.max(...prices).toFixed(2) : null;
-  const offerFor = (url) => (prices.length ? {
-    '@type': 'AggregateOffer',
-    priceCurrency: 'AUD',
-    lowPrice,
-    highPrice,
-    offerCount: prices.length,
-    url,
-  } : null);
+  // 计算器产品:用传入的真实起步价发单价 Offer(与 PDP "from $X" 同源)
+  const overrideOffer = (Number.isFinite(offerPrice) && offerPrice > 0)
+    ? Number(offerPrice).toFixed(2) : null;
+  const offerFor = (url) => {
+    if (overrideOffer) return {
+      '@type': 'Offer',
+      priceCurrency: 'AUD',
+      price: overrideOffer,
+      availability: 'https://schema.org/InStock',
+      url,
+    };
+    return prices.length ? {
+      '@type': 'AggregateOffer',
+      priceCurrency: 'AUD',
+      lowPrice,
+      highPrice,
+      offerCount: prices.length,
+      url,
+    } : null;
+  };
 
   // ── base Product fields (shared by Product and ProductGroup) ──
   const base = {

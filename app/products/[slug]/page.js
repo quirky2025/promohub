@@ -1,6 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import ProductClient from './ProductClient';
+import ASColourClient from './ASColourClient';
 import ProductJsonLd from './ProductJsonLd';
+import { startingUnitPrice } from '@/lib/decorationPricing';
 import { COLOUR_SWATCH } from '@/lib/colourSwatch';
 import { colourSlug } from '@/lib/colourName';
 import { absoluteUrl } from '@/lib/siteUrl';
@@ -11,6 +13,21 @@ const supabase = createClient(
 );
 
 const BRAND = 'QuirkyPromo';
+
+// 平铺画廊 + 主图取第0位:PromoBrands / AS Colour(及后续所有走计算器的服装品牌,如 Gildan)
+const FLAT_GALLERY_SUPPLIERS = ['PromoBrands', 'AS Colour'];
+function useFlatGallery(product) {
+  return FLAT_GALLERY_SUPPLIERS.includes(product?.supplier) || product?.decoration_model === 'calculator';
+}
+
+// 计算器产品的印刷类型(决定可用印刷方式 → 起步价)。默认 apparel。
+// ⚠ 必须与 ASColourClient.jsx 的 decoType 逐字一致 → "from $X" 分类 = JSON-LD offer 分类。
+function decoType(product) {
+  const s = `${product?.category || ''} ${product?.subcategory || ''}`.toLowerCase();
+  if (/\b(hat|cap|beanie|headwear|visor)\b/.test(s)) return 'hats';
+  if (/\b(bag|tote|backpack|pouch|satchel|duffle)\b/.test(s)) return 'bags';
+  return 'apparel';
+}
 
 // Append the brand once, never twice (SEO Rulebook §6 title format).
 function withBrand(title) {
@@ -151,7 +168,7 @@ export default async function ProductPage({ params, searchParams }) {
     ? (Array.isArray(imageSource.images) ? imageSource.images : Object.values(imageSource.images))
     : [];
 
-  const sortedImages = product.supplier === 'PromoBrands'
+  const sortedImages = useFlatGallery(product)
     ? [...rawImages]
     : [...rawImages].sort((a, b) => extractImgNum(a) - extractImgNum(b));
 
@@ -172,7 +189,7 @@ export default async function ProductPage({ params, searchParams }) {
 
   // 色块系产品(所有颜色都自带或都无图,不吃图池)→ 图池整体让位给主图轮播
   const poolUsed = colours.some(c => c.image && colourImages.includes(c.image));
-  const finalExtras = product.supplier === 'PromoBrands'
+  const finalExtras = useFlatGallery(product)
     ? sortedImages.slice(1)
     : (poolUsed ? extraImages : sortedImages.slice(1));
 
@@ -187,23 +204,45 @@ export default async function ProductPage({ params, searchParams }) {
     if (i >= 0) initialColourIndex = i;
   }
 
+  // calculator 产品:JSON-LD offer 价 = 真实起步价(衣服×1.4 + 最便宜印刷),
+  // 不是空白衣服价 —— 与 PDP "from $X" 同一个 startingUnitPrice(),页面价=结构化价。
+  const isCalc = product.decoration_model === 'calculator';
+  let offerPrice = null;
+  if (isCalc) {
+    const bases = pricingTiers.map(t => Number(t.base_price)).filter(n => Number.isFinite(n) && n > 0);
+    const garmentBase = bases.length ? Math.min(...bases) : 0;
+    offerPrice = startingUnitPrice(garmentBase, decoType(product));
+  }
+
   return (
     <>
       <ProductJsonLd
         product={product}
         images={[mainImage, ...finalExtras]}
         pricingTiers={pricingTiers}
+        offerPrice={offerPrice}
       />
-      <ProductClient
-        product={product}
-        mainImage={mainImage}
-        extraImages={finalExtras}
-        colours={colours}
-        pricingTiers={pricingTiers}
-        decorations={decorations}
-        secondaryColours={product.secondary_colours || null}
-        initialColourIndex={initialColourIndex}
-      />
+      {isCalc ? (
+        <ASColourClient
+          product={product}
+          mainImage={mainImage}
+          extraImages={finalExtras}
+          colours={colours}
+          pricingTiers={pricingTiers}
+          initialColourIndex={initialColourIndex}
+        />
+      ) : (
+        <ProductClient
+          product={product}
+          mainImage={mainImage}
+          extraImages={finalExtras}
+          colours={colours}
+          pricingTiers={pricingTiers}
+          decorations={decorations}
+          secondaryColours={product.secondary_colours || null}
+          initialColourIndex={initialColourIndex}
+        />
+      )}
     </>
   );
 }
