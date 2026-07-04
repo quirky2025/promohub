@@ -18,20 +18,34 @@ function SearchResults() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!q.trim()) return;
+    const term = q.trim();
+    if (!term) return;
     setLoading(true);
-    supabase
-      .from('products')
-      .select(`id, name, slug, supplier_sku, category, subcategory, min_qty, is_published,
+
+    const SEL = `id, name, slug, supplier_sku, category, subcategory, min_qty, is_published,
         product_colours(id, name, hex, images, sort_order),
-        pricing_tiers(base_price)`)
-      .eq('is_published', true)
-      .or(`name.ilike.%${q}%,supplier_sku.ilike.%${q}%,category.ilike.%${q}%,subcategory.ilike.%${q}%,description.ilike.%${q}%`)
-      .limit(48)
-      .then(({ data }) => {
-        setResults(data || []);
-        setLoading(false);
-      });
+        pricing_tiers(base_price)`;
+    const esc = term.replace(/[%,]/g, ' ');   // 防止 ilike 通配/or 分隔符注入
+    const base = () => supabase.from('products').select(SEL).eq('is_published', true);
+
+    Promise.all([
+      // ① 款号完全匹配(最高优先)
+      base().ilike('supplier_sku', esc).limit(48),
+      // ② 款号前缀匹配(如 5001 → 5001A / 5001Y)
+      base().ilike('supplier_sku', `${esc}%`).limit(48),
+      // ③ 文字匹配(名称/类目/描述)
+      base().or(`name.ilike.%${esc}%,category.ilike.%${esc}%,subcategory.ilike.%${esc}%,description.ilike.%${esc}%`).limit(48),
+    ]).then(([exact, prefix, text]) => {
+      const seen = new Set();
+      const merged = [];
+      for (const group of [exact.data, prefix.data, text.data]) {
+        for (const pr of (group || [])) {
+          if (!seen.has(pr.id)) { seen.add(pr.id); merged.push(pr); }
+        }
+      }
+      setResults(merged.slice(0, 48));
+      setLoading(false);
+    });
   }, [q]);
 
   function getImage(product) {
