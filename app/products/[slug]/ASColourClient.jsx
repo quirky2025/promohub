@@ -16,7 +16,7 @@ import { colourImageAlt } from '@/lib/colourName';
 import { getColourHex } from '@/lib/colourSwatch';
 import { getASHex } from '@/lib/ascolourSwatch';
 import { GST, SHIPPING } from '@/lib/pricing';
-import { quoteJob, quoteDecoration, methodsFor, startingUnitPrice, isDarkHex, MIN_QTY } from '@/lib/decorationPricing';
+import { quoteJob, quoteDecoration, methodsFor, startingUnitPrice, isDarkHex, FINISHING, MIN_QTY } from '@/lib/decorationPricing';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -44,7 +44,7 @@ const POSITION_OPTIONS = {
 
 const SIZE_OPTS = {
   dtf: [['small', 'Small ~12×12cm'], ['medium', 'Medium ~28×20cm'], ['large', 'Large ~28×28cm'], ['xlarge', 'XL ~35×40cm']],
-  dtg: [['A4', 'A4 ~21×30cm'], ['35x40', '35×40cm'], ['40x50', '40×50cm']],
+  dtg: [['A4', 'Small ~21×30cm'], ['35x40', 'Medium ~35×40cm'], ['40x50', 'Large ~40×50cm']],
   embroidery: [['small', 'Small ≤12×12cm'], ['medium', 'Medium 12–20cm (POA)']],
 };
 const needsSize = (m) => ['dtf', 'dtg', 'embroidery'].includes(m);
@@ -54,7 +54,7 @@ const TABS = ['Description', 'Sample Policy', 'Mockups & Artwork', 'Shipping & D
 const COLLAPSE_AT = 40;
 
 const money = (n) => `$${(Math.round(n * 100) / 100).toFixed(2)}`;
-const aud = (n) => '$' + (Math.round(n * 100) / 100).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const aud = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function ASColourClient({ product, mainImage, extraImages = [], colours = [], pricingTiers = [], initialColourIndex = null }) {
   const type = decoType(product);
@@ -69,6 +69,8 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
   const [cartOpen, setCartOpen] = useState(false);
   const [added, setAdded] = useState(false);
   const [specialty, setSpecialty] = useState(false);
+  const [addons, setAddons] = useState({});
+  const toggleAddon = (k) => setAddons((a) => ({ ...a, [k]: !a[k] }));
 
   const bigImage = selectedColour !== null
     ? (colours[selectedColour]?.image || bottomImages[0] || mainImage)
@@ -133,10 +135,13 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
 
   const decoPerUnit = job.poa ? 0 : job.perUnit;
   const decoSetup = job.poa ? 0 : job.setup;
-  const exGst = garmentSubtotal + decoPerUnit * totalQty + decoSetup;
+  const marginX = product.margin || 1.4;
+  const addonPerUnit = FINISHING.reduce((sum, a) => addons[a.key] ? sum + (((a.per_unit_fleece && fleece) ? a.per_unit_fleece : a.per_unit)) : sum, 0) * marginX;
+  const addonTotal = addonPerUnit * totalQty;
+  const exGst = garmentSubtotal + decoPerUnit * totalQty + decoSetup + addonTotal;
   const gstAmt = (exGst + SHIPPING) * GST;
   const grand = exGst + SHIPPING + gstAmt;
-  const blendedUnit = totalQty > 0 ? (garmentSubtotal + decoPerUnit * totalQty) / totalQty : (baseSell + decoPerUnit);
+  const blendedUnit = totalQty > 0 ? (garmentSubtotal + (decoPerUnit + addonPerUnit) * totalQty) / totalQty : (baseSell + decoPerUnit + addonPerUnit);
 
   const canAdd = qtyOk && !job.poa && selectedColour !== null && positions.length >= 1;
   const isValidQty = totalQty > 0;
@@ -150,7 +155,8 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
   function handleAdd() {
     if (!canAdd) return;
     const sizeBreakdown = Object.fromEntries(sizes.filter((s) => (sizeQty[s] || 0) > 0).map((s) => [s, sizeQty[s]]));
-    const decoName = positions.map(posLabel).join(' · ');
+    const finishingNames = FINISHING.filter((a) => addons[a.key]).map((a) => a.label);
+    const decoName = positions.map(posLabel).join(' · ') + (finishingNames.length ? ' + ' + finishingNames.join(', ') : '');
     const item = {
       productId: product.id, productName: product.name, productSlug: product.slug, sku: product.supplier_sku,
       image: bigImage || mainImage,
@@ -176,7 +182,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
       {/* breadcrumb */}
       <div className="qp-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px' }}>
-          <Link href="/catalog" style={{ color: '#7A7570', textDecoration: 'none' }}>Catalog</Link>
+          <Link href="/catalog" style={{ color: '#1a1a1a', textDecoration: 'none' }}>Catalog</Link>
           <span style={{ color: '#C8C4BC', margin: '0 8px' }}>/</span>
           <span style={{ color: NAVY }}>{product.name}</span>
         </div>
@@ -214,10 +220,10 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
             {fromPrice != null && (
               <div style={{ fontSize: '15px', color: NAVY, fontWeight: 700, margin: '6px 0 0' }}>
                 From <span style={{ color: GOLD, fontSize: '22px' }}>{money(fromPrice)}</span>
-                <span style={{ fontWeight: 400, fontSize: '12px', color: '#7A7570' }}> / unit decorated (ex GST)</span>
+                <span style={{ fontWeight: 400, fontSize: '12px', color: '#1a1a1a' }}> / unit decorated (ex GST)</span>
               </div>
             )}
-            <div style={{ fontSize: '12px', color: '#7A7570', marginTop: '4px' }}>Blank garments are not sold — every order includes your logo.</div>
+            <div style={{ fontSize: '12px', color: '#1a1a1a', marginTop: '4px' }}>Blank garments are not sold — every order includes your logo.</div>
             {product.short_desc && <p style={{ fontSize: '14px', lineHeight: 1.7, margin: '12px 0 0' }}>{product.short_desc}</p>}
           </div>
 
@@ -287,7 +293,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                     <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>{s}</div>
                     <input type="number" min="0" value={sizeQty[s] || ''} onChange={(e) => setQtyFor(s, e.target.value)} placeholder="0"
                       style={{ width: '58px', padding: '8px 4px', border: '1.5px solid #C8C4BC', borderRadius: '8px', fontSize: '15px', fontWeight: 600, textAlign: 'center', fontFamily: FONT, outline: 'none', background: '#fff', color: NAVY, boxSizing: 'border-box' }} />
-                    <div style={{ fontSize: '10px', color: surcharge ? '#B45309' : '#7A7570', marginTop: '3px' }}>{money(garmentUnit(s))}{surcharge ? ' ▲' : ''}</div>
+                    <div style={{ fontSize: '10px', color: surcharge ? '#B45309' : '#1a1a1a', marginTop: '3px' }}>{money(garmentUnit(s))}{surcharge ? ' ▲' : ''}</div>
                   </div>
                 );
               })}
@@ -300,7 +306,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
             <div style={{ marginBottom: '12px' }}><StepLabel num={3} text="Add Branding Options *" /></div>
             <div style={{ border: '1px solid #E0DDD7', borderRadius: '12px', overflow: 'hidden' }}>
               <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Branding &amp; Decoration</div>
-              <div style={{ padding: '14px', background: '#FBFAF8', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ padding: '14px', background: '#fff', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {positions.map((p, i) => {
                   const rowQuote = quoteDecoration({ method: p.method, colours: p.colours, positions: 1, qty: totalQty || minQty, shade: p.shade, sizeKey: effSize(p), dark, poly });
                   return (
@@ -323,6 +329,11 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                             </select>
                           </Field>
                         )}
+                        {p.method === 'screen_print' && (
+                          <Field label="Print size">
+                            <div style={{ padding: '8px 10px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', fontFamily: FONT, background: '#F4F2EE', color: '#1a1a1a', minWidth: '130px' }}>Up to 35×45cm</div>
+                          </Field>
+                        )}
                         {p.method === 'dtg' && (
                           <Field label="Garment shade">
                             <select value={p.shade} onChange={(e) => updatePosition(i, { shade: e.target.value })} style={selStyle}>
@@ -342,7 +353,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                           <button onClick={() => removePosition(i)} aria-label="Remove position" style={{ marginLeft: 'auto', background: 'none', border: '1.5px solid #E0DDD7', color: '#C0392B', borderRadius: '8px', width: '34px', height: '34px', cursor: 'pointer', fontSize: '16px' }}>×</button>
                         )}
                       </div>
-                      <div style={{ fontSize: '11px', color: rowQuote.poa ? '#C0392B' : '#7A7570', marginTop: '8px' }}>
+                      <div style={{ fontSize: '11px', color: rowQuote.poa ? '#C0392B' : '#1a1a1a', marginTop: '8px' }}>
                         {rowQuote.poa ? 'This size = request a quote' : `≈ ${money(rowQuote.perUnit)}/unit · setup ${money(rowQuote.setup)}`}
                       </div>
                     </div>
@@ -353,12 +364,34 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                     + Add a print position
                   </button>
                 )}
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#555', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#1a1a1a', cursor: 'pointer' }}>
                   <input type="checkbox" checked={specialty} onChange={(e) => setSpecialty(e.target.checked)} />
                   Puff / metallic / specialty ink (price on application)
                 </label>
                 {dark && !specialty && <div style={{ fontSize: '11px', color: '#B45309' }}>Dark garment — screen print dark-base surcharge (+$1.00/print) applied.</div>}
-                <div style={{ fontSize: '11px', color: '#7A7570' }}>Screen print area up to 35×45cm (adult tee; smaller for kids). Oversize / all-over / wrap-around = request a quote.</div>
+                <div style={{ fontSize: '11px', color: '#1a1a1a' }}>Screen print area up to 35×45cm (adult tee; smaller for kids). Oversize / all-over / wrap-around = request a quote.</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Add-ons & Extras (finishing, D 组) */}
+          <div>
+            <div style={{ border: '1px solid #E0DDD7', borderRadius: '12px', overflow: 'hidden' }}>
+              <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Add-ons &amp; Extras (optional)</div>
+              <div style={{ padding: '14px', background: '#fff', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {FINISHING.map((a) => {
+                  const price = ((a.per_unit_fleece && fleece) ? a.per_unit_fleece : a.per_unit) * marginX;
+                  return (
+                    <label key={a.key} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#1a1a1a', cursor: 'pointer' }}>
+                      <input type="checkbox" checked={!!addons[a.key]} onChange={() => toggleAddon(a.key)} />
+                      <span style={{ flex: 1 }}>{a.label}</span>
+                      <span style={{ color: NAVY, fontWeight: 600 }}>+{money(price)}/unit</span>
+                    </label>
+                  );
+                })}
+                <div style={{ fontSize: '11px', color: '#1a1a1a', borderTop: '1px solid #F0EEED', paddingTop: '8px', marginTop: '2px' }}>
+                  Need re-labelling or neck-tag printing? Those start at 100 units and vary by label type — <Link href="/contact" style={{ color: GOLD, fontWeight: 600 }}>request a quote</Link>.
+                </div>
               </div>
             </div>
           </div>
@@ -387,6 +420,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
               <PriceRow label="Garments" value={aud(garmentSubtotal)} />
               <PriceRow label="Decoration" value={aud(decoPerUnit * totalQty)} />
               <PriceRow label="Setup (one-off)" value={aud(decoSetup)} />
+              {addonTotal > 0 && <PriceRow label="Finishing" value={aud(addonTotal)} />}
               <PriceRow label="Shipping & Handling" value={`$${SHIPPING.toFixed(2)}`} />
               <PriceRow label="GST (10%)" value={aud(gstAmt)} />
               <PriceRow label="Total (incl. GST)" value={aud(grand)} bold />
@@ -457,15 +491,15 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                     )}
                   </div>
                   <div>
-                    {product.specs && typeof product.specs === 'object' && !Array.isArray(product.specs) && Object.keys(product.specs).length > 0 && (
+                    {Array.isArray(product.specs) && product.specs.filter((x) => x && x.name && x.value).length > 0 && (
                       <div style={{ border: '1px solid #E0DDD7', borderRadius: '8px', overflow: 'hidden' }}>
-                        <div style={{ background: NAVY, padding: '9px 12px', fontSize: '12px', fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Product Specs</div>
+                        <div style={{ background: NAVY, padding: '9px 12px', fontSize: '12px', fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Product Details</div>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                           <tbody>
-                            {Object.entries(product.specs).map(([k, v]) => (
-                              <tr key={k} style={{ borderBottom: '1px solid #F0EEED' }}>
-                                <td style={{ padding: '9px 12px', fontWeight: 600, color: NAVY, background: '#FAFAF8', textTransform: 'capitalize' }}>{k.replace(/_/g, ' ')}</td>
-                                <td style={{ padding: '9px 12px', color: '#1a1a1a' }}>{String(v)}</td>
+                            {product.specs.filter((x) => x && x.name && x.value).map((x, i) => (
+                              <tr key={i} style={{ borderBottom: '1px solid #F0EEED' }}>
+                                <td style={{ padding: '9px 12px', fontWeight: 600, color: NAVY, background: '#FAFAF8', verticalAlign: 'top', whiteSpace: 'nowrap' }}>{x.name}</td>
+                                <td style={{ padding: '9px 12px', color: '#1a1a1a', lineHeight: 1.6 }}>{x.value}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -541,7 +575,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                       ))}
                     </tbody>
                   </table>
-                  <p style={{ margin: '10px 0 0', fontSize: '12px', color: '#7A7570' }}>Production lead time is quoted per order after artwork approval. Delivery times are estimates only.</p>
+                  <p style={{ margin: '10px 0 0', fontSize: '12px', color: '#1a1a1a' }}>Production lead time is quoted per order after artwork approval. Delivery times are estimates only.</p>
                 </div>
               )}
 
@@ -583,7 +617,7 @@ function StepLabel({ num, text }) {
 function Field({ label, children }) {
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-      <span style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
+      <span style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
       {children}
     </label>
   );
@@ -591,9 +625,9 @@ function Field({ label, children }) {
 
 function PriceRow({ label, value, bold }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: bold ? '8px 0 0' : '3px 0', marginTop: bold ? '6px' : 0, borderTop: bold ? '1px solid rgba(255,255,255,.12)' : 'none', fontSize: bold ? '17px' : '13px', fontWeight: bold ? 700 : 400, color: bold ? GOLD : 'rgba(255,255,255,.85)' }}>
-      <span>{label}</span>
-      <span style={{ fontFamily: '"DM Mono", monospace' }}>{value}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontWeight: bold ? 700 : 400, marginBottom: '8px', marginTop: bold ? '2px' : 0, paddingTop: bold ? '12px' : 0, borderTop: bold ? '1px solid rgba(255,255,255,.18)' : 'none', fontFamily: '"DM Sans", sans-serif' }}>
+      <span style={{ color: '#fff', fontSize: bold ? '15px' : '13px' }}>{label}</span>
+      <span style={{ color: bold ? GOLD : '#fff', fontFamily: bold ? '"DM Mono", monospace' : 'inherit', fontSize: bold ? '30px' : '13px', fontWeight: bold ? 700 : 400, lineHeight: 1 }}>{value}</span>
     </div>
   );
 }
