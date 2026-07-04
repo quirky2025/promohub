@@ -69,6 +69,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
   const [activeTab, setActiveTab] = useState('Description');
   const [showGuide, setShowGuide] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [quoteOpen, setQuoteOpen] = useState(false);
   const [added, setAdded] = useState(false);
   const [specialty, setSpecialty] = useState(false);
   const [addons, setAddons] = useState({});
@@ -148,6 +149,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
   const gstAmt = (exGst + SHIPPING) * GST;
   const grand = exGst + SHIPPING + gstAmt;
   const blendedUnit = totalQty > 0 ? (garmentSubtotal + (decoPerUnit + addonPerUnit) * totalQty) / totalQty : (baseSell + decoPerUnit + addonPerUnit);
+  const quoteSelection = (selectedColour !== null && colours[selectedColour] ? colours[selectedColour].name + ' \u00b7 ' : '') + 'Qty ' + (totalQty || minQty) + (positions.length ? ' \u00b7 ' + positions.map(posLabel).join(' \u00b7 ') : '') + (FINISHING.filter((a) => addons[a.key]).length ? ' \u00b7 Add-ons: ' + FINISHING.filter((a) => addons[a.key]).map((a) => a.label).join(', ') : '');
 
   const canAdd = qtyOk && !job.poa && selectedColour !== null && positions.length >= 1;
   const isValidQty = totalQty > 0;
@@ -184,11 +186,11 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
   const selName = selectedColour !== null ? colours[selectedColour]?.name : '';
 
   return (
-    <div style={{ fontFamily: FONT, background: '#fff', color: '#1a1a1a' }}>
+    <div style={{ fontFamily: FONT, background: '#fff', color: '#000000' }}>
       {/* breadcrumb */}
       <div className="qp-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px' }}>
-          <Link href="/catalog" style={{ color: '#1a1a1a', textDecoration: 'none' }}>Catalog</Link>
+          <Link href="/catalog" style={{ color: '#000000', textDecoration: 'none' }}>Catalog</Link>
           <span style={{ color: '#C8C4BC', margin: '0 8px' }}>/</span>
           <span style={{ color: NAVY }}>{product.name}</span>
         </div>
@@ -221,15 +223,15 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: 700, letterSpacing: '0.5px', marginBottom: '8px', background: '#EFF6FF', color: '#1E40AF', border: '1px solid #93C5FD' }}>
               SOLD PRINTED ONLY · MIN {minQty}
             </div>
-            <div style={{ fontSize: '12px', color: '#1a1a1a', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku} · {product.brand}</div>
+            <div style={{ fontSize: '12px', color: '#000000', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku} · {product.brand}</div>
             <h1 className="qp-pdp-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.name}</h1>
             {fromPrice != null && (
               <div style={{ fontSize: '15px', color: NAVY, fontWeight: 700, margin: '6px 0 0' }}>
                 From <span style={{ color: GOLD, fontSize: '22px' }}>{money(fromPrice)}</span>
-                <span style={{ fontWeight: 400, fontSize: '12px', color: '#1a1a1a' }}> / unit decorated (ex GST)</span>
+                <span style={{ fontWeight: 400, fontSize: '12px', color: '#000000' }}> / unit decorated (ex GST)</span>
               </div>
             )}
-            <div style={{ fontSize: '12px', color: '#1a1a1a', marginTop: '4px' }}>Blank garments are not sold — every order includes your logo.</div>
+            <div style={{ fontSize: '12px', color: '#000000', marginTop: '4px' }}>Blank garments are not sold — every order includes your logo.</div>
             {product.short_desc && <p style={{ fontSize: '14px', lineHeight: 1.7, margin: '12px 0 0' }}>{product.short_desc}</p>}
           </div>
 
@@ -299,7 +301,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                     <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>{s}</div>
                     <input type="number" min="0" value={sizeQty[s] || ''} onChange={(e) => setQtyFor(s, e.target.value)} placeholder="0"
                       style={{ width: '58px', padding: '8px 4px', border: '1.5px solid #C8C4BC', borderRadius: '8px', fontSize: '15px', fontWeight: 600, textAlign: 'center', fontFamily: FONT, outline: 'none', background: '#fff', color: NAVY, boxSizing: 'border-box' }} />
-                    <div style={{ fontSize: '10px', color: surcharge ? '#B45309' : '#1a1a1a', marginTop: '3px' }}>{money(garmentUnit(s))}{surcharge ? ' ▲' : ''}</div>
+                    <div style={{ fontSize: '10px', color: surcharge ? '#B45309' : '#000000', marginTop: '3px' }}>{money(garmentUnit(s))}{surcharge ? ' ▲' : ''}</div>
                   </div>
                 );
               })}
@@ -337,7 +339,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                         )}
                         {p.method === 'screen_print' && (
                           <Field label="Print size">
-                            <div style={{ padding: '8px 10px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', fontFamily: FONT, background: '#F4F2EE', color: '#1a1a1a', minWidth: '130px' }}>Up to 35×45cm</div>
+                            <div style={{ padding: '8px 10px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', fontFamily: FONT, background: '#F4F2EE', color: '#000000', minWidth: '130px' }}>Up to 35×45cm</div>
                           </Field>
                         )}
                         {p.method === 'dtg' && (
@@ -359,7 +361,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                           <button onClick={() => removePosition(i)} aria-label="Remove position" style={{ marginLeft: 'auto', background: 'none', border: '1.5px solid #E0DDD7', color: '#C0392B', borderRadius: '8px', width: '34px', height: '34px', cursor: 'pointer', fontSize: '16px' }}>×</button>
                         )}
                       </div>
-                      <div style={{ fontSize: '11px', color: rowQuote.poa ? '#C0392B' : '#1a1a1a', marginTop: '8px' }}>
+                      <div style={{ fontSize: '11px', color: rowQuote.poa ? '#C0392B' : '#000000', marginTop: '8px' }}>
                         {rowQuote.poa ? 'This size = request a quote' : `≈ ${money(rowQuote.perUnit)}/unit · setup ${money(rowQuote.setup)}`}
                       </div>
                     </div>
@@ -370,33 +372,38 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                     + Add a print position
                   </button>
                 )}
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#1a1a1a', cursor: 'pointer' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: '#000000', cursor: 'pointer' }}>
                   <input type="checkbox" checked={specialty} onChange={(e) => setSpecialty(e.target.checked)} />
                   Puff / metallic / specialty ink (price on application)
                 </label>
                 {dark && !specialty && <div style={{ fontSize: '11px', color: '#B45309' }}>Dark garment — screen print dark-base surcharge (+$1.00/print) applied.</div>}
-                <div style={{ fontSize: '11px', color: '#1a1a1a' }}>Screen print area up to 35×45cm (adult tee; smaller for kids). Oversize / all-over / wrap-around = request a quote.</div>
+                <div style={{ fontSize: '11px', color: '#000000' }}>Screen print area up to 35×45cm (adult tee; smaller for kids). Oversize / all-over / wrap-around = request a quote.</div>
               </div>
             </div>
           </div>
 
-          {/* Add-ons & Extras (finishing, D 组) */}
+          {/* STEP 4: Add-on Options(finishing D 组)— 原版 toggle 样式 */}
           <div>
+            <div style={{ marginBottom: '12px' }}><StepLabel num={4} text="Select Add-on Options" /></div>
             <div style={{ border: '1px solid #E0DDD7', borderRadius: '12px', overflow: 'hidden' }}>
-              <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Add-ons &amp; Extras (optional)</div>
-              <div style={{ padding: '14px', background: '#fff', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Add-ons &amp; Extras</div>
+              <div style={{ background: '#fff' }}>
                 {FINISHING.map((a) => {
-                  const price = a.per_unit;
+                  const on = !!addons[a.key];
                   return (
-                    <label key={a.key} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: '#1a1a1a', cursor: 'pointer' }}>
-                      <input type="checkbox" checked={!!addons[a.key]} onChange={() => toggleAddon(a.key)} />
-                      <span style={{ flex: 1 }}>{a.label}</span>
-                      <span style={{ color: NAVY, fontWeight: 600 }}>+{money(price)}/unit</span>
-                    </label>
+                    <div key={a.key} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 14px', borderBottom: '1px solid #F0EEED' }}>
+                      <label style={{ position: 'relative', width: '44px', height: '24px', cursor: 'pointer', display: 'inline-block', flexShrink: 0 }}>
+                        <input type="checkbox" checked={on} onChange={() => toggleAddon(a.key)} style={{ opacity: 0, width: 0, height: 0, position: 'absolute' }} />
+                        <span style={{ position: 'absolute', inset: 0, background: on ? GOLD : '#C8C4BC', borderRadius: '12px', transition: 'background .2s' }} />
+                        <span style={{ position: 'absolute', top: '3px', left: on ? '23px' : '3px', width: '18px', height: '18px', background: '#fff', borderRadius: '50%', transition: 'left .2s', boxShadow: '0 1px 3px rgba(0,0,0,.2)' }} />
+                      </label>
+                      <span style={{ flex: 1, fontSize: '13px', fontWeight: 500, color: NAVY }}>{a.label}</span>
+                      <span style={{ fontSize: '13px', color: NAVY, fontWeight: 600 }}>+{money(a.per_unit)}/unit</span>
+                    </div>
                   );
                 })}
-                <div style={{ fontSize: '11px', color: '#1a1a1a', borderTop: '1px solid #F0EEED', paddingTop: '8px', marginTop: '2px' }}>
-                  Need re-labelling or neck-tag printing? Those start at 100 units and vary by label type — <Link href="/contact" style={{ color: GOLD, fontWeight: 600 }}>request a quote</Link>.
+                <div style={{ fontSize: '11px', color: '#000000', padding: '10px 14px' }}>
+                  Need re-labelling or neck-tag printing? Those start at 100 units and vary by label type — <button onClick={() => setQuoteOpen(true)} style={{ background: 'none', border: 'none', color: GOLD, fontWeight: 600, cursor: 'pointer', padding: 0, font: 'inherit', textDecoration: 'underline' }}>request a quote</button>.
                 </div>
               </div>
             </div>
@@ -444,9 +451,9 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
             style={{ width: '100%', background: canAdd ? GOLD : '#C8C4BC', color: '#fff', border: 'none', borderRadius: '12px', padding: '18px', fontSize: '18px', fontWeight: 700, cursor: canAdd ? 'pointer' : 'not-allowed', fontFamily: FONT, boxShadow: canAdd ? '0 4px 16px rgba(201,169,110,.4)' : 'none' }}>
             {added ? '✅ Added to Cart!' : !isValidQty ? 'Enter quantity to see pricing' : (colours.length > 0 && selectedColour === null) ? 'Choose a colour to continue' : job.poa ? 'Request a quote for pricing' : `Add to Cart  —  ${aud(grand)} incl. GST`}
           </button>
-          <Link href="/contact" style={{ width: '100%', boxSizing: 'border-box', background: NAVY, color: '#fff', border: 'none', borderRadius: '12px', padding: '16px', fontSize: '16px', fontWeight: 700, cursor: 'pointer', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', textDecoration: 'none' }}>
+          <button onClick={() => setQuoteOpen(true)} style={{ width: '100%', boxSizing: 'border-box', background: NAVY, color: '#fff', border: 'none', borderRadius: '12px', padding: '16px', fontSize: '16px', fontWeight: 700, cursor: 'pointer', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
             <span style={{ fontSize: '18px' }}>💬</span> Get a Quote / Ask a Question
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -463,7 +470,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
               <div key={b.title} style={{ background: '#fff', border: `1.5px solid ${GOLD}40`, borderRadius: '12px', padding: '16px 10px', textAlign: 'center', borderTop: `3px solid ${GOLD}` }}>
                 <div style={{ fontSize: '26px', marginBottom: '8px' }}>{b.icon}</div>
                 <div style={{ fontSize: '13px', color: NAVY, fontWeight: 700, marginBottom: '4px' }}>{b.title}</div>
-                <div style={{ fontSize: '11px', color: '#1a1a1a', lineHeight: 1.4 }}>{b.sub}</div>
+                <div style={{ fontSize: '11px', color: '#000000', lineHeight: 1.4 }}>{b.sub}</div>
               </div>
             ))}
           </div>
@@ -477,7 +484,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                 </button>
               ))}
             </div>
-            <div style={{ padding: '24px', fontSize: '14px', lineHeight: 1.8, color: '#1a1a1a' }}>
+            <div style={{ padding: '24px', fontSize: '14px', lineHeight: 1.8, color: '#000000' }}>
               {activeTab === 'Description' && (
                 <div className="qp-desc-3col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '32px', alignItems: 'start' }}>
                   <div>
@@ -491,7 +498,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                     )}
                     {credentials.length > 0 && (
                       <div style={{ marginTop: '4px' }}>
-                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px' }}>Credentials</div>
+                        <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 12px' }}>Credentials</h3>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px', alignItems: 'center' }}>
                           {credentials.map((c) => (
                             <img key={c.key} src={c.src} alt={c.label} title={c.label} style={{ height: '46px', width: 'auto', objectFit: 'contain' }} />
@@ -509,7 +516,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                             {product.specs.filter((x) => x && x.name && x.value).map((x, i) => (
                               <tr key={i} style={{ borderBottom: '1px solid #F0EEED' }}>
                                 <td style={{ padding: '9px 12px', fontWeight: 600, color: NAVY, background: '#FAFAF8', verticalAlign: 'top', whiteSpace: 'nowrap' }}>{x.name}</td>
-                                <td style={{ padding: '9px 12px', color: '#1a1a1a', lineHeight: 1.6 }}>{x.name === 'Care' ? String(x.value).split(/\.\s+/).map((t) => t.trim().replace(/\.$/, '')).filter(Boolean).map((t, j) => <div key={j} style={{ marginBottom: '2px' }}>{t}</div>) : x.value}</td>
+                                <td style={{ padding: '9px 12px', color: '#000000', lineHeight: 1.6 }}>{x.name === 'Care' ? String(x.value).split(/\.\s+/).map((t) => t.trim().replace(/\.$/, '')).filter(Boolean).map((t, j) => <div key={j} style={{ marginBottom: '2px' }}>{t}</div>) : x.value}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -585,7 +592,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                       ))}
                     </tbody>
                   </table>
-                  <p style={{ margin: '10px 0 0', fontSize: '12px', color: '#1a1a1a' }}>Production lead time is quoted per order after artwork approval. Delivery times are estimates only.</p>
+                  <p style={{ margin: '10px 0 0', fontSize: '12px', color: '#000000' }}>Production lead time is quoted per order after artwork approval. Delivery times are estimates only.</p>
                 </div>
               )}
 
@@ -597,7 +604,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                       <div key={i} style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '10px', padding: '16px', borderTop: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '24px', marginBottom: '8px' }}>{icon}</div>
                         <div style={{ fontSize: '13px', fontWeight: 700, color: NAVY, marginBottom: '6px' }}>{i + 1}. {title}</div>
-                        <div style={{ fontSize: '12px', color: '#1a1a1a', lineHeight: 1.5 }}>{desc}</div>
+                        <div style={{ fontSize: '12px', color: '#000000', lineHeight: 1.5 }}>{desc}</div>
                       </div>
                     ))}
                   </div>
@@ -608,6 +615,9 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
         </div>
       </div>
 
+      {quoteOpen && (
+        <ASQuoteModal product={product} selection={quoteSelection} colourName={selectedColour !== null ? (colours[selectedColour] && colours[selectedColour].name) : ''} qty={totalQty || minQty} unitPrice={blendedUnit} subtotal={exGst} shipping={SHIPPING} gst={gstAmt} total={grand} onClose={() => setQuoteOpen(false)} />
+      )}
       <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
     </div>
   );
@@ -627,7 +637,7 @@ function StepLabel({ num, text }) {
 function Field({ label, children }) {
   return (
     <label style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-      <span style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
+      <span style={{ fontSize: '11px', fontWeight: 700, color: '#000000', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</span>
       {children}
     </label>
   );
@@ -638,6 +648,97 @@ function PriceRow({ label, value, bold }) {
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontWeight: bold ? 700 : 400, marginBottom: '8px', marginTop: bold ? '2px' : 0, paddingTop: bold ? '12px' : 0, borderTop: bold ? '1px solid rgba(255,255,255,.18)' : 'none', fontFamily: '"DM Sans", sans-serif' }}>
       <span style={{ color: '#fff', fontSize: bold ? '15px' : '13px' }}>{label}</span>
       <span style={{ color: bold ? GOLD : '#fff', fontFamily: bold ? '"DM Mono", monospace' : 'inherit', fontSize: bold ? '30px' : '13px', fontWeight: bold ? 700 : 400, lineHeight: 1 }}>{value}</span>
+    </div>
+  );
+}
+
+
+function SectionHead({ num, text }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+      <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: GOLD, color: '#fff', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{num}</div>
+      <div style={{ fontSize: '13px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{text}</div>
+    </div>
+  );
+}
+
+function ASQuoteModal({ product, selection, colourName, qty, unitPrice, subtotal, shipping, gst, total, onClose }) {
+  const STATES = ['ACT', 'NSW', 'NT', 'QLD', 'SA', 'TAS', 'VIC', 'WA'];
+  const [form, setForm] = useState({ qty: String(qty || ''), name: '', company: '', email: '', phone: '', street: '', street2: '', suburb: '', state: '', postcode: '', requiredDate: '', notes: '' });
+  const [status, setStatus] = useState('idle');
+  const ch = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+  const canSubmit = form.name && form.email;
+  async function submit() {
+    if (!canSubmit) return;
+    setStatus('sending');
+    const deliveryAddress = [form.street, form.street2, form.suburb, form.state, form.postcode, 'Australia'].filter(Boolean).join(', ');
+    const requiredDate = form.requiredDate ? new Date(form.requiredDate + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    try {
+      const res = await fetch('/api/quote', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: form.name, company: form.company, email: form.email, phone: form.phone, requiredDate, deliveryAddress, notes: form.notes, colour: colourName || '', brandingSummary: selection, productName: product.name, productSku: product.supplier_sku, unitPrice, subtotal, shipping, gst, total, qty: parseInt(form.qty, 10) || qty }),
+      });
+      setStatus(res.ok ? 'success' : 'error');
+    } catch (e) { setStatus('error'); }
+  }
+  const inputStyle = { width: '100%', padding: '10px 14px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', fontFamily: FONT, color: '#000', outline: 'none', boxSizing: 'border-box', background: '#fff' };
+  const labelStyle = { fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '6px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.08em' };
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(27,42,74,0.6)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <div style={{ background: '#fff', borderRadius: '20px', width: '100%', maxWidth: '580px', maxHeight: '92vh', overflowY: 'auto', boxShadow: '0 24px 64px rgba(27,42,74,0.3)' }}>
+        <div style={{ padding: '22px 28px 16px', borderBottom: '1px solid #E0DDD7', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'sticky', top: 0, background: '#fff', zIndex: 10 }}>
+          <div>
+            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '26px', fontWeight: 600, color: NAVY, margin: '0 0 3px' }}>Get a Quote</h2>
+            <p style={{ fontSize: '13px', color: '#000', margin: 0 }}>{product.name}</p>
+          </div>
+          <button onClick={onClose} aria-label="Close" style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#000', lineHeight: 1 }}>×</button>
+        </div>
+        <div style={{ padding: '20px 28px 28px', fontFamily: FONT }}>
+          {status === 'success' ? (
+            <div style={{ textAlign: 'center', padding: '30px 0' }}>
+              <div style={{ fontSize: '40px', marginBottom: '10px' }}>✅</div>
+              <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 8px' }}>Quote request sent</h3>
+              <p style={{ fontSize: '14px', color: '#000' }}>Thanks {(form.name || '').split(' ')[0]} — our team will get back to you shortly.</p>
+              <button onClick={onClose} style={{ marginTop: '16px', background: NAVY, color: '#fff', border: 'none', borderRadius: '10px', padding: '12px 24px', fontSize: '14px', fontWeight: 700, cursor: 'pointer', fontFamily: FONT }}>Close</button>
+            </div>
+          ) : (
+            <>
+              <SectionHead num={1} text="Your Selection" />
+              <div style={{ border: '1px solid #E0DDD7', borderRadius: '12px', padding: '14px 16px', marginBottom: '20px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: NAVY, marginBottom: '8px' }}>{product.name}</div>
+                <div style={{ fontSize: '13px', color: '#000', lineHeight: 1.6 }}>{selection}</div>
+                {total > 0 && <div style={{ fontSize: '12px', color: '#000', marginTop: '6px' }}>Est. {money(unitPrice)}/unit · total {aud(total)} incl GST</div>}
+                <label style={{ ...labelStyle, marginTop: '12px' }}>Quantity *</label>
+                <input name="qty" type="number" min="1" value={form.qty} onChange={ch} style={inputStyle} />
+                <div style={{ fontSize: '12px', color: '#000', marginTop: '8px' }}>Colour, sizes and decoration follow your selection on the product page. Note any changes below.</div>
+              </div>
+              <SectionHead num={2} text="Your Details" />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '20px' }}>
+                <div><label style={labelStyle}>Your name *</label><input name="name" value={form.name} onChange={ch} placeholder="Jane Smith" style={inputStyle} /></div>
+                <div><label style={labelStyle}>Company</label><input name="company" value={form.company} onChange={ch} placeholder="Acme Corp" style={inputStyle} /></div>
+                <div><label style={labelStyle}>Email *</label><input name="email" type="email" value={form.email} onChange={ch} placeholder="jane@company.com" style={inputStyle} /></div>
+                <div><label style={labelStyle}>Phone</label><input name="phone" value={form.phone} onChange={ch} placeholder="04xx xxx xxx" style={{ ...inputStyle, fontFamily: '"DM Mono", monospace' }} /></div>
+              </div>
+              <SectionHead num={3} text="Delivery Address" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
+                <input name="street" value={form.street} onChange={ch} placeholder="Address Line 1 (e.g. 123 George Street)" style={inputStyle} />
+                <input name="street2" value={form.street2} onChange={ch} placeholder="Address Line 2 (Suite, Level, Unit — optional)" style={inputStyle} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <input name="suburb" value={form.suburb} onChange={ch} placeholder="Suburb" style={inputStyle} />
+                  <select name="state" value={form.state} onChange={ch} style={inputStyle}><option value="">State / Territory</option>{STATES.map((st) => <option key={st} value={st}>{st}</option>)}</select>
+                </div>
+                <input name="postcode" value={form.postcode} onChange={ch} placeholder="Postcode" style={{ ...inputStyle, maxWidth: '180px' }} />
+              </div>
+              <SectionHead num={4} text="More From You" />
+              <div style={{ marginBottom: '12px' }}><label style={labelStyle}>Required date</label><input name="requiredDate" type="date" value={form.requiredDate} onChange={ch} style={inputStyle} /></div>
+              <div style={{ marginBottom: '14px' }}><label style={labelStyle}>Notes</label><textarea name="notes" value={form.notes} onChange={ch} rows={3} placeholder="Anything else we should know?" style={{ ...inputStyle, resize: 'vertical' }} /></div>
+              <div style={{ fontSize: '12px', color: '#000', marginBottom: '16px' }}>Email your logo / artwork to <strong>hello@quirkypromo.com.au</strong> after submitting.</div>
+              {status === 'error' && <div style={{ fontSize: '13px', color: '#C0392B', marginBottom: '12px' }}>Something went wrong. Please try again or email us directly.</div>}
+              <button onClick={submit} disabled={!canSubmit || status === 'sending'} style={{ width: '100%', background: canSubmit ? GOLD : '#C8C4BC', color: '#fff', border: 'none', borderRadius: '12px', padding: '16px', fontSize: '16px', fontWeight: 700, cursor: canSubmit ? 'pointer' : 'not-allowed', fontFamily: FONT }}>{status === 'sending' ? 'Sending…' : 'Submit Quote Request'}</button>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
