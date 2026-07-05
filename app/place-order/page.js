@@ -279,8 +279,8 @@ export default function PlaceOrderPage() {
     clearCart();
     await triggerArtwork({
       orderNumber,
-      customerName: customer.name,
-      customerEmail: customer.email,
+      customerName: form.name,
+      customerEmail: form.email,
       paymentMethod: 'stripe',
       uploadedLogoUrl: logoUrl,
       uploadedLogoPngUrl: logoPngUrl,
