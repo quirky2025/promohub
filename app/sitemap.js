@@ -47,21 +47,13 @@ function dateOrNow(value) {
   return date && !Number.isNaN(date.valueOf()) ? date : new Date();
 }
 
-function hasNonEmptyImages(images) {
-  if (!images) return false;
-  try {
-    const arr = Array.isArray(images)
-      ? images
-      : typeof images === 'string'
-        ? JSON.parse(images)
-        : Object.values(images);
-    return Array.isArray(arr) && arr.length > 0;
-  } catch {
-    return false;
-  }
-}
-
 // PostgREST caps each request at 1000 rows; page through to get all products.
+// IMPORTANT: keep this select lightweight (slug, name only). Embedding
+// product_colours(images) bloats each row so much that a full 1000-row page can
+// exceed PostgREST's response-size cap and come back short — the loop then sees
+// "< PAGE" and stops early, silently dropping every product later in the sort
+// order (this is what hid all the AS Colour "womens-*" URLs). Order by the unique
+// id so range() pagination is stable.
 async function fetchAllProducts() {
   const PAGE = 1000;
   let from = 0;
@@ -69,9 +61,9 @@ async function fetchAllProducts() {
   for (;;) {
     const { data, error } = await supabase
       .from('products')
-      .select('id, slug, name, product_colours(images)')
+      .select('slug, name')
       .eq('is_published', true)
-      .order('slug', { ascending: true })
+      .order('id', { ascending: true })
       .range(from, from + PAGE - 1);
     if (error) {
       console.error('[sitemap] product page fetch failed', error);
@@ -106,7 +98,9 @@ export default async function sitemap() {
     priority: pagePriority(page),
   }));
 
-  // products: published + name + slug + has image; canonical /products/[slug].
+  // products: published + non-empty slug + non-empty name; canonical /products/[slug].
+  // No image gate: every published product currently has imagery, and the old
+  // gate required a heavy product_colours join that broke pagination (see above).
   // products has no reliable updated_at, so we omit lastModified (no fake dates).
   const productRows = await fetchAllProducts();
   const seen = new Set();
@@ -115,9 +109,6 @@ export default async function sitemap() {
     const slug = (p.slug || '').trim();
     const name = (p.name || '').trim();
     if (!slug || !name) continue;
-    const hasImage = Array.isArray(p.product_colours)
-      && p.product_colours.some((pc) => hasNonEmptyImages(pc.images));
-    if (!hasImage) continue;
     if (seen.has(slug)) continue;
     seen.add(slug);
     productEntries.push({
