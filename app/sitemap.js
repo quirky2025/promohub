@@ -1,7 +1,10 @@
 import { supabase } from '@/lib/supabase';
 import { absoluteUrl } from '@/lib/siteUrl';
 
-export const dynamic = 'force-dynamic';
+// ISR:每小时最多重新生成一次,平时走缓存。
+// 之前用 force-dynamic 每次请求都现查 ~5000 产品,导致生成极慢、
+// Google 抓取超时只拿到旧副本(GSC 卡在 2,827)。改缓存后又快又能反映新品。
+export const revalidate = 3600;
 
 const STATIC_ROUTES = [
   '/',
