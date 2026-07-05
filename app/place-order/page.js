@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { cld } from '@/lib/cloudinary';
+import { uploadImage } from '@/lib/imageHost';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getCart, clearCart, removeFromCart } from '@/lib/cart';
@@ -95,6 +96,7 @@ export default function PlaceOrderPage() {
   const [submitting, setSubmitting] = useState(false);
   const [logoFile, setLogoFile] = useState(null);
   const [logoUrl, setLogoUrl] = useState('');
+  const [logoPngUrl, setLogoPngUrl] = useState('');
   const [logoUploading, setLogoUploading] = useState(false);
   const [error, setError] = useState('');
   const [clientSecret, setClientSecret] = useState('');
@@ -138,29 +140,23 @@ export default function PlaceOrderPage() {
   };
 
   // EFT submit
-  // Upload logo to Cloudinary
+  // Upload logo via our own converter (lib/imageHost) — handles vector files
+  // (AI/EPS/PDF/SVG), stores the original + a PNG preview on R2. Same path as the
+  // /upload customer link. Returns { logo_url, logo_png_url } or null.
   async function uploadLogo(file) {
     if (!file) return null;
     setLogoUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET);
-      const res = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
-        { method: 'POST', body: formData }
-      );
-      const data = await res.json();
+      const up = await uploadImage(file, null, 'logo');
+      if (!up || !up.logo_url) return null;
+      return up; // { logo_url, logo_png_url }
+    } finally {
       setLogoUploading(false);
-      return data.secure_url;
-    } catch {
-      setLogoUploading(false);
-      return null;
     }
   }
 
   // Trigger artwork mockup after order placed
-  async function triggerArtwork({ orderNumber, customerName, customerEmail, paymentMethod, uploadedLogoUrl, savedCartItems }) {
+  async function triggerArtwork({ orderNumber, customerName, customerEmail, paymentMethod, uploadedLogoUrl, uploadedLogoPngUrl, savedCartItems }) {
     const cartItems = savedCartItems || getCart();
     const firstItem = cartItems[0];
     if (!firstItem) {
@@ -168,6 +164,7 @@ export default function PlaceOrderPage() {
     }
 
     const logoToUse = uploadedLogoUrl || logoUrl;
+    const logoPngToUse = uploadedLogoPngUrl || logoPngUrl;
 
     if (logoToUse) {
       // Logo available - generate mockup automatically
@@ -181,6 +178,7 @@ export default function PlaceOrderPage() {
           productName: firstItem.productName,
           productImageUrl: firstItem.image || '',
           logoUrl: logoToUse,
+          logoPngUrl: logoPngToUse,
           paymentMethod,
           colour: firstItem.colour || '',
           qty: firstItem.qty,
@@ -209,9 +207,15 @@ export default function PlaceOrderPage() {
     try {
       // Upload logo first if file selected
       let uploadedLogoUrl = logoUrl;
+      let uploadedLogoPngUrl = logoPngUrl;
       if (logoFile && !logoUrl) {
-        uploadedLogoUrl = await uploadLogo(logoFile);
-        if (uploadedLogoUrl) setLogoUrl(uploadedLogoUrl);
+        const up = await uploadLogo(logoFile);
+        if (up) {
+          uploadedLogoUrl = up.logo_url;
+          uploadedLogoPngUrl = up.logo_png_url || '';
+          setLogoUrl(up.logo_url);
+          setLogoPngUrl(up.logo_png_url || '');
+        }
       }
       const { data: { session: _os2 } } = await supabase.auth.getSession();
       const res = await fetch('/api/order', {
@@ -231,6 +235,7 @@ export default function PlaceOrderPage() {
           customerEmail: form.email,
           paymentMethod: 'eft',
           uploadedLogoUrl: uploadedLogoUrl,
+          uploadedLogoPngUrl: uploadedLogoPngUrl,
           savedCartItems: savedItems,
         });
         router.push(`/order-confirmation?order=${data.orderNumber}&method=eft`);
@@ -278,6 +283,7 @@ export default function PlaceOrderPage() {
       customerEmail: customer.email,
       paymentMethod: 'stripe',
       uploadedLogoUrl: logoUrl,
+      uploadedLogoPngUrl: logoPngUrl,
       savedCartItems: savedItems,
     });
     router.push(`/order-confirmation?order=${orderNumber}&method=stripe`);
