@@ -217,7 +217,19 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
       {/* breadcrumb */}
       <div className="qp-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px' }}>
-          <Link href="/catalog" style={{ color: '#000000', textDecoration: 'none' }}>Catalog</Link>
+          <Link href="/" style={{ color: '#000000', textDecoration: 'none' }}>Home</Link>
+          {product.category && (
+            <>
+              <span style={{ color: '#C8C4BC', margin: '0 8px' }}>/</span>
+              <span style={{ color: '#000000' }}>{product.category}</span>
+            </>
+          )}
+          {product.subcategory && (
+            <>
+              <span style={{ color: '#C8C4BC', margin: '0 8px' }}>/</span>
+              <span style={{ color: '#000000' }}>{product.subcategory}</span>
+            </>
+          )}
           <span style={{ color: '#C8C4BC', margin: '0 8px' }}>/</span>
           <span style={{ color: NAVY }}>{product.name}</span>
         </div>
