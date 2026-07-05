@@ -5,8 +5,105 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 
+// ── Legacy 404 handling (301/410 for old URLs; see outputs/REDIRECT_404_FIX_REQUEST.md) ──
+const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPA_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+function gone() {
+  return new NextResponse('Gone — this page has been permanently removed.', {
+    status: 410,
+    headers: { 'content-type': 'text/plain; charset=utf-8' },
+  });
+}
+
+async function supaGet(pathAndQuery) {
+  if (!SUPA_URL || !SUPA_KEY) return null;
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/${pathAndQuery}`, {
+      headers: { apikey: SUPA_KEY, Authorization: `Bearer ${SUPA_KEY}` },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+async function publishedProductSlug(slug) {
+  const rows = await supaGet(
+    `products?slug=eq.${encodeURIComponent(slug)}&is_published=eq.true&select=slug&limit=1`
+  );
+  return Array.isArray(rows) && rows.length > 0 ? rows[0].slug : null;
+}
+
+async function liveCategoryUrl(slug) {
+  const rows = await supaGet(
+    `url_pages?slug=eq.${encodeURIComponent(slug)}&status=eq.live&select=canonical_url&limit=1`
+  );
+  return (Array.isArray(rows) && rows[0] && rows[0].canonical_url) || null;
+}
+
+// C. Exact one-off legacy paths that are permanently gone -> 410.
+//    (NOT /privacy-policy — that's a live legal page, handled elsewhere.)
+const GONE_PATHS = new Set([
+  '/site',
+  '/subscribenewsletter',
+  '/author/quirkyadmin',
+  '/eofy-branded-merchandise-ideas-for-fy26-success',
+]);
+// Old single-segment /products/<slug> that no longer exist -> 410 (real PDPs pass through).
+const GONE_PRODUCT_SLUGS = new Set(['knitwear', 'travel', 't-shirts', 'hi-vis-trade-workwear']);
+
+// Returns a Response to short-circuit legacy 404 URLs, or null to continue normally.
+async function handleLegacy404(pathname, request) {
+  const p = pathname.replace(/\/+$/, '') || '/'; // normalise trailing slash
+
+  // B. Ancient PHP URLs -> 410
+  if (p.startsWith('/promo/') || p.endsWith('.php')) return gone();
+
+  // C. Known one-off legacy paths -> 410
+  if (GONE_PATHS.has(p)) return gone();
+
+  // C. Old /products/<...> URLs (previous site structure). Real single-slug PDPs pass
+  //    through; only old category-style paths (2+ segments) and known delisted single
+  //    slugs are 410'd — so live product pages are never affected.
+  if (p.startsWith('/products/')) {
+    const inner = p.split('/').filter(Boolean).slice(1); // drop 'products'
+    if (inner.length >= 2) return gone();
+    if (inner.length === 1 && GONE_PRODUCT_SLUGS.has(inner[0])) return gone();
+    return NextResponse.next();
+  }
+
+  // A. Deep legacy /category/<...>/<slug> (3+ inner segments; shallow /category/<x>
+  //    and /category/<x>/<y> are left to next.config's existing static redirects).
+  if (pathname.startsWith('/category/')) {
+    const inner = pathname.split('/').filter(Boolean).slice(1); // drop 'category'
+    if (inner.length >= 3) {
+      // 1. last segment = published product -> 301 to PDP
+      const last = inner[inner.length - 1];
+      if (last) {
+        const slug = await publishedProductSlug(last);
+        if (slug) return NextResponse.redirect(new URL(`/products/${slug}`, request.url), 301);
+      }
+      // 2. any segment maps to a live category -> 301 to canonical flat URL
+      for (const seg of inner) {
+        const canonical = await liveCategoryUrl(seg);
+        if (canonical) return NextResponse.redirect(new URL(canonical, request.url), 301);
+      }
+      // 3. nothing matched -> 410
+      return gone();
+    }
+    return NextResponse.next(); // shallow: leave to next.config / normal routing
+  }
+  return null;
+}
+
 export default async function proxy(request) {
   const { pathname } = request.nextUrl;
+
+  // Legacy 404 URLs are handled first and never reach the admin-auth logic below.
+  const legacy = await handleLegacy404(pathname, request);
+  if (legacy) return legacy;
 
   let response = NextResponse.next({ request });
 
@@ -76,5 +173,15 @@ export default async function proxy(request) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  matcher: [
+    '/admin/:path*',
+    '/api/admin/:path*',
+    '/category/:path*',
+    '/promo/:path*',
+    '/products/:path*',
+    '/site',
+    '/subscribenewsletter',
+    '/author/:path*',
+    '/eofy-branded-merchandise-ideas-for-fy26-success',
+  ],
 };
