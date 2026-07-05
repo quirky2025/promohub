@@ -13,7 +13,7 @@ export const FAQ_SECTIONS = [
 <ul>
 <li><strong>Add to cart &amp; pay online</strong> — check out and pay by card straight away.</li>
 <li><strong>Add to cart &amp; pay later (EFT)</strong> — place the order now and pay by bank transfer.</li>
-<li><strong><a href="/quote">Get a Quote</a></strong> — tell us your product, quantity and logo placement; we reply the same business day.</li>
+<li><strong><a href="#quote" data-quote>Get a Quote</a></strong> — tell us your product, quantity and logo placement; we reply the same business day.</li>
 <li><strong>Call us</strong> — order over the phone on <a href="tel:0294774748">02 9477 4748</a>.</li>
 <li><strong>Email us</strong> — send your details to <a href="mailto:hello@quirkypromo.com.au">hello@quirkypromo.com.au</a>.</li>
 </ul>
@@ -29,7 +29,7 @@ export const FAQ_SECTIONS = [
       },
       {
         q: 'How do I upload my logo, and what file formats do you accept?',
-        a: `<p>You can upload your logo on the product page or attach it to your <a href="/quote">quote request</a>. Vector files (AI, EPS, PDF, SVG) give the sharpest print result. A high-resolution PNG also works — our team will check your file and let you know if we need anything better.</p>`,
+        a: `<p>You can upload your logo on the product page or attach it to your <a href="#quote" data-quote>quote request</a>. Vector files (AI, EPS, PDF, SVG) give the sharpest print result. A high-resolution PNG also works — our team will check your file and let you know if we need anything better.</p>`,
       },
       {
         q: `What's the difference between vector and PNG files — which prints best?`,
@@ -69,7 +69,7 @@ export const FAQ_SECTIONS = [
       },
       {
         q: 'How do I get a quote?',
-        a: `<p>Hit <a href="/quote">Get a Quote</a> on any product (or the button in the menu), tell us your quantity and where you want your logo, and we'll come back to you the same business day.</p>`,
+        a: `<p>Hit <a href="#quote" data-quote>Get a Quote</a> on any product (or the button in the menu), tell us your quantity and where you want your logo, and we'll come back to you the same business day.</p>`,
       },
       {
         q: 'What payment methods do you accept?',
@@ -87,7 +87,7 @@ export const FAQ_SECTIONS = [
       },
       {
         q: 'Do you offer rush or fast turnaround?',
-        a: `<p>Yes — rush production is available on many products, but timing depends on the specific product and decoration, so it's not one-size-fits-all. Tell us your deadline when you <a href="/quote">enquire</a> and our team will confirm what's achievable; we'll lock it in when you place your order.</p>`,
+        a: `<p>Yes — rush production is available on many products, but timing depends on the specific product and decoration, so it's not one-size-fits-all. Tell us your deadline when you <a href="#quote" data-quote>enquire</a> and our team will confirm what's achievable; we'll lock it in when you place your order.</p>`,
       },
       {
         q: 'Can you match my exact brand colour (PMS)?',

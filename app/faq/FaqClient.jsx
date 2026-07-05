@@ -2,12 +2,13 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import QuoteModal from '@/components/QuoteModal';
 import { FAQ_SECTIONS } from './faqData';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 
-function FAQItem({ q, a }) {
+function FAQItem({ q, a, onQuoteClick }) {
   const [open, setOpen] = useState(false);
   return (
     <div style={{ borderBottom: '1px solid #F0EEED' }}>
@@ -22,6 +23,7 @@ function FAQItem({ q, a }) {
         <div
           className="faq-answer"
           style={{ paddingBottom: '18px', paddingRight: '32px' }}
+          onClick={onQuoteClick}
           dangerouslySetInnerHTML={{ __html: a }}
         />
       )}
@@ -31,6 +33,13 @@ function FAQItem({ q, a }) {
 
 export default function FaqClient() {
   const [activeCategory, setActiveCategory] = useState(null);
+  const [quoteOpen, setQuoteOpen] = useState(false);
+
+  // "Get a Quote" links inside answer HTML (data-quote) open the same modal as the nav.
+  const handleQuoteClick = (e) => {
+    const link = e.target.closest('a[data-quote]');
+    if (link) { e.preventDefault(); setQuoteOpen(true); }
+  };
 
   const displayed = activeCategory
     ? FAQ_SECTIONS.filter(f => f.category === activeCategory)
@@ -70,9 +79,9 @@ export default function FaqClient() {
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <span style={{ color: 'rgba(255,255,255,.5)', fontSize: '14px' }}>Can't find your answer?</span>
-            <a href="mailto:hello@quirkypromo.com.au" style={{ background: GOLD, color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
+            <Link href="/contact" style={{ background: GOLD, color: '#fff', padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
               Contact Us →
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -125,7 +134,7 @@ export default function FaqClient() {
               </div>
               <div style={{ background: '#fff', borderRadius: '12px', padding: '0 24px', border: '1px solid #E0DDD7' }}>
                 {section.questions.map((item, i) => (
-                  <FAQItem key={i} q={item.q} a={item.a} />
+                  <FAQItem key={i} q={item.q} a={item.a} onQuoteClick={handleQuoteClick} />
                 ))}
               </div>
             </div>
@@ -146,6 +155,8 @@ export default function FaqClient() {
           </div>
         </div>
       </div>
+
+      <QuoteModal open={quoteOpen} onClose={() => setQuoteOpen(false)} source="faq" />
     </div>
   );
 }
