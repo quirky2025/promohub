@@ -122,7 +122,7 @@ export default function QuoteModal({ open, onClose, source = 'homepage' }) {
               Quote Request Received!
             </h3>
             <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.7, margin: '0 0 24px' }}>
-              Thanks {form.name.split(' ')[0]} — our team will get back to you within 1 business hour with pricing and options.
+              Thanks {form.name.split(' ')[0]} — our team will get back to you within 3 business hours with pricing and options.
             </p>
             <button onClick={handleClose}
               style={{ background: GOLD, color: '#fff', border: 'none', padding: '12px 32px', borderRadius: '10px', fontSize: '15px', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
@@ -135,7 +135,7 @@ export default function QuoteModal({ open, onClose, source = 'homepage' }) {
               Get a Quote
             </h3>
             <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 24px', lineHeight: 1.6 }}>
-              Tell us what you need — we reply within 1 business hour.
+              Tell us what you need — we reply within 3 business hours.
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>

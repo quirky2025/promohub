@@ -122,12 +122,12 @@ const WHY_US = [
   {
     icon: '🖥️',
     title: 'Quote & Order Online',
-    desc: 'Get an instant quote and order online, anytime. Free digital mockup within 2 hours, with full specs and options laid out before you commit.',
+    desc: 'Get an instant quote and order online, anytime. Free digital mockup as soon as we can, with full specs and options laid out before you commit.',
   },
   {
     icon: '⚡',
     title: 'Responsive & Reliable',
-    desc: 'We reply within 1 hour. Standard production 7–10 business days with rush options. Trusted by Mazda, Netflix, NSW Government and more.',
+    desc: 'We reply within 3 business hours. Standard production 7–10 business days with rush options. Trusted by Mazda, Netflix, NSW Government and more.',
   },
   {
     icon: '🌱',

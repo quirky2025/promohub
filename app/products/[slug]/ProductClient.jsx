@@ -1218,7 +1218,7 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
 
             {/* Reply line */}
             <p style={{ textAlign: 'center', fontSize: '14px', fontWeight: 600, color: '#1B2A4A', fontFamily: '"DM Sans", sans-serif', margin: 0 }}>
-              We'll reply within 1 hour · 📞 02 9477 4748
+              We'll reply within 3 business hours · 📞 02 9477 4748
             </p>
 
           </div>

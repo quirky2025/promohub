@@ -120,7 +120,7 @@ export default function ContactPage() {
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
               <h3 style={{ fontFamily: '"Cormorant Garamond", Georgia, serif', fontSize: '28px', color: NAVY, marginBottom: '12px' }}>Message Sent!</h3>
               <p style={{ color: '#7A7570', fontSize: '15px', lineHeight: 1.7 }}>
-                Thank you for reaching out. We'll get back to you within 1 business day.
+                Thank you for reaching out. We'll get back to you within 3 business hours.
               </p>
               <button onClick={() => setSent(false)}
                 style={{ marginTop: '24px', background: 'none', border: `1.5px solid ${GOLD}`, color: GOLD, padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif' }}>

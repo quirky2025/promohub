@@ -65,7 +65,7 @@ export async function POST(req) {
 
       const customerHtml = quirkyEmail(`
           <p style="font-size:15px;margin:0 0 16px;">Hi ${esc(name)},</p>
-          <p style="font-size:15px;color:#1a1a1a;line-height:1.6;margin:0 0 16px;">Thank you so much for reaching out — your enquiry has landed safely with us and we're already on it. One of our team will be in touch very soon (usually within the hour during business hours) with some ideas and pricing tailored to what you need.</p>
+          <p style="font-size:15px;color:#1a1a1a;line-height:1.6;margin:0 0 16px;">Thank you so much for reaching out — your enquiry has landed safely with us and we're already on it. One of our team will be in touch very soon (usually within 3 business hours) with some ideas and pricing tailored to what you need.</p>
           <p style="font-size:11px;color:#7A7570;text-transform:uppercase;letter-spacing:0.06em;margin:0 0 6px;">Your enquiry</p>
           <div style="border-left:3px solid #C9A96E;padding:2px 0 2px 14px;margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-style:italic;color:#1a1a1a;font-size:14px;line-height:1.6;white-space:pre-wrap;">${esc(message)}</div>
           <p style="font-size:15px;color:#1a1a1a;line-height:1.6;margin:0 0 4px;">In the meantime, if you'd like to chat sooner just call us on <strong>02 9477 4748</strong> or simply reply to this email — we'd love to help make your promotion a success.</p>`);

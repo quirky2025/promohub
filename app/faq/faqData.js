@@ -13,7 +13,7 @@ export const FAQ_SECTIONS = [
 <ul>
 <li><strong>Add to cart &amp; pay online</strong> — check out and pay by card straight away.</li>
 <li><strong>Add to cart &amp; pay later (EFT)</strong> — place the order now and pay by bank transfer.</li>
-<li><strong><a href="#quote" data-quote>Get a Quote</a></strong> — tell us your product, quantity and logo placement; we reply the same business day.</li>
+<li><strong><a href="#quote" data-quote>Get a Quote</a></strong> — tell us your product, quantity and logo placement; we reply within 3 business hours.</li>
 <li><strong>Call us</strong> — order over the phone on <a href="tel:0294774748">02 9477 4748</a>.</li>
 <li><strong>Email us</strong> — send your details to <a href="mailto:hello@quirkypromo.com.au">hello@quirkypromo.com.au</a>.</li>
 </ul>
@@ -69,7 +69,7 @@ export const FAQ_SECTIONS = [
       },
       {
         q: 'How do I get a quote?',
-        a: `<p>Hit <a href="#quote" data-quote>Get a Quote</a> on any product (or the button in the menu), tell us your quantity and where you want your logo, and we'll come back to you the same business day.</p>`,
+        a: `<p>Hit <a href="#quote" data-quote>Get a Quote</a> on any product (or the button in the menu), tell us your quantity and where you want your logo, and we'll come back to you within 3 business hours.</p>`,
       },
       {
         q: 'What payment methods do you accept?',
