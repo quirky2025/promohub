@@ -56,6 +56,15 @@ function dateOrNow(value) {
 // id so range() pagination is stable.
 async function fetchAllProducts() {
   const PAGE = 1000;
+
+  // Expected total first, so the self-check at the end can detect silent
+  // truncation (the exact failure that once hid ~1,900 product URLs).
+  const { count: expected, error: countError } = await supabase
+    .from('products')
+    .select('id', { count: 'exact', head: true })
+    .eq('is_published', true);
+  if (countError) console.error('[sitemap] published count failed', countError);
+
   let from = 0;
   const all = [];
   for (;;) {
@@ -74,6 +83,17 @@ async function fetchAllProducts() {
     if (data.length < PAGE) break;
     from += PAGE;
   }
+
+  // Self-check: if we fetched materially fewer than the DB says exist, the
+  // pagination truncated. Shout in the logs instead of silently shipping a
+  // short sitemap that would de-index the missing product pages.
+  if (typeof expected === 'number' && all.length < expected) {
+    console.error(
+      `[sitemap] TRUNCATED — fetched ${all.length} of ${expected} published ` +
+      `products; missing ${expected - all.length} product URLs. Investigate pagination.`
+    );
+  }
+
   return all;
 }
 
