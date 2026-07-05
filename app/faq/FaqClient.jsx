@@ -114,7 +114,7 @@ export default function FaqClient() {
             <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff', marginBottom: '8px', fontFamily: '"Cormorant Garamond", serif' }}>Still need help?</div>
             <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.6)', margin: '0 0 14px', lineHeight: 1.6 }}>Our team replies the same business day.</p>
             <a href="mailto:hello@quirkypromo.com.au" style={{ display: 'block', background: GOLD, color: '#fff', textAlign: 'center', padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, textDecoration: 'none', marginBottom: '8px' }}>
-              📧 Email Us
+              📧 hello@quirkypromo.com.au
             </a>
             <a href="tel:0294774748" style={{ display: 'block', background: 'rgba(255,255,255,.1)', color: '#fff', textAlign: 'center', padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>
               📞 02 9477 4748
