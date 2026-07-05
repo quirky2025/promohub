@@ -210,7 +210,7 @@ export default function CartPage() {
                 { icon: '🎨', text: 'Free digital proof' },
                 { icon: '🚚', text: '$30 flat shipping' },
                 { icon: '✅', text: 'Quality guarantee' },
-                { icon: '💬', text: 'Reply within 1hr' },
+                { icon: '💬', text: 'Reply within 3 business hours' },
               ].map(b => (
                 <div key={b.text} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#5A5550', fontFamily: '"DM Sans", sans-serif' }}>
                   <span>{b.icon}</span><span>{b.text}</span>

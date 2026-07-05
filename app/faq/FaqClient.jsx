@@ -112,7 +112,7 @@ export default function FaqClient() {
           {/* CONTACT CARD */}
           <div style={{ marginTop: '20px', background: NAVY, borderRadius: '12px', padding: '20px' }}>
             <div style={{ fontSize: '15px', fontWeight: 700, color: '#fff', marginBottom: '8px', fontFamily: '"Cormorant Garamond", serif' }}>Still need help?</div>
-            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.6)', margin: '0 0 14px', lineHeight: 1.6 }}>Our team replies the same business day.</p>
+            <p style={{ fontSize: '13px', color: 'rgba(255,255,255,.6)', margin: '0 0 14px', lineHeight: 1.6 }}>Our team replies within 3 business hours.</p>
             <a href="mailto:hello@quirkypromo.com.au" style={{ display: 'block', background: GOLD, color: '#fff', textAlign: 'center', padding: '10px', borderRadius: '8px', fontSize: '13px', fontWeight: 600, textDecoration: 'none', marginBottom: '8px' }}>
               📧 hello@quirkypromo.com.au
             </a>

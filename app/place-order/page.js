@@ -343,7 +343,7 @@ export default function PlaceOrderPage() {
                 </div>
                 <div style={{ background: '#fff', padding: '16px 20px' }}>
                   <div style={{ fontSize: '13px', color: '#000', fontFamily: '"DM Sans", sans-serif', lineHeight: 1.7 }}>
-                    After placing your order, we'll send you a <strong>free digital proof</strong> for approval. Production only begins after you approve the artwork.
+                    After placing your order, we'll send you a <strong>free digital proof</strong> as soon as we can. Production only begins after you approve the artwork.
                   </div>
                 </div>
               </div>
