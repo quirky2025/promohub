@@ -2,6 +2,7 @@ import './globals.css';
 import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import { SITE_URL } from '@/lib/siteUrl';
+import GoogleAnalytics from '@/components/GoogleAnalytics';
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
@@ -32,6 +33,7 @@ export default function RootLayout({ children }) {
         WebkitFontSmoothing: 'antialiased',
         MozOsxFontSmoothing: 'grayscale',
       }}>
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
         <Nav />
         {children}
         <Footer />
