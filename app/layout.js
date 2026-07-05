@@ -33,7 +33,7 @@ export default function RootLayout({ children }) {
         WebkitFontSmoothing: 'antialiased',
         MozOsxFontSmoothing: 'grayscale',
       }}>
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || 'G-06J4WRFMLY'} />
         <Nav />
         {children}
         <Footer />
