@@ -25,6 +25,13 @@ const FONT = '"DM Sans", sans-serif';
 const LABEL_TO_KEY = { 'Screen Print': 'screen_print', 'DTG': 'dtg', 'DTF': 'dtf', 'Embroidery': 'embroidery' };
 const CRED_LABEL = { amfori: 'amfori', vegan: 'Vegan', upf50plus: 'UPF 50+', australian_cotton: 'Australian Cotton' };
 const CRED_ASSET = { amfori: '/credentials/cert-amfori.webp', vegan: '/credentials/cert-vegan.webp', upf50plus: '/credentials/upf50plus.svg', australian_cotton: '/credentials/australian_cotton.svg' };
+// Gildan Brands (Gildan / Comfort Colors / American Apparel) — same 4 brand-level certs, fixed by supplier.
+const GILDAN_CREDS = [
+  { src: '/credentials/standard100.png', alt: 'OEKO-TEX Standard 100' },
+  { src: '/credentials/wrap.png', alt: 'WRAP Certified' },
+  { src: '/credentials/sedex.png', alt: 'Sedex Member' },
+  { src: '/credentials/fairlabor.png', alt: 'Fair Labor Association' },
+];
 
 // ⚠ 必须与 page.js 的 decoType 逐字一致 → "from $X" 分类 = JSON-LD offer 分类。
 function decoType(product) {
@@ -210,7 +217,19 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
       {/* breadcrumb */}
       <div className="qp-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px' }}>
-          <Link href="/catalog" style={{ color: '#000000', textDecoration: 'none' }}>Catalog</Link>
+          <Link href="/" style={{ color: '#000000', textDecoration: 'none' }}>Home</Link>
+          {product.category && (
+            <>
+              <span style={{ color: '#C8C4BC', margin: '0 8px' }}>/</span>
+              <span style={{ color: '#000000' }}>{product.category}</span>
+            </>
+          )}
+          {product.subcategory && (
+            <>
+              <span style={{ color: '#C8C4BC', margin: '0 8px' }}>/</span>
+              <span style={{ color: '#000000' }}>{product.subcategory}</span>
+            </>
+          )}
           <span style={{ color: '#C8C4BC', margin: '0 8px' }}>/</span>
           <span style={{ color: NAVY }}>{product.name}</span>
         </div>
@@ -251,7 +270,6 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                 <span style={{ fontWeight: 400, fontSize: '12px', color: '#000000' }}> / unit decorated (ex GST)</span>
               </div>
             )}
-            <div style={{ fontSize: '12px', color: '#000000', marginTop: '4px' }}>Blank garments are not sold — every order includes your logo.</div>
             {product.seo_description && <p style={{ fontSize: '14px', lineHeight: 1.7, margin: '12px 0 0' }}>{product.seo_description}</p>}
           </div>
 
@@ -538,6 +556,16 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                         </div>
                       </div>
                     )}
+                    {product.supplier === 'Gildan Brands' && (
+                      <div style={{ marginTop: '4px' }}>
+                        <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 12px' }}>Credentials</h3>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '18px', alignItems: 'center' }}>
+                          {GILDAN_CREDS.map((c) => (
+                            <img key={c.src} src={c.src} alt={c.alt} title={c.alt} style={{ height: '46px', width: 'auto', objectFit: 'contain' }} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   <div>
                     {Array.isArray(product.specs) && product.specs.filter((x) => x && x.name && x.value && x.name !== 'Credentials').length > 0 && (
@@ -559,6 +587,30 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                         </table>
                       </div>
                     )}
+                    {product.supplier === 'Gildan Brands' && product.specs && !Array.isArray(product.specs) && (() => {
+                      const s = product.specs;
+                      const material = [s.composition, s.weight_gsm ? `${s.weight_gsm} GSM` : ''].filter(Boolean).join(' · ');
+                      const rows = [['Material', material], ['Fit', s.fit], ['Care', s.care]].filter(([, v]) => v && String(v).trim());
+                      return (
+                        <div style={{ border: '1px solid #E0DDD7', borderRadius: '8px', overflow: 'hidden' }}>
+                          <div style={{ background: NAVY, padding: '9px 12px', fontSize: '12px', fontWeight: 700, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Product Details</div>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
+                            <tbody>
+                              {rows.map(([k, v], i) => (
+                                <tr key={i} style={{ borderBottom: '1px solid #F0EEED' }}>
+                                  <td style={{ padding: '9px 12px', fontWeight: 600, color: NAVY, background: '#FAFAF8', verticalAlign: 'top', whiteSpace: 'nowrap' }}>{k}</td>
+                                  <td style={{ padding: '9px 12px', color: '#000000', lineHeight: 1.6 }}>{v}</td>
+                                </tr>
+                              ))}
+                              <tr style={{ borderBottom: '1px solid #F0EEED' }}>
+                                <td style={{ padding: '9px 12px', fontWeight: 600, color: NAVY, background: '#FAFAF8', verticalAlign: 'top', whiteSpace: 'nowrap' }}>Lead time</td>
+                                <td style={{ padding: '9px 12px', color: '#000000', lineHeight: 1.6, fontWeight: 500 }}>7–10 business days (after artwork approval)</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      );
+                    })()}
                   </div>
                   <div>
                     {product.description && (
