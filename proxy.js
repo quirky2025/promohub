@@ -43,12 +43,37 @@ async function liveCategoryUrl(slug) {
   return (Array.isArray(rows) && rows[0] && rows[0].canonical_url) || null;
 }
 
+// C. Exact one-off legacy paths that are permanently gone -> 410.
+//    (NOT /privacy-policy — that's a live legal page, handled elsewhere.)
+const GONE_PATHS = new Set([
+  '/site',
+  '/subscribenewsletter',
+  '/author/quirkyadmin',
+  '/eofy-branded-merchandise-ideas-for-fy26-success',
+]);
+// Old single-segment /products/<slug> that no longer exist -> 410 (real PDPs pass through).
+const GONE_PRODUCT_SLUGS = new Set(['knitwear', 'travel', 't-shirts', 'hi-vis-trade-workwear']);
+
 // Returns a Response to short-circuit legacy 404 URLs, or null to continue normally.
 async function handleLegacy404(pathname, request) {
+  const p = pathname.replace(/\/+$/, '') || '/'; // normalise trailing slash
+
   // B. Ancient PHP URLs -> 410
-  if (pathname.startsWith('/promo/') || pathname.endsWith('.php')) return gone();
-  // C. /site -> 410
-  if (pathname === '/site') return gone();
+  if (p.startsWith('/promo/') || p.endsWith('.php')) return gone();
+
+  // C. Known one-off legacy paths -> 410
+  if (GONE_PATHS.has(p)) return gone();
+
+  // C. Old /products/<...> URLs (previous site structure). Real single-slug PDPs pass
+  //    through; only old category-style paths (2+ segments) and known delisted single
+  //    slugs are 410'd — so live product pages are never affected.
+  if (p.startsWith('/products/')) {
+    const inner = p.split('/').filter(Boolean).slice(1); // drop 'products'
+    if (inner.length >= 2) return gone();
+    if (inner.length === 1 && GONE_PRODUCT_SLUGS.has(inner[0])) return gone();
+    return NextResponse.next();
+  }
+
   // A. Deep legacy /category/<...>/<slug> (3+ inner segments; shallow /category/<x>
   //    and /category/<x>/<y> are left to next.config's existing static redirects).
   if (pathname.startsWith('/category/')) {
@@ -153,6 +178,10 @@ export const config = {
     '/api/admin/:path*',
     '/category/:path*',
     '/promo/:path*',
+    '/products/:path*',
     '/site',
+    '/subscribenewsletter',
+    '/author/:path*',
+    '/eofy-branded-merchandise-ideas-for-fy26-success',
   ],
 };
