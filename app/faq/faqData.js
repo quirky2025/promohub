@@ -91,7 +91,7 @@ export const FAQ_SECTIONS = [
       },
       {
         q: 'Can you match my exact brand colour (PMS)?',
-        a: `<p>Yes — send us your PMS (Pantone) colour code and we'll match it across most decoration methods. Not sure of your code? Just ask and our team will help you find it.</p>`,
+        a: `<p>Yes — send us your PMS (Pantone) colour code and we'll match it across most decoration methods. Not sure of your code? Use our <a href="/resources/pms-chart">PMS chart</a> to find it.</p>`,
       },
       {
         q: 'What print methods do you offer, and which is best for my logo?',
@@ -147,7 +147,7 @@ export const FAQ_SECTIONS = [
       },
       {
         q: 'Do you offer eco-friendly promotional products?',
-        a: `<p>Yes — we carry a growing range of eco-friendly products. Many of our apparel products also carry credentials like amfori BSCI, PETA-Approved Vegan, UPF50+ and Australian Cotton, shown on each product page. <a href="/contact">Contact us</a> and we'll point you to eco options for your project.</p>`,
+        a: `<p>Yes — browse our <a href="/eco">Eco range</a>. Many of our apparel products also carry credentials like amfori BSCI, PETA-Approved Vegan, UPF50+ and Australian Cotton, shown on each product page.</p>`,
       },
     ],
   },
