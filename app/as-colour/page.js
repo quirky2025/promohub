@@ -1,9 +1,12 @@
-// app/as-colour/page.js — AS Colour brand Range hub (calculator products live here,
-// not in the global TRENDS category pages). Hero + subcategory pills that link to
-// per-type sub-pages (/as-colour/<type>), which carry the left filter + product grid.
+// app/as-colour/page.js — AS Colour brand Range (single page). Hero + subcategory
+// pills that act as tabs (client): click one -> its products + left filter show below,
+// on the same page. Pills are ordered by product count (popular first).
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { getFirstImage, getColourSwatches } from '@/lib/urlPages';
+import { calculatorFromPrice } from '@/lib/decorationPricing';
 import QuoteButton from '@/components/QuoteButton';
+import ASRangeBrowser from '@/components/ASRangeBrowser';
 
 export const revalidate = 3600;
 
@@ -19,14 +22,13 @@ const GOLD = '#C9A96E';
 const FONT = '"DM Sans", sans-serif';
 const CAT_ORDER = ['Apparel', 'Bags', 'Headwear'];
 
-const slugify = (s) => (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-
 async function getRangeProducts(supplier) {
   const { data, error } = await supabase
     .from('products')
-    .select('id, category, subcategory')
+    .select('id, slug, name, category, subcategory, is_eco, min_qty, colour_slugs, brand, material_tags, fulfillment, capacity, pen_mechanism, pen_ink_colour, pricing_tiers(base_price), product_colours(images, sort_order, hex, name), decoration_options(name, type)')
     .eq('supplier', supplier)
     .eq('is_published', true)
+    .order('name')
     .limit(1000);
   if (error) {
     console.error('[as-colour range] query failed', error);
@@ -35,14 +37,34 @@ async function getRangeProducts(supplier) {
   return data || [];
 }
 
-function groupByType(products) {
-  const groups = {};
+// Trim to only the fields CategoryFilter + pills need (keeps the client payload small).
+function enrich(p) {
+  return {
+    id: p.id, slug: p.slug, name: p.name, category: p.category, subcategory: p.subcategory,
+    is_eco: p.is_eco, min_qty: p.min_qty, colour_slugs: p.colour_slugs, brand: p.brand,
+    material_tags: p.material_tags, fulfillment: p.fulfillment, capacity: p.capacity,
+    pen_mechanism: p.pen_mechanism, pen_ink_colour: p.pen_ink_colour,
+    _image: getFirstImage(p),
+    _price: calculatorFromPrice(p) || 0,
+    _swatches: getColourSwatches(p),
+    _decorationNames: (p.decoration_options || []).filter((d) => d.type !== 'addon').map((d) => d.name),
+  };
+}
+
+// -> { [category]: [{ sub, count, products }] } with subs sorted by count desc.
+function buildGroups(products) {
+  const byCat = {};
   for (const p of products) {
     const cat = p.category || 'Other';
     const sub = p.subcategory || 'Other';
-    (groups[cat] ||= {});
-    (groups[cat][sub] ||= 0);
-    groups[cat][sub] += 1;
+    (byCat[cat] ||= {});
+    (byCat[cat][sub] ||= []).push(p);
+  }
+  const groups = {};
+  for (const cat of Object.keys(byCat)) {
+    groups[cat] = Object.entries(byCat[cat])
+      .map(([sub, items]) => ({ sub, count: items.length, products: items }))
+      .sort((a, b) => b.count - a.count);
   }
   return groups;
 }
@@ -54,19 +76,9 @@ function orderedCats(groups) {
   ];
 }
 
-// Subcategory nav = compact pill button (clearly navigation, not a product card).
-function SubcatPill({ sub, count }) {
-  return (
-    <Link href={`/as-colour/${slugify(sub)}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', borderRadius: '999px', border: '1.5px solid #E0DDD7', background: '#fff', color: '#1a1a1a', fontSize: '14px', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
-      {sub}
-      <span style={{ color: '#1a1a1a', fontWeight: 400, fontSize: '12px' }}>{count}</span>
-    </Link>
-  );
-}
-
 export default async function ASColourRangePage() {
-  const products = await getRangeProducts('AS Colour');
-  const groups = groupByType(products);
+  const products = (await getRangeProducts('AS Colour')).map(enrich);
+  const groups = buildGroups(products);
   const cats = orderedCats(groups);
 
   return (
@@ -102,28 +114,9 @@ export default async function ASColourRangePage() {
       </section>
 
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 40px 80px' }}>
-        {products.length === 0 && (
-          <p style={{ color: '#1a1a1a' }}>This range is being prepared — please check back shortly.</p>
-        )}
-
-        {/* Browse by subcategory — pills link to per-type sub-pages */}
-        {products.length > 0 && (
-          <section>
-            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', fontWeight: 600, color: NAVY, margin: '0 0 20px' }}>
-              Browse by Subcategory
-            </h2>
-            {cats.map((cat) => (
-              <div key={cat} style={{ marginBottom: '24px' }}>
-                <div style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>{cat}</div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                  {Object.keys(groups[cat]).sort().map((sub) => (
-                    <SubcatPill key={sub} sub={sub} count={groups[cat][sub]} />
-                  ))}
-                </div>
-              </div>
-            ))}
-          </section>
-        )}
+        {products.length === 0
+          ? <p style={{ color: '#1a1a1a' }}>This range is being prepared — please check back shortly.</p>
+          : <ASRangeBrowser groups={groups} cats={cats} />}
       </div>
     </div>
   );
