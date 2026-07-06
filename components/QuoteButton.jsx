@@ -8,7 +8,7 @@ export default function QuoteButton({ label = 'Get a Quote', source = 'page', st
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button type="button" onClick={() => { gaEvent('quote_click', { source }); setOpen(true); }} style={style}>{label}</button>
+      <button type="button" onClick={() => { gaEvent('quote_click', { source_location: source }); setOpen(true); }} style={style}>{label}</button>
       <QuoteModal open={open} onClose={() => setOpen(false)} source={source} />
     </>
   );

@@ -54,8 +54,10 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
   useEffect(() => {
     gaEvent('product_view', {
-      currency: 'AUD',
-      items: [{ item_id: product.supplier_sku || product.slug, item_name: product.name, item_category: product.category }],
+      product_slug: product.slug,
+      supplier: product.supplier || null,
+      decoration_model: product.decoration_model || null,
+      category: product.category || null,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -242,9 +244,9 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
     addToCart(item);
     gaEvent('add_to_cart', {
-      currency: 'AUD',
+      product_slug: product.slug,
       value: Math.round(unitPrice * qty * 100) / 100,
-      items: [{ item_id: product.supplier_sku || product.slug, item_name: product.name, item_category: product.category, price: unitPrice, quantity: qty }],
+      currency: 'AUD',
     });
     setCartAdded(true);
   }
@@ -582,7 +584,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             {cartAdded ? '✅ Added to Cart!' : !isValidQty ? 'Enter quantity to see pricing' : (colours.length > 0 && selectedColour === null) ? 'Choose a colour to continue' : `Add to Cart  —  ${aud(grand)} incl. GST`}
           </button>
 
-          <button onClick={() => setQuoteOpen(true)} style={{ width: '100%', background: NAVY, color: '#fff', border: 'none', borderRadius: '12px', padding: '18px', fontSize: '17px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+          <button onClick={() => { gaEvent('quote_click', { product_slug: product.slug, source_location: 'pdp' }); setQuoteOpen(true); }} style={{ width: '100%', background: NAVY, color: '#fff', border: 'none', borderRadius: '12px', padding: '18px', fontSize: '17px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
             <span style={{ fontSize: '20px' }}>💬</span> Get a Quote / Ask a Question
           </button>
 
@@ -990,10 +992,8 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
       });
       if (res.ok) {
         gaEvent('enquiry_submit', {
-          source: 'product_page',
-          currency: 'AUD',
-          value: total,
-          items: [{ item_id: product.supplier_sku || product.slug, item_name: product.name, item_category: product.category, price: unitPrice, quantity: formQty }],
+          product_slug: product.slug,
+          enquiry_type: 'product_enquiry',
         });
         setStatus('success');
       } else setStatus('error');

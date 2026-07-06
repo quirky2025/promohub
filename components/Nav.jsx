@@ -7,6 +7,7 @@ import { supabase } from '@/lib/supabase';
 import { getCartCount } from '@/lib/cart';
 import { slugify } from '@/lib/slug';
 import QuoteModal from '@/components/QuoteModal';
+import { gaEvent } from '@/lib/gtag';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -653,7 +654,7 @@ export default function Nav() {
           </div>
 
           {/* GET A QUOTE - 金色按钮,右端,打开弹窗 */}
-          <button onClick={() => { setActiveDropdown(null); setQuoteOpen(true); }}
+          <button onClick={() => { gaEvent('quote_click', { source_location: 'nav' }); setActiveDropdown(null); setQuoteOpen(true); }}
             style={{ marginLeft: 'auto', background: GOLD, color: '#fff', border: 'none', padding: '10px 22px', borderRadius: '8px', fontSize: '14px', fontWeight: 700, fontFamily: '"DM Sans", sans-serif', cursor: 'pointer', letterSpacing: '0.5px', whiteSpace: 'nowrap', boxShadow: '0 2px 10px rgba(201,169,110,.35)' }}>
             Get a Quote
           </button>
@@ -745,7 +746,7 @@ export default function Nav() {
             <div style={{ padding: '4px 0 28px' }}>
               {/* GET A QUOTE — 置顶 */}
               <div style={{ padding: '10px 20px 14px' }}>
-                <button onClick={() => { setMobileOpen(false); setQuoteOpen(true); }}
+                <button onClick={() => { gaEvent('quote_click', { source_location: 'nav' }); setMobileOpen(false); setQuoteOpen(true); }}
                   style={{ width: '100%', background: GOLD, color: '#fff', border: 'none', padding: '13px 0', borderRadius: '8px', fontSize: '15px', fontWeight: 700, fontFamily: '"DM Sans", sans-serif', cursor: 'pointer', letterSpacing: '0.5px' }}>
                   GET A QUOTE
                 </button>

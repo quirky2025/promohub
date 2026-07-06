@@ -7,9 +7,10 @@
 // + navy "Your Selection" 汇总卡 + 信任徽章 + 原版同款 Tabs。观感对齐 ProductClient。
 // 仅当 page.js 判定 product.decoration_model === 'calculator' 时渲染。
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import ProductImg from '@/components/ProductImg';
+import { gaEvent } from '@/lib/gtag';
 import CartDrawer from '@/components/CartDrawer';
 import { addToCart } from '@/lib/cart';
 import { colourImageAlt } from '@/lib/colourName';
@@ -85,6 +86,16 @@ const aud = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractio
 
 export default function ASColourClient({ product, mainImage, extraImages = [], colours = [], pricingTiers = [], initialColourIndex = null }) {
   const type = decoType(product);
+
+  useEffect(() => {
+    gaEvent('product_view', {
+      product_slug: product.slug,
+      supplier: product.supplier || null,
+      decoration_model: product.decoration_model || null,
+      category: product.category || null,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const bottomImages = [mainImage, ...(extraImages || [])].filter(Boolean);
   const [selectedColour, setSelectedColour] = useState(initialColourIndex ?? null);
@@ -203,6 +214,11 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
       addons: [{ id: 'decoration', name: decoName, perUnit: decoPerUnit, setupFee: decoSetup, setupQty: 1 }],
     };
     addToCart(item);
+    gaEvent('add_to_cart', {
+      product_slug: product.slug,
+      value: Math.round(exGst * 100) / 100,
+      currency: 'AUD',
+    });
     setAdded(true); setCartOpen(true); setTimeout(() => setAdded(false), 1800);
   }
 
@@ -449,7 +465,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                   );
                 })}
                 <div style={{ fontSize: '11px', color: '#000000', padding: '10px 14px' }}>
-                  Need re-labelling or neck-tag printing? Those start at 100 units and vary by label type — <button onClick={() => setQuoteOpen(true)} style={{ background: 'none', border: 'none', color: GOLD, fontWeight: 600, cursor: 'pointer', padding: 0, font: 'inherit', textDecoration: 'underline' }}>request a quote</button>.
+                  Need re-labelling or neck-tag printing? Those start at 100 units and vary by label type — <button onClick={() => { gaEvent('quote_click', { product_slug: product.slug, source_location: 'pdp' }); setQuoteOpen(true); }} style={{ background: 'none', border: 'none', color: GOLD, fontWeight: 600, cursor: 'pointer', padding: 0, font: 'inherit', textDecoration: 'underline' }}>request a quote</button>.
                 </div>
               </div>
             </div>
@@ -495,13 +511,13 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
           {/* actions */}
           <div style={{ fontSize: '13px', color: '#000', fontWeight: 500 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span aria-hidden="true">🕒</span> Production: 7–10 business days (after artwork approval)</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}><span aria-hidden="true">⚡</span> Rush order available — <button onClick={() => setQuoteOpen(true)} style={{ background: 'none', border: 'none', color: GOLD, fontWeight: 600, cursor: 'pointer', padding: 0, font: 'inherit', textDecoration: 'underline' }}>ask us for a faster turnaround</button>.</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}><span aria-hidden="true">⚡</span> Rush order available — <button onClick={() => { gaEvent('quote_click', { product_slug: product.slug, source_location: 'pdp' }); setQuoteOpen(true); }} style={{ background: 'none', border: 'none', color: GOLD, fontWeight: 600, cursor: 'pointer', padding: 0, font: 'inherit', textDecoration: 'underline' }}>ask us for a faster turnaround</button>.</div>
           </div>
           <button onClick={canAdd ? handleAdd : undefined} disabled={!canAdd}
             style={{ width: '100%', background: canAdd ? GOLD : '#C8C4BC', color: '#fff', border: 'none', borderRadius: '12px', padding: '18px', fontSize: '18px', fontWeight: 700, cursor: canAdd ? 'pointer' : 'not-allowed', fontFamily: FONT, boxShadow: canAdd ? '0 4px 16px rgba(201,169,110,.4)' : 'none' }}>
             {added ? '✅ Added to Cart!' : !isValidQty ? 'Enter quantity to see pricing' : (colours.length > 0 && selectedColour === null) ? 'Choose a colour to continue' : job.poa ? 'Request a quote for pricing' : `Add to Cart  —  ${aud(grand)} incl. GST`}
           </button>
-          <button onClick={() => setQuoteOpen(true)} style={{ width: '100%', boxSizing: 'border-box', background: NAVY, color: '#fff', border: 'none', borderRadius: '12px', padding: '16px', fontSize: '16px', fontWeight: 700, cursor: 'pointer', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+          <button onClick={() => { gaEvent('quote_click', { product_slug: product.slug, source_location: 'pdp' }); setQuoteOpen(true); }} style={{ width: '100%', boxSizing: 'border-box', background: NAVY, color: '#fff', border: 'none', borderRadius: '12px', padding: '16px', fontSize: '16px', fontWeight: 700, cursor: 'pointer', fontFamily: FONT, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
             <span style={{ fontSize: '18px' }}>💬</span> Get a Quote / Ask a Question
           </button>
         </div>
@@ -766,7 +782,10 @@ function ASQuoteModal({ product, selection, colourName, qty, unitPrice, subtotal
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name, company: form.company, email: form.email, phone: form.phone, requiredDate, deliveryAddress, notes: form.notes, colour: colourName || '', brandingSummary: selection, productName: product.name, productSku: product.supplier_sku, unitPrice, subtotal, shipping, gst, total, qty: parseInt(form.qty, 10) || qty }),
       });
-      setStatus(res.ok ? 'success' : 'error');
+      if (res.ok) {
+        gaEvent('enquiry_submit', { product_slug: product.slug, enquiry_type: 'product_enquiry' });
+        setStatus('success');
+      } else setStatus('error');
     } catch (e) { setStatus('error'); }
   }
   const inputStyle = { width: '100%', padding: '10px 14px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', fontFamily: FONT, color: '#000', outline: 'none', boxSizing: 'border-box', background: '#fff' };
