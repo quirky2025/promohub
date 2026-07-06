@@ -19,7 +19,6 @@ const STATIC_ROUTES = [
   '/sale',
   '/services/decoration-methods',
   '/services/logistics',
-  '/services/merch-store',
   '/services/sourcing',
   '/services/warehousing',
   '/supply-chain',

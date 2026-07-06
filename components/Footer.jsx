@@ -37,7 +37,6 @@ export default function Footer() {
           {[
             { label: 'About Us', href: '/about' },
             { label: 'Contact Us', href: '/contact' },
-            { label: 'Testimonials', href: '/reviews' },
           ].map(item => (
             <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: '13px', color: '#ffffff', textDecoration: 'none', marginBottom: '10px', lineHeight: '1.4', fontFamily: '"DM Sans", sans-serif' }}>
               {item.label}
@@ -71,7 +70,6 @@ export default function Footer() {
             { label: 'Track Your Order', href: '/track-order' },
             { label: 'PMS Colour Match', href: '/resources/pms-chart' },
             { label: 'Decoration Methods', href: '/services/decoration-methods' },
-            { label: 'Your Merch Store', href: '/services/merch-store' },
           ].map(item => (
             <Link key={item.href} href={item.href} style={{ display: 'block', fontSize: '13px', color: '#ffffff', textDecoration: 'none', marginBottom: '10px', lineHeight: '1.4', fontFamily: '"DM Sans", sans-serif' }}>
               {item.label}
