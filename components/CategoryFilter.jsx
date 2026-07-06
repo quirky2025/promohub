@@ -48,7 +48,7 @@ export default function CategoryFilter({ products = [], category, includeType = 
       </div>
       <div style={{ flex: 1 }}>
         {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570' }}>No products match these filters.</div>
+          <div style={{ textAlign: 'center', padding: '60px', color: '#000' }}>No products match these filters.</div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(214px, 1fr))', gap: '20px' }}>
             {filtered.map(product => <ProductCard key={product.id} product={product} />)}
@@ -61,6 +61,7 @@ export default function CategoryFilter({ products = [], category, includeType = 
 
 function ProductCard({ product }) {
   const price = product._price || 0;
+  const isCalc = product.decoration_model === 'calculator';
   const swatches = product._swatches || [];
   return (
     <a href={`/products/${product.slug}`} style={{ textDecoration: 'none' }}>
@@ -73,16 +74,17 @@ function ProductCard({ product }) {
         </div>
         <div style={{ padding: '14px 15px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={{ color: NAVY, fontSize: '14px', fontWeight: 700, lineHeight: 1.35, textAlign: 'center' }}>{product.name}</div>
-          <div style={{ fontSize: '12px', color: '#7A7570', textAlign: 'center' }}>{product.subcategory || product.category}</div>
+          <div style={{ fontSize: '12px', color: '#000', textAlign: 'center' }}>{product.subcategory || product.category}</div>
           <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'center', gap: '22px', alignItems: 'flex-end' }}>
             {price > 0 && (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '11px', color: '#7A7570' }}>As low as</div>
+                <div style={{ fontSize: '11px', color: '#000' }}>{isCalc ? 'From' : 'As low as'}</div>
                 <div style={{ color: GOLD, fontSize: '18px' }}>${price.toFixed(2)}</div>
+                {isCalc && <div style={{ fontSize: '10px', color: '#000' }}>decorated</div>}
               </div>
             )}
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '11px', color: '#7A7570' }}>Min Qty</div>
+              <div style={{ fontSize: '11px', color: '#000' }}>Min Qty</div>
               <div style={{ color: NAVY, fontSize: '18px' }}>{product.min_qty || '-'}</div>
             </div>
           </div>

@@ -25,7 +25,7 @@ const CAT_ORDER = ['Apparel', 'Bags', 'Headwear'];
 async function getRangeProducts(supplier) {
   const { data, error } = await supabase
     .from('products')
-    .select('id, slug, name, category, subcategory, is_eco, min_qty, colour_slugs, brand, material_tags, fulfillment, capacity, pen_mechanism, pen_ink_colour, pricing_tiers(base_price), product_colours(images, sort_order, hex, name), decoration_options(name, type)')
+    .select('id, slug, name, category, subcategory, is_eco, min_qty, colour_slugs, brand, material_tags, fulfillment, capacity, pen_mechanism, pen_ink_colour, decoration_model, pricing_tiers(base_price), product_colours(images, sort_order, hex, name), decoration_options(name, type)')
     .eq('supplier', supplier)
     .eq('is_published', true)
     .order('name')
@@ -44,6 +44,7 @@ function enrich(p) {
     is_eco: p.is_eco, min_qty: p.min_qty, colour_slugs: p.colour_slugs, brand: p.brand,
     material_tags: p.material_tags, fulfillment: p.fulfillment, capacity: p.capacity,
     pen_mechanism: p.pen_mechanism, pen_ink_colour: p.pen_ink_colour,
+    decoration_model: p.decoration_model,
     _image: getFirstImage(p),
     _price: calculatorFromPrice(p) || 0,
     _swatches: getColourSwatches(p),
@@ -85,8 +86,8 @@ export default async function ASColourRangePage() {
     <div style={{ fontFamily: FONT, background: '#fff', minHeight: '100vh' }}>
       {/* Breadcrumb */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#1a1a1a' }}>
-          <Link href="/" style={{ color: '#1a1a1a', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>AS Colour Range</span>
         </div>
@@ -115,7 +116,7 @@ export default async function ASColourRangePage() {
 
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 40px 80px' }}>
         {products.length === 0
-          ? <p style={{ color: '#1a1a1a' }}>This range is being prepared — please check back shortly.</p>
+          ? <p style={{ color: '#000' }}>This range is being prepared — please check back shortly.</p>
           : <ASRangeBrowser groups={groups} cats={cats} />}
       </div>
     </div>

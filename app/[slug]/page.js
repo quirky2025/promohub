@@ -62,7 +62,7 @@ export default async function UrlPage({ params }) {
   const productCount = count ?? products.length;
 
   return (
-    <main style={{ minHeight: '100vh', background: BG, color: '#1a1a1a' }}>
+    <main style={{ minHeight: '100vh', background: BG, color: '#000' }}>
       <Breadcrumb urlPage={urlPage} />
       <Hero urlPage={urlPage} productCount={productCount} />
 
@@ -92,7 +92,7 @@ export default async function UrlPage({ params }) {
                   {urlPage.nav_label || urlPage.h1}
                 </h2>
               </div>
-              <div style={{ color: '#7A7570', fontSize: '14px' }}>
+              <div style={{ color: '#000', fontSize: '14px' }}>
                 {products.length < productCount
                   ? `Showing ${products.length} of ${productCount} products`
                   : `Showing ${productCount} product${productCount === 1 ? '' : 's'}`}
@@ -139,12 +139,12 @@ async function getChildPageCards(urlPage) {
 function Breadcrumb({ urlPage }) {
   return (
     <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-        <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+      <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+        <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
         {urlPage.breadcrumb_parent && (
           <>
             <span style={{ margin: '0 8px' }}>/</span>
-            <Link href={`/${urlPage.breadcrumb_parent}`} style={{ color: '#7A7570', textDecoration: 'none' }}>
+            <Link href={`/${urlPage.breadcrumb_parent}`} style={{ color: '#000', textDecoration: 'none' }}>
               {parentLabel(urlPage.breadcrumb_parent)}
             </Link>
           </>
@@ -178,7 +178,7 @@ function SubcategorySection({ childPages }) {
                   <div style={{ color: NAVY, fontSize: '15px', fontWeight: 700, lineHeight: 1.35 }}>
                     {childPage.nav_label || childPage.h1}
                   </div>
-                  <div style={{ color: '#7A7570', fontSize: '13px', marginTop: '4px' }}>
+                  <div style={{ color: '#000', fontSize: '13px', marginTop: '4px' }}>
                     {childPage.product_count} product{childPage.product_count === 1 ? '' : 's'}
                   </div>
                 </div>
@@ -223,7 +223,8 @@ function Hero({ urlPage, productCount }) {
 
 function ProductCard({ product }) {
   const image = getFirstImage(product);
-  const price = getLowestPrice(product);
+  const isCalc = product.decoration_model === 'calculator';
+  const price = isCalc ? (calculatorFromPrice(product) || 0) : getLowestPrice(product);
   const swatches = getColourSwatches(product);
 
   return (
@@ -245,18 +246,19 @@ function ProductCard({ product }) {
           <div style={{ color: NAVY, fontSize: '14px', fontWeight: 700, lineHeight: 1.35, textAlign: 'center' }}>
             {product.name}
           </div>
-          <div style={{ fontSize: '12px', color: '#7A7570', textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', color: '#000', textAlign: 'center' }}>
             {product.subcategory || product.category}
           </div>
           <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'center', gap: '22px', alignItems: 'flex-end' }}>
             {price > 0 && (
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: '11px', color: '#7A7570' }}>As low as</div>
+                <div style={{ fontSize: '11px', color: '#000' }}>{isCalc ? 'From' : 'As low as'}</div>
                 <div style={{ color: GOLD, fontSize: '18px' }}>${price.toFixed(2)}</div>
+                {isCalc && <div style={{ fontSize: '10px', color: '#000' }}>decorated</div>}
               </div>
             )}
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '11px', color: '#7A7570' }}>Min Qty</div>
+              <div style={{ fontSize: '11px', color: '#000' }}>Min Qty</div>
               <div style={{ color: NAVY, fontSize: '18px' }}>{product.min_qty || '-'}</div>
             </div>
           </div>

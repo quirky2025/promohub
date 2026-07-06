@@ -12,7 +12,7 @@ const SHOW_LIMIT = 8;
 
 // Colour family -> swatch colour
 const COLOUR_HEX = {
-  Black: '#1a1a1a', White: '#ffffff', Grey: '#9aa0a6', Silver: '#c6cace', Gold: '#d4af37',
+  Black: '#000', White: '#ffffff', Grey: '#9aa0a6', Silver: '#c6cace', Gold: '#d4af37',
   Blue: '#27408b', Green: '#2e7d32', Red: '#c62828', Orange: '#ef6c00', Yellow: '#f4c20d',
   Purple: '#7b1fa2', Pink: '#e899b0', Natural: '#d8c3a5', Brown: '#795548', Clear: '#e6ebee',
 };
@@ -32,7 +32,7 @@ function FacetSection({ facet, selected, onToggle }) {
         {facet.label}
       </div>
       {shown.map(({ value, count }) => (
-        <label key={value} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '3px 0', fontSize: 14, color: '#1a1a1a' }}>
+        <label key={value} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '3px 0', fontSize: 14, color: '#000' }}>
           <input
             type="checkbox"
             checked={!!(selected && selected.has(value))}
@@ -41,7 +41,7 @@ function FacetSection({ facet, selected, onToggle }) {
           />
           {isColour && <span style={swatchStyle(value)} />}
           <span style={{ flex: 1 }}>{value}</span>
-          <span style={{ fontSize: 12, color: '#A9A39B' }}>({count})</span>
+          <span style={{ fontSize: 12, color: '#000' }}>({count})</span>
         </label>
       ))}
       {facet.values.length > SHOW_LIMIT && (
@@ -50,7 +50,7 @@ function FacetSection({ facet, selected, onToggle }) {
         </button>
       )}
       {facet.key === 'price' && (
-        <div style={{ fontSize: 11, color: '#A9A39B', marginTop: 6, lineHeight: 1.5 }}>{PRICE_NOTE}</div>
+        <div style={{ fontSize: 11, color: '#000', marginTop: 6, lineHeight: 1.5 }}>{PRICE_NOTE}</div>
       )}
     </div>
   );
@@ -67,10 +67,10 @@ export default function FilterSidebar({ facets = [], selected = {}, onToggle, on
         )}
       </div>
       {facets.length === 0
-        ? <div style={{ fontSize: 13, color: '#A9A39B' }}>No filters available</div>
+        ? <div style={{ fontSize: 13, color: '#000' }}>No filters available</div>
         : facets.map(f => <FacetSection key={f.key} facet={f} selected={selected[f.key]} onToggle={onToggle} />)}
       {typeof resultCount === 'number' && (
-        <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: 16, fontSize: 13, color: '#7A7570' }}>
+        <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: 16, fontSize: 13, color: '#000' }}>
           {resultCount} product{resultCount !== 1 ? 's' : ''}
         </div>
       )}

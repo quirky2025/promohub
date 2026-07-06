@@ -16,7 +16,7 @@ export default function ASRangeBrowser({ groups, cats }) {
   const pillBase = {
     display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px',
     borderRadius: '999px', border: '1.5px solid #E0DDD7', background: '#fff',
-    color: '#1a1a1a', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
+    color: '#000', fontSize: '14px', fontWeight: 600, cursor: 'pointer',
     fontFamily: '"DM Sans", sans-serif', whiteSpace: 'nowrap',
   };
   const pillOn = { background: NAVY, color: '#fff', borderColor: NAVY };
@@ -29,14 +29,14 @@ export default function ASRangeBrowser({ groups, cats }) {
 
       {cats.map((cat) => (
         <div key={cat} style={{ marginBottom: '22px' }}>
-          <div style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>{cat}</div>
+          <div style={{ fontSize: '17px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>{cat}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
             {groups[cat].map((g) => {
               const on = g.sub === sel;
               return (
                 <button key={g.sub} type="button" onClick={() => setSel(g.sub)} style={{ ...pillBase, ...(on ? pillOn : {}) }}>
                   {g.sub}
-                  <span style={{ color: on ? 'rgba(255,255,255,.7)' : '#1a1a1a', fontWeight: 400, fontSize: '12px' }}>{g.count}</span>
+                  <span style={{ color: on ? 'rgba(255,255,255,.7)' : '#000', fontWeight: 400, fontSize: '12px' }}>{g.count}</span>
                 </button>
               );
             })}
@@ -47,7 +47,7 @@ export default function ASRangeBrowser({ groups, cats }) {
       {current && (
         <div style={{ marginTop: '30px', borderTop: '1px solid #E0DDD7', paddingTop: '28px' }}>
           <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', fontWeight: 600, color: NAVY, margin: '0 0 20px' }}>
-            {current.sub} <span style={{ fontSize: '14px', color: '#1a1a1a', fontWeight: 400 }}>· {current.count} products</span>
+            {current.sub} <span style={{ fontSize: '14px', color: '#000', fontWeight: 400 }}>· {current.count} products</span>
           </h3>
           <CategoryFilter products={current.products} category={current.cat} includeType={false} />
         </div>
