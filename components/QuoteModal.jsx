@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { gaEvent } from '@/lib/gtag';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -9,7 +10,7 @@ const GOLD = '#C9A96E';
 const inputStyle = {
   width: '100%', boxSizing: 'border-box', padding: '12px 14px',
   borderRadius: '8px', border: '1px solid #D8D4CE', background: '#fff',
-  fontSize: '14px', fontFamily: '"DM Sans", sans-serif', color: '#1a1a1a',
+  fontSize: '14px', fontFamily: '"DM Sans", sans-serif', color: '#000',
   outline: 'none',
 };
 
@@ -82,6 +83,7 @@ export default function QuoteModal({ open, onClose, source = 'homepage' }) {
       setError('Something went wrong. Please try again or call us on 02 9477 4748.');
       return;
     }
+    gaEvent('enquiry_submit', { source, quantity: form.quantity.trim() || undefined });
     setDone(true);
   }
 
@@ -121,7 +123,7 @@ export default function QuoteModal({ open, onClose, source = 'homepage' }) {
             <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', color: NAVY, margin: '0 0 12px', fontWeight: 600 }}>
               Quote Request Received!
             </h3>
-            <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.7, margin: '0 0 24px' }}>
+            <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.7, margin: '0 0 24px' }}>
               Thanks {form.name.split(' ')[0]} — our team will get back to you within 3 business hours with pricing and options.
             </p>
             <button onClick={handleClose}
@@ -134,7 +136,7 @@ export default function QuoteModal({ open, onClose, source = 'homepage' }) {
             <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 6px', fontWeight: 600 }}>
               Get a Quote
             </h3>
-            <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 24px', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '14px', color: '#000', margin: '0 0 24px', lineHeight: 1.6 }}>
               Tell us what you need — we reply within 3 business hours.
             </p>
 
@@ -184,7 +186,7 @@ export default function QuoteModal({ open, onClose, source = 'homepage' }) {
               style={{ width: '100%', background: GOLD, color: '#fff', border: 'none', padding: '15px', borderRadius: '10px', fontSize: '16px', fontWeight: 700, cursor: submitting ? 'wait' : 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 16px rgba(201,169,110,.4)', opacity: submitting ? 0.7 : 1 }}>
               {submitting ? 'Sending…' : 'Get My Free Quote →'}
             </button>
-            <p style={{ fontSize: '12px', color: '#B0AAA3', textAlign: 'center', margin: '14px 0 0' }}>
+            <p style={{ fontSize: '12px', color: '#000', textAlign: 'center', margin: '14px 0 0' }}>
               Prefer to talk? Call us on <a href="tel:0294774748" style={{ color: GOLD, fontWeight: 600, textDecoration: 'none' }}>02 9477 4748</a>
             </p>
           </>

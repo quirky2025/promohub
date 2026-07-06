@@ -58,10 +58,10 @@ export default async function ASColourTypePage({ params }) {
     <div style={{ fontFamily: FONT, background: '#fff', minHeight: '100vh' }}>
       {/* Breadcrumb */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#1a1a1a' }}>
-          <Link href="/" style={{ color: '#1a1a1a', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href="/as-colour" style={{ color: '#1a1a1a', textDecoration: 'none' }}>AS Colour Range</Link>
+          <Link href="/as-colour" style={{ color: '#000', textDecoration: 'none' }}>AS Colour Range</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>{sub}</span>
         </div>

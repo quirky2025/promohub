@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { addToCart } from '@/lib/cart';
+import { gaEvent } from '@/lib/gtag';
 import CartDrawer from '@/components/CartDrawer';
 import { getColourHex } from '@/lib/colourSwatch';
 import { slugify } from '@/lib/slug';
@@ -50,6 +51,14 @@ export default function ProductClient({ product, mainImage, colours, extraImages
     const n = Math.max(0, parseInt(val) || 0);
     setSizeQty(prev => ({ ...prev, [size]: n }));
   }
+
+  useEffect(() => {
+    gaEvent('product_view', {
+      currency: 'AUD',
+      items: [{ item_id: product.supplier_sku || product.slug, item_name: product.name, item_category: product.category }],
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (hasSizes) { setQty(sizeTotal); setQtyInput(String(sizeTotal)); }
@@ -232,20 +241,25 @@ export default function ProductClient({ product, mainImage, colours, extraImages
     };
 
     addToCart(item);
+    gaEvent('add_to_cart', {
+      currency: 'AUD',
+      value: Math.round(unitPrice * qty * 100) / 100,
+      items: [{ item_id: product.supplier_sku || product.slug, item_name: product.name, item_category: product.category, price: unitPrice, quantity: qty }],
+    });
     setCartAdded(true);
   }
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', color: '#1a1a1a' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', color: '#000' }}>
 
       {/* BREADCRUMB */}
       <div className="qp-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#1a1a1a' }}>
-          <Link href="/" style={{ color: '#1a1a1a', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href={`/category/${slugify(product.category)}`} style={{ color: '#1a1a1a', textDecoration: 'none' }}>{product.category}</Link>
+          <Link href={`/category/${slugify(product.category)}`} style={{ color: '#000', textDecoration: 'none' }}>{product.category}</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href={`/category/${slugify(product.category)}/${slugify(product.subcategory)}`} style={{ color: '#1a1a1a', textDecoration: 'none' }}>{product.subcategory}</Link>
+          <Link href={`/category/${slugify(product.category)}/${slugify(product.subcategory)}`} style={{ color: '#000', textDecoration: 'none' }}>{product.subcategory}</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>{product.name}</span>
         </div>
@@ -259,7 +273,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           <div style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '16px', width: '100%', aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '12px' }}>
             {bigImage
               ? <ProductImg src={bigImage} alt={mainAlt} size="detail" eager style={{ width: '94%', height: '94%', objectFit: 'contain' }} />
-              : <div style={{ color: '#1a1a1a', fontSize: '14px' }}>No image available</div>
+              : <div style={{ color: '#000', fontSize: '14px' }}>No image available</div>
             }
           </div>
           {bottomImages.length >= 1 && (
@@ -283,10 +297,10 @@ export default function ProductClient({ product, mainImage, colours, extraImages
     {product.indent_type === 'indent_air' ? '✈️ INDENT AIR' : '🚢 INDENT SEA'}
   </div>
 )}
-            <div style={{ fontSize: '12px', color: '#1a1a1a', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku}</div>
+            <div style={{ fontSize: '12px', color: '#000', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku}</div>
             <h1 className="qp-pdp-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.name}</h1>
             {product.seo_description && (
-              <p style={{ fontSize: '14px', color: '#1a1a1a', lineHeight: 1.7, margin: '12px 0 0', fontFamily: '"DM Sans", sans-serif' }}>
+              <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.7, margin: '12px 0 0', fontFamily: '"DM Sans", sans-serif' }}>
                 {product.seo_description}
               </p>
             )}
@@ -305,7 +319,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                           : hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: hex, border: hex === '#FFFFFF' ? '1px solid #E0DDD7' : '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
                           : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
                       </div>
-                      <div style={{ fontSize: '10px', color: selectedSecondary === i ? GOLD : '#7A7570', fontWeight: selectedSecondary === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
+                      <div style={{ fontSize: '10px', color: selectedSecondary === i ? GOLD : '#000', fontWeight: selectedSecondary === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
                     </div>
                   );
                 })}
@@ -330,13 +344,13 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                           : hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: hex, border: hex === '#FFFFFF' ? '1px solid #E0DDD7' : '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
                           : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
                       </div>
-                      <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#7A7570', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
+                      <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#000', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
                     </div>
                   );
                 })}
               </div>
               {availableColours.length >= 2 && (
-                <p style={{ fontSize: '13px', color: '#1a1a1a', lineHeight: 1.6, margin: '14px 0 0', fontFamily: '"DM Sans", sans-serif' }}>
+                <p style={{ fontSize: '13px', color: '#000', lineHeight: 1.6, margin: '14px 0 0', fontFamily: '"DM Sans", sans-serif' }}>
                   Available colours: {availableColours.join(', ')}.
                 </p>
               )}
@@ -357,7 +371,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                     </div>
                   ))}
                 </div>
-                <div style={{ fontSize: '13px', color: '#1a1a1a' }}>
+                <div style={{ fontSize: '13px', color: '#000' }}>
                   Total: <strong style={{ color: sizeTotal >= (product.min_qty || 1) ? NAVY : '#C0392B', fontSize: '16px' }}>{sizeTotal} units</strong>
                   <span style={{ marginLeft: '10px' }}>(Minimum order: {product.min_qty} units)</span>
                 </div>
@@ -366,7 +380,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               </div>
             ) : (
               <>
-                <div style={{ fontSize: '13px', color: '#1a1a1a', margin: '6px 0 12px' }}>Minimum order: <strong style={{ color: NAVY }}>{product.min_qty} units</strong></div>
+                <div style={{ fontSize: '13px', color: '#000', margin: '6px 0 12px' }}>Minimum order: <strong style={{ color: NAVY }}>{product.min_qty} units</strong></div>
                 <input
                   type="number"
                   value={qtyInput}
@@ -402,7 +416,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                   </tr>
                   <tr>
                     <td style={tdLabelStyle}>Save</td>
-                    {pricingTiers.map((t, i) => { const isActive = activeTier?.id === t.id; return <td key={t.id} style={{ ...tdStyle, color: '#1a1a1a', fontWeight: 700, fontSize: '15px', background: isActive ? '#FDF8F0' : undefined }}>{i === 0 ? '—' : Math.round((1 - (t.base_price * MARGIN) / firstRetailPrice) * 100) + '%'}</td>; })}
+                    {pricingTiers.map((t, i) => { const isActive = activeTier?.id === t.id; return <td key={t.id} style={{ ...tdStyle, color: '#000', fontWeight: 700, fontSize: '15px', background: isActive ? '#FDF8F0' : undefined }}>{i === 0 ? '—' : Math.round((1 - (t.base_price * MARGIN) / firstRetailPrice) * 100) + '%'}</td>; })}
                   </tr>
                 </tbody>
               </table>
@@ -432,7 +446,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                         <tr key={d.id} style={{ borderBottom: '1px solid #F0EEED' }}>
                           <td style={{ padding: '10px 14px' }}>
                             <div style={{ fontSize: '13px', fontWeight: 500, color: NAVY }}>{d.name}</div>
-                            {d.detail && d.detail !== 'EMPTY' && <div style={{ fontSize: '11px', color: '#1a1a1a', marginTop: '2px' }}>{d.detail}</div>}
+                            {d.detail && d.detail !== 'EMPTY' && <div style={{ fontSize: '11px', color: '#000', marginTop: '2px' }}>{d.detail}</div>}
                           </td>
                           <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                             <label style={{ position: 'relative', width: '44px', height: '24px', cursor: 'pointer', display: 'inline-block' }}>
@@ -442,12 +456,12 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                             </label>
                           </td>
                           <td style={{ ...tdStyle, fontWeight: 500, color: NAVY }}>${(d.per_unit * MARGIN).toFixed(2)}</td>
-                          <td style={{ ...tdStyle, color: '#1a1a1a' }}>{qty}</td>
+                          <td style={{ ...tdStyle, color: '#000' }}>{qty}</td>
                           <td style={tdStyle}>{d.has_setup ? `$${(SETUP_FEE * MARGIN).toFixed(2)}` : '—'}</td>
                           <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                             {d.has_setup
-                              ? <input type="number" value={(!isColourMethod(d) || isOneColourLocked(d)) ? 1 : st.setupQty} min="1" disabled={!st.on || !isColourMethod(d) || isOneColourLocked(d)}onChange={e => setSetupQty(d.id, e.target.value)} style={{ width: '54px', border: '1.5px solid #C8C4BC', borderRadius: '6px', padding: '5px 6px', fontSize: '13px', fontWeight: 600, textAlign: 'center', fontFamily: '"DM Sans", sans-serif', background: !st.on ? '#F4F2EE' : '#fff', color: !st.on ? '#B0AAA3' : NAVY,outline: 'none' }} />
-                              : <span style={{ color: '#1a1a1a' }}>—</span>}
+                              ? <input type="number" value={(!isColourMethod(d) || isOneColourLocked(d)) ? 1 : st.setupQty} min="1" disabled={!st.on || !isColourMethod(d) || isOneColourLocked(d)}onChange={e => setSetupQty(d.id, e.target.value)} style={{ width: '54px', border: '1.5px solid #C8C4BC', borderRadius: '6px', padding: '5px 6px', fontSize: '13px', fontWeight: 600, textAlign: 'center', fontFamily: '"DM Sans", sans-serif', background: !st.on ? '#F4F2EE' : '#fff', color: !st.on ? '#000' : NAVY,outline: 'none' }} />
+                              : <span style={{ color: '#000' }}>—</span>}
                           </td>
                         </tr>
                       );
@@ -455,11 +469,11 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                     <tr>
                       <td style={{ padding: '10px 14px' }}>
                         <div style={{ fontSize: '13px', fontWeight: 500, color: NAVY }}>Shipping & Handling</div>
-                        <div style={{ fontSize: '11px', color: '#1a1a1a' }}>Per domestic address</div>
+                        <div style={{ fontSize: '11px', color: '#000' }}>Per domestic address</div>
                       </td>
                       <td /><td /><td />
                       <td style={{ ...tdStyle, fontWeight: 500, color: NAVY }}>${SHIPPING.toFixed(2)}</td>
-                      <td style={{ padding: '10px 12px', textAlign: 'center', color: '#1a1a1a' }}>1</td>
+                      <td style={{ padding: '10px 12px', textAlign: 'center', color: '#000' }}>1</td>
                     </tr>
                   </tbody>
                 </table>
@@ -485,12 +499,12 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                           </label>
                           <div>
                             <div style={{ fontSize: '13px', fontWeight: 500, color: NAVY }}>{d.name}</div>
-                            {d.detail && d.detail !== 'EMPTY' && <div style={{ fontSize: '11px', color: '#1a1a1a', marginTop: '2px' }}>{d.detail}</div>}
+                            {d.detail && d.detail !== 'EMPTY' && <div style={{ fontSize: '11px', color: '#000', marginTop: '2px' }}>{d.detail}</div>}
                           </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
                           <div style={{ fontSize: '13px', fontWeight: 500, color: NAVY }}>+${(d.per_unit * MARGIN).toFixed(2)}/unit</div>
-                          {d.has_setup && <div style={{ fontSize: '11px', color: '#1a1a1a', marginTop: '2px' }}>Setup: ${(SETUP_FEE * MARGIN).toFixed(2)}</div>}
+                          {d.has_setup && <div style={{ fontSize: '11px', color: '#000', marginTop: '2px' }}>Setup: ${(SETUP_FEE * MARGIN).toFixed(2)}</div>}
                         </div>
                       </div>
                     );
@@ -588,7 +602,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               <div key={b.title} style={{ background: '#fff', border: `1.5px solid ${GOLD}40`, borderRadius: '12px', padding: '16px 10px', textAlign: 'center', borderTop: `3px solid ${GOLD}` }}>
                 <div style={{ fontSize: '26px', marginBottom: '8px' }}>{b.icon}</div>
                 <div style={{ fontSize: '13px', color: NAVY, fontWeight: 700, marginBottom: '4px', fontFamily: '"DM Sans", sans-serif' }}>{b.title}</div>
-                <div style={{ fontSize: '11px', color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif', lineHeight: 1.4 }}>{b.sub}</div>
+                <div style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Sans", sans-serif', lineHeight: 1.4 }}>{b.sub}</div>
               </div>
             ))}
           </div>
@@ -601,7 +615,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                 </button>
               ))}
             </div>
-            <div style={{ padding: '24px', fontSize: '14px', lineHeight: '1.8', color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' }}>
+            <div style={{ padding: '24px', fontSize: '14px', lineHeight: '1.8', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
               {activeTab === 'Description' && (
                 <div className="qp-desc-3col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '32px', alignItems: 'start' }}>
 
@@ -611,20 +625,20 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                         <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 12px' }}>Features</h3>
                         <ul style={{ margin: 0, paddingLeft: '20px' }}>
                           {product.features.filter(f => f).map((f, i) => (
-                            <li key={i} style={{ marginBottom: '6px', color: '#1a1a1a' }}>{f}</li>
+                            <li key={i} style={{ marginBottom: '6px', color: '#000' }}>{f}</li>
                           ))}
                         </ul>
                       </div>
                     )}
                     {product.materials && (
                       <div style={{ marginBottom: '12px', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #E0DDD7', borderLeft: `3px solid ${GOLD}` }}>
-                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Materials</div>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Materials</div>
                         <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{product.materials}</div>
                       </div>
                     )}
                     {product.dimensions && (
                       <div style={{ marginBottom: '12px', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #E0DDD7', borderLeft: `3px solid ${GOLD}` }}>
-                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Dimensions</div>
+                        <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Dimensions</div>
                         <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{product.dimensions}</div>
                       </div>
                     )}
@@ -634,7 +648,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                         {decorations.map(d => (
                           <div key={d.id} style={{ marginBottom: '10px', paddingBottom: '10px', borderBottom: '1px solid #F0EEED' }}>
                             <div style={{ fontSize: '13px', fontWeight: 500, color: '#3a3a3a' }}>{d.name}</div>
-                            {d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#7A7570', fontSize: '12px', marginTop: '2px' }}>{d.detail}</div>}
+                            {d.detail && d.detail !== 'EMPTY' && <div style={{ color: '#000', fontSize: '12px', marginTop: '2px' }}>{d.detail}</div>}
                           </div>
                         ))}
                       </div>
@@ -653,7 +667,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                     {product.description && (
                       <div>
                         <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '18px', color: NAVY, margin: '0 0 12px' }}>Description</h3>
-                        <p style={{ margin: 0, color: '#1a1a1a', lineHeight: 1.7 }}>{product.description}</p>
+                        <p style={{ margin: 0, color: '#000', lineHeight: 1.7 }}>{product.description}</p>
                       </div>
                     )}
                   </div>
@@ -663,7 +677,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
               {activeTab === 'Sample Policy' && (
                 <div style={{ maxWidth: '760px' }}>
-                  <p style={{ margin: '0 0 16px', fontSize: '15px', color: '#1a1a1a', lineHeight: 1.7 }}>
+                  <p style={{ margin: '0 0 16px', fontSize: '15px', color: '#000', lineHeight: 1.7 }}>
                     Before committing to a bulk order, we offer several ways to help you verify quality, colour, and branding — so you can order with complete confidence.
                   </p>
                   {[
@@ -700,15 +714,15 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                         <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: NAVY, color: '#fff', fontSize: '12px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{s.num}</div>
                         <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"Cormorant Garamond", serif' }}>{s.title}</div>
                       </div>
-                      <p style={{ margin: '0 0 10px', color: '#1a1a1a', fontSize: '13px' }}>{s.desc}</p>
+                      <p style={{ margin: '0 0 10px', color: '#000', fontSize: '13px' }}>{s.desc}</p>
                       <ul style={{ margin: 0, paddingLeft: '18px' }}>
-                        {s.points.map((p, i) => <li key={i} style={{ marginBottom: '4px', fontSize: '13px', color: '#1a1a1a' }}>{p}</li>)}
+                        {s.points.map((p, i) => <li key={i} style={{ marginBottom: '4px', fontSize: '13px', color: '#000' }}>{p}</li>)}
                       </ul>
                     </div>
                   ))}
                   <div style={{ marginTop: '20px', padding: '14px 16px', background: `${GOLD}15`, borderRadius: '10px', border: `1px solid ${GOLD}40`, display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                     <span style={{ fontSize: '20px', flexShrink: 0 }}>💡</span>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#1a1a1a', lineHeight: 1.6 }}>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#000', lineHeight: 1.6 }}>
                       <strong>Not ready for a physical sample?</strong> Every order includes a free digital mockup created by our design team — showing exactly how your logo will appear on the final product. You must approve this mockup before production begins. <button onClick={() => setActiveTab('Mockups & Artwork')} style={{ background: 'none', border: 'none', color: GOLD, fontWeight: 700, cursor: 'pointer', padding: 0, fontSize: '13px', textDecoration: 'underline' }}>See Mockups & Artwork →</button>
                     </p>
                   </div>
@@ -719,14 +733,14 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                 <div style={{ maxWidth: '760px' }}>
                   <div style={{ marginBottom: '20px' }}>
                     <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 10px' }}>Wondering what your logo will look like on the product?</h3>
-                    <p style={{ margin: '0 0 10px', color: '#1a1a1a', lineHeight: 1.7 }}>
+                    <p style={{ margin: '0 0 10px', color: '#000', lineHeight: 1.7 }}>
                       Ordering branded merchandise without seeing the final result can feel like a leap of faith. That's why every order includes a <strong>free digital mockup</strong> created by our in-house design team, so you can see exactly how your brand will look before a single item is produced.
                     </p>
                     <p style={{ margin: 0, fontWeight: 700, color: NAVY }}>No surprises. No guesswork. Just confidence.</p>
                   </div>
                   <div style={{ padding: '16px', background: '#ffffff', borderRadius: '10px', borderLeft: `3px solid ${NAVY}`, marginBottom: '20px' }}>
                     <h4 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '17px', color: NAVY, margin: '0 0 10px' }}>How It Works</h4>
-                    <p style={{ margin: 0, color: '#1a1a1a', fontSize: '13px', lineHeight: 1.7 }}>
+                    <p style={{ margin: 0, color: '#000', fontSize: '13px', lineHeight: 1.7 }}>
                       Once your order is confirmed, our design team creates a digital mockup showing your logo on the product and sends it to you for approval. <strong>Production only begins after you give us the green light in writing.</strong>
                     </p>
                   </div>
@@ -741,7 +755,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                   </div>
                   <div style={{ padding: '14px 16px', background: `${GOLD}15`, borderRadius: '10px', border: `1px solid ${GOLD}40`, display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <span style={{ fontSize: '20px', flexShrink: 0 }}>🎨</span>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#1a1a1a', lineHeight: 1.6 }}>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#000', lineHeight: 1.6 }}>
                       <strong>Need help with your artwork?</strong> Don't have a vector file? No problem — our design team can assist. Contact us at <strong>hello@quirkypromo.com.au</strong> or call <strong>02 9477 4748</strong>.
                     </p>
                   </div>
@@ -757,7 +771,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                       <div key={c.title} style={{ padding: '14px', background: '#ffffff', borderRadius: '10px', borderTop: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '22px', marginBottom: '6px' }}>{c.icon}</div>
                         <div style={{ fontSize: '12px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>{c.title}</div>
-                        <div style={{ fontSize: '13px', color: '#1a1a1a' }}>{c.value}</div>
+                        <div style={{ fontSize: '13px', color: '#000' }}>{c.value}</div>
                       </div>
                     ))}
                   </div>
@@ -772,13 +786,13 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                           { region: '🌾 Rural Regions', time: '5–15 business days' },
                         ].map((r, i) => (
                           <tr key={i} style={{ background: i % 2 === 0 ? '#ffffff' : '#fff' }}>
-                            <td style={{ padding: '10px 14px', color: '#1a1a1a' }}>{r.region}</td>
+                            <td style={{ padding: '10px 14px', color: '#000' }}>{r.region}</td>
                             <td style={{ padding: '10px 14px', fontWeight: 600, color: NAVY, textAlign: 'right' }}>{r.time}</td>
                           </tr>
                         ))}
                       </tbody>
                     </table>
-                    <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#1a1a1a' }}>Delivery times are estimates only. For up-to-date tracking, refer to your dispatch notification email.</p>
+                    <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#000' }}>Delivery times are estimates only. For up-to-date tracking, refer to your dispatch notification email.</p>
                   </div>
                   <div style={{ padding: '14px 16px', background: '#F0F4FF', borderRadius: '10px', borderLeft: `3px solid ${NAVY}`, marginBottom: '12px' }}>
                     <h4 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '16px', color: NAVY, margin: '0 0 8px' }}>Indent Orders</h4>
@@ -792,11 +806,11 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                         <div style={{ fontSize: '13px', color: '#1E40AF' }}>Made to order — enquire for lead time</div>
                       </div>
                     </div>
-                    <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#1a1a1a' }}>Indent orders are factory-direct and ideal for large volume orders with significant cost savings. Lead times commence after artwork proof approval.</p>
+                    <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#000' }}>Indent orders are factory-direct and ideal for large volume orders with significant cost savings. Lead times commence after artwork proof approval.</p>
                   </div>
                   <div style={{ padding: '14px 16px', background: `${GOLD}15`, borderRadius: '10px', border: `1px solid ${GOLD}40`, display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <span style={{ fontSize: '20px', flexShrink: 0 }}>⚡</span>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#1a1a1a', lineHeight: 1.6 }}>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#000', lineHeight: 1.6 }}>
                       <strong>Urgent deadline?</strong> Contact us as soon as possible at <strong>hello@quirkypromo.com.au</strong> or call <strong>02 9477 4748</strong> and we'll do our best to accommodate your timeline.
                     </p>
                   </div>
@@ -805,7 +819,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
               {activeTab === 'Ordering Process' && (
                 <div>
-                  <p style={{ margin: '0 0 20px', color: '#1a1a1a', fontSize: '14px' }}>Four simple steps from quote to delivery — your branded products, done right.</p>
+                  <p style={{ margin: '0 0 20px', color: '#000', fontSize: '14px' }}>Four simple steps from quote to delivery — your branded products, done right.</p>
                   <div className="qp-steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
                     {[
                       {
@@ -814,12 +828,12 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                           <div>
                             <div style={{ background: '#ffffff', borderRadius: '6px', padding: '8px 10px', marginBottom: '6px', border: '1px solid #E0DDD7' }}>
                               <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '2px' }}>Add to Cart</div>
-                              <div style={{ fontSize: '11px', color: '#1a1a1a' }}>Select colour & qty, pay by EFT or credit card</div>
+                              <div style={{ fontSize: '11px', color: '#000' }}>Select colour & qty, pay by EFT or credit card</div>
                             </div>
-                            <div style={{ textAlign: 'center', fontSize: '11px', color: '#1a1a1a', margin: '4px 0' }}>— or —</div>
+                            <div style={{ textAlign: 'center', fontSize: '11px', color: '#000', margin: '4px 0' }}>— or —</div>
                             <div style={{ background: '#ffffff', borderRadius: '6px', padding: '8px 10px', border: '1px solid #E0DDD7' }}>
                               <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '2px' }}>Get a Quote</div>
-                              <div style={{ fontSize: '11px', color: '#1a1a1a' }}>For custom requirements or large orders</div>
+                              <div style={{ fontSize: '11px', color: '#000' }}>For custom requirements or large orders</div>
                             </div>
                           </div>
                         )
@@ -832,13 +846,13 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                         <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: GOLD, color: '#fff', fontSize: '10px', fontWeight: 700, borderRadius: '20px', padding: '2px 10px' }}>Step {s.num}</div>
                         <div style={{ fontSize: '22px', textAlign: 'center', margin: '8px 0 6px' }}>{s.icon}</div>
                         <div style={{ fontWeight: 700, color: NAVY, fontSize: '13px', textAlign: 'center', marginBottom: '8px', fontFamily: '"DM Sans", sans-serif' }}>{s.title}</div>
-                        {s.content || <p style={{ margin: 0, fontSize: '12px', color: '#1a1a1a', lineHeight: 1.5, textAlign: 'center' }}>{s.desc}</p>}
+                        {s.content || <p style={{ margin: 0, fontSize: '12px', color: '#000', lineHeight: 1.5, textAlign: 'center' }}>{s.desc}</p>}
                       </div>
                     ))}
                   </div>
                   <div style={{ padding: '14px 16px', background: `${GOLD}15`, borderRadius: '10px', border: `1px solid ${GOLD}40`, display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <span style={{ fontSize: '18px', flexShrink: 0 }}>💬</span>
-                    <p style={{ margin: 0, fontSize: '13px', color: '#1a1a1a', lineHeight: 1.6 }}>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#000', lineHeight: 1.6 }}>
                       Need help? Contact our team at <strong>hello@quirkypromo.com.au</strong> or call <strong>02 9477 4748</strong> — we're here to make the process seamless.
                     </p>
                   </div>
@@ -864,13 +878,13 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
                     >
                       <div style={{ height: '180px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px' }}>
-                        {img ? <ProductImg src={img} alt={`${p.name} with logo`} size="list" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <div style={{ fontSize: '32px', color: '#1a1a1a' }}>📦</div>}
+                        {img ? <ProductImg src={img} alt={`${p.name} with logo`} size="list" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <div style={{ fontSize: '32px', color: '#000' }}>📦</div>}
                       </div>
                       <div style={{ padding: '14px 16px' }}>
                         <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', fontWeight: 600, color: NAVY, marginBottom: '8px', lineHeight: '1.4' }}>{p.name}</div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          {price > 0 && (<div><div style={{ fontSize: '11px', color: '#1a1a1a' }}>As low as</div><div style={{ fontSize: '16px', fontWeight: 400, color: GOLD }}>${price.toFixed(2)}</div></div>)}
-                          <div style={{ textAlign: 'right' }}><div style={{ fontSize: '11px', color: '#1a1a1a' }}>Min Qty</div><div style={{ fontSize: '16px', fontWeight: 400, color: NAVY }}>{p.min_qty}</div></div>
+                          {price > 0 && (<div><div style={{ fontSize: '11px', color: '#000' }}>As low as</div><div style={{ fontSize: '16px', fontWeight: 400, color: GOLD }}>${price.toFixed(2)}</div></div>)}
+                          <div style={{ textAlign: 'right' }}><div style={{ fontSize: '11px', color: '#000' }}>Min Qty</div><div style={{ fontSize: '16px', fontWeight: 400, color: NAVY }}>{p.min_qty}</div></div>
                         </div>
                       </div>
                     </div>
@@ -974,8 +988,15 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
         headers: { 'Content-Type': 'application/json', ...(_qs ? { Authorization: `Bearer ${_qs.access_token}` } : {}) },
         body: JSON.stringify(payload),
       });
-      if (res.ok) setStatus('success');
-      else setStatus('error');
+      if (res.ok) {
+        gaEvent('enquiry_submit', {
+          source: 'product_page',
+          currency: 'AUD',
+          value: total,
+          items: [{ item_id: product.supplier_sku || product.slug, item_name: product.name, item_category: product.category, price: unitPrice, quantity: formQty }],
+        });
+        setStatus('success');
+      } else setStatus('error');
     } catch { setStatus('error'); }
   }
 
@@ -1020,16 +1041,16 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
         <div style={{ padding: '22px 28px 16px', borderBottom: '1px solid #E0DDD7', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', position: 'sticky', top: 0, background: '#fff', zIndex: 10 }}>
           <div>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '26px', fontWeight: 600, color: '#1B2A4A', margin: '0 0 3px' }}>Get a Quote</h2>
-            <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#1a1a1a', margin: 0 }}>{product.name}</p>
+            <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#000', margin: 0 }}>{product.name}</p>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: '#1a1a1a', lineHeight: 1, padding: '4px 8px' }}>✕</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: '#000', lineHeight: 1, padding: '4px 8px' }}>✕</button>
         </div>
 
         {status === 'success' ? (
           <div style={{ padding: '48px 32px', textAlign: 'center' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
             <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: '#1B2A4A', margin: '0 0 10px' }}>Quote Request Sent!</h3>
-            <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', color: '#1a1a1a', margin: '0 0 24px' }}>We'll get back to you within 1 hour.</p>
+            <p style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', color: '#000', margin: '0 0 24px' }}>We'll get back to you within 3 business hours.</p>
             <button onClick={onClose} style={{ background: '#C9A96E', color: '#fff', border: 'none', borderRadius: '10px', padding: '13px 32px', fontSize: '15px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>Close</button>
           </div>
         ) : (
@@ -1102,7 +1123,7 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                   <input name="postcode" value={form.postcode} onChange={handleChange}
                     placeholder="Postcode" style={{ ...inputStyle, fontFamily: '"DM Mono", monospace' }} />
-                  <input value="Australia" readOnly style={{ ...inputStyle, background: '#ffffff', color: '#1a1a1a', cursor: 'not-allowed' }} />
+                  <input value="Australia" readOnly style={{ ...inputStyle, background: '#ffffff', color: '#000', cursor: 'not-allowed' }} />
                 </div>
               </div>
               <div style={{ marginTop: '6px', fontSize: '11px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
@@ -1451,16 +1472,16 @@ function FlatSpecTable({ product }) {
 function SpecRow({ label, value }) {
   return (
     <tr style={{ borderBottom: '1px solid #F0EEED', fontFamily: '"DM Sans", sans-serif' }}>
-      <td style={{ width: '160px', verticalAlign: 'top', padding: '8px 0', color: '#1a1a1a', fontSize: '13px' }}>{label}</td>
+      <td style={{ width: '160px', verticalAlign: 'top', padding: '8px 0', color: '#000', fontSize: '13px' }}>{label}</td>
       <td style={{ padding: '8px 0', fontWeight: 500, color: NAVY }}>{value}</td>
     </tr>
   );
 }
 
-const qtyBtnStyle = { width: '38px', height: '42px', background: '#ffffff', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' };
-const thStyle = { fontSize: '11px', fontWeight: 600, padding: '8px 10px', textAlign: 'center', color: '#1a1a1a', borderBottom: '1px solid #E0DDD7', fontFamily: '"DM Sans", sans-serif' };
+const qtyBtnStyle = { width: '38px', height: '42px', background: '#ffffff', border: 'none', fontSize: '20px', cursor: 'pointer', color: '#000', fontFamily: '"DM Sans", sans-serif' };
+const thStyle = { fontSize: '11px', fontWeight: 600, padding: '8px 10px', textAlign: 'center', color: '#000', borderBottom: '1px solid #E0DDD7', fontFamily: '"DM Sans", sans-serif' };
 const tdStyle = { padding: '8px 10px', fontSize: '13px', textAlign: 'center', fontFamily: '"DM Sans", sans-serif' };
-const tdLabelStyle = { padding: '8px 12px', fontSize: '12px', color: '#1a1a1a', fontWeight: 500, background: '#FAFAF8', fontFamily: '"DM Sans", sans-serif' };
+const tdLabelStyle = { padding: '8px 12px', fontSize: '12px', color: '#000', fontWeight: 500, background: '#FAFAF8', fontFamily: '"DM Sans", sans-serif' };
 function SizeChartTable({ sizeChart }) {
   if (!sizeChart || !Array.isArray(sizeChart.sizes) || !sizeChart.sizes.length) return null;
   return (

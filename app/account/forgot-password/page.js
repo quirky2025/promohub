@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
           <>
             <div style={{ fontSize: '48px', margin: '24px 0 16px' }}>📧</div>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 12px' }}>Email sent!</h2>
-            <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 24px' }}>
+            <p style={{ fontSize: '14px', color: '#000', margin: '0 0 24px' }}>
               Check your inbox at <strong>{email}</strong> for a password reset link.
             </p>
             <Link href="/account/login" style={{ color: GOLD, textDecoration: 'none', fontWeight: 600, fontSize: '14px' }}>
@@ -50,7 +50,7 @@ export default function ForgotPasswordPage() {
         ) : (
           <>
             <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', fontWeight: 600, color: NAVY, margin: '24px 0 8px' }}>Forgot Password?</h1>
-            <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 28px' }}>
+            <p style={{ fontSize: '14px', color: '#000', margin: '0 0 28px' }}>
               Enter your email and we'll send you a reset link.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
                 style={{ width: '100%', background: !email ? '#C8C4BC' : GOLD, color: '#fff', border: 'none', borderRadius: '10px', padding: '15px', fontSize: '16px', fontWeight: 700, cursor: !email ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
                 {loading ? 'Sending...' : 'Send Reset Link'}
               </button>
-              <p style={{ textAlign: 'center', fontSize: '14px', color: '#7A7570', margin: 0 }}>
+              <p style={{ textAlign: 'center', fontSize: '14px', color: '#000', margin: 0 }}>
                 <Link href="/account/login" style={{ color: GOLD, textDecoration: 'none', fontWeight: 600 }}>← Back to Sign In</Link>
               </p>
             </div>

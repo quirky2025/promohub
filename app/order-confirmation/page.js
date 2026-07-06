@@ -27,13 +27,13 @@ function OrderConfirmationContent() {
           Order Placed!
         </h1>
 
-        <p style={{ fontSize: '16px', color: '#7A7570', margin: '0 0 8px' }}>
+        <p style={{ fontSize: '16px', color: '#000', margin: '0 0 8px' }}>
           Thank you for your order.
         </p>
 
         {orderNumber && (
           <div style={{ background: '#ffffff', borderRadius: '10px', padding: '12px 20px', margin: '16px 0 24px', display: 'inline-block' }}>
-            <span style={{ fontSize: '13px', color: '#7A7570' }}>Order Number: </span>
+            <span style={{ fontSize: '13px', color: '#000' }}>Order Number: </span>
             <span style={{ fontSize: '16px', fontWeight: 700, color: NAVY, fontFamily: '"DM Mono", monospace' }}>{orderNumber}</span>
           </div>
         )}
@@ -41,7 +41,7 @@ function OrderConfirmationContent() {
         {/* What happens next */}
         <div style={{ background: '#ffffff', borderRadius: '12px', padding: '20px 24px', marginBottom: '24px', textAlign: 'left' }}>
           <div style={{ fontWeight: 700, color: NAVY, marginBottom: '12px', fontSize: '15px' }}>📋 What happens next?</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px', color: '#3D3A36' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px', color: '#000' }}>
             <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
               <span style={{ color: GOLD, fontWeight: 700, flexShrink: 0 }}>1.</span>
               <span>Your <strong>Order Confirmation</strong>{isPaid && <> and <strong>Tax Invoice</strong></>} {isPaid ? 'have' : 'has'} been emailed to you (PDF)</span>
@@ -68,7 +68,7 @@ function OrderConfirmationContent() {
           </div>
         )}
 
-        <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 24px' }}>
+        <p style={{ fontSize: '14px', color: '#000', margin: '0 0 24px' }}>
           A confirmation email has been sent to your inbox.
         </p>
 

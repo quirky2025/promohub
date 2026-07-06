@@ -56,12 +56,12 @@ export default function CatalogClient() {
   const current = CATALOGS[active];
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#ffffff', color: '#1a1a1a' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#ffffff', color: '#000' }}>
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>/</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>Catalogues</span>
         </div>
@@ -112,7 +112,7 @@ export default function CatalogClient() {
                     </span>
                   ))}
                 </div>
-                <div style={{ fontSize: '12.5px', color: isActive ? GOLD : '#7A7570', marginTop: '10px', fontWeight: 600 }}>
+                <div style={{ fontSize: '12.5px', color: isActive ? GOLD : '#000', marginTop: '10px', fontWeight: 600 }}>
                   {isActive ? '▼ Reading below' : 'Click to read →'}
                 </div>
               </button>
@@ -127,7 +127,7 @@ export default function CatalogClient() {
               <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', fontWeight: 600, color: NAVY }}>
                 {current.title}
               </div>
-              <div style={{ fontSize: '12.5px', color: '#7A7570' }}>
+              <div style={{ fontSize: '12.5px', color: '#000' }}>
                 Tip: click the ⛶ icon inside the viewer for fullscreen
               </div>
             </div>

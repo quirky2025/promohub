@@ -163,10 +163,10 @@ export default function SubcategoryPage() {
 
       {/* BREADCRUMB */}
       <div className="qp-sub-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href={`/category/${category}`} style={{ color: '#7A7570', textDecoration: 'none' }}>{categoryName}</Link>
+          <Link href={`/category/${category}`} style={{ color: '#000', textDecoration: 'none' }}>{categoryName}</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>{subName}</span>
         </div>
@@ -222,11 +222,11 @@ export default function SubcategoryPage() {
             <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
               <input type="checkbox" checked={isEco} onChange={e => setIsEco(e.target.checked)}
                 style={{ width: '16px', height: '16px', accentColor: GOLD }} />
-              <span style={{ fontSize: '14px', color: '#1a1a1a' }}>🌿 Eco-Friendly only</span>
+              <span style={{ fontSize: '14px', color: '#000' }}>🌿 Eco-Friendly only</span>
             </label>
           </div>
 
-          <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '16px', fontSize: '13px', color: '#7A7570' }}>
+          <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '16px', fontSize: '13px', color: '#000' }}>
             {filtered.length} product{filtered.length !== 1 ? 's' : ''} found
           </div>
         </div>
@@ -237,11 +237,11 @@ export default function SubcategoryPage() {
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '26px', color: NAVY, margin: 0, fontWeight: 600 }}>
               {subName}
             </h2>
-            <span style={{ fontSize: '13px', color: '#7A7570' }}>Showing {displayed.length} of {filtered.length}</span>
+            <span style={{ fontSize: '13px', color: '#000' }}>Showing {displayed.length} of {filtered.length}</span>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '80px', color: '#7A7570' }}>Loading products...</div>
+            <div style={{ textAlign: 'center', padding: '80px', color: '#000' }}>Loading products...</div>
           ) : filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '80px' }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
@@ -279,12 +279,12 @@ export default function SubcategoryPage() {
                           <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: 'auto' }}>
                             {price > 0 && (
                               <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '2px' }}>As low as</div>
+                                <div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>As low as</div>
                                 <div style={{ fontSize: '18px', color: GOLD }}>${price.toFixed(2)}</div>
                               </div>
                             )}
                             <div style={{ textAlign: 'center' }}>
-                              <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '2px' }}>Min Qty</div>
+                              <div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>Min Qty</div>
                               <div style={{ fontSize: '18px', color: NAVY }}>{product.min_qty}</div>
                             </div>
                           </div>
@@ -293,7 +293,7 @@ export default function SubcategoryPage() {
                               {colours.map(c => (
                                 <div key={c.id} title={c.name} style={{ width: '16px', height: '16px', borderRadius: '50%', background: c.hex, border: '1.5px solid rgba(0,0,0,.1)', flexShrink: 0 }} />
                               ))}
-                              {extraColours > 0 && <span style={{ fontSize: '11px', color: '#7A7570' }}>+{extraColours}</span>}
+                              {extraColours > 0 && <span style={{ fontSize: '11px', color: '#000' }}>+{extraColours}</span>}
                             </div>
                           )}
                         </div>
@@ -329,7 +329,7 @@ export default function SubcategoryPage() {
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 16px', fontWeight: 600 }}>
               About Custom Printed {subName}
             </h2>
-            <p style={{ fontSize: '15px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 28px' }}>{seoBlurb}</p>
+            <p style={{ fontSize: '15px', color: '#000', lineHeight: 1.8, margin: '0 0 28px' }}>{seoBlurb}</p>
             <div style={{ padding: '20px 24px', background: '#ffffff', borderRadius: '12px', borderLeft: `4px solid ${GOLD}` }}>
               <p style={{ margin: 0, fontSize: '14px', color: '#3D3A36', lineHeight: 1.8 }}>
                 <strong>Need help choosing?</strong> Contact our team at{' '}
@@ -345,4 +345,4 @@ export default function SubcategoryPage() {
 }
 
 const labelStyle = { fontSize: '11px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' };
-const selectStyle = { width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #E0DDD7', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#1a1a1a', background: '#fff', outline: 'none', cursor: 'pointer' };
+const selectStyle = { width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #E0DDD7', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#000', background: '#fff', outline: 'none', cursor: 'pointer' };

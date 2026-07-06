@@ -6,6 +6,7 @@ import { uploadImage } from '@/lib/imageHost';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getCart, clearCart, removeFromCart } from '@/lib/cart';
+import { gaEvent } from '@/lib/gtag';
 import { supabase } from '@/lib/supabase';
 import { SHIPPING, GST } from '@/lib/pricing';
 import { loadStripe } from '@stripe/stripe-js';
@@ -238,6 +239,12 @@ export default function PlaceOrderPage() {
           uploadedLogoPngUrl: uploadedLogoPngUrl,
           savedCartItems: savedItems,
         });
+        gaEvent('purchase', {
+          transaction_id: data.orderNumber,
+          currency: 'AUD',
+          value: orderTotal,
+          items: (savedItems || []).map(it => ({ item_id: it.sku || it.productSlug, item_name: it.productName, price: it.unitPrice, quantity: it.qty })),
+        });
         router.push(`/order-confirmation?order=${data.orderNumber}&method=eft`);
       } else {
         setError('Something went wrong. Please try again or call us on 02 9477 4748.');
@@ -286,6 +293,12 @@ export default function PlaceOrderPage() {
       uploadedLogoPngUrl: logoPngUrl,
       savedCartItems: savedItems,
     });
+    gaEvent('purchase', {
+      transaction_id: orderNumber,
+      currency: 'AUD',
+      value: orderTotalWithSurcharge,
+      items: (savedItems || []).map(it => ({ item_id: it.sku || it.productSlug, item_name: it.productName, price: it.unitPrice, quantity: it.qty })),
+    });
     router.push(`/order-confirmation?order=${orderNumber}&method=stripe`);
   }
 
@@ -318,10 +331,10 @@ export default function PlaceOrderPage() {
 
       {/* Breadcrumb */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href="/place-order" style={{ color: '#7A7570', textDecoration: 'none' }}>Place Order</Link>
+          <Link href="/place-order" style={{ color: '#000', textDecoration: 'none' }}>Place Order</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>Place Order</span>
         </div>
@@ -494,18 +507,18 @@ export default function PlaceOrderPage() {
                   <>
                     <div style={{ fontSize: '32px', marginBottom: '8px' }}>✅</div>
                     <div style={{ fontWeight: 600, color: NAVY, fontSize: '15px' }}>{logoFile.name}</div>
-                    <div style={{ fontSize: '12px', color: '#7A7570', marginTop: '4px' }}>Click to change file</div>
+                    <div style={{ fontSize: '12px', color: '#000', marginTop: '4px' }}>Click to change file</div>
                   </>
                 ) : (
                   <>
                     <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎨</div>
                     <div style={{ fontWeight: 600, color: NAVY, fontSize: '15px', marginBottom: '4px' }}>Click to upload your logo / artwork</div>
-                    <div style={{ fontSize: '12px', color: '#7A7570' }}>AI, PDF, PNG, JPG, EPS, SVG accepted</div>
+                    <div style={{ fontSize: '12px', color: '#000' }}>AI, PDF, PNG, JPG, EPS, SVG accepted</div>
                   </>
                 )}
               </div>
               {logoUploading && (
-                <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '13px', color: '#7A7570' }}>Uploading logo...</div>
+                <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '13px', color: '#000' }}>Uploading logo...</div>
               )}
               </div>
 
@@ -529,7 +542,7 @@ export default function PlaceOrderPage() {
                       <input type="radio" name="payment" value="eft" checked={paymentMethod === 'eft'} onChange={() => setPaymentMethod('eft')} style={{ accentColor: GOLD, width: '18px', height: '18px' }} />
                       <div>
                         <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>🏦 Pay by EFT (Bank Transfer) (Bank Transfer)</div>
-                        <div style={{ fontSize: '12px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Order Confirmation + Invoice (Awaiting Payment) sent now — pay by EFT before production</div>
+                        <div style={{ fontSize: '12px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>Order Confirmation + Invoice (Awaiting Payment) sent now — pay by EFT before production</div>
                       </div>
                     </div>
                     {paymentMethod === 'eft' && (
@@ -544,7 +557,7 @@ export default function PlaceOrderPage() {
                             ['ABN', '95 656 714 270', true],
                           ].map(([label, value, mono]) => (
                             <div key={label} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                              <span style={{ color: '#7A7570' }}>{label}</span>
+                              <span style={{ color: '#000' }}>{label}</span>
                               <strong style={{ fontFamily: mono ? '"DM Mono", monospace' : 'inherit' }}>{value}</strong>
                             </div>
                           ))}
@@ -564,7 +577,7 @@ export default function PlaceOrderPage() {
                       <input type="radio" name="payment" value="stripe" checked={paymentMethod === 'stripe'} onChange={() => setPaymentMethod('stripe')} style={{ accentColor: GOLD, width: '18px', height: '18px' }} />
                       <div>
                         <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>💳 Pay Now by Credit Card</div>
-                        <div style={{ fontSize: '12px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Visa, Mastercard, Amex · 2% surcharge applies</div>
+                        <div style={{ fontSize: '12px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>Visa, Mastercard, Amex · 2% surcharge applies</div>
                       </div>
                     </div>
                     {paymentMethod === 'stripe' && !showStripeForm && (
@@ -586,7 +599,7 @@ export default function PlaceOrderPage() {
             </div>
 
             {!canSubmit && (
-              <div style={{ textAlign: 'center', fontSize: '12px', color: '#B0AAA3', fontFamily: '"DM Sans", sans-serif' }}>
+              <div style={{ textAlign: 'center', fontSize: '12px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
                 Please fill in all required fields (*)
               </div>
             )}
@@ -625,7 +638,7 @@ export default function PlaceOrderPage() {
               </button>
             )}
 
-            <p style={{ textAlign: 'center', fontSize: '12px', color: '#B0AAA3', fontFamily: '"DM Sans", sans-serif', margin: 0 }}>
+            <p style={{ textAlign: 'center', fontSize: '12px', color: '#000', fontFamily: '"DM Sans", sans-serif', margin: 0 }}>
               By placing your order you agree to our terms and conditions.
             </p>
           </div>
@@ -643,17 +656,17 @@ export default function PlaceOrderPage() {
                     </div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: '13px', fontWeight: 600, color: NAVY, fontFamily: '"DM Sans", sans-serif' }}>{item.productName}</div>
-                      {item.colour && <div style={{ fontSize: '11px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Colour: {item.colour}</div>}
+                      {item.colour && <div style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>Colour: {item.colour}</div>}
                       {item.addons?.length > 0 && item.addons.map(a => (
-                        <div key={a.id} style={{ fontSize: '11px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>+ {a.name}</div>
+                        <div key={a.id} style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>+ {a.name}</div>
                       ))}
-                      <div style={{ fontSize: '11px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Qty: {item.qty}</div>
+                      <div style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>Qty: {item.qty}</div>
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
                       <div style={{ fontSize: '13px', fontWeight: 600, color: NAVY, fontFamily: '"DM Mono", monospace' }}>${item.subtotal.toFixed(2)}</div>
                       <button
                         onClick={() => { setCart(removeFromCart(item.id)); }}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#B0AAA3', fontSize: '11px', fontFamily: '"DM Sans", sans-serif', padding: 0, textDecoration: 'underline' }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000', fontSize: '11px', fontFamily: '"DM Sans", sans-serif', padding: 0, textDecoration: 'underline' }}
                       >Remove</button>
                     </div>
                   </div>
@@ -664,15 +677,15 @@ export default function PlaceOrderPage() {
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#7A7570' }}>Subtotal (excl. GST)</span>
+                  <span style={{ color: '#000' }}>Subtotal (excl. GST)</span>
                   <span style={{ fontFamily: '"DM Mono", monospace' }}>${totalSubtotal.toFixed(2)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#7A7570' }}>Shipping & Handling</span>
+                  <span style={{ color: '#000' }}>Shipping & Handling</span>
                   <span style={{ fontFamily: '"DM Mono", monospace' }}>${orderShipping.toFixed(2)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ color: '#7A7570' }}>GST (10%)</span>
+                  <span style={{ color: '#000' }}>GST (10%)</span>
                   <span style={{ fontFamily: '"DM Mono", monospace' }}>${orderGst.toFixed(2)}</span>
                 </div>
                 {paymentMethod === 'stripe' && (

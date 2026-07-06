@@ -11,10 +11,10 @@ export default function CompliancePage() {
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href="/supply-chain" style={{ color: '#7A7570', textDecoration: 'none' }}>Supply Chain</Link>
+          <Link href="/supply-chain" style={{ color: '#000', textDecoration: 'none' }}>Supply Chain</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>Compliance & Safety</span>
         </div>
@@ -43,13 +43,13 @@ export default function CompliancePage() {
         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '64px', alignItems: 'center' }}>
           <div>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', color: NAVY, margin: '0 0 16px', fontWeight: 600 }}>Why Compliance Matters</h2>
-            <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 16px' }}>
+            <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: '0 0 16px' }}>
               Australian Consumer Law requires that all products supplied in Australia meet mandatory safety standards. For promotional merchandise — particularly items distributed to employees, clients, or the public — non-compliant products can expose your organisation to significant legal and reputational risk.
             </p>
-            <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 16px' }}>
+            <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: '0 0 16px' }}>
               Government departments, educational institutions, healthcare organisations, and ASX-listed companies increasingly require compliance documentation before approving merchandise purchases. We make this easy.
             </p>
-            <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.8, margin: 0 }}>
+            <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: 0 }}>
               At QuirkyPromo, compliance is built into our sourcing process — not an afterthought. Every factory partner is assessed for compliance capability, and documentation is available for any product in our range.
             </p>
           </div>
@@ -64,7 +64,7 @@ export default function CompliancePage() {
                 <span style={{ fontSize: '24px', flexShrink: 0 }}>{s.icon}</span>
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: 700, color: NAVY, marginBottom: '3px' }}>{s.title}</div>
-                  <div style={{ fontSize: '13px', color: '#7A7570' }}>{s.desc}</div>
+                  <div style={{ fontSize: '13px', color: '#000' }}>{s.desc}</div>
                 </div>
               </div>
             ))}
@@ -75,7 +75,7 @@ export default function CompliancePage() {
       {/* STANDARDS WE MEET */}
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '64px 40px' }}>
         <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', color: NAVY, margin: '0 0 12px', fontWeight: 600, textAlign: 'center' }}>Standards We Work To</h2>
-        <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 40px', textAlign: 'center' }}>Our products are sourced and tested against the following Australian and international standards</p>
+        <p style={{ fontSize: '15px', color: '#000', margin: '0 0 40px', textAlign: 'center' }}>Our products are sourced and tested against the following Australian and international standards</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
           {[
             {
@@ -126,11 +126,11 @@ export default function CompliancePage() {
                 <span style={{ background: s.badgeColor, color: '#fff', fontSize: '11px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', letterSpacing: '0.5px' }}>{s.badge}</span>
               </div>
               <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', color: NAVY, margin: 0, fontWeight: 600 }}>{s.title}</h3>
-              <p style={{ fontSize: '13px', color: '#5A5550', lineHeight: 1.7, margin: 0, flex: 1 }}>{s.desc}</p>
+              <p style={{ fontSize: '13px', color: '#000', lineHeight: 1.7, margin: 0, flex: 1 }}>{s.desc}</p>
               <div style={{ paddingTop: '12px', borderTop: '1px solid #F0EEED' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Available Documents</div>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>Available Documents</div>
                 {s.docs.map(d => (
-                  <div key={d} style={{ fontSize: '12px', color: '#5A5550', marginBottom: '3px' }}>✓ {d}</div>
+                  <div key={d} style={{ fontSize: '12px', color: '#000', marginBottom: '3px' }}>✓ {d}</div>
                 ))}
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function CompliancePage() {
       <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '64px 40px' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', color: NAVY, margin: '0 0 16px', fontWeight: 600 }}>How to Request Compliance Documentation</h2>
-          <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 40px', lineHeight: 1.7 }}>Compliance documentation is available for any product in our range. Simply follow these steps:</p>
+          <p style={{ fontSize: '15px', color: '#000', margin: '0 0 40px', lineHeight: 1.7 }}>Compliance documentation is available for any product in our range. Simply follow these steps:</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', textAlign: 'left' }}>
             {[
               { num: '1', title: 'Identify Your Products', desc: 'Note the product SKU or name from your quote or order.' },
@@ -152,7 +152,7 @@ export default function CompliancePage() {
               <div key={s.num} style={{ background: BG, borderRadius: '12px', padding: '24px', border: '1px solid #E0DDD7' }}>
                 <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: NAVY, color: GOLD, fontSize: '16px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '14px' }}>{s.num}</div>
                 <div style={{ fontSize: '15px', fontWeight: 700, color: NAVY, marginBottom: '8px' }}>{s.title}</div>
-                <div style={{ fontSize: '13px', color: '#7A7570', lineHeight: 1.6 }}>{s.desc}</div>
+                <div style={{ fontSize: '13px', color: '#000', lineHeight: 1.6 }}>{s.desc}</div>
               </div>
             ))}
           </div>

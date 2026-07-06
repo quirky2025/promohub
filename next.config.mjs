@@ -344,6 +344,7 @@ function buildCategoryRedirects() {
 // /products has no index page (only /products/[slug]); send it to the main hub.
 const STATIC_REDIRECTS = [
   ['/products', '/promotional-products'],
+  ['/privacy-policy', '/privacy'],
 ];
 
 /** @type {import('next').NextConfig} */

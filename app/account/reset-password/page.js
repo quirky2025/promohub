@@ -68,7 +68,7 @@ export default function ResetPasswordPage() {
           <>
             <div style={{ fontSize: '48px', margin: '24px 0 16px' }}>✅</div>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 12px' }}>Password Updated!</h2>
-            <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 24px' }}>
+            <p style={{ fontSize: '14px', color: '#000', margin: '0 0 24px' }}>
               Your password has been reset successfully. Redirecting you to your account...
             </p>
             <Link href="/account" style={{ color: GOLD, textDecoration: 'none', fontWeight: 600, fontSize: '14px' }}>
@@ -79,7 +79,7 @@ export default function ResetPasswordPage() {
           <>
             <div style={{ fontSize: '48px', margin: '24px 0 16px' }}>🔗</div>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 12px' }}>Checking link...</h2>
-            <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 24px' }}>
+            <p style={{ fontSize: '14px', color: '#000', margin: '0 0 24px' }}>
               Please wait while we verify your reset link. If this takes too long, your link may have expired.
             </p>
             <Link href="/account/forgot-password" style={{ color: GOLD, textDecoration: 'none', fontWeight: 600, fontSize: '14px' }}>
@@ -89,7 +89,7 @@ export default function ResetPasswordPage() {
         ) : (
           <>
             <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', fontWeight: 600, color: NAVY, margin: '24px 0 8px' }}>Set New Password</h1>
-            <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 28px' }}>
+            <p style={{ fontSize: '14px', color: '#000', margin: '0 0 28px' }}>
               Choose a strong password for your account.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', textAlign: 'left' }}>
@@ -129,7 +129,7 @@ export default function ResetPasswordPage() {
                 {loading ? 'Updating...' : 'Update Password'}
               </button>
 
-              <p style={{ textAlign: 'center', fontSize: '14px', color: '#7A7570', margin: 0 }}>
+              <p style={{ textAlign: 'center', fontSize: '14px', color: '#000', margin: 0 }}>
                 <Link href="/account/login" style={{ color: GOLD, textDecoration: 'none', fontWeight: 600 }}>← Back to Sign In</Link>
               </p>
             </div>

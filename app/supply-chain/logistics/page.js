@@ -11,10 +11,10 @@ export default function LogisticsPage() {
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href="/supply-chain" style={{ color: '#7A7570', textDecoration: 'none' }}>Supply Chain</Link>
+          <Link href="/supply-chain" style={{ color: '#000', textDecoration: 'none' }}>Supply Chain</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>Freight & Logistics</span>
         </div>
@@ -45,10 +45,10 @@ export default function LogisticsPage() {
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 16px', fontWeight: 600 }}>
               Why Our Freight Rates Are Lower
             </h2>
-            <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 16px' }}>
+            <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: '0 0 16px' }}>
               Standard international freight booked through local carriers carries significant margin at every step. We work differently — our first-tier freight partnerships give us direct access to carrier rates that bypass the typical markup chain.
             </p>
-            <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 24px' }}>
+            <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: '0 0 24px' }}>
               Through strategic routing — including consolidation hubs across Asia — we consistently deliver freight savings of up to 50% compared to standard international rates, without compromising on speed or reliability.
             </p>
             <div style={{ padding: '16px 20px', background: BG, borderRadius: '10px', borderLeft: `4px solid ${GOLD}` }}>
@@ -67,7 +67,7 @@ export default function LogisticsPage() {
               <div key={s.label} style={{ background: BG, borderRadius: '12px', padding: '20px', border: '1px solid #E0DDD7', textAlign: 'center' }}>
                 <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: GOLD, fontWeight: 600 }}>{s.value}</div>
                 <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '2px' }}>{s.label}</div>
-                <div style={{ fontSize: '11px', color: '#7A7570' }}>{s.sub}</div>
+                <div style={{ fontSize: '11px', color: '#000' }}>{s.sub}</div>
               </div>
             ))}
           </div>
@@ -77,7 +77,7 @@ export default function LogisticsPage() {
       {/* THREE OPTIONS */}
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '64px 40px' }}>
         <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '36px', color: NAVY, margin: '0 0 12px', fontWeight: 600, textAlign: 'center' }}>Three Freight Options</h2>
-        <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 40px', textAlign: 'center' }}>Choose the right balance of speed and cost for your order</p>
+        <p style={{ fontSize: '15px', color: '#000', margin: '0 0 40px', textAlign: 'center' }}>Choose the right balance of speed and cost for your order</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
           {[
             {
@@ -132,14 +132,14 @@ export default function LogisticsPage() {
                 <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: NAVY, margin: '0 0 6px', fontWeight: 600 }}>{o.title}</h3>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span style={{ fontSize: '13px', fontWeight: 700, color: GOLD, fontFamily: '"DM Mono", monospace' }}>{o.leadTime}</span>
-                  <span style={{ fontSize: '12px', color: '#7A7570' }}>lead time</span>
+                  <span style={{ fontSize: '12px', color: '#000' }}>lead time</span>
                 </div>
               </div>
-              <div style={{ padding: '10px 14px', background: BG, borderRadius: '8px', fontSize: '12px', color: '#5A5550' }}>
+              <div style={{ padding: '10px 14px', background: BG, borderRadius: '8px', fontSize: '12px', color: '#000' }}>
                 <strong>Best for:</strong> {o.best}
               </div>
               <ul style={{ margin: 0, paddingLeft: '18px' }}>
-                {o.points.map((p, i) => <li key={i} style={{ fontSize: '13px', color: '#5A5550', marginBottom: '8px', lineHeight: 1.5 }}>{p}</li>)}
+                {o.points.map((p, i) => <li key={i} style={{ fontSize: '13px', color: '#000', marginBottom: '8px', lineHeight: 1.5 }}>{p}</li>)}
               </ul>
               <Link href="/contact" style={{ marginTop: 'auto', display: 'block', background: NAVY, color: '#fff', textAlign: 'center', padding: '12px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
                 Get a Quote →
@@ -172,7 +172,7 @@ export default function LogisticsPage() {
                 <tr key={r.label} style={{ background: i % 2 === 0 ? BG : '#fff' }}>
                   <td style={{ padding: '14px 20px', fontWeight: 700, color: NAVY, fontSize: '13px' }}>{r.label}</td>
                   {r.vals.map((v, j) => (
-                    <td key={j} style={{ padding: '14px 20px', textAlign: 'center', color: '#5A5550' }}>{v}</td>
+                    <td key={j} style={{ padding: '14px 20px', textAlign: 'center', color: '#000' }}>{v}</td>
                   ))}
                 </tr>
               ))}

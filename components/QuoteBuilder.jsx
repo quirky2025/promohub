@@ -135,14 +135,14 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
       <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '560px', boxShadow: '0 24px 64px rgba(0,0,0,.25)' }}>
         <div style={{ padding: '18px 22px', borderBottom: '1px solid #E0DDD7', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: 0 }}>Build a Quote</h2>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '22px', color: '#B0AAA3', cursor: 'pointer', lineHeight: 1 }}>×</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '22px', color: '#000', cursor: 'pointer', lineHeight: 1 }}>×</button>
         </div>
 
         {status === 'sent' ? (
           <div style={{ padding: '40px 28px', textAlign: 'center' }}>
             <div style={{ fontSize: '40px', marginBottom: '12px' }}>✅</div>
             <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', color: NAVY, margin: '0 0 8px' }}>Quote sent</h3>
-            <p style={{ fontSize: '13px', color: '#7A7570', margin: '0 0 20px' }}>PDF emailed to {cust.email}. It now shows in the board under Quotes.</p>
+            <p style={{ fontSize: '13px', color: '#000', margin: '0 0 20px' }}>PDF emailed to {cust.email}. It now shows in the board under Quotes.</p>
             <button onClick={onClose} style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '11px 28px', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Done</button>
           </div>
         ) : (
@@ -185,7 +185,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
                 </div>
               )}
               {searching && <div style={{ fontSize: '11px', color: '#9B958E', marginTop: '4px' }}>Searching…</div>}
-              {product && <div style={{ fontSize: '11px', color: '#7A7570', marginTop: '5px', fontFamily: '"DM Mono", monospace' }}>SKU: {product.supplier_sku || '—'} · min {product.min_qty}</div>}
+              {product && <div style={{ fontSize: '11px', color: '#000', marginTop: '5px', fontFamily: '"DM Mono", monospace' }}>SKU: {product.supplier_sku || '—'} · min {product.min_qty}</div>}
             </div>
 
             {product && (

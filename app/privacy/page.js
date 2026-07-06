@@ -23,7 +23,7 @@ export default function PrivacyPolicyPage() {
       {/* CONTENT */}
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '80px 40px' }}>
 
-        <p style={{ fontSize: '16px', lineHeight: 1.9, color: '#5A5A5A', marginBottom: '48px' }}>
+        <p style={{ fontSize: '16px', lineHeight: 1.9, color: '#000', marginBottom: '48px' }}>
           QuirkyPromo (operated by Grow Your Marketing, ABN 95 656 714 270) is committed to providing quality services to you. This policy outlines our ongoing obligations in respect of how we manage your Personal Information. We have adopted the Australian Privacy Principles (APPs) contained in the Privacy Act 1988 (Cth).
         </p>
 
@@ -83,7 +83,7 @@ QuirkyPromo will not charge any fee for your access request, but may charge an a
               {title}
             </h2>
             {content.split('\n\n').map((para, i) => (
-              <p key={i} style={{ fontSize: '15px', lineHeight: 1.9, color: '#5A5A5A', marginBottom: '16px' }}>
+              <p key={i} style={{ fontSize: '15px', lineHeight: 1.9, color: '#000', marginBottom: '16px' }}>
                 {para}
               </p>
             ))}

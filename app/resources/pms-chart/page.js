@@ -322,13 +322,13 @@ export default function PMSColourMatchPage() {
             <div key={title} style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '12px', padding: '24px' }}>
               <div style={{ fontSize: '32px', marginBottom: '12px' }}>{icon}</div>
               <div style={{ fontFamily: '"Cormorant Garamond", Georgia, serif', fontSize: '20px', fontWeight: 600, color: NAVY, marginBottom: '10px' }}>{title}</div>
-              <div style={{ fontSize: '14px', color: '#5A5A5A', lineHeight: 1.8 }}>{desc}</div>
+              <div style={{ fontSize: '14px', color: '#000', lineHeight: 1.8 }}>{desc}</div>
             </div>
           ))}
         </div>
 
         <div style={{ background: '#fff', borderLeft: `4px solid ${GOLD}`, borderRadius: '0 8px 8px 0', padding: '16px 20px', marginBottom: '48px' }}>
-          <p style={{ fontSize: '14px', color: '#5A5A5A', lineHeight: 1.8, margin: 0 }}>
+          <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: 0 }}>
             <strong style={{ color: NAVY }}>Please note:</strong> Exact colour reproduction can vary depending on product material and branding method. Hex values shown are approximate digital representations only. We recommend requesting a physical sample for colour-critical orders.
           </p>
         </div>
@@ -341,13 +341,13 @@ export default function PMSColourMatchPage() {
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
           {COLOUR_GROUPS.map(group => (
             <button key={group} onClick={() => setActiveGroup(group)}
-              style={{ padding: '6px 14px', borderRadius: '20px', border: `1.5px solid ${activeGroup === group ? NAVY : '#E0DDD7'}`, background: activeGroup === group ? NAVY : '#fff', color: activeGroup === group ? '#fff' : '#5A5A5A', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+              style={{ padding: '6px 14px', borderRadius: '20px', border: `1.5px solid ${activeGroup === group ? NAVY : '#E0DDD7'}`, background: activeGroup === group ? NAVY : '#fff', color: activeGroup === group ? '#fff' : '#000', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
               {group}
             </button>
           ))}
         </div>
 
-        <p style={{ fontSize: '13px', color: '#B0AAA3', marginBottom: '20px' }}>
+        <p style={{ fontSize: '13px', color: '#000', marginBottom: '20px' }}>
           Showing {filtered.length} colours — click any colour to copy the PMS number
         </p>
 
@@ -363,7 +363,7 @@ export default function PMSColourMatchPage() {
               <div style={{ height: '64px', background: colour.hex, border: colour.hex === '#FFFFFF' ? '1px solid #E0DDD7' : 'none' }} />
               <div style={{ padding: '7px 9px' }}>
                 <div style={{ fontSize: '9px', fontWeight: 700, color: NAVY, marginBottom: '2px', fontFamily: '"DM Mono", monospace', lineHeight: 1.3 }}>{colour.pms}</div>
-                <div style={{ fontSize: '9px', color: '#7A7570', lineHeight: 1.3 }}>{colour.name}</div>
+                <div style={{ fontSize: '9px', color: '#000', lineHeight: 1.3 }}>{colour.name}</div>
                 {copied === colour.pms && <div style={{ fontSize: '9px', color: GOLD, fontWeight: 700, marginTop: '2px' }}>✓ Copied!</div>}
               </div>
             </div>

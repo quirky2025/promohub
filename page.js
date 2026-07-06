@@ -223,7 +223,7 @@ export default function Home() {
   }
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', color: '#1a1a1a' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', color: '#000' }}>
 
       {/* ============ HERO (新版: 浅色背景图 + 左侧文案) ============ */}
       <div className="qp-hero" style={{
@@ -275,7 +275,7 @@ export default function Home() {
               <span style={{ fontSize: '26px' }}>{b.icon}</span>
               <div>
                 <div style={{ fontSize: '14px', fontWeight: 700, color: NAVY }}>{b.title}</div>
-                <div style={{ fontSize: '12px', color: '#7A7570' }}>{b.sub}</div>
+                <div style={{ fontSize: '12px', color: '#000' }}>{b.sub}</div>
               </div>
             </div>
           ))}
@@ -286,7 +286,7 @@ export default function Home() {
       <div className="qp-sec" style={{ maxWidth: '1400px', margin: '0 auto', padding: '64px 40px' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <h2 className="qp-h2" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>Promotional Product Categories</h2>
-          <p style={{ fontSize: '15px', color: '#7A7570', margin: 0 }}>Browse our full range across 12 categories</p>
+          <p style={{ fontSize: '15px', color: '#000', margin: 0 }}>Browse our full range across 12 categories</p>
         </div>
          <div className="qp-cat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
           {(showAllCats ? CATEGORIES : CATEGORIES.slice(0, 8)).map(cat => (
@@ -325,7 +325,7 @@ export default function Home() {
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '44px' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>Two Ways to Build Your Brand</h2>
-            <p style={{ fontSize: '15px', color: '#7A7570', margin: 0 }}>Fast Australian stock, or fully custom global sourcing — we do both</p>
+            <p style={{ fontSize: '15px', color: '#000', margin: 0 }}>Fast Australian stock, or fully custom global sourcing — we do both</p>
           </div>
 
           <div className="qp-two-ways" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
@@ -365,7 +365,7 @@ export default function Home() {
               <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>
                 Custom Made & Global Sourcing
               </h3>
-              <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.7, margin: '0 0 22px' }}>
+              <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.7, margin: '0 0 22px' }}>
                 We source and manufacture custom products directly from trusted factories.
               </p>
               <div className="qp-card-body" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', alignItems: 'center' }}>
@@ -404,7 +404,7 @@ export default function Home() {
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '44px' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>Solutions for Your Industry</h2>
-            <p style={{ fontSize: '15px', color: '#7A7570', margin: 0 }}>Curated product ranges for the industries we know best</p>
+            <p style={{ fontSize: '15px', color: '#000', margin: 0 }}>Curated product ranges for the industries we know best</p>
           </div>
           <div className="qp-industries" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
             {INDUSTRIES.map(ind => (
@@ -420,7 +420,7 @@ export default function Home() {
                   </div>
                   <div style={{ padding: '20px 18px' }}>
                     <div style={{ fontSize: '17px', fontWeight: 700, color: NAVY, marginBottom: '8px' }}>{ind.name}</div>
-                    <p style={{ fontSize: '13px', color: '#5A5550', lineHeight: 1.6, margin: '0 0 12px' }}>{ind.desc}</p>
+                    <p style={{ fontSize: '13px', color: '#000', lineHeight: 1.6, margin: '0 0 12px' }}>{ind.desc}</p>
                     <div style={{ fontSize: '13px', color: GOLD, fontWeight: 700 }}>Learn More →</div>
                   </div>
                 </div>
@@ -439,14 +439,14 @@ export default function Home() {
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>Why QuirkyPromo</h2>
-            <p style={{ fontSize: '15px', color: '#7A7570', margin: 0 }}>Built for Australian businesses that demand quality, reliability, and value</p>
+            <p style={{ fontSize: '15px', color: '#000', margin: 0 }}>Built for Australian businesses that demand quality, reliability, and value</p>
           </div>
           <div className="qp-why-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
             {WHY_US.map(w => (
               <div key={w.title} style={{ background: BG, borderRadius: '14px', padding: '32px 24px', border: '1px solid #E0DDD7' }}>
                 <div style={{ fontSize: '36px', marginBottom: '16px',textAlign: 'center' }}>{w.icon}</div>
                 <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>{w.title}</h3>
-                <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.7, margin: 0 }}>{w.desc}</p>
+                <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.7, margin: 0 }}>{w.desc}</p>
               </div>
             ))}
           </div>
@@ -464,7 +464,7 @@ export default function Home() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
             <div>
               <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: NAVY, margin: '0 0 6px', fontWeight: 600 }}>Featured Products</h2>
-              <p style={{ fontSize: '14px', color: '#7A7570', margin: 0 }}>A selection from our range of 1,800+ products</p>
+              <p style={{ fontSize: '14px', color: '#000', margin: 0 }}>A selection from our range of 1,800+ products</p>
             </div>
             <Link href="/category/bags" style={{ color: GOLD, fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>View All Products →</Link>
           </div>
@@ -489,12 +489,12 @@ export default function Home() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         {price > 0 && (
                           <div>
-                            <div style={{ fontSize: '11px', color: '#7A7570' }}>As low as</div>
+                            <div style={{ fontSize: '11px', color: '#000' }}>As low as</div>
                             <div style={{ fontSize: '18px', color: GOLD, fontWeight: 400 }}>${price.toFixed(2)}</div>
                           </div>
                         )}
                         <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '11px', color: '#7A7570' }}>{product.subcategory || product.category}</div>
+                          <div style={{ fontSize: '11px', color: '#000' }}>{product.subcategory || product.category}</div>
                         </div>
                       </div>
                     </div>
@@ -511,7 +511,7 @@ export default function Home() {
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '44px' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '38px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>Recent Projects</h2>
-            <p style={{ fontSize: '15px', color: '#7A7570', margin: 0 }}>Real campaigns, delivered for Australian businesses</p>
+            <p style={{ fontSize: '15px', color: '#000', margin: 0 }}>Real campaigns, delivered for Australian businesses</p>
           </div>
           <div className="qp-projects" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px' }}>
             {PROJECTS.map(p => (
@@ -521,7 +521,7 @@ export default function Home() {
                 </div>
                 <div style={{ padding: '18px' }}>
                   <div style={{ fontSize: '16px', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>{p.title}</div>
-                  <div style={{ fontSize: '13px', color: '#7A7570' }}>{p.sub}</div>
+                  <div style={{ fontSize: '13px', color: '#000' }}>{p.sub}</div>
                 </div>
               </div>
             ))}
@@ -570,7 +570,7 @@ export default function Home() {
       <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '56px 0', overflow: 'hidden' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', textAlign: 'center', padding: '0 40px' }}>
           <h2 className="qp-h2" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 8px', fontWeight: 600 }}>Trusted By Leading Australian Brands</h2>
-          <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 36px' }}>From ASX-listed companies to government departments and fast-growing startups</p>
+          <p style={{ fontSize: '14px', color: '#000', margin: '0 0 36px' }}>From ASX-listed companies to government departments and fast-growing startups</p>
         </div>
 
         {/* 横向无限滚动跑马灯 */}
@@ -585,7 +585,7 @@ export default function Home() {
           </div>
         </div>
 
-        <p style={{ fontSize: '12px', color: '#B0AAA3', margin: '36px 0 0', textAlign: 'center' }}>
+        <p style={{ fontSize: '12px', color: '#000', margin: '36px 0 0', textAlign: 'center' }}>
           + many more Australian businesses, government departments, and education institutions
         </p>
 
@@ -644,14 +644,14 @@ export default function Home() {
             Promotional Products, Branded Merchandise & Corporate Gifts Australia
           </h2>
           {SEO_PARAGRAPHS.map((para, i) => (
-            <p key={i} style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.85, margin: '0 0 16px' }}>
+            <p key={i} style={{ fontSize: '14px', color: '#000', lineHeight: 1.85, margin: '0 0 16px' }}>
               {para}
             </p>
           ))}
           <p style={{ fontSize: '16px', color: GOLD, fontWeight: 700, textAlign: 'center', margin: '32px 0 6px', letterSpacing: '0.5px' }}>
             Easy. Fast. Transparent. Custom.
           </p>
-          <p style={{ fontSize: '14px', color: '#7A7570', textAlign: 'center', fontStyle: 'italic', margin: 0 }}>
+          <p style={{ fontSize: '14px', color: '#000', textAlign: 'center', fontStyle: 'italic', margin: 0 }}>
             Because building your brand should be simple.
           </p>
         </div>

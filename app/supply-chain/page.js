@@ -67,12 +67,12 @@ const STEPS = [
 
 export default function SupplyChainPage() {
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', color: '#1a1a1a' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', color: '#000' }}>
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>Supply Chain</span>
         </div>
@@ -123,7 +123,7 @@ export default function SupplyChainPage() {
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '36px', color: NAVY, margin: '0 0 12px', fontWeight: 600 }}>
               How It Works
             </h2>
-            <p style={{ fontSize: '15px', color: '#7A7570', margin: 0 }}>Our end-to-end process — from factory to your door</p>
+            <p style={{ fontSize: '15px', color: '#000', margin: 0 }}>Our end-to-end process — from factory to your door</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '0' }}>
             {STEPS.map((s, i) => (
@@ -133,7 +133,7 @@ export default function SupplyChainPage() {
                 )}
                 <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: NAVY, color: GOLD, fontFamily: '"DM Mono", monospace', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>{s.num}</div>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: NAVY, marginBottom: '8px' }}>{s.title}</div>
-                <div style={{ fontSize: '12px', color: '#7A7570', lineHeight: 1.6 }}>{s.desc}</div>
+                <div style={{ fontSize: '12px', color: '#000', lineHeight: 1.6 }}>{s.desc}</div>
               </div>
             ))}
           </div>
@@ -146,7 +146,7 @@ export default function SupplyChainPage() {
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '36px', color: NAVY, margin: '0 0 12px', fontWeight: 600 }}>
             Our Supply Chain Capabilities
           </h2>
-          <p style={{ fontSize: '15px', color: '#7A7570', margin: 0 }}>Six integrated services — use one or all of them</p>
+          <p style={{ fontSize: '15px', color: '#000', margin: 0 }}>Six integrated services — use one or all of them</p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
           {MODULES.map(m => (
@@ -158,14 +158,14 @@ export default function SupplyChainPage() {
                 <div style={{ fontSize: '36px' }}>{m.icon}</div>
                 <div>
                   <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>{m.title}</h3>
-                  <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.7, margin: 0 }}>{m.desc}</p>
+                  <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.7, margin: 0 }}>{m.desc}</p>
                 </div>
                 <div style={{ display: 'flex', gap: '16px', marginTop: 'auto', paddingTop: '16px', borderTop: '1px solid #F0EEED', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ display: 'flex', gap: '16px' }}>
                     {m.stats.map(s => (
                       <div key={s.label}>
                         <div style={{ fontSize: '14px', fontWeight: 700, color: GOLD, fontFamily: '"DM Mono", monospace' }}>{s.value}</div>
-                        <div style={{ fontSize: '11px', color: '#7A7570' }}>{s.label}</div>
+                        <div style={{ fontSize: '11px', color: '#000' }}>{s.label}</div>
                       </div>
                     ))}
                   </div>
@@ -181,7 +181,7 @@ export default function SupplyChainPage() {
       <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '64px 40px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto', textAlign: 'center' }}>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '36px', color: NAVY, margin: '0 0 12px', fontWeight: 600 }}>Who We Work With</h2>
-          <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 40px' }}>Our supply chain solutions are built for Australian organisations with volume merchandise needs</p>
+          <p style={{ fontSize: '15px', color: '#000', margin: '0 0 40px' }}>Our supply chain solutions are built for Australian organisations with volume merchandise needs</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
             {[
               { icon: '🏢', title: 'Corporate & Enterprise', desc: 'Staff gifts, onboarding packs, client gifting programs' },
@@ -192,7 +192,7 @@ export default function SupplyChainPage() {
               <div key={w.title} style={{ background: BG, borderRadius: '12px', padding: '28px 24px', border: '1px solid #E0DDD7' }}>
                 <div style={{ fontSize: '32px', marginBottom: '12px' }}>{w.icon}</div>
                 <div style={{ fontWeight: 700, color: NAVY, fontSize: '15px', marginBottom: '8px' }}>{w.title}</div>
-                <div style={{ fontSize: '13px', color: '#7A7570', lineHeight: 1.6 }}>{w.desc}</div>
+                <div style={{ fontSize: '13px', color: '#000', lineHeight: 1.6 }}>{w.desc}</div>
               </div>
             ))}
           </div>

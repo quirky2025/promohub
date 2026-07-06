@@ -518,7 +518,7 @@ export default function DecorationMethodsPage() {
         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           {CATEGORIES.map(cat => (
             <button key={cat} onClick={() => setActiveCategory(cat)}
-              style={{ padding: '8px 20px', borderRadius: '20px', border: `1.5px solid ${activeCategory === cat ? NAVY : '#E0DDD7'}`, background: activeCategory === cat ? NAVY : '#fff', color: activeCategory === cat ? '#fff' : '#5A5A5A', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', transition: 'all 0.15s' }}>
+              style={{ padding: '8px 20px', borderRadius: '20px', border: `1.5px solid ${activeCategory === cat ? NAVY : '#E0DDD7'}`, background: activeCategory === cat ? NAVY : '#fff', color: activeCategory === cat ? '#fff' : '#000', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', transition: 'all 0.15s' }}>
               {cat}
             </button>
           ))}
@@ -550,7 +550,7 @@ export default function DecorationMethodsPage() {
 
               {/* Description always visible */}
               <div style={{ padding: '0 24px 20px', borderTop: '1px solid #F0EEED' }}>
-                <p style={{ fontSize: '14px', color: '#5A5A5A', lineHeight: 1.8, margin: '16px 0 0' }}>
+                <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: '16px 0 0' }}>
                   {method.description}
                 </p>
               </div>

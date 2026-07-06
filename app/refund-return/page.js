@@ -102,7 +102,7 @@ export default function RefundReturnPage() {
             <div key={label} style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '10px', padding: '20px', textAlign: 'center' }}>
               <div style={{ fontSize: '28px', marginBottom: '8px' }}>{icon}</div>
               <div style={{ fontWeight: 700, color: NAVY, fontSize: '14px', marginBottom: '4px' }}>{label}</div>
-              <div style={{ fontSize: '12px', color: '#7A7570' }}>{desc}</div>
+              <div style={{ fontSize: '12px', color: '#000' }}>{desc}</div>
             </div>
           ))}
         </div>
@@ -115,14 +115,14 @@ export default function RefundReturnPage() {
               {title}
             </h2>
             {content && content.split('\n\n').map((para, i) => (
-              <p key={i} style={{ fontSize: '16px', lineHeight: 1.9, color: '#5A5A5A', marginBottom: '12px', whiteSpace: 'pre-line' }}>
+              <p key={i} style={{ fontSize: '16px', lineHeight: 1.9, color: '#000', marginBottom: '12px', whiteSpace: 'pre-line' }}>
                 {para}
               </p>
             ))}
             {subsections && subsections.map(({ subtitle, content: sub }) => (
               <div key={subtitle} style={{ marginBottom: '20px', paddingLeft: '16px', borderLeft: '3px solid #E0DDD7' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: NAVY, marginBottom: '8px' }}>{subtitle}</h3>
-                <p style={{ fontSize: '16px', lineHeight: 1.9, color: '#5A5A5A', margin: 0 }}>{sub}</p>
+                <p style={{ fontSize: '16px', lineHeight: 1.9, color: '#000', margin: 0 }}>{sub}</p>
               </div>
             ))}
           </div>

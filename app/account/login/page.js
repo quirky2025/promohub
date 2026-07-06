@@ -43,7 +43,7 @@ export default function LoginPage() {
             QUIRKY<span style={{ color: GOLD }}>PROMO</span>
           </Link>
           <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', fontWeight: 600, color: NAVY, margin: '16px 0 8px' }}>Sign In</h1>
-          <p style={{ fontSize: '14px', color: '#7A7570', margin: 0 }}>Welcome back! Sign in to view your orders.</p>
+          <p style={{ fontSize: '14px', color: '#000', margin: 0 }}>Welcome back! Sign in to view your orders.</p>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -75,7 +75,7 @@ export default function LoginPage() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
 
-          <p style={{ textAlign: 'center', fontSize: '14px', color: '#7A7570', margin: 0 }}>
+          <p style={{ textAlign: 'center', fontSize: '14px', color: '#000', margin: 0 }}>
             Don't have an account?{' '}
             <Link href="/account/register" style={{ color: GOLD, textDecoration: 'none', fontWeight: 600 }}>Create one</Link>
           </p>
