@@ -14,7 +14,7 @@ const CATEGORY_URLS = [
       ['Jackets', '/custom-jackets-australia'],
       ['Pants & Shorts', '/workwear-pants-and-shorts-australia'],
       ['Polo Shirts', '/custom-polo-shirts-australia'],
-      ['Scarves & Accessories', '/branded-scarves-and-accessories-australia'],
+      ['Scarves & Gloves', '/branded-scarves-and-accessories-australia'],
       ['Shirts', '/custom-shirts-australia'],
       ['Socks', '/custom-socks-australia'],
       ['Sweatshirts', '/custom-sweatshirts-australia'],
@@ -271,6 +271,8 @@ const CATEGORY_URLS = [
 ];
 
 const LEGACY_BUCKET_REDIRECTS = [
+  // Renamed subcategory 'Scarves & Accessories' -> 'Scarves & Gloves'; keep the old /category path alive.
+  ['/category/apparel/scarves-accessories', '/branded-scarves-and-accessories-australia'],
   ['/category/business', '/branded-office-supplies-australia'],
   ['/category/business/business-cards', '/business-cards-australia'],
   ['/category/leisure', '/outdoor-promotional-products-australia'],

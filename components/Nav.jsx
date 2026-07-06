@@ -54,7 +54,7 @@ const FLAT_NAV_OVERRIDES = {
       { label: 'Teamwear', href: '/custom-teamwear-australia' },
       { label: 'Aprons', href: '/custom-aprons-australia' },
       { label: 'Socks', href: '/custom-socks-australia' },
-      { label: 'Scarves & Accessories', href: '/branded-scarves-and-accessories-australia' },
+      { label: 'Scarves & Gloves', href: '/branded-scarves-and-accessories-australia' },
       { label: 'Apparel Accessories', href: '/branded-apparel-accessories-australia' },
     ],
   },
