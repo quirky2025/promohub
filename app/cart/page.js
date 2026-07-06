@@ -45,8 +45,8 @@ export default function CartPage() {
     return (
       <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', minHeight: '100vh' }}>
         <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-          <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-            <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+          <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+            <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
             <span style={{ margin: '0 8px' }}>›</span>
             <span style={{ color: NAVY, fontWeight: 600 }}>Your Cart</span>
           </div>
@@ -54,7 +54,7 @@ export default function CartPage() {
         <div style={{ maxWidth: '500px', margin: '100px auto', padding: '0 40px', textAlign: 'center' }}>
           <div style={{ fontSize: '64px', marginBottom: '24px' }}>🛒</div>
           <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 12px' }}>Your cart is empty</h1>
-          <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 32px', lineHeight: 1.7 }}>
+          <p style={{ fontSize: '15px', color: '#000', margin: '0 0 32px', lineHeight: 1.7 }}>
             Browse our range and add products to your cart to get started.
           </p>
           <Link href="/category/bags" style={{ background: GOLD, color: '#fff', padding: '14px 32px', borderRadius: '10px', fontSize: '15px', fontWeight: 600, textDecoration: 'none', display: 'inline-block' }}>
@@ -70,8 +70,8 @@ export default function CartPage() {
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>Your Cart</span>
         </div>
@@ -114,7 +114,7 @@ export default function CartPage() {
                 <Link href={`/products/${item.productSlug}`} style={{ textDecoration: 'none' }}>
                   <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '16px', fontWeight: 700, color: NAVY, marginBottom: '6px', lineHeight: 1.3 }}>{item.productName}</div>
                 </Link>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', fontSize: '13px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif', marginBottom: '12px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', fontSize: '13px', color: '#000', fontFamily: '"DM Sans", sans-serif', marginBottom: '12px' }}>
                   {item.sku && <span>SKU: {item.sku}</span>}
                   {item.colour && <span>Colour: {item.colour}</span>}
                   <span>Unit price: ${item.unitPrice?.toFixed(2)}</span>
@@ -122,7 +122,7 @@ export default function CartPage() {
                 {item.addons?.length > 0 && (
                   <div style={{ marginBottom: '12px' }}>
                     {item.addons.map(a => (
-                      <div key={a.id} style={{ fontSize: '12px', color: '#5A5550', fontFamily: '"DM Sans", sans-serif' }}>
+                      <div key={a.id} style={{ fontSize: '12px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
                         + {a.name}
                       </div>
                     ))}
@@ -130,7 +130,7 @@ export default function CartPage() {
                 )}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <label style={{ fontSize: '12px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>Qty:</label>
+                    <label style={{ fontSize: '12px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>Qty:</label>
                     <input
                       type="number"
                       value={item.qty}
@@ -138,9 +138,9 @@ export default function CartPage() {
                       onChange={e => handleQtyChange(item.id, e.target.value)}
                       style={{ width: '80px', padding: '6px 10px', border: '1.5px solid #E0DDD7', borderRadius: '6px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', color: NAVY, outline: 'none' }}
                     />
-                    {item.minQty && <span style={{ fontSize: '11px', color: '#B0AAA3' }}>Min {item.minQty}</span>}
+                    {item.minQty && <span style={{ fontSize: '11px', color: '#000' }}>Min {item.minQty}</span>}
                   </div>
-                  <button onClick={() => handleRemove(item.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#B0AAA3', fontSize: '12px', fontFamily: '"DM Sans", sans-serif', textDecoration: 'underline', padding: 0 }}>
+                  <button onClick={() => handleRemove(item.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#000', fontSize: '12px', fontFamily: '"DM Sans", sans-serif', textDecoration: 'underline', padding: 0 }}>
                     Remove
                   </button>
                 </div>
@@ -149,7 +149,7 @@ export default function CartPage() {
               {/* Price */}
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
                 <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '20px', fontWeight: 600, color: GOLD }}>${item.subtotal.toFixed(2)}</div>
-                <div style={{ fontSize: '11px', color: '#B0AAA3', fontFamily: '"DM Sans", sans-serif', marginTop: '3px' }}>excl. GST</div>
+                <div style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Sans", sans-serif', marginTop: '3px' }}>excl. GST</div>
               </div>
             </div>
           ))}
@@ -169,15 +169,15 @@ export default function CartPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#7A7570' }}>Subtotal ({cart.length} item{cart.length !== 1 ? 's' : ''})</span>
+                <span style={{ color: '#000' }}>Subtotal ({cart.length} item{cart.length !== 1 ? 's' : ''})</span>
                 <span style={{ fontFamily: '"DM Mono", monospace' }}>${totalSubtotal.toFixed(2)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#7A7570' }}>Shipping & Handling</span>
+                <span style={{ color: '#000' }}>Shipping & Handling</span>
                 <span style={{ fontFamily: '"DM Mono", monospace' }}>${SHIPPING.toFixed(2)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#7A7570' }}>GST (10%)</span>
+                <span style={{ color: '#000' }}>GST (10%)</span>
                 <span style={{ fontFamily: '"DM Mono", monospace' }}>${gstAmt.toFixed(2)}</span>
               </div>
               <div style={{ height: '1px', background: '#E0DDD7' }} />
@@ -198,7 +198,7 @@ export default function CartPage() {
               Place Order — Pay Later →
             </Link>
 
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', fontSize: '12px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>
+            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', fontSize: '12px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
               <span>🔒 Secure checkout</span>
               <span>·</span>
               <span>EFT or Credit Card</span>
@@ -212,7 +212,7 @@ export default function CartPage() {
                 { icon: '✅', text: 'Quality guarantee' },
                 { icon: '💬', text: 'Reply within 3 business hours' },
               ].map(b => (
-                <div key={b.text} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#5A5550', fontFamily: '"DM Sans", sans-serif' }}>
+                <div key={b.text} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
                   <span>{b.icon}</span><span>{b.text}</span>
                 </div>
               ))}

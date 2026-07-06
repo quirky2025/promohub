@@ -61,7 +61,7 @@ export default function RegisterPage() {
         <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '440px', width: '100%', textAlign: 'center', boxShadow: '0 8px 32px rgba(27,42,74,0.08)' }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: '0 0 12px' }}>Check your email!</h2>
-          <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 24px' }}>
+          <p style={{ fontSize: '14px', color: '#000', margin: '0 0 24px' }}>
             We've sent a verification link to <strong>{form.email}</strong>. Click the link to activate your account.
           </p>
           <Link href="/account/login" style={{ background: GOLD, color: '#fff', textDecoration: 'none', padding: '14px 32px', borderRadius: '10px', fontWeight: 700, fontSize: '15px', fontFamily: '"DM Sans", sans-serif' }}>
@@ -81,7 +81,7 @@ export default function RegisterPage() {
             QUIRKY<span style={{ color: GOLD }}>PROMO</span>
           </Link>
           <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', fontWeight: 600, color: NAVY, margin: '16px 0 8px' }}>Create Account</h1>
-          <p style={{ fontSize: '14px', color: '#7A7570', margin: 0 }}>Join QuirkyPromo to track your orders.</p>
+          <p style={{ fontSize: '14px', color: '#000', margin: 0 }}>Join QuirkyPromo to track your orders.</p>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -119,7 +119,7 @@ export default function RegisterPage() {
             {loading ? 'Creating account...' : 'Create Account'}
           </button>
 
-          <p style={{ textAlign: 'center', fontSize: '14px', color: '#7A7570', margin: 0 }}>
+          <p style={{ textAlign: 'center', fontSize: '14px', color: '#000', margin: 0 }}>
             Already have an account?{' '}
             <Link href="/account/login" style={{ color: GOLD, textDecoration: 'none', fontWeight: 600 }}>Sign in</Link>
           </p>

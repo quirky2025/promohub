@@ -174,12 +174,12 @@ export default function CollectionPage() {
   const selectStyle = { padding: '10px 16px', borderRadius: '8px', border: '1px solid #E0DDD7', fontSize: '14px', color: NAVY, background: '#fff', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' };
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#ffffff', color: '#1a1a1a' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#ffffff', color: '#000' }}>
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>/</span>
-          <Link href="/collections" style={{ color: '#7A7570', textDecoration: 'none' }}>Collections</Link>
+          <Link href="/collections" style={{ color: '#000', textDecoration: 'none' }}>Collections</Link>
           <span style={{ margin: '0 8px' }}>/</span>
           <span style={{ color: NAVY, fontWeight: 600, textTransform: 'capitalize' }}>{collectionName}</span>
         </div>
@@ -200,7 +200,7 @@ export default function CollectionPage() {
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '48px 40px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '28px', flexWrap: 'wrap', gap: '16px' }}>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', color: NAVY, margin: 0, fontWeight: 600 }}>
-            Products {!loading && <span style={{ fontSize: '15px', color: '#7A7570', fontWeight: 400 }}>({filtered.length})</span>}
+            Products {!loading && <span style={{ fontSize: '15px', color: '#000', fontWeight: 400 }}>({filtered.length})</span>}
           </h2>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
             <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)} style={selectStyle}>
@@ -222,12 +222,12 @@ export default function CollectionPage() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '80px 0', color: '#7A7570' }}>Loading…</div>
+          <div style={{ textAlign: 'center', padding: '80px 0', color: '#000' }}>Loading…</div>
         ) : loadError ? (
           <div style={{ textAlign: 'center', padding: '80px 0' }}>
             <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
             <div style={{ fontSize: '16px', fontWeight: 600, color: NAVY, marginBottom: '8px' }}>Couldn’t load this collection</div>
-            <div style={{ fontSize: '14px', color: '#7A7570', marginBottom: '8px' }}>Something went wrong. Please try again in a moment.</div>
+            <div style={{ fontSize: '14px', color: '#000', marginBottom: '8px' }}>Something went wrong. Please try again in a moment.</div>
             <Link href="/" style={{ display: 'inline-block', marginTop: '8px', background: GOLD, color: '#fff', padding: '10px 24px', borderRadius: '8px', textDecoration: 'none', fontWeight: 600 }}>Browse All Products</Link>
           </div>
         ) : filtered.length === 0 ? (
@@ -254,8 +254,8 @@ export default function CollectionPage() {
                       <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ fontSize: '14px', fontWeight: 600, color: NAVY, lineHeight: 1.4, textAlign: 'center' }}>{product.name}</div>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: 'auto' }}>
-                          {price > 0 && (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '2px' }}>As low as</div><div style={{ fontSize: '18px', color: GOLD, fontWeight: 400 }}>${price.toFixed(2)}</div></div>)}
-                          <div style={{ textAlign: 'center' }}><div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '2px' }}>Min Qty</div><div style={{ fontSize: '18px', color: NAVY, fontWeight: 400 }}>{product.min_qty}</div></div>
+                          {price > 0 && (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>As low as</div><div style={{ fontSize: '18px', color: GOLD, fontWeight: 400 }}>${price.toFixed(2)}</div></div>)}
+                          <div style={{ textAlign: 'center' }}><div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>Min Qty</div><div style={{ fontSize: '18px', color: NAVY, fontWeight: 400 }}>{product.min_qty}</div></div>
                         </div>
                       </div>
                     </div>

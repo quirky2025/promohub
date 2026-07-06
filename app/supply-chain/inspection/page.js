@@ -11,10 +11,10 @@ export default function InspectionPage() {
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href="/supply-chain" style={{ color: '#7A7570', textDecoration: 'none' }}>Supply Chain</Link>
+          <Link href="/supply-chain" style={{ color: '#000', textDecoration: 'none' }}>Supply Chain</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>Quality Inspection</span>
         </div>
@@ -47,13 +47,13 @@ export default function InspectionPage() {
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', color: NAVY, margin: '0 0 16px', fontWeight: 600 }}>
               Why Third-Party Inspection Matters
             </h2>
-            <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 16px' }}>
+            <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: '0 0 16px' }}>
               When merchandise is manufactured overseas, the biggest risk isn't the factory — it's the gap between what was approved and what was produced. Colours shift. Dimensions drift. Print quality varies. Without an independent check before shipment, these issues only become visible when the goods arrive in Australia.
             </p>
-            <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 16px' }}>
+            <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: '0 0 16px' }}>
               A third-party pre-shipment inspection puts an independent set of eyes on your order at the factory — before it's packed into containers and shipped. Any discrepancies are caught and resolved at the source, not after a 45-day sea freight journey.
             </p>
-            <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.8, margin: 0 }}>
+            <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: 0 }}>
               We arrange independent inspection through accredited third-party inspection companies. The inspection report is shared with you directly, giving you full transparency over your order quality.
             </p>
           </div>
@@ -68,7 +68,7 @@ export default function InspectionPage() {
                 <span style={{ fontSize: '24px', flexShrink: 0 }}>{s.icon}</span>
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: 700, color: NAVY, marginBottom: '3px' }}>{s.title}</div>
-                  <div style={{ fontSize: '13px', color: '#7A7570', lineHeight: 1.5 }}>{s.desc}</div>
+                  <div style={{ fontSize: '13px', color: '#000', lineHeight: 1.5 }}>{s.desc}</div>
                 </div>
               </div>
             ))}
@@ -81,7 +81,7 @@ export default function InspectionPage() {
         <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', color: NAVY, margin: '0 0 12px', fontWeight: 600, textAlign: 'center' }}>
           What Gets Inspected
         </h2>
-        <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 40px', textAlign: 'center' }}>
+        <p style={{ fontSize: '15px', color: '#000', margin: '0 0 40px', textAlign: 'center' }}>
           Our inspection partners check every critical aspect of your order against the approved specifications
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
@@ -122,7 +122,7 @@ export default function InspectionPage() {
               <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', color: NAVY, margin: '0 0 14px', fontWeight: 600 }}>{s.title}</h3>
               <ul style={{ margin: 0, paddingLeft: '16px' }}>
                 {s.points.map((p, i) => (
-                  <li key={i} style={{ fontSize: '13px', color: '#5A5550', marginBottom: '6px', lineHeight: 1.5 }}>{p}</li>
+                  <li key={i} style={{ fontSize: '13px', color: '#000', marginBottom: '6px', lineHeight: 1.5 }}>{p}</li>
                 ))}
               </ul>
             </div>
@@ -151,7 +151,7 @@ export default function InspectionPage() {
                 <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: NAVY, color: GOLD, fontFamily: '"DM Mono", monospace', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>{s.num}</div>
                 <div style={{ fontSize: '24px', marginBottom: '10px' }}>{s.icon}</div>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: NAVY, marginBottom: '8px' }}>{s.title}</div>
-                <div style={{ fontSize: '12px', color: '#7A7570', lineHeight: 1.6 }}>{s.desc}</div>
+                <div style={{ fontSize: '12px', color: '#000', lineHeight: 1.6 }}>{s.desc}</div>
               </div>
             ))}
           </div>
@@ -163,7 +163,7 @@ export default function InspectionPage() {
         <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', color: NAVY, margin: '0 0 16px', fontWeight: 600, textAlign: 'center' }}>
           When We Recommend an Inspection
         </h2>
-        <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 32px', textAlign: 'center', lineHeight: 1.7 }}>
+        <p style={{ fontSize: '15px', color: '#000', margin: '0 0 32px', textAlign: 'center', lineHeight: 1.7 }}>
           Inspection is strongly recommended for the following types of orders
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>

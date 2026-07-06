@@ -58,7 +58,7 @@ export default async function PromotionalProductsPage() {
   };
 
   return (
-    <main style={{ minHeight: '100vh', background: CREAM, color: '#1a1a1a' }}>
+    <main style={{ minHeight: '100vh', background: CREAM, color: '#000' }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
 
       <nav aria-label="Breadcrumb" style={{ borderBottom: `1px solid ${LINE}`, background: '#fff' }}>

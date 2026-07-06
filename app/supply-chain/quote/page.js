@@ -90,10 +90,10 @@ export default function SupplyChainQuotePage() {
     return (
       <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', minHeight: '100vh' }}>
         <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-          <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-            <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+          <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+            <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
             <span style={{ margin: '0 8px' }}>›</span>
-            <Link href="/supply-chain" style={{ color: '#7A7570', textDecoration: 'none' }}>Supply Chain</Link>
+            <Link href="/supply-chain" style={{ color: '#000', textDecoration: 'none' }}>Supply Chain</Link>
             <span style={{ margin: '0 8px' }}>›</span>
             <span style={{ color: NAVY, fontWeight: 600 }}>Sourcing Quote</span>
           </div>
@@ -103,7 +103,7 @@ export default function SupplyChainQuotePage() {
           <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '36px', color: NAVY, margin: '0 0 16px' }}>
             Quote Request Received
           </h1>
-          <p style={{ fontSize: '15px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 32px' }}>
+          <p style={{ fontSize: '15px', color: '#000', lineHeight: 1.8, margin: '0 0 32px' }}>
             Thank you for your enquiry. Our sourcing team will review your requirements and get back to you within <strong>24–48 business hours</strong> with a detailed quotation.
           </p>
           <div style={{ background: '#fff', borderRadius: '12px', padding: '24px', border: '1px solid #E0DDD7', marginBottom: '32px', textAlign: 'left' }}>
@@ -116,7 +116,7 @@ export default function SupplyChainQuotePage() {
             ].map((s, i) => (
               <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start', marginBottom: '10px' }}>
                 <div style={{ width: '22px', height: '22px', borderRadius: '50%', background: GOLD, color: '#fff', fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{i + 1}</div>
-                <div style={{ fontSize: '13px', color: '#5A5550', lineHeight: 1.5 }}>{s}</div>
+                <div style={{ fontSize: '13px', color: '#000', lineHeight: 1.5 }}>{s}</div>
               </div>
             ))}
           </div>
@@ -138,10 +138,10 @@ export default function SupplyChainQuotePage() {
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href="/supply-chain" style={{ color: '#7A7570', textDecoration: 'none' }}>Supply Chain</Link>
+          <Link href="/supply-chain" style={{ color: '#000', textDecoration: 'none' }}>Supply Chain</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>Get a Sourcing Quote</span>
         </div>
@@ -165,10 +165,10 @@ export default function SupplyChainQuotePage() {
           {STEPS.map((s, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', flex: i < STEPS.length - 1 ? 1 : 'none' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: i <= step ? NAVY : '#E0DDD7', color: i <= step ? GOLD : '#B0AAA3', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"DM Mono", monospace' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: i <= step ? NAVY : '#E0DDD7', color: i <= step ? GOLD : '#000', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: '"DM Mono", monospace' }}>
                   {i < step ? '✓' : i + 1}
                 </div>
-                <span style={{ fontSize: '13px', fontWeight: i === step ? 700 : 400, color: i === step ? NAVY : '#B0AAA3', whiteSpace: 'nowrap' }}>{s}</span>
+                <span style={{ fontSize: '13px', fontWeight: i === step ? 700 : 400, color: i === step ? NAVY : '#000', whiteSpace: 'nowrap' }}>{s}</span>
               </div>
               {i < STEPS.length - 1 && (
                 <div style={{ flex: 1, height: '1px', background: i < step ? GOLD : '#E0DDD7', margin: '0 12px' }} />
@@ -186,7 +186,7 @@ export default function SupplyChainQuotePage() {
           {step === 0 && (
             <div>
               <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '26px', color: NAVY, margin: '0 0 8px' }}>Product Requirements</h2>
-              <p style={{ fontSize: '13px', color: '#7A7570', margin: '0 0 28px' }}>Tell us what you need — be as detailed as possible.</p>
+              <p style={{ fontSize: '13px', color: '#000', margin: '0 0 28px' }}>Tell us what you need — be as detailed as possible.</p>
 
               <div style={{ marginBottom: '20px' }}>
                 <label style={labelStyle}>Product Description <span style={{ color: '#C0392B' }}>*</span></label>
@@ -233,7 +233,7 @@ export default function SupplyChainQuotePage() {
                 Next: Branding & Compliance →
               </button>
               {!canProceedStep0() && (
-                <p style={{ textAlign: 'center', fontSize: '12px', color: '#B0AAA3', margin: '8px 0 0' }}>Please fill in all required fields to continue</p>
+                <p style={{ textAlign: 'center', fontSize: '12px', color: '#000', margin: '8px 0 0' }}>Please fill in all required fields to continue</p>
               )}
             </div>
           )}
@@ -242,7 +242,7 @@ export default function SupplyChainQuotePage() {
           {step === 1 && (
             <div>
               <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '26px', color: NAVY, margin: '0 0 8px' }}>Branding & Compliance</h2>
-              <p style={{ fontSize: '13px', color: '#7A7570', margin: '0 0 28px' }}>Help us understand your branding requirements and any compliance needs.</p>
+              <p style={{ fontSize: '13px', color: '#000', margin: '0 0 28px' }}>Help us understand your branding requirements and any compliance needs.</p>
 
               <div style={{ marginBottom: '20px' }}>
                 <label style={labelStyle}>Logo / Branding Requirements <span style={{ color: '#C0392B' }}>*</span></label>
@@ -311,7 +311,7 @@ export default function SupplyChainQuotePage() {
                 </button>
               </div>
               {!canProceedStep1() && (
-                <p style={{ textAlign: 'center', fontSize: '12px', color: '#B0AAA3', margin: '8px 0 0' }}>Please fill in all required fields to continue</p>
+                <p style={{ textAlign: 'center', fontSize: '12px', color: '#000', margin: '8px 0 0' }}>Please fill in all required fields to continue</p>
               )}
             </div>
           )}
@@ -320,7 +320,7 @@ export default function SupplyChainQuotePage() {
           {step === 2 && (
             <div>
               <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '26px', color: NAVY, margin: '0 0 8px' }}>Your Details</h2>
-              <p style={{ fontSize: '13px', color: '#7A7570', margin: '0 0 28px' }}>Almost done — tell us who to send the quote to.</p>
+              <p style={{ fontSize: '13px', color: '#000', margin: '0 0 28px' }}>Almost done — tell us who to send the quote to.</p>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
                 <div>
@@ -363,7 +363,7 @@ export default function SupplyChainQuotePage() {
                   { label: 'Delivery State', value: form.deliveryState },
                 ].filter(r => r.value).map(r => (
                   <div key={r.label} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}>
-                    <span style={{ color: '#7A7570' }}>{r.label}</span>
+                    <span style={{ color: '#000' }}>{r.label}</span>
                     <span style={{ color: NAVY, fontWeight: 500, textAlign: 'right', maxWidth: '60%' }}>{r.value}</span>
                   </div>
                 ))}
@@ -388,9 +388,9 @@ export default function SupplyChainQuotePage() {
                 </button>
               </div>
               {!canSubmit() && (
-                <p style={{ textAlign: 'center', fontSize: '12px', color: '#B0AAA3', margin: '8px 0 0' }}>Please fill in company name, your name and email</p>
+                <p style={{ textAlign: 'center', fontSize: '12px', color: '#000', margin: '8px 0 0' }}>Please fill in company name, your name and email</p>
               )}
-              <p style={{ textAlign: 'center', fontSize: '13px', color: '#7A7570', margin: '16px 0 0' }}>
+              <p style={{ textAlign: 'center', fontSize: '13px', color: '#000', margin: '16px 0 0' }}>
                 We'll respond within <strong style={{ color: NAVY }}>24–48 business hours</strong> · 📞 02 9477 4748
               </p>
             </div>

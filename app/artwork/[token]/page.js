@@ -108,8 +108,8 @@ export default function ArtworkPage() {
       <div>
         <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
         <h2 style={{ color: NAVY, marginBottom: '8px' }}>Link not found</h2>
-        <p style={{ color: '#7A7570' }}>{error}</p>
-        <p style={{ color: '#7A7570' }}>Please call us: <strong>02 9477 4748</strong></p>
+        <p style={{ color: '#000' }}>{error}</p>
+        <p style={{ color: '#000' }}>Please call us: <strong>02 9477 4748</strong></p>
       </div>
     </div>
   );
@@ -119,10 +119,10 @@ export default function ArtworkPage() {
       <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '500px', width: '100%', textAlign: 'center' }}>
         <div style={{ fontSize: '64px', marginBottom: '16px' }}>✅</div>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 12px' }}>Artwork Approved!</h1>
-        <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 24px' }}>
+        <p style={{ fontSize: '15px', color: '#000', margin: '0 0 24px' }}>
           Thank you, <strong>{name}</strong>! Your approval has been recorded and a confirmation has been emailed to you.
         </p>
-        <div style={{ background: '#ffffff', borderRadius: '10px', padding: '16px', fontSize: '14px', color: '#7A7570' }}>
+        <div style={{ background: '#ffffff', borderRadius: '10px', padding: '16px', fontSize: '14px', color: '#000' }}>
           {artwork?.payment_method === 'eft'
             ? 'Your Invoice will arrive shortly. Production begins once payment is received.'
             : "Production is now starting. We'll notify you when your order is dispatched."}
@@ -136,7 +136,7 @@ export default function ArtworkPage() {
       <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '500px', width: '100%', textAlign: 'center' }}>
         <div style={{ fontSize: '64px', marginBottom: '16px' }}>📝</div>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 12px' }}>Changes Requested</h1>
-        <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 16px' }}>
+        <p style={{ fontSize: '15px', color: '#000', margin: '0 0 16px' }}>
           We've received your feedback and will send a revised mockup shortly.
         </p>
         <p style={{ fontSize: '13px', color: '#9CA3AF' }}>
@@ -151,7 +151,7 @@ export default function ArtworkPage() {
       <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '500px', width: '100%', textAlign: 'center' }}>
         <div style={{ fontSize: '64px', marginBottom: '16px' }}>✅</div>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 12px' }}>Already Approved</h1>
-        <p style={{ fontSize: '15px', color: '#7A7570' }}>
+        <p style={{ fontSize: '15px', color: '#000' }}>
           This artwork has already been approved by <strong>{artwork.approved_by}</strong>.
         </p>
       </div>
@@ -181,9 +181,9 @@ export default function ArtworkPage() {
 
         <div style={{ background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7', padding: '20px 24px', marginBottom: '24px' }}>
           <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', fontSize: '14px' }}>
-            <div><span style={{ color: '#7A7570' }}>Order Number: </span><strong style={{ color: GOLD }}>{artwork?.order_number}</strong></div>
-            <div><span style={{ color: '#7A7570' }}>Product: </span><strong>{artwork?.product_name}</strong></div>
-            <div><span style={{ color: '#7A7570' }}>Customer: </span><strong>{artwork?.customer_name}</strong></div>
+            <div><span style={{ color: '#000' }}>Order Number: </span><strong style={{ color: GOLD }}>{artwork?.order_number}</strong></div>
+            <div><span style={{ color: '#000' }}>Product: </span><strong>{artwork?.product_name}</strong></div>
+            <div><span style={{ color: '#000' }}>Customer: </span><strong>{artwork?.customer_name}</strong></div>
           </div>
         </div>
 
@@ -217,7 +217,7 @@ export default function ArtworkPage() {
                     style={{ width: '100%', padding: '12px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box', outline: 'none', resize: 'vertical' }} />
                 </div>
 
-                <div style={{ background: '#ffffff', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontSize: '12px', color: '#7A7570' }}>
+                <div style={{ background: '#ffffff', borderRadius: '8px', padding: '12px 16px', marginBottom: '20px', fontSize: '12px', color: '#000' }}>
                   By clicking "I Approve This Artwork", you confirm that you have reviewed the mockup and approve it for production. This approval is legally binding.
                 </div>
 
@@ -251,7 +251,7 @@ export default function ArtworkPage() {
                     {submitting ? 'Sending...' : 'Submit Changes Request'}
                   </button>
                   <button onClick={() => setRequestingChanges(false)}
-                    style={{ background: '#fff', color: '#7A7570', border: '1.5px solid #E0DDD7', borderRadius: '10px', padding: '14px 20px', fontSize: '14px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                    style={{ background: '#fff', color: '#000', border: '1.5px solid #E0DDD7', borderRadius: '10px', padding: '14px 20px', fontSize: '14px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
                     Cancel
                   </button>
                 </div>

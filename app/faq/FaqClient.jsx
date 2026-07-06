@@ -50,10 +50,10 @@ export default function FaqClient() {
 
       {/* Answer HTML styling (links / lists inside dangerouslySetInnerHTML) */}
       <style>{`
-        .faq-answer p { margin: 0 0 10px; font-size: 14px; color: #5A5550; line-height: 1.8; }
+        .faq-answer p { margin: 0 0 10px; font-size: 14px; color: #000; line-height: 1.8; }
         .faq-answer p:last-child { margin-bottom: 0; }
         .faq-answer ul { margin: 8px 0 10px; padding-left: 20px; }
-        .faq-answer li { font-size: 14px; color: #5A5550; line-height: 1.7; margin-bottom: 6px; }
+        .faq-answer li { font-size: 14px; color: #000; line-height: 1.7; margin-bottom: 6px; }
         .faq-answer a { color: ${GOLD}; text-decoration: underline; }
         .faq-answer a:hover { color: ${NAVY}; }
         .faq-answer strong { color: ${NAVY}; }
@@ -61,8 +61,8 @@ export default function FaqClient() {
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>FAQ</span>
         </div>
@@ -91,7 +91,7 @@ export default function FaqClient() {
         {/* SIDEBAR NAV */}
         <div style={{ position: 'sticky', top: '80px' }}>
           <div style={{ background: '#fff', borderRadius: '12px', padding: '20px', border: '1px solid #E0DDD7' }}>
-            <div style={{ fontSize: '11px', fontWeight: 700, color: '#B0AAA3', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px' }}>Jump to</div>
+            <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px' }}>Jump to</div>
             <button
               onClick={() => setActiveCategory(null)}
               style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: activeCategory === null ? 700 : 400, color: activeCategory === null ? GOLD : '#3D3A36', background: activeCategory === null ? '#FDF8F0' : 'none', marginBottom: '4px', fontFamily: '"DM Sans", sans-serif' }}
@@ -143,7 +143,7 @@ export default function FaqClient() {
           {/* BOTTOM CTA */}
           <div style={{ background: '#fff', borderRadius: '12px', padding: '32px', border: '1px solid #E0DDD7', textAlign: 'center', marginTop: '20px' }}>
             <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: NAVY, margin: '0 0 10px' }}>Ready to get started?</h3>
-            <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 20px', lineHeight: 1.7 }}>Browse our full product range or contact our team for expert advice on your next campaign.</p>
+            <p style={{ fontSize: '14px', color: '#000', margin: '0 0 20px', lineHeight: 1.7 }}>Browse our full product range or contact our team for expert advice on your next campaign.</p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link href="/promotional-products" style={{ background: GOLD, color: '#fff', padding: '12px 24px', borderRadius: '8px', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
                 Browse Products →

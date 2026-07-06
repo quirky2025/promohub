@@ -73,8 +73,8 @@ export default function UploadLogoPage() {
       <div>
         <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
         <h2 style={{ color: NAVY }}>{error}</h2>
-        <p style={{ color: '#7A7570' }}>Please email your logo to <strong>hello@quirkypromo.com.au</strong></p>
-        <p style={{ color: '#7A7570' }}>Or call us: <strong>02 9477 4748</strong></p>
+        <p style={{ color: '#000' }}>Please email your logo to <strong>hello@quirkypromo.com.au</strong></p>
+        <p style={{ color: '#000' }}>Or call us: <strong>02 9477 4748</strong></p>
       </div>
     </div>
   );
@@ -84,10 +84,10 @@ export default function UploadLogoPage() {
       <div style={{ background: '#fff', borderRadius: '20px', border: '1px solid #E0DDD7', padding: '48px', maxWidth: '500px', width: '100%', textAlign: 'center' }}>
         <div style={{ fontSize: '64px', marginBottom: '16px' }}>🎨</div>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 12px' }}>Logo Uploaded!</h1>
-        <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 8px' }}>
+        <p style={{ fontSize: '15px', color: '#000', margin: '0 0 8px' }}>
           Thank you! We're generating your artwork mockup now.
         </p>
-        <p style={{ fontSize: '14px', color: '#7A7570' }}>
+        <p style={{ fontSize: '14px', color: '#000' }}>
           You'll receive an email shortly with your mockup to review and approve.
         </p>
       </div>
@@ -106,7 +106,7 @@ export default function UploadLogoPage() {
       <div style={{ maxWidth: '600px', margin: '0 auto', padding: '40px 20px' }}>
         <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #E0DDD7', padding: '40px' }}>
           <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', color: NAVY, margin: '0 0 8px' }}>Upload Your Logo</h1>
-          <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 24px' }}>
+          <p style={{ fontSize: '14px', color: '#000', margin: '0 0 24px' }}>
             Order: <strong style={{ color: GOLD }}>{artwork?.order_number}</strong> · {artwork?.product_name}
           </p>
 
@@ -133,13 +133,13 @@ export default function UploadLogoPage() {
               <>
                 <div style={{ fontSize: '48px', marginBottom: '12px' }}>✅</div>
                 <div style={{ fontWeight: 700, color: NAVY, fontSize: '16px' }}>{logoFile.name}</div>
-                <div style={{ fontSize: '13px', color: '#7A7570', marginTop: '8px' }}>Click to change file</div>
+                <div style={{ fontSize: '13px', color: '#000', marginTop: '8px' }}>Click to change file</div>
               </>
             ) : (
               <>
                 <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎨</div>
                 <div style={{ fontWeight: 700, color: NAVY, fontSize: '16px', marginBottom: '8px' }}>Click to upload your logo</div>
-                <div style={{ fontSize: '13px', color: '#7A7570' }}>AI, PDF, PNG, JPG, EPS, SVG</div>
+                <div style={{ fontSize: '13px', color: '#000' }}>AI, PDF, PNG, JPG, EPS, SVG</div>
                 <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '4px' }}>Vector files (AI, PDF, EPS) preferred for best quality</div>
               </>
             )}

@@ -11,10 +11,10 @@ export default function SourcingPage() {
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href="/supply-chain" style={{ color: '#7A7570', textDecoration: 'none' }}>Supply Chain</Link>
+          <Link href="/supply-chain" style={{ color: '#000', textDecoration: 'none' }}>Supply Chain</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>Sourcing & Manufacturing</span>
         </div>
@@ -43,17 +43,17 @@ export default function SourcingPage() {
         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '64px', alignItems: 'center' }}>
           <div>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', color: NAVY, margin: '0 0 16px', fontWeight: 600 }}>How We Source Your Products</h2>
-            <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 16px' }}>
+            <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: '0 0 16px' }}>
               Our sourcing team maintains direct relationships with over 200 factory partners across China, Vietnam, Bangladesh, and India. We visit trade shows including Canton Fair, Reed, and PPAI to stay across new products, materials, and manufacturing capabilities.
             </p>
-            <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 24px' }}>
+            <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: '0 0 24px' }}>
               Every factory partner is vetted for quality standards, ethical manufacturing practices, and compliance capability before we place a single order. When you order through QuirkyPromo, you're getting factory-direct pricing with the confidence of a professional sourcing team behind it.
             </p>
             <div style={{ display: 'flex', gap: '20px' }}>
               {[{ value: '200+', label: 'Factory Partners' }, { value: '8', label: 'Countries' }, { value: '12', label: 'Product Categories' }].map(s => (
                 <div key={s.label} style={{ textAlign: 'center' }}>
                   <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: GOLD, fontWeight: 600 }}>{s.value}</div>
-                  <div style={{ fontSize: '12px', color: '#7A7570' }}>{s.label}</div>
+                  <div style={{ fontSize: '12px', color: '#000' }}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -70,7 +70,7 @@ export default function SourcingPage() {
                 <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: NAVY, color: GOLD, fontSize: '11px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontFamily: '"DM Mono", monospace' }}>{s.step}</div>
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: 700, color: NAVY, marginBottom: '3px' }}>{s.title}</div>
-                  <div style={{ fontSize: '13px', color: '#7A7570', lineHeight: 1.5 }}>{s.desc}</div>
+                  <div style={{ fontSize: '13px', color: '#000', lineHeight: 1.5 }}>{s.desc}</div>
                 </div>
               </div>
             ))}
@@ -93,7 +93,7 @@ export default function SourcingPage() {
             <div key={o.title} style={{ background: '#fff', borderRadius: '12px', padding: '28px', border: '1px solid #E0DDD7' }}>
               <div style={{ fontSize: '28px', marginBottom: '14px' }}>{o.icon}</div>
               <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>{o.title}</h3>
-              <p style={{ fontSize: '13px', color: '#5A5550', lineHeight: 1.7, margin: 0 }}>{o.desc}</p>
+              <p style={{ fontSize: '13px', color: '#000', lineHeight: 1.7, margin: 0 }}>{o.desc}</p>
             </div>
           ))}
         </div>

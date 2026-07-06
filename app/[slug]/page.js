@@ -171,7 +171,7 @@ function SubcategorySection({ childPages }) {
                   {childPage.image ? (
                     <img src={cld(childPage.image, 300)} alt={childPage.nav_label || childPage.h1} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '12px', boxSizing: 'border-box' }} />
                   ) : (
-                    <div style={{ color: '#BEB8AF', fontSize: '13px' }}>No image</div>
+                    <div style={{ color: '#000', fontSize: '13px' }}>No image</div>
                   )}
                 </div>
                 <div style={{ padding: '15px 16px 16px' }}>
@@ -234,7 +234,7 @@ function ProductCard({ product }) {
           {image ? (
             <img src={cld(image, 400)} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '13px', boxSizing: 'border-box' }} />
           ) : (
-            <div style={{ color: '#BEB8AF', fontSize: '13px' }}>No image</div>
+            <div style={{ color: '#000', fontSize: '13px' }}>No image</div>
           )}
           {product.is_eco && (
             <div style={{ position: 'absolute', left: '10px', top: '10px', background: '#2D6A4F', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '4px 8px', borderRadius: '999px' }}>
@@ -281,7 +281,7 @@ function StatusPanel({ title, body }) {
       <h2 style={{ fontFamily: '"Cormorant Garamond", serif', color: NAVY, fontSize: '30px', margin: '0 0 10px', fontWeight: 600 }}>
         {title}
       </h2>
-      <p style={{ color: '#6F6962', fontSize: '15px', lineHeight: 1.7, margin: '0 auto', maxWidth: '620px' }}>
+      <p style={{ color: '#000', fontSize: '15px', lineHeight: 1.7, margin: '0 auto', maxWidth: '620px' }}>
         {body}
       </p>
     </div>
@@ -297,7 +297,7 @@ function SeoSection({ urlPage }) {
     <section style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '54px 40px 64px' }}>
       <div style={{ maxWidth: '920px', margin: '0 auto' }}>
         {urlPage.seo_content && (
-          <div style={{ color: '#4F4943', fontSize: '15px', lineHeight: 1.85, whiteSpace: 'pre-line' }}>
+          <div style={{ color: '#000', fontSize: '15px', lineHeight: 1.85, whiteSpace: 'pre-line' }}>
             {urlPage.seo_content}
           </div>
         )}
@@ -312,7 +312,7 @@ function SeoSection({ urlPage }) {
                   <div style={{ color: NAVY, fontWeight: 700, marginBottom: '7px' }}>
                     {item.question}
                   </div>
-                  <div style={{ color: '#5A5550', fontSize: '14px', lineHeight: 1.7 }}>
+                  <div style={{ color: '#000', fontSize: '14px', lineHeight: 1.7 }}>
                     {item.answer}
                   </div>
                 </div>

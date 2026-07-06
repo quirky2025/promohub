@@ -70,7 +70,7 @@ function SearchResults() {
           Search Results
         </h1>
         {q && (
-          <p style={{ color: '#7A7570', fontSize: '15px', margin: 0 }}>
+          <p style={{ color: '#000', fontSize: '15px', margin: 0 }}>
             {loading ? 'Searching...' : `${results.length} result${results.length !== 1 ? 's' : ''} for `}
             {!loading && <strong style={{ color: NAVY }}>"{q}"</strong>}
           </p>
@@ -79,7 +79,7 @@ function SearchResults() {
 
       {/* No query */}
       {!q && (
-        <div style={{ textAlign: 'center', padding: '80px 0', color: '#7A7570' }}>
+        <div style={{ textAlign: 'center', padding: '80px 0', color: '#000' }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
           <p style={{ fontSize: '18px' }}>Enter a search term to find products</p>
         </div>
@@ -87,7 +87,7 @@ function SearchResults() {
 
       {/* Loading */}
       {loading && (
-        <div style={{ textAlign: 'center', padding: '80px 0', color: '#7A7570' }}>
+        <div style={{ textAlign: 'center', padding: '80px 0', color: '#000' }}>
           <p style={{ fontSize: '16px' }}>Searching...</p>
         </div>
       )}
@@ -97,7 +97,7 @@ function SearchResults() {
         <div style={{ textAlign: 'center', padding: '80px 0' }}>
           <div style={{ fontSize: '48px', marginBottom: '16px' }}>😕</div>
           <p style={{ fontSize: '18px', color: NAVY, fontWeight: 600, marginBottom: '8px' }}>No products found for "{q}"</p>
-          <p style={{ color: '#7A7570', marginBottom: '24px' }}>Try a different keyword or browse our categories</p>
+          <p style={{ color: '#000', marginBottom: '24px' }}>Try a different keyword or browse our categories</p>
           <Link href="/" style={{ background: GOLD, color: '#fff', padding: '12px 28px', borderRadius: '8px', textDecoration: 'none', fontWeight: 600, fontSize: '15px' }}>
             Browse All Products
           </Link>
@@ -119,20 +119,20 @@ function SearchResults() {
                 <div style={{ aspectRatio: '1', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                   {img
                     ? <ProductImg src={img} alt={product.name} style={{ width: '80%', height: '80%', objectFit: 'contain' }} />
-                    : <div style={{ color: '#B0AAA3', fontSize: '13px' }}>No image</div>
+                    : <div style={{ color: '#000', fontSize: '13px' }}>No image</div>
                   }
                 </div>
                 <div style={{ padding: '16px' }}>
-                  <div style={{ fontSize: '11px', color: '#B0AAA3', fontFamily: '"DM Mono", monospace', marginBottom: '4px' }}>{product.supplier_sku}</div>
+                  <div style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Mono", monospace', marginBottom: '4px' }}>{product.supplier_sku}</div>
                   <div style={{ fontWeight: 600, color: NAVY, fontSize: '15px', marginBottom: '6px', lineHeight: 1.3 }}>{product.name}</div>
-                  <div style={{ fontSize: '12px', color: '#7A7570', marginBottom: '10px' }}>{product.category}{product.subcategory ? ` › ${product.subcategory}` : ''}</div>
+                  <div style={{ fontSize: '12px', color: '#000', marginBottom: '10px' }}>{product.category}{product.subcategory ? ` › ${product.subcategory}` : ''}</div>
                   {price && (
                     <div style={{ fontSize: '13px', color: GOLD, fontWeight: 700 }}>
-                      From ${price.toFixed(2)} <span style={{ color: '#B0AAA3', fontWeight: 400, fontSize: '11px' }}>excl. GST</span>
+                      From ${price.toFixed(2)} <span style={{ color: '#000', fontWeight: 400, fontSize: '11px' }}>excl. GST</span>
                     </div>
                   )}
                   {product.min_qty && (
-                    <div style={{ fontSize: '11px', color: '#B0AAA3', marginTop: '4px' }}>Min. {product.min_qty} units</div>
+                    <div style={{ fontSize: '11px', color: '#000', marginTop: '4px' }}>Min. {product.min_qty} units</div>
                   )}
                 </div>
               </Link>
@@ -148,7 +148,7 @@ export default function SearchPage() {
   return (
     <div style={{ background: '#fff', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
       <Suspense fallback={
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px', textAlign: 'center', color: '#7A7570' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '40px', textAlign: 'center', color: '#000' }}>
           <p style={{ fontSize: '16px' }}>Loading...</p>
         </div>
       }>

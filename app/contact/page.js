@@ -105,7 +105,7 @@ export default function ContactPage() {
 
             <div>
               <div style={{ fontSize: '11px', fontWeight: 700, color: GOLD, textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '8px' }}>Business Hours</div>
-              <div style={{ fontSize: '15px', color: '#5A5A5A', lineHeight: 1.8 }}>
+              <div style={{ fontSize: '15px', color: '#000', lineHeight: 1.8 }}>
                 Monday – Friday<br />
                 9:00am – 5:00pm AEST
               </div>
@@ -119,7 +119,7 @@ export default function ContactPage() {
             <div style={{ textAlign: 'center', padding: '40px 0' }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
               <h3 style={{ fontFamily: '"Cormorant Garamond", Georgia, serif', fontSize: '28px', color: NAVY, marginBottom: '12px' }}>Message Sent!</h3>
-              <p style={{ color: '#7A7570', fontSize: '15px', lineHeight: 1.7 }}>
+              <p style={{ color: '#000', fontSize: '15px', lineHeight: 1.7 }}>
                 Thank you for reaching out. We'll get back to you within 3 business hours.
               </p>
               <button onClick={() => setSent(false)}

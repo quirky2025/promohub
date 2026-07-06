@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
-const MUTED = '#7A7570';
+const MUTED = '#000';
 const BORDER = '#E0DDD7';
 
 const PAY_STATUS = {
@@ -147,7 +147,7 @@ export default function AccountPage() {
     return (
       <div style={card}>
         <div style={cap}>{a.kind === 'billing' ? 'Billing' : 'Delivery'}{a.is_default ? <span style={{ color: '#2D6A4F' }}> ● default</span> : ''}{a.label ? ` · ${a.label}` : ''}</div>
-        <div style={{ fontSize: '14px', color: '#1a1a1a', marginTop: '8px', lineHeight: 1.7 }}>
+        <div style={{ fontSize: '14px', color: '#000', marginTop: '8px', lineHeight: 1.7 }}>
           {[a.line1, a.line2].filter(Boolean).join(', ')}<br />
           {[a.suburb, a.state, a.postcode].filter(Boolean).join(' ')}<br />{a.country || 'Australia'}
         </div>

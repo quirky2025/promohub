@@ -153,14 +153,14 @@ export default function CategoryPage() {
   const seo = SEO_CONTENT[categoryKey] || null;
 
   return (
-    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#ffffff', color: '#1a1a1a' }}>
+    <div style={{ fontFamily: '"DM Sans", sans-serif', minHeight: '100vh', background: '#ffffff', color: '#000' }}>
 
       {/* BREADCRUMB */}
       <div className="qp-padx" style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href="/promotional-products" style={{ color: '#7A7570', textDecoration: 'none' }}>All Products</Link>
+          <Link href="/promotional-products" style={{ color: '#000', textDecoration: 'none' }}>All Products</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>{categoryName}</span>
         </div>
@@ -198,7 +198,7 @@ export default function CategoryPage() {
                   </div>
                   <div style={{ padding: '12px 14px', borderTop: '1px solid #F0EEED' }}>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: NAVY, marginBottom: '2px' }}>{sub.name}</div>
-                    <div style={{ fontSize: '11px', color: '#7A7570' }}>{sub.count} products</div>
+                    <div style={{ fontSize: '11px', color: '#000' }}>{sub.count} products</div>
                   </div>
                 </div>
               </Link>
@@ -246,11 +246,11 @@ export default function CategoryPage() {
             <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
               <input type="checkbox" checked={isEco} onChange={e => setIsEco(e.target.checked)}
                 style={{ width: '16px', height: '16px', accentColor: GOLD }} />
-              <span style={{ fontSize: '14px', color: '#1a1a1a' }}>🌿 Eco-Friendly only</span>
+              <span style={{ fontSize: '14px', color: '#000' }}>🌿 Eco-Friendly only</span>
             </label>
           </div>
 
-          <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '16px', fontSize: '13px', color: '#7A7570' }}>
+          <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '16px', fontSize: '13px', color: '#000' }}>
             {filtered.length} product{filtered.length !== 1 ? 's' : ''} found
           </div>
         </div>
@@ -261,11 +261,11 @@ export default function CategoryPage() {
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '28px', color: NAVY, margin: 0, fontWeight: 600 }}>
               All {categoryName}
             </h2>
-            <span style={{ fontSize: '14px', color: '#7A7570' }}>Showing {displayed.length} of {filtered.length}</span>
+            <span style={{ fontSize: '14px', color: '#000' }}>Showing {displayed.length} of {filtered.length}</span>
           </div>
 
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '80px', color: '#7A7570' }}>Loading products...</div>
+            <div style={{ textAlign: 'center', padding: '80px', color: '#000' }}>Loading products...</div>
           ) : filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '80px' }}>
               <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔍</div>
@@ -299,12 +299,12 @@ export default function CategoryPage() {
                           <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: 'auto' }}>
                             {price > 0 && (
                               <div style={{ textAlign: 'center' }}>
-                                <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '2px' }}>As low as</div>
+                                <div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>As low as</div>
                                 <div style={{ fontSize: '18px', color: GOLD, fontWeight: 400 }}>${price.toFixed(2)}</div>
                               </div>
                             )}
                             <div style={{ textAlign: 'center' }}>
-                              <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '2px' }}>Min Qty</div>
+                              <div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>Min Qty</div>
                               <div style={{ fontSize: '18px', color: NAVY, fontWeight: 400 }}>{product.min_qty}</div>
                             </div>
                           </div>
@@ -341,12 +341,12 @@ export default function CategoryPage() {
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', color: NAVY, margin: '0 0 20px', fontWeight: 600 }}>
               Custom Printed {categoryName} for Australian Businesses
             </h2>
-            <p style={{ fontSize: '16px', color: '#5A5550', lineHeight: 1.8, margin: '0 0 36px' }}>{seo.intro}</p>
+            <p style={{ fontSize: '16px', color: '#000', lineHeight: 1.8, margin: '0 0 36px' }}>{seo.intro}</p>
             <div className="qp-seo-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
               {seo.sections.map((s, i) => (
                 <div key={i}>
                   <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>{s.title}</h3>
-                  <p style={{ fontSize: '14px', color: '#5A5550', lineHeight: 1.8, margin: 0 }}>{s.body}</p>
+                  <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.8, margin: 0 }}>{s.body}</p>
                 </div>
               ))}
             </div>
@@ -376,4 +376,4 @@ export default function CategoryPage() {
 }
 
 const labelStyle = { fontSize: '11px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '8px' };
-const selectStyle = { width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #E0DDD7', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#1a1a1a', background: '#fff', outline: 'none', cursor: 'pointer' };
+const selectStyle = { width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #E0DDD7', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', color: '#000', background: '#fff', outline: 'none', cursor: 'pointer' };

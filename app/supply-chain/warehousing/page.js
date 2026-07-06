@@ -11,10 +11,10 @@ export default function WarehousingPage() {
 
       {/* BREADCRUMB */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#000' }}>
+          <Link href="/" style={{ color: '#000', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <Link href="/supply-chain" style={{ color: '#7A7570', textDecoration: 'none' }}>Supply Chain</Link>
+          <Link href="/supply-chain" style={{ color: '#000', textDecoration: 'none' }}>Supply Chain</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>Warehousing & Fulfilment</span>
         </div>
@@ -53,7 +53,7 @@ export default function WarehousingPage() {
                 {i < 3 && <div style={{ position: 'absolute', top: '28px', right: '-8px', color: GOLD, fontSize: '20px' }}>›</div>}
                 <div style={{ fontSize: '40px', marginBottom: '16px' }}>{s.icon}</div>
                 <div style={{ fontSize: '15px', fontWeight: 700, color: NAVY, marginBottom: '10px' }}>{s.title}</div>
-                <div style={{ fontSize: '13px', color: '#7A7570', lineHeight: 1.6 }}>{s.desc}</div>
+                <div style={{ fontSize: '13px', color: '#000', lineHeight: 1.6 }}>{s.desc}</div>
               </div>
             ))}
           </div>
@@ -75,7 +75,7 @@ export default function WarehousingPage() {
             <div key={s.title} style={{ background: '#fff', borderRadius: '12px', padding: '28px', border: '1px solid #E0DDD7' }}>
               <div style={{ fontSize: '28px', marginBottom: '14px' }}>{s.icon}</div>
               <h3 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '20px', color: NAVY, margin: '0 0 10px', fontWeight: 600 }}>{s.title}</h3>
-              <p style={{ fontSize: '13px', color: '#5A5550', lineHeight: 1.7, margin: 0 }}>{s.desc}</p>
+              <p style={{ fontSize: '13px', color: '#000', lineHeight: 1.7, margin: 0 }}>{s.desc}</p>
             </div>
           ))}
         </div>
@@ -85,7 +85,7 @@ export default function WarehousingPage() {
       <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '64px 40px' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', color: NAVY, margin: '0 0 16px', fontWeight: 600, textAlign: 'center' }}>Who This Is For</h2>
-          <p style={{ fontSize: '15px', color: '#7A7570', margin: '0 0 32px', lineHeight: 1.7, textAlign: 'center' }}>Warehousing and fulfilment works best for organisations with ongoing or repeat merchandise needs</p>
+          <p style={{ fontSize: '15px', color: '#000', margin: '0 0 32px', lineHeight: 1.7, textAlign: 'center' }}>Warehousing and fulfilment works best for organisations with ongoing or repeat merchandise needs</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             {[
               '🏢 Large enterprises with regular staff gifting programs',

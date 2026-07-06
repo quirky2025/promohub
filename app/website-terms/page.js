@@ -108,7 +108,7 @@ export default function WebsiteTermsPage() {
 
       {/* INTRO */}
       <div style={{ maxWidth: '800px', margin: '0 auto', padding: '60px 40px 0' }}>
-        <p style={{ fontSize: '15px', lineHeight: 1.9, color: '#5A5A5A', padding: '20px 24px', background: '#fff', borderLeft: `4px solid ${GOLD}`, borderRadius: '0 8px 8px 0' }}>
+        <p style={{ fontSize: '15px', lineHeight: 1.9, color: '#000', padding: '20px 24px', background: '#fff', borderLeft: `4px solid ${GOLD}`, borderRadius: '0 8px 8px 0' }}>
           Please read these Website Terms and Conditions carefully before using quirkypromo.com.au. By accessing or using the Website, you agree to be bound by these terms.
         </p>
       </div>
@@ -122,14 +122,14 @@ export default function WebsiteTermsPage() {
               {title}
             </h2>
             {content.split('\n\n').map((para, i) => (
-              <p key={i} style={{ fontSize: '14px', lineHeight: 1.9, color: '#5A5A5A', marginBottom: '12px' }}>
+              <p key={i} style={{ fontSize: '14px', lineHeight: 1.9, color: '#000', marginBottom: '12px' }}>
                 {para}
               </p>
             ))}
           </div>
         ))}
 
-        <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '32px', fontSize: '13px', color: '#B0AAA3' }}>
+        <div style={{ borderTop: '1px solid #E0DDD7', paddingTop: '32px', fontSize: '13px', color: '#000' }}>
           For any queries regarding these terms, please contact us at hello@quirkypromo.com.au or call 02 9477 4748.
         </div>
       </div>

@@ -1,0 +1,1056 @@
+{
+  "1466": {
+    "name": "Comfort Colors® 1466 Crewneck",
+    "description": "Garment-dyed ring-spun cotton crewneck sweatshirt with a relaxed, seamless fit.",
+    "composition": "100% Ring Spun US Cotton",
+    "weight_gsm": "217",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "51",
+            "56",
+            "61",
+            "66",
+            "71",
+            "76"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "69",
+            "71",
+            "74",
+            "76",
+            "79",
+            "81"
+          ]
+        },
+        {
+          "name": "Sleeve Center Back (D2)",
+          "values": [
+            "85",
+            "88",
+            "90",
+            "93",
+            "95",
+            "98"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Pre-shrunk during the garment dye process for almost no shrinkage at home",
+      "Our clean pigment dye colours use 50% less water than traditional pigment dye processes",
+      "Garment-dyed soft ring spun fabric feels great against your skin",
+      "Rolled forward shoulder",
+      "Relaxed fit, seamless body",
+      "1x1 rib collar, cuffs and waistband with spandex for enhanced stretch and recovery",
+      "Signature twill label and back neck tape",
+      "Proud member of the US Cotton Trust Protocol (USCTP) and Better Cotton",
+      "Cotton products from Comfort Colors support more sustainable + ethical cotton farming"
+    ],
+    "fit": "Relaxed Fit"
+  },
+  "1467": {
+    "name": "Comfort Colors® 1467 Hoodie",
+    "description": "Garment-dyed ring-spun cotton hoodie with a jersey-lined hood and relaxed fit.",
+    "composition": "100% Ring Spun US Cotton",
+    "weight_gsm": "217",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "51",
+            "56",
+            "61",
+            "66",
+            "71",
+            "76"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "69",
+            "71",
+            "74",
+            "76",
+            "79",
+            "81"
+          ]
+        },
+        {
+          "name": "Sleeve Center Back (D2)",
+          "values": [
+            "85",
+            "88",
+            "90",
+            "93",
+            "95",
+            "98"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Garment-dyed soft ring spun fabric feels great against your skin",
+      "Jersey lined hood with natural coloured flatcord (white flatcord on colour white)",
+      "Rolled forward shoulder",
+      "Relaxed fit, seamless body",
+      "1x1 rib cuffs and waistband with spandex for enhanced stretch and recovery",
+      "Signature twill label and back neck tape",
+      "Pre-shrunk during the garment dye process for almost no shrinkage at home",
+      "Our clean pigment dye colours use 50% less water than traditional pigment dye processes",
+      "Proud member of the US Cotton Trust Protocol (USCTP) and Better Cotton",
+      "Cotton products from Comfort Colors support more sustainable + ethical cotton farming"
+    ],
+    "fit": "Relaxed Fit"
+  },
+  "1468": {
+    "name": "Comfort Colors® 1468 Shorts",
+    "description": "Garment-dyed ring-spun cotton sweat shorts with jersey-lined pockets and relaxed fit.",
+    "composition": "100% Ring Spun US Cotton",
+    "weight_gsm": "217",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "38",
+            "41",
+            "43",
+            "46",
+            "50"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "19",
+            "19",
+            "19",
+            "19",
+            "19"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Pre-shrunk during the garment dye process for almost no shrinkage at home",
+      "Garment-dyed soft ring spun fabric feels great against your skin",
+      "Natural coloured flatcord",
+      "Jersey-lined side pockets",
+      "Differential rise for a better fit",
+      "Relaxed fit, side-seamed short",
+      "Signature twill label",
+      "Our clean pigment dye colours use 50% less water than traditional pigment dye processes",
+      "Proud member of the US Cotton Trust Protocol (USCTP) and Better Cotton",
+      "Cotton products from Comfort Colors support more sustainable + ethical cotton farming"
+    ],
+    "fit": "Relaxed Fit"
+  },
+  "1469": {
+    "name": "Comfort Colors® 1469 Sweatpants",
+    "description": "Garment-dyed ring-spun cotton sweatpants with a relaxed, differential-rise fit.",
+    "composition": "100% Ring Spun US Cotton",
+    "weight_gsm": "217",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "38",
+            "41",
+            "43",
+            "46",
+            null
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "70",
+            "72",
+            "73",
+            "74",
+            null
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Pre-shrunk during the garment dye process for almost no shrinkage at home",
+      "Our clean pigment dye colours use 50% less water than traditional pigment dye processes",
+      "Garment-dyed soft ring spun fabric feels great against your skin",
+      "Natural coloured flatcord",
+      "Jersey-lined side pockets",
+      "Differential rise for a better fit",
+      "Relaxed fit, side-seamed pant",
+      "Signature twill label",
+      "Proud member of the US Cotton Trust Protocol (USCTP) and Better Cotton",
+      "Cotton products from Comfort Colors support more sustainable + ethical cotton farming"
+    ],
+    "fit": "Relaxed Fit",
+    "_note": "Site's 2XL row shows Width 76 / Length 50 (values appear swapped/erroneous vs the increasing trend of other sizes). Per instruction, set to null rather than using the likely-wrong figures."
+  },
+  "1545": {
+    "name": "",
+    "description": "Product not found: no page exists for Comfort Colors 1545 under this style number.",
+    "composition": "",
+    "weight_gsm": "",
+    "sizes": [],
+    "size_chart": null,
+    "care": "",
+    "features": [],
+    "fit": ""
+  },
+  "3000": {
+    "name": "",
+    "description": "Product not found: direct URL and site search both return zero results for style 3000.",
+    "composition": "",
+    "weight_gsm": "",
+    "sizes": [],
+    "size_chart": null,
+    "care": "",
+    "features": [],
+    "fit": ""
+  },
+  "5389": {
+    "name": "American Apparel® 5389 T-Shirt",
+    "description": "Ultra-soft sueded cotton T-shirt with a relaxed fit and ribbed collar for everyday wear.",
+    "composition": "100% Combed Ring Spun Cotton",
+    "weight_gsm": "175",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "48",
+            "52",
+            "56",
+            "61",
+            "66",
+            "71"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "72",
+            "75",
+            "77",
+            "80",
+            "82",
+            "85"
+          ]
+        },
+        {
+          "name": "Sleeve Center Back (D2)",
+          "values": [
+            "43",
+            "46",
+            "49",
+            "53",
+            "57",
+            "60"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Fabric Weight: 175g/㎡",
+      "Fabric Composition: 100% Combed Ring Spun Cotton",
+      "Sueded jersey fabric creates an ultra plush, soft hand feel.",
+      "Self-fabric back neck tape for comfort and durability",
+      "Classic width, rib collar",
+      "Relaxed fit, side seamed body",
+      "Recycled tear away label",
+      "Proud member of the U.S. Cotton Trust Protocol",
+      "Made with OEKO-TEX certified low-impact dyes",
+      "Plastic waste is diverted from landfills annually by the removal of polybags from all products except colour White"
+    ],
+    "fit": "Relaxed Fit"
+  },
+  "9001": {
+    "name": "American Apparel® 9001 T-Shirt",
+    "description": "Oversized heavyweight tee blending ring-spun cotton and polyester for a relaxed streetwear look.",
+    "composition": "80% Ring Spun Cotton / 20% Polyester",
+    "weight_gsm": "300",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "50",
+            "53",
+            "58",
+            "64",
+            "69",
+            "74"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "71",
+            "74",
+            "76",
+            "79",
+            "81",
+            "84"
+          ]
+        },
+        {
+          "name": "Sleeve Center Back (D2)",
+          "values": [
+            "45",
+            "47",
+            "50",
+            "52",
+            "53",
+            "54"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Fabric weight: 300g/m²",
+      "Fabric Composition: 80% Ring Spun Cotton, 20% Polyester",
+      "Oversized Fit with Side Seamed Body",
+      "Wide 2x2 rib collar",
+      "Taped neck and shoulders for comfort and durability",
+      "Rolled forward drop shoulder",
+      "Recycled tear away label",
+      "Proud member of the U.S. Cotton Trust Protocol",
+      "Made with OEKO-TEX certified low-impact dyes",
+      "Rough & Tumble, Durable fabric"
+    ],
+    "fit": "Relaxed Fit"
+  },
+  "9410": {
+    "name": "American Apparel® 9410 T-Shirt",
+    "description": "Oversized heavyweight long-sleeve pocket tee in a cotton-polyester blend for a relaxed fit.",
+    "composition": "80% Ring Spun Cotton / 20% Polyester",
+    "weight_gsm": "300",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "50",
+            "53",
+            "58",
+            "64",
+            "69",
+            "74"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "71",
+            "74",
+            "76",
+            "79",
+            "81",
+            "84"
+          ]
+        },
+        {
+          "name": "Sleeve Center Back (D2)",
+          "values": [
+            "85",
+            "87",
+            "90",
+            "92",
+            "93",
+            "94"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Fabric weight: 300g/m²",
+      "Fabric Composition: 80% Ring Spun Cotton, 20% Polyester",
+      "Oversized Fit with Side Seamed Body",
+      "Rib Cuffs",
+      "Wide 2x2 rib collar",
+      "Large left chest pocket ideal for decorating",
+      "Taped neck and shoulders for comfort and durability",
+      "Rolled forward drop shoulder",
+      "Recycled tear away label",
+      "Proud member of the U.S. Cotton Trust Protocol",
+      "Made with OEKO-TEX certified low-impact dyes",
+      "Rough & Tumble, Durable fabric"
+    ],
+    "fit": "Relaxed Fit"
+  },
+  "307GD": {
+    "name": "American Apparel® 307GD Muscle T-Shirt",
+    "description": "Heavyweight garment-dyed cotton muscle tee with a boxy, slightly cropped fit for women.",
+    "composition": "100% US Cotton",
+    "weight_gsm": "203",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "53",
+            "56",
+            "58",
+            "62",
+            "66"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "50",
+            "53",
+            "56",
+            "58",
+            "61"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Fabric Weight: 203g/㎡",
+      "Fabric Composition: 100% US Cotton",
+      "The Heavyweight Cotton collection offers rough and tumble must-haves",
+      "Garment dyed for that vintage, faded look and almost no shrinkage at home",
+      "Wide rib collar",
+      "Structured shoulders",
+      "Boxy fit, slightly cropped, side seamed body",
+      "Recycled tear away label",
+      "Proud member of the U.S. Cotton Trust Protocol",
+      "Made with OEKO-TEX certified low-impact dyes",
+      "Plastic waste is diverted from landfills annually by the removal of polybags from all products except colour white"
+    ],
+    "fit": "Boxy Fit"
+  },
+  "RF491": {
+    "name": "American Apparel® RF491 Sweatpants",
+    "description": "Relaxed-fit fleece sweatpants made from recycled-blend ReFlex fabric with covered elastic waistband.",
+    "composition": "70% Combed RS Cotton / 10% Polyester / 20% Recycled Polyester",
+    "weight_gsm": "258",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "34",
+            "37",
+            "40",
+            "42",
+            "44",
+            "47"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "75",
+            "75",
+            "76",
+            "77",
+            "77",
+            "79"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Fabric Weight: 258g/㎡",
+      "Fabric Composition: 70% Combed Ring Spun Cotton, 20% Recycled Polyester, 10% Polyester",
+      "Reimagined, Recycled, ReFlex Fleece is the next evolution of fleece in AA.",
+      "3-end lightweight fleece made using a portion of recycled polyester",
+      "100% combed ring spun cotton face for cotton friendly decorating techniques",
+      "Covered elastic waistband with external dyed to match recycled polyester flatcords",
+      "Relaxed fit, side seamed body",
+      "Side pockets",
+      "Differential rise for a better fit",
+      "Retro inspired 1\" covered elastic bottom band",
+      "Recycled tear away label",
+      "Complete the look with our matching sweatshirt: RF496",
+      "Proud member of the U.S. Cotton Trust Protocol",
+      "Made with OEKO-TEX certified low-impact dyes"
+    ],
+    "fit": "Relaxed Fit"
+  },
+  "RF494": {
+    "name": "American Apparel® RF494 Boxy Cropped Crewneck",
+    "description": "Boxy, cropped ReFlex fleece crewneck sweatshirt with balloon sleeves for women.",
+    "composition": "70% Combed RS Cotton / 10% Polyester / 20% Recycled Polyester",
+    "weight_gsm": "258",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "55",
+            "57",
+            "60",
+            "62",
+            "65"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "57",
+            "58",
+            "60",
+            "61",
+            "62"
+          ]
+        },
+        {
+          "name": "Sleeve Center Back (D2)",
+          "values": [
+            "84",
+            "86",
+            "88",
+            "88",
+            "90"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Fabric Weight: 258g/㎡",
+      "Fabric Composition: 70% Combed Ring Spun Cotton, 20% Recycled Polyester, 10% Polyester",
+      "Reimagined, Recycled, ReFlex Fleece is the next evolution of fleece in AA.",
+      "3-end lightweight fleece made using a portion of recycled polyester",
+      "100% combed ring spun cotton face for cotton friendly decorating techniques",
+      "1\" Rolled back dropped shoulder seam for added decoration",
+      "Balloon sleeves",
+      "1x1 rib with spandex for enhanced stretch and recovery",
+      "Boxy fit, slightly cropped, side seamed body",
+      "Recycled tear away label",
+      "Complete the look with our matching sweatpants: RF491",
+      "Proud member of the U.S. Cotton Trust Protocol",
+      "Made with OEKO-TEX certified low-impact dyes"
+    ],
+    "fit": "Boxy Fit, Slightly Cropped"
+  },
+  "RF496": {
+    "name": "American Apparel® RF496 Crewneck",
+    "description": "Relaxed ReFlex fleece crewneck sweatshirt made from a recycled cotton-polyester blend.",
+    "composition": "70% Combed RS Cotton / 10% Polyester / 20% Recycled Polyester",
+    "weight_gsm": "258",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "51",
+            "56",
+            "61",
+            "66",
+            "71",
+            "76"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "71",
+            "74",
+            "76",
+            "79",
+            "81",
+            "84"
+          ]
+        },
+        {
+          "name": "Sleeve Center Back (D2)",
+          "values": [
+            "86",
+            "89",
+            "91",
+            "94",
+            "97",
+            "99"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Fabric Weight: 258g/㎡",
+      "Fabric Composition: 70% Combed Ring Spun Cotton, 20% Recycled Polyester, 10% Polyester",
+      "Reimagined, Recycled, ReFlex Fleece is the next evolution of fleece in AA.",
+      "3-end lightweight fleece made using a portion of recycled polyester",
+      "100% combed ring spun cotton face for cotton friendly decorating techniques",
+      "1\" Rolled back dropped shoulder seam for added decoration",
+      "1x1 rib with spandex for enhanced stretch and recovery",
+      "Relaxed fit, side seamed body",
+      "Recycled tear away label",
+      "Complete the look with our matching sweatpants: RF491",
+      "Proud member of the U.S. Cotton Trust Protocol",
+      "Made with OEKO-TEX certified low-impact dyes"
+    ],
+    "fit": "Boxy Fit"
+  },
+  "RF497": {
+    "name": "American Apparel® RF497 Hoodie",
+    "description": "Relaxed-fit full-zip ReFlex fleece hoodie with side pockets and an unlined hood.",
+    "composition": "70% Combed RS Cotton / 10% Polyester / 20% Recycled Polyester",
+    "weight_gsm": "258",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL",
+      "4XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "51",
+            "53",
+            "56",
+            "61",
+            "66",
+            "71",
+            "76",
+            "81"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "69",
+            "71",
+            "74",
+            "76",
+            "79",
+            "81",
+            "84",
+            "86"
+          ]
+        },
+        {
+          "name": "Sleeve Center Back (D2)",
+          "values": [
+            "84",
+            "86",
+            "89",
+            "91",
+            "94",
+            "97",
+            "99",
+            "102"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Fabric Weight: 258g/m²",
+      "70% Combed Ring Spun Cotton, 20% Recycled Polyester, 10% Polyester",
+      "Reimagined, Recycled, ReFlex Fleece is the next evolution of fleece in AA.",
+      "3-end lightweight fleece made using a portion of recycled polyester",
+      "1\" Rolled back dropped shoulder seam for added decoration",
+      "Drawcord-free, unlined hood",
+      "Dyed-to-match zipper with recycled zipper tape",
+      "On seam side pockets",
+      "1x1 rib with spandex for enhanced stretch and recovery",
+      "Relaxed fit, side seamed body",
+      "Recycled tear away label",
+      "Complete the look with our matching sweatpants: RF491",
+      "Proud member of the U.S. Cotton Trust Protocol",
+      "Made with OEKO-TEX certified low-impact dyes"
+    ],
+    "fit": "Relaxed Fit"
+  },
+  "RF498": {
+    "name": "American Apparel® RF498 Hoodie",
+    "description": "Boxy-fit pullover ReFlex fleece hoodie with an oversized pouch pocket.",
+    "composition": "70% Combed RS Cotton / 10% Polyester / 20% Recycled Polyester",
+    "weight_gsm": "258",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            null,
+            "51",
+            "56",
+            "61",
+            "66",
+            "71",
+            null
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            null,
+            "71",
+            "74",
+            "76",
+            "79",
+            "81",
+            null
+          ]
+        },
+        {
+          "name": "Sleeve Center Back (D2)",
+          "values": [
+            null,
+            "86",
+            "89",
+            "91",
+            "94",
+            "97",
+            null
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Fabric Weight: 258g/㎡",
+      "Fabric Composition: 70% Combed Ring Spun Cotton, 20% Recycled Polyester, 10% Polyester",
+      "Reimagined, Recycled, ReFlex Fleece is the next evolution of fleece in AA.",
+      "3-end lightweight fleece made using a portion of recycled polyester",
+      "100% combed ring spun cotton face for cotton friendly decorating techniques",
+      "Drawcord-free, unlined hood",
+      "1\" Rolled back dropped shoulder seam for added decoration",
+      "Back neck patch for easy customisation",
+      "Oversized pouch pocket",
+      "1x1 rib with spandex for enhanced stretch and recovery",
+      "Relaxed fit, side seamed body",
+      "Recycled tear away label",
+      "Complete the look with our matching sweatpants: RF491",
+      "Proud member of the U.S. Cotton Trust Protocol",
+      "Made with OEKO-TEX certified low-impact dyes"
+    ],
+    "fit": "Boxy Fit"
+  },
+  "TR401": {
+    "name": "American Apparel® TR401 T-Shirt",
+    "description": "Tri-blend jersey track tee in a poly-cotton-rayon blend with a soft heathered look.",
+    "composition": "50% Polyester / 25% Ring Spun Cotton / 25% Rayon",
+    "weight_gsm": "136",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "42",
+            "46",
+            "51",
+            "56",
+            "61",
+            "66",
+            "71"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "70",
+            "73",
+            "76",
+            "78",
+            "81",
+            "83",
+            "86"
+          ]
+        },
+        {
+          "name": "Sleeve Center Back (D2)",
+          "values": [
+            "40",
+            "42",
+            "44",
+            "47",
+            "50",
+            "52",
+            "55"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "The Tri-Blend Collection offers soft, lightweight comfort, featuring a polyester, combed ring spun cotton and rayon blend for an ultra soft hand",
+      "Polyester and rayon gives a vintage heathered appearance",
+      "Classic width, rib collar",
+      "Taped neck and shoulders for comfort and durability",
+      "Relaxed fit, side seamed body",
+      "Tear-away label"
+    ],
+    "fit": "Relaxed Fit"
+  },
+  "18500B": {
+    "name": "Gildan® Heavy Blend® 18500B Hoodie",
+    "description": "Classic-fit kids' pullover hoodie in cotton-polyester fleece with a double-lined hood.",
+    "composition": "50% Cotton / 50% Polyester",
+    "weight_gsm": "271",
+    "sizes": [
+      "XS",
+      "S",
+      "M",
+      "L",
+      "XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "41",
+            "43",
+            "46",
+            "48",
+            "51"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "50",
+            "54",
+            "57",
+            "61",
+            "65"
+          ]
+        },
+        {
+          "name": "Sleeve Center Back (D2)",
+          "values": [
+            "60",
+            "67",
+            "70",
+            "77",
+            "84"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "100% of our fabric cutting scraps are recycled into fiber and used in new products",
+      "1x1 rib with spandex for enhanced stretch and recovery",
+      "3-end ring spun cotton face fleece",
+      "33% of the energy used to manufacture our products comes from renewable resources",
+      "Classic fit tubular body",
+      "Double-lined hood",
+      "Double-needle stitching at shoulders, armholes, neck, waistband and cuffs",
+      "Tear away label",
+      "CPSIA Tracking label compliant",
+      "Spun yarn for softer feel and reduced pilling"
+    ],
+    "fit": "Classic Fit"
+  },
+  "H000": {
+    "name": "Gildan® Hammer® H000 T-Shirt",
+    "description": "Heavyweight preshrunk cotton T-shirt with a modern classic fit for durable printing.",
+    "composition": "100% Combed Ring Spun US Cotton",
+    "weight_gsm": "203",
+    "sizes": [
+      "S",
+      "M",
+      "L",
+      "XL",
+      "2XL",
+      "3XL"
+    ],
+    "size_chart": {
+      "unit": "cm",
+      "measurements": [
+        {
+          "name": "Width (A)",
+          "values": [
+            "46",
+            "51",
+            "56",
+            "61",
+            "66",
+            "71"
+          ]
+        },
+        {
+          "name": "Length (B)",
+          "values": [
+            "71",
+            "74",
+            "76",
+            "79",
+            "81",
+            "74"
+          ]
+        },
+        {
+          "name": "Sleeve Center Back (D2)",
+          "values": [
+            "40",
+            "44",
+            "48",
+            "51",
+            "55",
+            "60"
+          ]
+        }
+      ]
+    },
+    "care": "",
+    "features": [
+      "Fabric weight: 203g/m²",
+      "Fabric composition: 100% ring spun cotton",
+      "100% of our fabric cutting scraps are recycled into fiber and used in new products",
+      "2.22cm rib collar",
+      "Double-needle sleeve and bottom hems",
+      "Fiber content varies by colour, see color list for exceptions",
+      "Tear away label",
+      "High stitch density for smoother printing surface",
+      "Modern classic fit tubular body",
+      "Heavyweight soft ring spun fabric",
+      "Taped neck and shoulders",
+      "33% of the energy used to manufacture our products comes from renewable resources",
+      "Proudly using 100% US Cotton that is sustainably grown and ethically harvested."
+    ],
+    "fit": "Modern Classic Fit",
+    "_note": "Re-verified directly from live table HTML: Length (B) for 3XL is genuinely '74' on the site, dropping from '81' at 2XL (breaks the increasing trend). This is confirmed as live site data, not an extraction error, matching the anomaly noted previously."
+  }
+}

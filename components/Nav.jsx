@@ -558,15 +558,15 @@ export default function Nav() {
 
           {/* ALL PRODUCTS - Click */}
           <button onClick={() => toggleDropdown('products')}
-            style={{ padding: '0 16px', height: '56px', background: 'none', border: 'none', fontSize: '15px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif', color: activeDropdown === 'products' ? NAVY : '#1a1a1a', cursor: 'pointer', borderBottom: activeDropdown === 'products' ? `2px solid ${GOLD}` : '2px solid transparent', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>
-            All Products <span style={{ fontSize: '11px', color: activeDropdown === 'products' ? GOLD : '#B0AAA3' }}>▾</span>
+            style={{ padding: '0 16px', height: '56px', background: 'none', border: 'none', fontSize: '15px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif', color: activeDropdown === 'products' ? NAVY : '#000', cursor: 'pointer', borderBottom: activeDropdown === 'products' ? `2px solid ${GOLD}` : '2px solid transparent', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>
+            All Products <span style={{ fontSize: '11px', color: activeDropdown === 'products' ? GOLD : '#000' }}>▾</span>
           </button>
 
           {/* COLLECTIONS - Click */}
           <div style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center' }}>
             <button onClick={() => toggleDropdown('collections')}
-              style={{ padding: '0 16px', height: '56px', background: 'none', border: 'none', fontSize: '15px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif', color: activeDropdown === 'collections' ? NAVY : '#1a1a1a', cursor: 'pointer', borderBottom: activeDropdown === 'collections' ? `2px solid ${GOLD}` : '2px solid transparent', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>
-              Collections <span style={{ fontSize: '11px', color: activeDropdown === 'collections' ? GOLD : '#B0AAA3' }}>▾</span>
+              style={{ padding: '0 16px', height: '56px', background: 'none', border: 'none', fontSize: '15px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif', color: activeDropdown === 'collections' ? NAVY : '#000', cursor: 'pointer', borderBottom: activeDropdown === 'collections' ? `2px solid ${GOLD}` : '2px solid transparent', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>
+              Collections <span style={{ fontSize: '11px', color: activeDropdown === 'collections' ? GOLD : '#000' }}>▾</span>
             </button>
             {activeDropdown === 'collections' && (
               <div style={{ ...dropPanel, left: 0, minWidth: '320px' }}>
@@ -588,8 +588,8 @@ export default function Nav() {
           {/* BRANDS - Click */}
           <div style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center' }}>
             <button onClick={() => toggleDropdown('brands')}
-              style={{ padding: '0 16px', height: '56px', background: 'none', border: 'none', fontSize: '15px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif', color: activeDropdown === 'brands' ? NAVY : '#1a1a1a', cursor: 'pointer', borderBottom: activeDropdown === 'brands' ? `2px solid ${GOLD}` : '2px solid transparent', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>
-              Brands <span style={{ fontSize: '11px', color: activeDropdown === 'brands' ? GOLD : '#B0AAA3' }}>▾</span>
+              style={{ padding: '0 16px', height: '56px', background: 'none', border: 'none', fontSize: '15px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif', color: activeDropdown === 'brands' ? NAVY : '#000', cursor: 'pointer', borderBottom: activeDropdown === 'brands' ? `2px solid ${GOLD}` : '2px solid transparent', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>
+              Brands <span style={{ fontSize: '11px', color: activeDropdown === 'brands' ? GOLD : '#000' }}>▾</span>
             </button>
             {activeDropdown === 'brands' && (
               <div style={{ ...dropPanel, left: 0, minWidth: '260px' }}>
@@ -616,12 +616,12 @@ export default function Nav() {
           {/* INDENT - Click */}
           <div style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'center' }}>
             <button onClick={() => toggleDropdown('indent')}
-              style={{ padding: '0 16px', height: '56px', background: 'none', border: 'none', fontSize: '15px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif', color: activeDropdown === 'indent' ? NAVY : '#1a1a1a', cursor: 'pointer', borderBottom: activeDropdown === 'indent' ? `2px solid ${GOLD}` : '2px solid transparent', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>
-              Indent <span style={{ fontSize: '11px', color: activeDropdown === 'indent' ? GOLD : '#B0AAA3' }}>▾</span>
+              style={{ padding: '0 16px', height: '56px', background: 'none', border: 'none', fontSize: '15px', fontWeight: 600, fontFamily: '"DM Sans", sans-serif', color: activeDropdown === 'indent' ? NAVY : '#000', cursor: 'pointer', borderBottom: activeDropdown === 'indent' ? `2px solid ${GOLD}` : '2px solid transparent', display: 'flex', alignItems: 'center', gap: '4px', letterSpacing: '0.3px', whiteSpace: 'nowrap' }}>
+              Indent <span style={{ fontSize: '11px', color: activeDropdown === 'indent' ? GOLD : '#000' }}>▾</span>
             </button>
             {activeDropdown === 'indent' && (
               <div style={{ ...dropPanel, left: 0, minWidth: '220px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #E0DDD7' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid #E0DDD7' }}>
                   Made-to-Order from China
                 </div>
                 <Link href="/indent/air"
@@ -633,7 +633,7 @@ export default function Nav() {
                   <span style={{ fontSize: '20px' }}>✈️</span>
                   <div>
                     <div style={{ fontWeight: 700, color: NAVY, fontSize: '14px' }}>Indent Air</div>
-                    <div style={{ fontSize: '11px', color: '#7A7570' }}>Made to order</div>
+                    <div style={{ fontSize: '11px', color: '#000' }}>Made to order</div>
                   </div>
                 </Link>
                 <Link href="/indent/sea"
@@ -645,7 +645,7 @@ export default function Nav() {
                   <span style={{ fontSize: '20px' }}>🚢</span>
                   <div>
                     <div style={{ fontWeight: 700, color: NAVY, fontSize: '14px' }}>Indent Sea</div>
-                    <div style={{ fontSize: '11px', color: '#7A7570' }}>Made to order</div>
+                    <div style={{ fontSize: '11px', color: '#000' }}>Made to order</div>
                   </div>
                 </Link>
               </div>
@@ -729,7 +729,7 @@ export default function Nav() {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { setMobileOpen(false); handleSearch(e); } }}
-                  style={{ width: '100%', padding: '11px 40px 11px 14px', borderRadius: '8px', border: '1px solid #D8D2C6', background: '#ffffff', color: '#1a1a1a', fontSize: '15px', outline: 'none', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
+                  style={{ width: '100%', padding: '11px 40px 11px 14px', borderRadius: '8px', border: '1px solid #D8D2C6', background: '#ffffff', color: '#000', fontSize: '15px', outline: 'none', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
                 <span onClick={() => { setMobileOpen(false); handleSearchClick(); }} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9A958C', fontSize: '17px', cursor: 'pointer' }}>🔍</span>
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
@@ -760,7 +760,7 @@ export default function Nav() {
                       style={{ ...mItem, flex: 1, width: 'auto', borderBottom: 'none', paddingLeft: '20px' }}>{cat}</button>
                     <button onClick={() => setMobileCat(mobileCat === cat ? null : cat)}
                       aria-label="Expand"
-                      style={{ width: '52px', background: 'none', border: 'none', color: '#B0AAA3', fontSize: '13px', cursor: 'pointer' }}>
+                      style={{ width: '52px', background: 'none', border: 'none', color: '#000', fontSize: '13px', cursor: 'pointer' }}>
                       {mobileCat === cat ? '⌄' : '›'}
                     </button>
                   </div>
@@ -815,7 +815,7 @@ export default function Nav() {
 
 const navLinkStyle = {
   padding: '0 16px', height: '56px', fontSize: '15px', fontWeight: 500,
-  fontFamily: '"DM Sans", sans-serif', color: '#1a1a1a', textDecoration: 'none',
+  fontFamily: '"DM Sans", sans-serif', color: '#000', textDecoration: 'none',
   display: 'flex', alignItems: 'center', borderBottom: '2px solid transparent',
   letterSpacing: '0.3px', whiteSpace: 'nowrap',
 };
