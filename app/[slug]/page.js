@@ -11,6 +11,7 @@ import {
   getProductsForUrlPage,
 } from '@/lib/urlPages';
 import { absoluteUrl } from '@/lib/siteUrl';
+import { calculatorFromPrice } from '@/lib/decorationPricing';
 import CategoryFilter from '@/components/CategoryFilter';
 import QuoteButton from '@/components/QuoteButton';
 
@@ -50,7 +51,7 @@ export default async function UrlPage({ params }) {
     ? products.map((p) => ({
         ...p,
         _image: getFirstImage(p),
-        _price: getLowestPrice(p),
+        _price: p.decoration_model === 'calculator' ? (calculatorFromPrice(p) || 0) : getLowestPrice(p),
         _swatches: getColourSwatches(p),
         _decorationNames: (p.decoration_options || []).filter((d) => d.type !== 'addon').map((d) => d.name),
       }))
