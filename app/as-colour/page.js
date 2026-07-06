@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { getFirstImage } from '@/lib/urlPages';
 import { calculatorFromPrice } from '@/lib/decorationPricing';
+import QuoteButton from '@/components/QuoteButton';
 
 export const revalidate = 3600;
 
@@ -58,9 +59,9 @@ function orderedCats(groups) {
 // Subcategory nav = compact pill button (clearly navigation, not a product card).
 function SubcatPill({ sub, count }) {
   return (
-    <a href={`#${slugify(sub)}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', borderRadius: '999px', border: '1.5px solid #E0DDD7', background: '#fff', color: '#000000', fontSize: '14px', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+    <a href={`#${slugify(sub)}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', borderRadius: '999px', border: '1.5px solid #E0DDD7', background: '#fff', color: '#1a1a1a', fontSize: '14px', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
       {sub}
-      <span style={{ color: '#000000', fontWeight: 400, fontSize: '12px' }}>{count}</span>
+      <span style={{ color: '#1a1a1a', fontWeight: 400, fontSize: '12px' }}>{count}</span>
     </a>
   );
 }
@@ -77,11 +78,11 @@ function ProductCard({ p }) {
             : <span style={{ color: '#B0AAA3', fontSize: '13px' }}>No image</span>}
         </div>
         <div style={{ padding: '12px 14px' }}>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: '#000000', lineHeight: 1.4, minHeight: '36px' }}>{p.name}</div>
+          <div style={{ fontSize: '13px', fontWeight: 600, color: '#1a1a1a', lineHeight: 1.4, minHeight: '36px' }}>{p.name}</div>
           {from != null && (
-            <div style={{ fontSize: '13px', color: '#000000', marginTop: '6px' }}>
+            <div style={{ fontSize: '13px', color: '#1a1a1a', marginTop: '6px' }}>
               From <span style={{ color: GOLD, fontWeight: 700 }}>${from.toFixed(2)}</span>
-              <span style={{ color: '#000000', fontSize: '11px' }}> / unit decorated</span>
+              <span style={{ color: '#1a1a1a', fontSize: '11px' }}> / unit decorated</span>
             </div>
           )}
         </div>
@@ -99,29 +100,37 @@ export default async function ASColourRangePage() {
     <div style={{ fontFamily: FONT, background: '#fff', minHeight: '100vh' }}>
       {/* Breadcrumb */}
       <div style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '12px 40px' }}>
-        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#7A7570' }}>
-          <Link href="/" style={{ color: '#7A7570', textDecoration: 'none' }}>Home</Link>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', fontSize: '13px', color: '#1a1a1a' }}>
+          <Link href="/" style={{ color: '#1a1a1a', textDecoration: 'none' }}>Home</Link>
           <span style={{ margin: '0 8px' }}>›</span>
           <span style={{ color: NAVY, fontWeight: 600 }}>AS Colour Range</span>
         </div>
       </div>
 
-      {/* Hero */}
-      <div style={{ background: NAVY, padding: '44px 40px' }}>
+      {/* Hero — matches FRONTEND_STYLE_GUIDE §4 list-page hero (padding 54px 40px 58px) */}
+      <section style={{ background: NAVY, padding: '54px 40px 58px' }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-          <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '40px', fontWeight: 600, color: '#fff', margin: '0 0 10px' }}>
-            AS Colour Custom Apparel
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,.7)', fontSize: '15px', margin: 0, lineHeight: 1.7, maxWidth: '720px' }}>
-            Premium blanks, printed to order — tees, hoodies, bags and headwear with your logo.
-            Screen print, DTG, DTF or embroidery. Minimum 20, free digital proof before production.
-          </p>
+          <div style={{ maxWidth: '820px' }}>
+            <div style={{ display: 'inline-block', background: `${GOLD}25`, color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '1.4px', textTransform: 'uppercase', padding: '5px 13px', borderRadius: '20px', marginBottom: '18px' }}>
+              AS Colour Range
+            </div>
+            <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '48px', lineHeight: 1.08, color: '#fff', fontWeight: 600, margin: '0 0 16px' }}>
+              AS Colour Custom Apparel
+            </h1>
+            <p style={{ color: 'rgba(255,255,255,.76)', fontSize: '16px', lineHeight: 1.75, margin: '0 0 22px', maxWidth: '780px' }}>
+              Premium blanks, printed to order — tees, hoodies, bags and headwear with your logo. Screen print, DTG, DTF or embroidery. Minimum 20, free digital proof before production.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <QuoteButton label="Request a Quote" source="as-colour-range" style={{ background: GOLD, color: '#fff', padding: '12px 22px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '14px', fontFamily: '"DM Sans", sans-serif' }} />
+              <span style={{ color: 'rgba(255,255,255,.65)', fontSize: '13px' }}>{products.length} products</span>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px 40px 80px' }}>
         {products.length === 0 && (
-          <p style={{ color: '#7A7570' }}>This range is being prepared — please check back shortly.</p>
+          <p style={{ color: '#1a1a1a' }}>This range is being prepared — please check back shortly.</p>
         )}
 
         {/* Browse by Subcategory */}
@@ -132,7 +141,7 @@ export default async function ASColourRangePage() {
             </h2>
             {cats.map((cat) => (
               <div key={cat} style={{ marginBottom: '24px' }}>
-                <div style={{ fontSize: '17px', fontWeight: 700, color: '#000000', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>{cat}</div>
+                <div style={{ fontSize: '17px', fontWeight: 700, color: '#1a1a1a', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>{cat}</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                   {Object.keys(groups[cat]).sort().map((sub) => (
                     <SubcatPill key={sub} sub={sub} count={groups[cat][sub].length} />
@@ -150,7 +159,7 @@ export default async function ASColourRangePage() {
               <div key={sub} id={slugify(sub)} style={{ marginBottom: '40px', scrollMarginTop: '80px' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '16px', paddingBottom: '10px', borderBottom: `2px solid ${GOLD}` }}>
                   <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', fontWeight: 600, color: NAVY, margin: 0 }}>{sub}</h2>
-                  <span style={{ fontSize: '13px', color: '#000000' }}>{groups[cat][sub].length}</span>
+                  <span style={{ fontSize: '13px', color: '#1a1a1a' }}>{groups[cat][sub].length}</span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '18px' }}>
                   {groups[cat][sub].map((p) => <ProductCard key={p.id} p={p} />)}
