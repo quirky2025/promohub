@@ -12,6 +12,7 @@ import {
 } from '@/lib/urlPages';
 import { absoluteUrl } from '@/lib/siteUrl';
 import CategoryFilter from '@/components/CategoryFilter';
+import QuoteButton from '@/components/QuoteButton';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -208,9 +209,7 @@ function Hero({ urlPage, productCount }) {
             </p>
           )}
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <Link href="/contact" style={{ background: GOLD, color: '#fff', padding: '12px 22px', borderRadius: '8px', textDecoration: 'none', fontWeight: 700, fontSize: '14px' }}>
-              Request a Quote
-            </Link>
+            <QuoteButton label="Request a Quote" source="category" style={{ background: GOLD, color: '#fff', padding: '12px 22px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 700, fontSize: '14px', fontFamily: '"DM Sans", sans-serif' }} />
             <span style={{ color: 'rgba(255,255,255,.65)', fontSize: '13px' }}>
               {productCount} product{productCount === 1 ? '' : 's'} matched
             </span>
