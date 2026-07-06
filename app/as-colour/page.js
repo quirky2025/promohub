@@ -25,7 +25,7 @@ const CAT_ORDER = ['Apparel', 'Bags', 'Headwear'];
 async function getRangeProducts(supplier) {
   const { data, error } = await supabase
     .from('products')
-    .select('id, slug, name, category, subcategory, is_eco, min_qty, colour_slugs, brand, material_tags, fulfillment, capacity, pen_mechanism, pen_ink_colour, decoration_model, pricing_tiers(base_price), product_colours(images, sort_order, hex, name), decoration_options(name, type)')
+    .select('id, slug, name, category, subcategory, is_eco, min_qty, colour_slugs, brand, material_tags, fulfillment, capacity, pen_mechanism, pen_ink_colour, decoration_model, supplier_sku, pricing_tiers(base_price), product_colours(images, sort_order, hex, name), decoration_options(name, type)')
     .eq('supplier', supplier)
     .eq('is_published', true)
     .order('name')
@@ -44,7 +44,7 @@ function enrich(p) {
     is_eco: p.is_eco, min_qty: p.min_qty, colour_slugs: p.colour_slugs, brand: p.brand,
     material_tags: p.material_tags, fulfillment: p.fulfillment, capacity: p.capacity,
     pen_mechanism: p.pen_mechanism, pen_ink_colour: p.pen_ink_colour,
-    decoration_model: p.decoration_model,
+    decoration_model: p.decoration_model, supplier_sku: p.supplier_sku,
     _image: getFirstImage(p),
     _price: calculatorFromPrice(p) || 0,
     _swatches: getColourSwatches(p),
