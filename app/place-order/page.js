@@ -208,18 +208,8 @@ export default function PlaceOrderPage() {
     setSubmitting(true);
     setError('');
     try {
-      // Upload logo first if file selected
-      let uploadedLogoUrl = logoUrl;
-      let uploadedLogoPngUrl = logoPngUrl;
-      if (logoFile && !logoUrl) {
-        const up = await uploadLogo(logoFile);
-        if (up) {
-          uploadedLogoUrl = up.logo_url;
-          uploadedLogoPngUrl = up.logo_png_url || '';
-          setLogoUrl(up.logo_url);
-          setLogoPngUrl(up.logo_png_url || '');
-        }
-      }
+      // Create the order FIRST — it doesn't need the logo, so don't make the
+      // customer wait on the (slow) logo upload + rasterization.
       const { data: { session: _os2 } } = await supabase.auth.getSession();
       const res = await fetch('/api/order', {
         method: 'POST',
@@ -235,19 +225,32 @@ export default function PlaceOrderPage() {
           transaction_id: data.orderNumber,
           currency: 'AUD',
           value: orderTotal,
+          payment_type: 'eft',
           items: (savedItems || []).map(it => ({ item_id: it.sku || it.productSlug, slug: it.productSlug, item_name: it.productName, price: it.unitPrice, quantity: it.qty })),
         });
-        // Order is already saved — fire the artwork/proof workflow in the background
-        // (keepalive keeps it running after we navigate) so the customer isn't kept waiting.
-        triggerArtwork({
-          orderNumber: data.orderNumber,
-          customerName: form.name,
-          customerEmail: form.email,
-          paymentMethod: 'eft',
-          uploadedLogoUrl: uploadedLogoUrl,
-          uploadedLogoPngUrl: uploadedLogoPngUrl,
-          savedCartItems: savedItems,
-        });
+        // Upload the logo (if any) + fire the artwork/proof workflow in the BACKGROUND.
+        // Soft client navigation keeps this JS runtime alive, so the slow logo
+        // rasterization no longer blocks the customer's Order Placed screen.
+        (async () => {
+          try {
+            let uLogoUrl = logoUrl, uLogoPngUrl = logoPngUrl;
+            if (logoFile && !logoUrl) {
+              const up = await uploadLogo(logoFile);
+              if (up) { uLogoUrl = up.logo_url; uLogoPngUrl = up.logo_png_url || ''; }
+            }
+            triggerArtwork({
+              orderNumber: data.orderNumber,
+              customerName: form.name,
+              customerEmail: form.email,
+              paymentMethod: 'eft',
+              uploadedLogoUrl: uLogoUrl,
+              uploadedLogoPngUrl: uLogoPngUrl,
+              savedCartItems: savedItems,
+            });
+          } catch (bgErr) {
+            console.error('[place-order] background logo/artwork failed', bgErr);
+          }
+        })();
         router.push(`/order-confirmation?order=${data.orderNumber}&method=eft`);
       } else {
         setError('Something went wrong. Please try again or call us on 02 9477 4748.');
@@ -291,6 +294,7 @@ export default function PlaceOrderPage() {
       transaction_id: orderNumber,
       currency: 'AUD',
       value: orderTotalWithSurcharge,
+      payment_type: 'stripe',
       items: (savedItems || []).map(it => ({ item_id: it.sku || it.productSlug, slug: it.productSlug, item_name: it.productName, price: it.unitPrice, quantity: it.qty })),
     });
     // Payment already succeeded + order saved — run artwork/proof workflow in the
