@@ -83,7 +83,7 @@ export default function QuoteModal({ open, onClose, source = 'homepage' }) {
       setError('Something went wrong. Please try again or call us on 02 9477 4748.');
       return;
     }
-    gaEvent('enquiry_submit', { source, quantity: form.quantity.trim() || undefined });
+    gaEvent('enquiry_submit', { enquiry_type: source || 'general_quote' });
     setDone(true);
   }
 
