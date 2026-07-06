@@ -55,21 +55,12 @@ function orderedCats(groups) {
   ];
 }
 
-function SubcatCard({ sub, items }) {
-  const img = items.map(getFirstImage).find(Boolean);
+// Subcategory nav = compact pill button (clearly navigation, not a product card).
+function SubcatPill({ sub, count }) {
   return (
-    <a href={`#${slugify(sub)}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-      <div style={{ border: '1px solid #E0DDD7', borderRadius: '12px', overflow: 'hidden', background: '#fff' }}>
-        <div style={{ aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-          {img
-            ? <img src={img} alt={sub} loading="lazy" style={{ width: '82%', height: '82%', objectFit: 'contain' }} />
-            : <span style={{ color: '#B0AAA3', fontSize: '13px' }}>No image</span>}
-        </div>
-        <div style={{ padding: '12px 14px' }}>
-          <div style={{ fontSize: '15px', fontWeight: 700, color: NAVY }}>{sub}</div>
-          <div style={{ fontSize: '12px', color: '#7A7570', marginTop: '2px' }}>{items.length} products</div>
-        </div>
-      </div>
+    <a href={`#${slugify(sub)}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', padding: '9px 16px', borderRadius: '999px', border: '1.5px solid #E0DDD7', background: '#fff', color: '#000000', fontSize: '14px', fontWeight: 600, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+      {sub}
+      <span style={{ color: '#000000', fontWeight: 400, fontSize: '12px' }}>{count}</span>
     </a>
   );
 }
@@ -86,11 +77,11 @@ function ProductCard({ p }) {
             : <span style={{ color: '#B0AAA3', fontSize: '13px' }}>No image</span>}
         </div>
         <div style={{ padding: '12px 14px' }}>
-          <div style={{ fontSize: '13px', fontWeight: 600, color: NAVY, lineHeight: 1.4, minHeight: '36px' }}>{p.name}</div>
+          <div style={{ fontSize: '13px', fontWeight: 600, color: '#000000', lineHeight: 1.4, minHeight: '36px' }}>{p.name}</div>
           {from != null && (
-            <div style={{ fontSize: '13px', color: NAVY, marginTop: '6px' }}>
+            <div style={{ fontSize: '13px', color: '#000000', marginTop: '6px' }}>
               From <span style={{ color: GOLD, fontWeight: 700 }}>${from.toFixed(2)}</span>
-              <span style={{ color: '#7A7570', fontSize: '11px' }}> / unit decorated</span>
+              <span style={{ color: '#000000', fontSize: '11px' }}> / unit decorated</span>
             </div>
           )}
         </div>
@@ -141,10 +132,10 @@ export default async function ASColourRangePage() {
             </h2>
             {cats.map((cat) => (
               <div key={cat} style={{ marginBottom: '24px' }}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: '#B0AAA3', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '12px' }}>{cat}</div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '18px' }}>
+                <div style={{ fontSize: '17px', fontWeight: 700, color: '#000000', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>{cat}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                   {Object.keys(groups[cat]).sort().map((sub) => (
-                    <SubcatCard key={sub} sub={sub} items={groups[cat][sub]} />
+                    <SubcatPill key={sub} sub={sub} count={groups[cat][sub].length} />
                   ))}
                 </div>
               </div>
@@ -159,7 +150,7 @@ export default async function ASColourRangePage() {
               <div key={sub} id={slugify(sub)} style={{ marginBottom: '40px', scrollMarginTop: '80px' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '16px', paddingBottom: '10px', borderBottom: `2px solid ${GOLD}` }}>
                   <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', fontWeight: 600, color: NAVY, margin: 0 }}>{sub}</h2>
-                  <span style={{ fontSize: '13px', color: '#7A7570' }}>{groups[cat][sub].length}</span>
+                  <span style={{ fontSize: '13px', color: '#000000' }}>{groups[cat][sub].length}</span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '18px' }}>
                   {groups[cat][sub].map((p) => <ProductCard key={p.id} p={p} />)}
