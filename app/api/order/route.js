@@ -1,3 +1,4 @@
+import { after } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 import Stripe from 'stripe';
@@ -90,6 +91,11 @@ export async function POST(req) {
     }
     if (error) throw error;
 
+    // Respond as soon as the order row is saved. Generate the PDF + send the emails
+    // in the background (after the response is flushed) so the customer lands on the
+    // Order Placed screen immediately instead of waiting ~minutes.
+    after(async () => {
+     try {
     // ✅ Generate Order Confirmation / Tax Invoice PDF (shared QUOTE-style template)
     const deliveryLines = [
       customer.street, customer.street2,
@@ -184,6 +190,10 @@ export async function POST(req) {
       subject: `New Order: ${orderNumber} — ${customer.name}`,
       html: emailHtml,
       attachments,
+    });
+     } catch (bgErr) {
+       console.error('[api/order] background PDF/email failed for', orderNumber, bgErr);
+     }
     });
 
     return Response.json({ success: true, orderNumber });

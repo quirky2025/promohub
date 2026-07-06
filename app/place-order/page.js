@@ -171,6 +171,7 @@ export default function PlaceOrderPage() {
       // Logo available - generate mockup automatically
       await fetch('/api/artwork/upload', {
         method: 'POST',
+        keepalive: true,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderNumber,
@@ -189,6 +190,7 @@ export default function PlaceOrderPage() {
       // No logo - send "please upload logo" email
       await fetch('/api/artwork/request-logo', {
         method: 'POST',
+        keepalive: true,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           orderNumber,
@@ -229,8 +231,15 @@ export default function PlaceOrderPage() {
         // Save cart items before clearing
         const savedItems = getCart();
         clearCart();
-        // Trigger artwork workflow
-        await triggerArtwork({
+        gaEvent('purchase', {
+          transaction_id: data.orderNumber,
+          currency: 'AUD',
+          value: orderTotal,
+          items: (savedItems || []).map(it => ({ item_id: it.sku || it.productSlug, item_name: it.productName, price: it.unitPrice, quantity: it.qty })),
+        });
+        // Order is already saved — fire the artwork/proof workflow in the background
+        // (keepalive keeps it running after we navigate) so the customer isn't kept waiting.
+        triggerArtwork({
           orderNumber: data.orderNumber,
           customerName: form.name,
           customerEmail: form.email,
@@ -238,12 +247,6 @@ export default function PlaceOrderPage() {
           uploadedLogoUrl: uploadedLogoUrl,
           uploadedLogoPngUrl: uploadedLogoPngUrl,
           savedCartItems: savedItems,
-        });
-        gaEvent('purchase', {
-          transaction_id: data.orderNumber,
-          currency: 'AUD',
-          value: orderTotal,
-          items: (savedItems || []).map(it => ({ item_id: it.sku || it.productSlug, item_name: it.productName, price: it.unitPrice, quantity: it.qty })),
         });
         router.push(`/order-confirmation?order=${data.orderNumber}&method=eft`);
       } else {
@@ -284,7 +287,15 @@ export default function PlaceOrderPage() {
   async function handleStripeSuccess(orderNumber) {
     const savedItems = getCart();
     clearCart();
-    await triggerArtwork({
+    gaEvent('purchase', {
+      transaction_id: orderNumber,
+      currency: 'AUD',
+      value: orderTotalWithSurcharge,
+      items: (savedItems || []).map(it => ({ item_id: it.sku || it.productSlug, item_name: it.productName, price: it.unitPrice, quantity: it.qty })),
+    });
+    // Payment already succeeded + order saved — run artwork/proof workflow in the
+    // background (keepalive) so the customer lands on Order Placed immediately.
+    triggerArtwork({
       orderNumber,
       customerName: form.name,
       customerEmail: form.email,
@@ -292,12 +303,6 @@ export default function PlaceOrderPage() {
       uploadedLogoUrl: logoUrl,
       uploadedLogoPngUrl: logoPngUrl,
       savedCartItems: savedItems,
-    });
-    gaEvent('purchase', {
-      transaction_id: orderNumber,
-      currency: 'AUD',
-      value: orderTotalWithSurcharge,
-      items: (savedItems || []).map(it => ({ item_id: it.sku || it.productSlug, item_name: it.productName, price: it.unitPrice, quantity: it.qty })),
     });
     router.push(`/order-confirmation?order=${orderNumber}&method=stripe`);
   }
