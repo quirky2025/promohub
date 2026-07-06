@@ -225,6 +225,7 @@ export default function PlaceOrderPage() {
           transaction_id: data.orderNumber,
           currency: 'AUD',
           value: orderTotal,
+          payment_type: 'eft',
           items: (savedItems || []).map(it => ({ item_id: it.sku || it.productSlug, slug: it.productSlug, item_name: it.productName, price: it.unitPrice, quantity: it.qty })),
         });
         // Upload the logo (if any) + fire the artwork/proof workflow in the BACKGROUND.
@@ -293,6 +294,7 @@ export default function PlaceOrderPage() {
       transaction_id: orderNumber,
       currency: 'AUD',
       value: orderTotalWithSurcharge,
+      payment_type: 'stripe',
       items: (savedItems || []).map(it => ({ item_id: it.sku || it.productSlug, slug: it.productSlug, item_name: it.productName, price: it.unitPrice, quantity: it.qty })),
     });
     // Payment already succeeded + order saved — run artwork/proof workflow in the
