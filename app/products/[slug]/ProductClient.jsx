@@ -1483,26 +1483,34 @@ const thStyle = { fontSize: '11px', fontWeight: 600, padding: '8px 10px', textAl
 const tdStyle = { padding: '8px 10px', fontSize: '13px', textAlign: 'center', fontFamily: '"DM Sans", sans-serif' };
 const tdLabelStyle = { padding: '8px 12px', fontSize: '12px', color: '#000', fontWeight: 500, background: '#FAFAF8', fontFamily: '"DM Sans", sans-serif' };
 function SizeChartTable({ sizeChart }) {
+  const [open, setOpen] = useState(false);
   if (!sizeChart || !Array.isArray(sizeChart.sizes) || !sizeChart.sizes.length) return null;
   return (
-    <div style={{ border: '1.5px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '14px' }}>
-      <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>
-        Size Chart {sizeChart.unit ? `(${sizeChart.unit})` : ''}
-      </div>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead><tr>
-          <th style={{ ...thStyle, textAlign: 'left' }}>Measurement</th>
-          {sizeChart.sizes.map(s => <th key={s} style={thStyle}>{s}</th>)}
-        </tr></thead>
-        <tbody>
-          {(sizeChart.measurements || []).map((m, i) => (
-            <tr key={i} style={{ background: i % 2 ? '#FAFAF8' : '#fff' }}>
-              <td style={tdLabelStyle}>{m.name}</td>
-              {(m.values || []).map((v, j) => <td key={j} style={tdStyle}>{v}</td>)}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div style={{ marginTop: '14px' }}>
+      <button onClick={() => setOpen(o => !o)} style={{ background: 'none', border: 'none', color: GOLD, fontSize: '13px', fontWeight: 600, cursor: 'pointer', padding: 0, textDecoration: 'underline', fontFamily: '"DM Sans", sans-serif' }}>
+        {open ? 'Hide size chart ▲' : 'Size chart ▼'}
+      </button>
+      {open && (
+        <div style={{ border: '1.5px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', marginTop: '10px' }}>
+          <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>
+            Size Chart {sizeChart.unit ? `(${sizeChart.unit})` : ''}
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead><tr>
+              <th style={{ ...thStyle, textAlign: 'left' }}>Measurement</th>
+              {sizeChart.sizes.map(s => <th key={s} style={thStyle}>{s}</th>)}
+            </tr></thead>
+            <tbody>
+              {(sizeChart.measurements || []).map((m, i) => (
+                <tr key={i} style={{ background: i % 2 ? '#FAFAF8' : '#fff' }}>
+                  <td style={tdLabelStyle}>{m.name}</td>
+                  {(m.values || []).map((v, j) => <td key={j} style={tdStyle}>{v}</td>)}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     <style>{`
         @media (max-width: 768px) {
           .qp-padx { padding-left: 16px !important; padding-right: 16px !important; }
