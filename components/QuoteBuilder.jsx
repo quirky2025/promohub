@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
-import { MARGIN, GST, SHIPPING, SETUP_FEE, brandingLabel, isColourMethod, isOneColourLocked } from '@/lib/pricing';
+import { MARGIN, GST, SHIPPING, SETUP_FEE, decoUnitPrice, brandingLabel, isColourMethod, isOneColourLocked } from '@/lib/pricing';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -94,7 +94,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
   if (activeTier && nQty > 0) {
     autoUnit = activeTier.base_price * MARGIN;
     selectedDecos.forEach(d => {
-      autoUnit += (d.per_unit || 0) * (addon[d.id]?.setupQty || 1) * MARGIN;
+      autoUnit += decoUnitPrice(d.per_unit) * (addon[d.id]?.setupQty || 1);
       if (d.has_setup) autoUnit += (SETUP_FEE * (addon[d.id]?.setupQty || 1) / nQty);
     });
   }

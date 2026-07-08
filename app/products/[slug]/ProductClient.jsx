@@ -12,7 +12,7 @@ import { slugify } from '@/lib/slug';
 import { colourImageAlt, cleanColour } from '@/lib/colourName';
 import ProductImg from '@/components/ProductImg';
 import { uploadImage } from '@/lib/imageHost';
-import { MARGIN, GST, SHIPPING, SETUP_FEE, brandingLabel, isColourMethod, isOneColourLocked } from '@/lib/pricing';
+import { MARGIN, GST, SHIPPING, SETUP_FEE, decoUnitPrice, brandingLabel, isColourMethod, isOneColourLocked } from '@/lib/pricing';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -136,7 +136,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
     decorations.forEach(d => {
       const st = addonState[d.id];
       if (!st?.on) return;
-      unit += d.per_unit * (st.setupQty || 1) * MARGIN;
+      unit += decoUnitPrice(d.per_unit) * (st.setupQty || 1);
       if (d.has_setup) unit += (SETUP_FEE * st.setupQty / quantity);
     });
     return unit;
@@ -209,7 +209,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
       .map(d => ({
         id: d.id,
         name: d.name,
-        perUnit: d.per_unit * MARGIN,
+        perUnit: decoUnitPrice(d.per_unit),
         setupFee: d.has_setup ? SETUP_FEE : 0,
         setupQty: addonState[d.id]?.setupQty || 1,
       }));
@@ -457,7 +457,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                               <span style={{ position: 'absolute', top: '3px', left: st.on ? '23px' : '3px', width: '18px', height: '18px', background: '#fff', borderRadius: '50%', transition: 'left .2s', boxShadow: '0 1px 3px rgba(0,0,0,.2)' }} />
                             </label>
                           </td>
-                          <td style={{ ...tdStyle, fontWeight: 500, color: NAVY }}>${(d.per_unit * MARGIN).toFixed(2)}</td>
+                          <td style={{ ...tdStyle, fontWeight: 500, color: NAVY }}>${decoUnitPrice(d.per_unit).toFixed(2)}</td>
                           <td style={{ ...tdStyle, color: '#000' }}>{qty}</td>
                           <td style={tdStyle}>{d.has_setup ? `$${(SETUP_FEE).toFixed(2)}` : '—'}</td>
                           <td style={{ padding: '10px 12px', textAlign: 'center' }}>
@@ -505,7 +505,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                           </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '13px', fontWeight: 500, color: NAVY }}>+${(d.per_unit * MARGIN).toFixed(2)}/unit</div>
+                          <div style={{ fontSize: '13px', fontWeight: 500, color: NAVY }}>+${decoUnitPrice(d.per_unit).toFixed(2)}/unit</div>
                           {d.has_setup && <div style={{ fontSize: '11px', color: '#000', marginTop: '2px' }}>Setup: ${(SETUP_FEE).toFixed(2)}</div>}
                         </div>
                       </div>
