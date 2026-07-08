@@ -95,7 +95,7 @@ export default function QuoteBuilder({ open, onClose, prefill, onSent }) {
     autoUnit = activeTier.base_price * MARGIN;
     selectedDecos.forEach(d => {
       autoUnit += (d.per_unit || 0) * (addon[d.id]?.setupQty || 1) * MARGIN;
-      if (d.has_setup) autoUnit += (SETUP_FEE * (addon[d.id]?.setupQty || 1) / nQty) * MARGIN;
+      if (d.has_setup) autoUnit += (SETUP_FEE * (addon[d.id]?.setupQty || 1) / nQty);
     });
   }
   const unitPrice = override !== '' ? (parseFloat(override) || 0) : Math.round(autoUnit * 100) / 100;
