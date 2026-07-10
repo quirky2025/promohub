@@ -151,6 +151,9 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   const firstRetailPrice = pricingTiers[0] ? pricingTiers[0].base_price * MARGIN : 0;
   const isValidQty = qty >= (product.min_qty || 1);
   const canAdd = isValidQty && (colours.length === 0 || selectedColour !== null);
+  // ── Quote-only (indent) products: hide the calculator/cart, show a reference "From $X" + Get a Quote ──
+  const quoteOnly = !!product.quote_only;
+  const refSell = product.quote_ref_price != null ? Number(product.quote_ref_price) * MARGIN : null;
   const collectionLabel = product.collection
     ? (Array.isArray(product.collection) ? product.collection.join(', ') : product.collection)
     : null;
@@ -359,7 +362,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           )}
 
-      <div>
+      {!quoteOnly && (<div>
             <StepLabel num={qtyStep} text={(hasSizes ? 'Enter Quantity per Size' : 'Enter Quantity') + ' *'} />
             {hasSizes ? (
               <div>
@@ -399,9 +402,9 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                 {!isValidQty && <div style={{ fontSize: '12px', color: '#C0392B', marginTop: '8px' }}>Minimum order quantity is {product.min_qty} units.</div>}
               </>
             )}
-          </div>
+          </div>)}
 
-          {pricingTiers.length > 0 && (
+          {!quoteOnly && pricingTiers.length > 0 && (
             <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflowX: 'auto' }}>
               <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Unbranded Pricing (excl. GST)</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -425,7 +428,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           )}
 
-          {brandingDecorations.length > 0 && (
+          {!quoteOnly && brandingDecorations.length > 0 && (
             <div>
               <StepLabel num={brandingStep} text="Add Branding Options" />
               <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflowX: 'auto', marginTop: '10px' }}>
@@ -516,7 +519,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           )}
 
-          {pricingTiers.length > 0 && (
+          {!quoteOnly && pricingTiers.length > 0 && (
             <div className="qp-scroll-x" style={{ border: '1px solid #E0DDD7', borderRadius: '10px', overflowX: 'auto' }}>
               <div style={{ background: NAVY, padding: '11px 14px', fontSize: '12px', fontWeight: 700, color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.8px', textAlign: 'center' }}>Price Summary</div>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -540,7 +543,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           )}
 
-          {isValidQty && unitPrice > 0 && (
+          {!quoteOnly && isValidQty && unitPrice > 0 && (
             <div style={{ background: NAVY, borderRadius: '16px', padding: '24px', color: '#fff' }}>
               <div style={{ marginBottom: '14px', paddingBottom: '14px', borderBottom: '1px solid rgba(255,255,255,.12)' }}>
                 <div style={{ fontSize: '11px', color: '#fff', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>Your Selection</div>
@@ -568,7 +571,33 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           )}
 
-          <button
+          {quoteOnly && (
+            <div style={{ background: NAVY, borderRadius: '16px', padding: '24px', color: '#fff' }}>
+              <div style={{ display: 'inline-block', background: 'rgba(201,169,110,.18)', color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase', padding: '5px 12px', borderRadius: '20px', marginBottom: '14px' }}>Indent · Made to Order</div>
+              {refSell != null ? (
+                <div style={{ marginBottom: '10px' }}>
+                  <div style={{ fontSize: '11px', color: '#fff', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>From (excl. GST)</div>
+                  <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '32px', fontWeight: 500, color: GOLD }}>${refSell.toFixed(2)}</div>
+                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,.7)', marginTop: '2px' }}>Indicative price incl. 1 print position. Final price depends on quantity, decoration &amp; freight.</div>
+                </div>
+              ) : (
+                <div style={{ fontSize: '18px', fontWeight: 600, color: GOLD, marginBottom: '8px' }}>Price on application</div>
+              )}
+              <div style={{ marginTop: '14px' }}>
+                {product.min_qty ? (
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: '1px solid rgba(255,255,255,.12)', fontSize: '13px' }}>
+                    <span style={{ color: 'rgba(255,255,255,.7)' }}>Minimum order</span>
+                    <span style={{ fontWeight: 600 }}>{Number(product.min_qty).toLocaleString('en-AU')} units</span>
+                  </div>
+                ) : null}
+              </div>
+              <div style={{ fontSize: '12.5px', color: 'rgba(255,255,255,.8)', lineHeight: 1.6, marginTop: '14px', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,.12)' }}>
+                Factory-direct indent product. Request a quote below and our team will confirm final price, decoration options and timing.
+              </div>
+            </div>
+          )}
+
+          {!quoteOnly && (<button
             onClick={canAdd ? handleAddToCart : undefined}
             disabled={!canAdd}
             style={{
@@ -582,7 +611,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               transition: 'background .3s',
             }}>
             {cartAdded ? '✅ Added to Cart!' : !isValidQty ? 'Enter quantity to see pricing' : (colours.length > 0 && selectedColour === null) ? 'Choose a colour to continue' : `Add to Cart  —  ${aud(grand)} incl. GST`}
-          </button>
+          </button>)}
 
           <button onClick={() => { gaEvent('quote_click', { product_slug: product.slug, source_location: 'pdp' }); setQuoteOpen(true); }} style={{ width: '100%', background: NAVY, color: '#fff', border: 'none', borderRadius: '12px', padding: '18px', fontSize: '17px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
             <span style={{ fontSize: '20px' }}>💬</span> Get a Quote / Ask a Question
