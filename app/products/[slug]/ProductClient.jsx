@@ -154,11 +154,6 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   // ── Quote-only (indent) products: hide the calculator/cart, show a reference "From $X" + Get a Quote ──
   const quoteOnly = !!product.quote_only;
   const refSell = product.quote_ref_price != null ? Number(product.quote_ref_price) * MARGIN : null;
-  const indentLead = product.indent_type === 'indent_air'
-    ? (product.indent_lead_time ? `${product.indent_lead_time} business days (air)` : 'Enquire (air freight)')
-    : product.indent_type === 'indent_sea'
-      ? (product.indent_lead_time ? `${product.indent_lead_time} business days (sea)` : 'Enquire (sea freight)')
-      : 'Enquire';
   const collectionLabel = product.collection
     ? (Array.isArray(product.collection) ? product.collection.join(', ') : product.collection)
     : null;
@@ -595,10 +590,6 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                     <span style={{ fontWeight: 600 }}>{Number(product.min_qty).toLocaleString('en-AU')} units</span>
                   </div>
                 ) : null}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: '1px solid rgba(255,255,255,.12)', fontSize: '13px' }}>
-                  <span style={{ color: 'rgba(255,255,255,.7)' }}>Lead time</span>
-                  <span style={{ fontWeight: 600 }}>{indentLead}</span>
-                </div>
               </div>
               <div style={{ fontSize: '12.5px', color: 'rgba(255,255,255,.8)', lineHeight: 1.6, marginTop: '14px', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,.12)' }}>
                 Factory-direct indent product. Request a quote below and our team will confirm final price, decoration options and timing.
