@@ -12,7 +12,7 @@ import { slugify } from '@/lib/slug';
 import { colourImageAlt, cleanColour } from '@/lib/colourName';
 import ProductImg from '@/components/ProductImg';
 import { uploadImage } from '@/lib/imageHost';
-import { MARGIN, GST, SHIPPING, SETUP_FEE, decoUnitPrice, brandingLabel, isColourMethod, isOneColourLocked } from '@/lib/pricing';
+import { MARGIN, tierMargin, GST, SHIPPING, SETUP_FEE, decoUnitPrice, brandingLabel, isColourMethod, isOneColourLocked } from '@/lib/pricing';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -130,9 +130,9 @@ export default function ProductClient({ product, mainImage, colours, extraImages
     return best;
   }, null) || pricingTiers[0];
 
-  const calcUnit = useCallback((tierPrice, quantity) => {
+  const calcUnit = useCallback((tierPrice, quantity, tierIndex = 2) => {
     if (!tierPrice || !quantity) return 0;
-    let unit = tierPrice * MARGIN;
+    let unit = tierPrice * tierMargin(tierIndex);   // 1st tier ×1.50, 2nd ×1.45, else ×1.40
     decorations.forEach(d => {
       const st = addonState[d.id];
       if (!st?.on) return;
@@ -144,11 +144,12 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 
   // Round the unit price to cents FIRST, then multiply by qty — so the total
   // always equals (displayed unit price × quantity) and matches the admin quote.
-  const unitPrice = activeTier ? Math.round(calcUnit(activeTier.base_price, qty) * 100) / 100 : 0;
+  const activeTierIndex = activeTier ? pricingTiers.findIndex(t => t.id === activeTier.id) : 0;
+  const unitPrice = activeTier ? Math.round(calcUnit(activeTier.base_price, qty, activeTierIndex) * 100) / 100 : 0;
   const subtotal = Math.round(unitPrice * qty * 100) / 100;
   const gstAmt = Math.round((subtotal + SHIPPING) * GST * 100) / 100;
   const grand = subtotal + SHIPPING + gstAmt;
-  const firstRetailPrice = pricingTiers[0] ? pricingTiers[0].base_price * MARGIN : 0;
+  const firstRetailPrice = pricingTiers[0] ? pricingTiers[0].base_price * tierMargin(0) : 0;
   const isValidQty = qty >= (product.min_qty || 1);
   const canAdd = isValidQty && (colours.length === 0 || selectedColour !== null);
   // ── Quote-only (indent) products: hide the calculator/cart, show a reference "From $X" + Get a Quote ──
@@ -417,11 +418,11 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                 <tbody>
                   <tr>
                     <td style={tdLabelStyle}>Price</td>
-                    {pricingTiers.map(t => { const isActive = activeTier?.id === t.id; return <td key={t.id} style={{ ...tdStyle, fontWeight: isActive ? 700 : 500, color: isActive ? GOLD : NAVY, background: isActive ? '#FDF8F0' : undefined, fontSize: isActive ? '15px' : '13px' }}>${(t.base_price * MARGIN).toFixed(2)}</td>; })}
+                    {pricingTiers.map((t, i) => { const isActive = activeTier?.id === t.id; return <td key={t.id} style={{ ...tdStyle, fontWeight: isActive ? 700 : 500, color: isActive ? GOLD : NAVY, background: isActive ? '#FDF8F0' : undefined, fontSize: isActive ? '15px' : '13px' }}>${(t.base_price * tierMargin(i)).toFixed(2)}</td>; })}
                   </tr>
                   <tr>
                     <td style={tdLabelStyle}>Save</td>
-                    {pricingTiers.map((t, i) => { const isActive = activeTier?.id === t.id; return <td key={t.id} style={{ ...tdStyle, color: '#000', fontWeight: 700, fontSize: '15px', background: isActive ? '#FDF8F0' : undefined }}>{i === 0 ? '—' : Math.round((1 - (t.base_price * MARGIN) / firstRetailPrice) * 100) + '%'}</td>; })}
+                    {pricingTiers.map((t, i) => { const isActive = activeTier?.id === t.id; return <td key={t.id} style={{ ...tdStyle, color: '#000', fontWeight: 700, fontSize: '15px', background: isActive ? '#FDF8F0' : undefined }}>{i === 0 ? '—' : Math.round((1 - (t.base_price * tierMargin(i)) / firstRetailPrice) * 100) + '%'}</td>; })}
                   </tr>
                 </tbody>
               </table>
@@ -532,11 +533,11 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                 <tbody>
                   <tr style={{ borderBottom: '1px solid #F0EEED' }}>
                     <td style={tdLabelStyle}>Buy (unit)</td>
-                    {pricingTiers.map(t => { const u = calcUnit(t.base_price, t.min_qty); const isActive = activeTier?.id === t.id; return <td key={t.id} style={{ ...tdStyle, fontWeight: 600, color: isActive ? GOLD : NAVY, background: isActive ? '#FDF8F0' : undefined }}>${u.toFixed(2)}</td>; })}
+                    {pricingTiers.map((t, i) => { const u = calcUnit(t.base_price, t.min_qty, i); const isActive = activeTier?.id === t.id; return <td key={t.id} style={{ ...tdStyle, fontWeight: 600, color: isActive ? GOLD : NAVY, background: isActive ? '#FDF8F0' : undefined }}>${u.toFixed(2)}</td>; })}
                   </tr>
                   <tr>
                     <td style={tdLabelStyle}>Buy (subtotal)</td>
-                    {pricingTiers.map(t => { const u = calcUnit(t.base_price, t.min_qty); const isActive = activeTier?.id === t.id; return <td key={t.id} style={{ ...tdStyle, fontWeight: 600, color: isActive ? GOLD : NAVY, background: isActive ? '#FDF8F0' : undefined }}>{aud(u * t.min_qty)}</td>; })}
+                    {pricingTiers.map((t, i) => { const u = calcUnit(t.base_price, t.min_qty, i); const isActive = activeTier?.id === t.id; return <td key={t.id} style={{ ...tdStyle, fontWeight: 600, color: isActive ? GOLD : NAVY, background: isActive ? '#FDF8F0' : undefined }}>{aud(u * t.min_qty)}</td>; })}
                   </tr>
                 </tbody>
               </table>
