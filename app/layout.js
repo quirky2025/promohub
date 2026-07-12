@@ -3,6 +3,7 @@ import Nav from '@/components/Nav';
 import Footer from '@/components/Footer';
 import { SITE_URL } from '@/lib/siteUrl';
 import GoogleAnalytics from '@/components/GoogleAnalytics';
+import LiveChat from '@/components/LiveChat';
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
@@ -37,6 +38,10 @@ export default function RootLayout({ children }) {
         <Nav />
         {children}
         <Footer />
+        <LiveChat
+          propertyId={process.env.NEXT_PUBLIC_TAWK_PROPERTY_ID}
+          widgetId={process.env.NEXT_PUBLIC_TAWK_WIDGET_ID}
+        />
       </body>
     </html>
   );
