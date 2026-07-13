@@ -50,9 +50,16 @@ export default async function UrlPage({ params }) {
 
   const filterable = urlPage.product_filter?.type === 'category' || urlPage.product_filter?.type === 'subcategory';
   const { products, count, error, unsupported } = await getProductsForUrlPage(urlPage, filterable ? 1000 : 96);
+  // 只把筛选+卡片真正用到的精简字段传给客户端(砍掉 product_colours 图数组 / pricing_tiers / decoration_options),
+  // 大幅缩小 RSC payload —— 类目页仍偏慢的主因。
   const filterProducts = filterable
     ? products.map((p) => ({
-        ...p,
+        id: p.id, name: p.name, slug: p.slug,
+        category: p.category, subcategory: p.subcategory, supplier_sku: p.supplier_sku,
+        brand: p.brand, is_eco: p.is_eco, min_qty: p.min_qty, fulfillment: p.fulfillment,
+        decoration_model: p.decoration_model,
+        colour_slugs: p.colour_slugs, materials: p.materials, material_tags: p.material_tags,
+        capacity: p.capacity, pen_mechanism: p.pen_mechanism, pen_ink_colour: p.pen_ink_colour,
         _image: getFirstImage(p),
         _price: p.decoration_model === 'calculator' ? (calculatorFromPrice(p) || 0) : getLowestPrice(p),
         _swatches: getColourSwatches(p),
