@@ -195,6 +195,7 @@ const CATEGORY_URLS = [
       ['Pencils', '/custom-pencils-australia'],
       ['Plastic Pens', '/custom-plastic-pens-australia'],
       ['Stylus Pens', '/custom-stylus-pens-australia'],
+      ['Pen Gift Sets', '/pen-gift-sets-australia'],
     ],
   },
   {
