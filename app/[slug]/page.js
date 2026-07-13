@@ -9,6 +9,7 @@ import {
   getLiveUrlPage,
   getLowestPrice,
   getProductsForUrlPage,
+  getAllLivePageSlugs,
 } from '@/lib/urlPages';
 import { absoluteUrl } from '@/lib/siteUrl';
 import { calculatorFromPrice } from '@/lib/decorationPricing';
@@ -21,6 +22,12 @@ const BG = '#ffffff';
 
 // ISR:类目页静态缓存 5 分钟,CDN 直出(原本每次请求实时 SSR 查 Supabase)
 export const revalidate = 300;
+
+// 部署时预渲染所有已上线类目页 → 纯 CDN 静态直出,用户不吃冷渲染
+export async function generateStaticParams() {
+  const slugs = await getAllLivePageSlugs();
+  return slugs.map((slug) => ({ slug }));
+}
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
