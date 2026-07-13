@@ -19,6 +19,9 @@ const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 const BG = '#ffffff';
 
+// ISR:类目页静态缓存 5 分钟,CDN 直出(原本每次请求实时 SSR 查 Supabase)
+export const revalidate = 300;
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const urlPage = await getLiveUrlPage(slug);
