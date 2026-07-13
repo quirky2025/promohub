@@ -14,6 +14,7 @@ import {
 import { absoluteUrl } from '@/lib/siteUrl';
 import { calculatorFromPrice } from '@/lib/decorationPricing';
 import CategoryFilter from '@/components/CategoryFilter';
+import SeoContent from '@/components/SeoContent';
 import QuoteButton from '@/components/QuoteButton';
 
 const NAVY = '#1B2A4A';
@@ -129,8 +130,22 @@ export default async function UrlPage({ params }) {
         )}
       </section>
 
-      {(urlPage.seo_content || Array.isArray(urlPage.faq)) && (
-        <SeoSection urlPage={urlPage} />
+      {(urlPage.seo_content || (Array.isArray(urlPage.faq) && urlPage.faq.length > 0)) && (
+        <SeoContent content={urlPage.seo_content} faq={Array.isArray(urlPage.faq) ? urlPage.faq : []} />
+      )}
+      {Array.isArray(urlPage.faq) && urlPage.faq.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: urlPage.faq.map((fq) => ({
+              "@type": "Question",
+              name: fq.question,
+              acceptedAnswer: { "@type": "Answer", text: String(fq.answer || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim() },
+            })),
+          }) }}
+        />
       )}
     </main>
   );
@@ -209,7 +224,7 @@ function SubcategorySection({ childPages }) {
 }
 
 function Hero({ urlPage, productCount }) {
-  const intro = urlPage.meta_description || '';
+  const intro = urlPage.seo_intro || urlPage.meta_description || '';
 
   return (
     <section style={{ background: NAVY, padding: '54px 40px 58px' }}>
@@ -305,42 +320,6 @@ function StatusPanel({ title, body }) {
   );
 }
 
-function SeoSection({ urlPage }) {
-  const faq = Array.isArray(urlPage.faq) ? urlPage.faq : [];
-
-  if (!urlPage.seo_content && faq.length === 0) return null;
-
-  return (
-    <section style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '54px 40px 64px' }}>
-      <div style={{ maxWidth: '920px', margin: '0 auto' }}>
-        {urlPage.seo_content && (
-          <div style={{ color: '#000', fontSize: '15px', lineHeight: 1.85, whiteSpace: 'pre-line' }}>
-            {urlPage.seo_content}
-          </div>
-        )}
-        {faq.length > 0 && (
-          <div style={{ marginTop: urlPage.seo_content ? '34px' : 0 }}>
-            <h2 style={{ fontFamily: '"Cormorant Garamond", serif', color: NAVY, fontSize: '30px', margin: '0 0 18px', fontWeight: 600 }}>
-              FAQs
-            </h2>
-            <div style={{ display: 'grid', gap: '12px' }}>
-              {faq.map((item, index) => (
-                <div key={`${item.question || 'faq'}-${index}`} style={{ border: '1px solid #E0DDD7', borderRadius: '8px', padding: '18px 20px', background: BG }}>
-                  <div style={{ color: NAVY, fontWeight: 700, marginBottom: '7px' }}>
-                    {item.question}
-                  </div>
-                  <div style={{ color: '#000', fontSize: '14px', lineHeight: 1.7 }}>
-                    {item.answer}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
 
 function pageTypeLabel(urlPage) {
   if (urlPage.page_type === 'collection') return 'Collection';
