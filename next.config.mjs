@@ -193,6 +193,7 @@ const CATEGORY_URLS = [
       ['Highlighters', '/custom-highlighters-australia'],
       ['Metal Pens', '/custom-metal-pens-australia'],
       ['Pencils', '/custom-pencils-australia'],
+      ['Novelty Pens', '/novelty-pens-australia'],
       ['Plastic Pens', '/custom-plastic-pens-australia'],
       ['Stylus Pens', '/custom-stylus-pens-australia'],
       ['Pen Gift Sets', '/pen-gift-sets-australia'],

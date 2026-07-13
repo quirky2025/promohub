@@ -159,6 +159,7 @@ const FLAT_NAV_OVERRIDES = {
       { label: 'Highlighters', href: '/custom-highlighters-australia' },
       { label: 'Eco Pens', href: '/eco-pens-australia' },
       { label: 'Pencils', href: '/custom-pencils-australia' },
+      { label: 'Novelty Pens', href: '/novelty-pens-australia' },
       { label: 'Pen Presentation', href: '/pen-presentation-australia' },
       { label: 'Pen Gift Sets', href: '/pen-gift-sets-australia' },
     ],
