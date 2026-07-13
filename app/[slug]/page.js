@@ -134,7 +134,7 @@ async function getChildPageCards(urlPage) {
 
   const cards = await Promise.all(
     childPages.map(async (childPage) => {
-      const { products, count } = await getProductsForUrlPage(childPage, 24);
+      const { products, count } = await getProductsForUrlPage(childPage, 1); // 只需数量+一张图,别拉 24 条
       return {
         ...childPage,
         product_count: count ?? products.length,
