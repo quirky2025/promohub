@@ -54,6 +54,12 @@ export default function QuoteWizard({ product, colours = [], decorations = [], p
   const total = subtotal + SHIPPING + gst;
 
   const colourMissing = colours.length > 0 && !wizColour;
+  const emailOk = (form.email || '').includes('@') && (form.email || '').includes('.');
+  // Each step's required fields must be filled before "Next" is enabled.
+  const stepBlocked =
+    (step === 0 && (colourMissing || !(formQty >= (product.min_qty || 1)))) ||
+    (step === 1 && (!form.name.trim() || !emailOk || !form.street.trim() || !form.suburb.trim() || !form.state || !form.postcode.trim()));
+  const showPrice = subtotal > 0;
   const setF = (k, v) => setForm((p) => ({ ...p, [k]: v }));
   const handleChange = (e) => setF(e.target.name, e.target.value);
   const toggleDeco = (id) => setAddonState((prev) => ({ ...prev, [id]: { ...prev[id], on: !prev[id]?.on } }));
@@ -61,7 +67,7 @@ export default function QuoteWizard({ product, colours = [], decorations = [], p
   async function submit() {
     if (!form.name || !form.email) { setStep(1); return; }
     setStatus('sending');
-    const requiredDate = form.requiredDate ? new Date(form.requiredDate + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    const requiredDate = form.requiredDate ? form.requiredDate.split('-').reverse().join('/') : '';
     const deliveryAddress = [form.street, form.street2, form.suburb, form.state, form.postcode, 'Australia'].filter(Boolean).join(', ');
     try {
       const payload = {
@@ -83,7 +89,7 @@ export default function QuoteWizard({ product, colours = [], decorations = [], p
   }
 
   function next() {
-    if (step === 0 && colourMissing) { setColourErr(true); return; }
+    if (stepBlocked) { if (step === 0 && colourMissing) setColourErr(true); return; }
     if (step < STEPS.length - 1) setStep(step + 1);
     else submit();
   }
@@ -185,7 +191,7 @@ export default function QuoteWizard({ product, colours = [], decorations = [], p
                       <div><label style={LB}>Phone</label><input name="phone" value={form.phone} onChange={handleChange} placeholder="04xx xxx xxx" style={{ ...IN, fontFamily: MONO }} /></div>
                     </div>
                     <div style={{ borderTop: '1px dashed #ECE8E1', margin: '16px 0 14px' }} />
-                    <label style={LB}>Delivery address</label>
+                    <label style={LB}>Delivery address *</label>
                     <input name="street" value={form.street} onChange={handleChange} placeholder="Address line 1" style={{ ...IN, marginBottom: '8px' }} />
                     <input name="street2" value={form.street2} onChange={handleChange} placeholder="Address line 2 (optional)" style={{ ...IN, marginBottom: '8px' }} />
                     <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr', gap: '8px' }}>
@@ -212,8 +218,10 @@ export default function QuoteWizard({ product, colours = [], decorations = [], p
                     </div>
                     {form.artworkFileName && <div style={{ fontSize: '12px', color: form.artworkUploading ? BLACK : '#1B5E3A', marginBottom: '12px' }}>{form.artworkUploading ? '⏳ Uploading… ' : '✅ '}{form.artworkFileName}</div>}
 
-                    <label style={{ ...LB, marginTop: '10px' }}>Required date</label>
-                    <input name="requiredDate" type="date" value={form.requiredDate} onChange={handleChange} min={new Date().toISOString().split('T')[0]} style={{ ...IN, maxWidth: '200px', cursor: 'pointer', marginBottom: '14px' }} />
+                    <label style={{ ...LB, marginTop: '10px' }}>Required date (DD/MM/YYYY)</label>
+                    <input name="requiredDate" type="date" value={form.requiredDate} onChange={handleChange} min={new Date().toISOString().split('T')[0]} style={{ ...IN, maxWidth: '200px', cursor: 'pointer' }} />
+                    {form.requiredDate && <div style={{ fontSize: '12px', color: BLACK, fontWeight: 600, margin: '5px 0 0' }}>Selected: {form.requiredDate.split('-').reverse().join('/')}</div>}
+                    <div style={{ height: '14px' }} />
 
                     <label style={LB}>Notes</label>
                     <textarea name="notes" value={form.notes} onChange={handleChange} rows={3} placeholder="Anything else? If delivering to multiple addresses, please list them here." style={{ ...IN, resize: 'vertical', lineHeight: 1.6, fontFamily: DM }} />
@@ -224,7 +232,7 @@ export default function QuoteWizard({ product, colours = [], decorations = [], p
                   <>
                     <div style={{ background: '#FDF8F0', border: `1.5px solid ${GOLD}`, borderRadius: '11px', padding: '14px 16px' }}>
                       <div style={{ fontSize: '15px', fontWeight: 700, color: NAVY, marginBottom: '8px' }}>{product.name}</div>
-                      {[['Colour', wizColour || '—'], ['Quantity', formQty], ['Print method', brandingSummary], ['Customer', [form.name, form.company].filter(Boolean).join(' · ') || '—'], ['Delivery', [form.suburb, form.state].filter(Boolean).join(' ') || '—'], ['Est. total (ex GST)', money(subtotal)]].map(([k, v]) => (
+                      {[['Colour', wizColour || '—'], ['Quantity', formQty], ['Print method', brandingSummary], ['Customer', [form.name, form.company].filter(Boolean).join(' · ') || '—'], ['Delivery', [form.suburb, form.state].filter(Boolean).join(' ') || '—'], ['Est. total (ex GST)', showPrice ? money(subtotal) : 'By quote']].map(([k, v]) => (
                         <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #F0EEED', fontSize: '13px' }}>
                           <span style={{ color: BLACK }}>{k}</span><span style={{ fontWeight: 700, color: NAVY }}>{v}</span>
                         </div>
@@ -240,12 +248,12 @@ export default function QuoteWizard({ product, colours = [], decorations = [], p
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', padding: '13px 20px', borderTop: '1px solid #ECE8E1', background: '#FAF8F4', position: 'sticky', bottom: 0 }}>
               <div>
                 <div style={{ fontSize: '11px', color: BLACK, fontFamily: DM }}>Estimated total (ex GST)</div>
-                <div style={{ fontSize: '24px', fontWeight: 700, color: NAVY, fontFamily: MONO, lineHeight: 1.1 }}>{money(subtotal)}</div>
+                <div style={{ fontSize: '24px', fontWeight: 700, color: NAVY, fontFamily: MONO, lineHeight: 1.1 }}>{showPrice ? money(subtotal) : 'By quote'}</div>
                 <div style={{ fontSize: '10px', color: BLACK, fontFamily: DM }}>Final quote confirmed by us · + GST + freight</div>
               </div>
               <div style={{ display: 'flex', gap: '8px' }}>
                 {step > 0 && <button onClick={back} style={{ background: '#fff', border: '1.5px solid #E0DDD7', color: NAVY, borderRadius: '9px', padding: '11px 16px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: DM }}>← Back</button>}
-                <button onClick={next} disabled={status === 'sending'} style={{ background: (step === 0 && colourMissing) ? '#D9CDB4' : GOLD, border: 'none', color: '#fff', borderRadius: '9px', padding: '11px 22px', fontSize: '13px', fontWeight: 700, cursor: status === 'sending' ? 'not-allowed' : 'pointer', fontFamily: DM }}>
+                <button onClick={next} disabled={stepBlocked || status === 'sending'} style={{ background: (stepBlocked || status === 'sending') ? '#D9CDB4' : GOLD, border: 'none', color: '#fff', borderRadius: '9px', padding: '11px 22px', fontSize: '13px', fontWeight: 700, cursor: (stepBlocked || status === 'sending') ? 'not-allowed' : 'pointer', fontFamily: DM }}>
                   {status === 'sending' ? '⏳ Sending…' : step === STEPS.length - 1 ? 'Request My Quote' : 'Next →'}
                 </button>
               </div>
