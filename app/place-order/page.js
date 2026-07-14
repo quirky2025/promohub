@@ -454,8 +454,9 @@ export default function PlaceOrderPage() {
               <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', fontWeight: 600, color: NAVY, margin: '0 0 18px' }}>More From You</h2>
 
               <div style={{ marginBottom: '16px' }}>
-                <label style={labelStyle}>Required Date <span style={{ color: '#000', fontWeight: 400 }}>(when do you need it by?)</span></label>
+                <label style={labelStyle}>Required Date <span style={{ color: '#000', fontWeight: 400 }}>(DD/MM/YYYY — when do you need it by?)</span></label>
                 <input type="date" name="requiredDate" value={form.requiredDate} onChange={handleChange} style={inputStyle} />
+                {form.requiredDate && <div style={{ fontSize: '13px', color: '#000', fontWeight: 600, marginTop: '6px', fontFamily: '"DM Sans", sans-serif' }}>Selected: {form.requiredDate.split('-').reverse().join('/')}</div>}
               </div>
 
               <div style={{ marginBottom: '16px' }}>
@@ -532,7 +533,7 @@ export default function PlaceOrderPage() {
               </div>
 
               <div>
-                <label style={labelStyle}>Comments</label>
+                <label style={labelStyle}>Notes</label>
                 <textarea name="comments" value={form.comments} onChange={handleChange} rows={3} placeholder="e.g. ship to multiple addresses, special requirements…" style={{ ...inputStyle, resize: 'vertical' }} />
               </div>
 

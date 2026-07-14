@@ -12,6 +12,7 @@ import { slugify } from '@/lib/slug';
 import { colourImageAlt, cleanColour } from '@/lib/colourName';
 import ProductImg from '@/components/ProductImg';
 import { uploadImage } from '@/lib/imageHost';
+import QuoteWizard from './QuoteWizard';
 import { MARGIN, tierMargin, GST, SHIPPING, SETUP_FEE, decoUnitPrice, brandingLabel, isColourMethod, isOneColourLocked } from '@/lib/pricing';
 
 const NAVY = '#1B2A4A';
@@ -929,11 +930,12 @@ export default function ProductClient({ product, mainImage, colours, extraImages
       )}
 
       {quoteOpen && (
-        <QuoteModal
+        <QuoteWizard
           product={product}
           colours={colours}
           decorations={decorations}
           addonState={addonState}
+          setAddonState={setAddonState}
           pricingTiers={pricingTiers}
           calcUnit={calcUnit}
           selectedColour={selectedColour !== null ? colours[selectedColour]?.name : ''}
@@ -963,6 +965,13 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
   });
   const [status, setStatus] = useState('idle');
   const [purposeOther, setPurposeOther] = useState(false);
+  // Product colour — captured HERE in the quote form. Previously colour was only inherited
+  // from the product page swatch, so if the customer opened Get-a-Quote without clicking a
+  // colour first, nothing was saved (the enquiry came through with a blank colour).
+  // Option A: colour + branding are chosen on the product page (rich, price-accurate UI)
+  // and carried in here. If the customer opened Get-a-Quote without picking a colour, we
+  // don't let them submit — we prompt them to choose it on the product page first.
+  const colourMissing = colours.length > 0 && !selectedColour;
 
   // Branding carried over from the product page selection (read-only here)
   const selectedDecos = decorations.filter(d => addonState?.[d.id]?.on);
@@ -976,6 +985,7 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
 
   async function handleSubmit() {
     if (!form.name || !form.email) return;
+    if (colourMissing) return;
     setStatus('sending');
     const requiredDate = form.requiredDate
       ? new Date(form.requiredDate + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -1093,20 +1103,27 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
             {/* YOUR SELECTION — carried over from the product page */}
             <div>
               <SectionHead num={1} text="Your Selection" />
-              <div style={{ background: '#ffffff', border: '1px solid #E0DDD7', borderRadius: '12px', padding: '16px 18px' }}>
-                <div style={{ fontSize: '14px', color: '#1B2A4A', lineHeight: 1.6, fontFamily: '"DM Sans", sans-serif' }}>
-                  <strong>{product.name}</strong>
-                  {selectedColour ? <> · {selectedColour}</> : null}
-                  {' · '}{brandingSummary}
+              <div style={{ background: '#FDF8F0', border: `1.5px solid ${colourMissing ? '#B4413E' : '#C9A96E'}`, borderRadius: '12px', padding: '18px' }}>
+                <div style={{ fontSize: '16px', fontWeight: 700, color: '#1B2A4A', marginBottom: '12px', fontFamily: '"DM Sans", sans-serif' }}>{product.name}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 16px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif' }}>
+                  <span style={{ color: '#7A7570' }}>Colour</span>
+                  <span style={{ fontWeight: 700, color: colourMissing ? '#B4413E' : '#1B2A4A' }}>{selectedColour || (colours.length > 0 ? 'Not selected' : '—')}</span>
+                  <span style={{ color: '#7A7570' }}>Branding</span>
+                  <span style={{ fontWeight: 700, color: '#1B2A4A' }}>{brandingSummary}</span>
                 </div>
-                <div style={{ marginTop: '14px', maxWidth: '200px' }}>
+                {colourMissing && (
+                  <div style={{ marginTop: '14px', background: '#FDECEA', border: '1px solid #B4413E', borderRadius: '8px', padding: '11px 13px', fontSize: '13px', color: '#B4413E', fontWeight: 600, lineHeight: 1.5, fontFamily: '"DM Sans", sans-serif' }}>
+                    ⚠️ Please choose your colour on the product page first, then reopen Get a Quote — so we quote the exact item you want.
+                  </div>
+                )}
+                <div style={{ marginTop: '16px', maxWidth: '200px' }}>
                   <label style={labelStyle}>Quantity *</label>
                   <input name="qty" type="text" inputMode="numeric" value={form.qty} onChange={handleChange}
                     placeholder={`min. ${product.min_qty}`}
                     style={{ ...inputStyle, fontFamily: '"DM Mono", monospace' }} />
                 </div>
-                <div style={{ marginTop: '8px', fontSize: '11px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
-                  Colour & branding follow your selection on the product page. Need changes? Note them below.
+                <div style={{ marginTop: '10px', fontSize: '11px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
+                  Colour &amp; branding follow your selection on the product page. Need changes? Note them below.
                 </div>
               </div>
             </div>
