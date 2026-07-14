@@ -1,5 +1,6 @@
 import Link from 'next/link';
- 
+import SubscribeBar from './SubscribeBar';
+
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
  
@@ -14,17 +15,7 @@ export default function Footer() {
             <div style={{ color: '#fff', fontSize: '18px', fontFamily: '"Cormorant Garamond", serif', fontWeight: 500, marginBottom: '6px' }}>Stay in the loop</div>
             <div style={{ fontSize: '13px', color: 'rgba(255,255,255,.7)', fontFamily: '"DM Sans", sans-serif' }}>Subscribe for new arrivals, promotions and industry tips.</div>
           </div>
-          <div className="qp-sub-box" style={{ display: 'flex', gap: '0', flexShrink: 0 }}>
-            <input
-              type="email"
-              placeholder="Enter your email address"
-              className="qp-sub-input"
-              style={{ padding: '12px 16px', border: 'none', background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: '13px', outline: 'none', fontFamily: '"DM Sans", sans-serif', borderRadius: '8px 0 0 8px', width: '280px' }}
-            />
-            <button style={{ background: GOLD, color: '#fff', border: 'none', padding: '12px 24px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', borderRadius: '0 8px 8px 0' }}>
-              Subscribe
-            </button>
-          </div>
+          <SubscribeBar />
         </div>
       </div>
  

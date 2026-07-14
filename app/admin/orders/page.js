@@ -55,6 +55,9 @@ export default function AdminOrdersPage() {
   const [deliveryAddr, setDeliveryAddr] = useState('');
   const [carrier, setCarrier] = useState('');
   const [saving, setSaving]           = useState(false);
+  const [shipments, setShipments]     = useState([]);
+  const [shipForm, setShipForm]       = useState({ carrier: '', trackingNumber: '', shipDate: '', recipientName: '', recipientEmail: '', address: '', contents: '', notify: true });
+  const [shipBusy, setShipBusy]       = useState(false);
 
   useEffect(() => { fetchOrders(); }, [statusFilter]);
 
@@ -122,6 +125,53 @@ export default function AdminOrdersPage() {
     setTrackingUrl(order.tracking_url || '');
     setDeliveryAddr(order.delivery_address || '');
     setCarrier(order.carrier || '');
+    setShipments([]);
+    setShipForm({ carrier: '', trackingNumber: '', shipDate: '', recipientName: '', recipientEmail: '', address: '', contents: '', notify: true });
+    fetchShipments(order.id);
+  }
+
+  async function fetchShipments(orderId) {
+    try {
+      const res = await fetch(`/api/admin/orders/shipments?orderId=${orderId}`, { cache: 'no-store' });
+      const data = await res.json();
+      setShipments(Array.isArray(data.shipments) ? data.shipments : []);
+    } catch { setShipments([]); }
+  }
+
+  async function addShipment() {
+    if (!selected) return;
+    if (!shipForm.carrier && !shipForm.trackingNumber && !shipForm.contents) {
+      alert('Add at least a carrier, tracking number, or contents for this parcel.');
+      return;
+    }
+    setShipBusy(true);
+    const res = await fetch('/api/admin/orders/shipments', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: selected.id, ...shipForm, status: shipForm.shipDate ? 'shipped' : 'pending' }),
+    });
+    setShipBusy(false);
+    if (!res.ok) { alert('Could not add shipment'); return; }
+    setShipForm({ carrier: '', trackingNumber: '', shipDate: '', recipientName: '', recipientEmail: '', address: '', contents: '', notify: true });
+    fetchShipments(selected.id);
+  }
+
+  async function patchShipment(id, body) {
+    setShipBusy(true);
+    const res = await fetch('/api/admin/orders/shipments', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...body }),
+    });
+    setShipBusy(false);
+    if (!res.ok) { alert('Update failed'); return; }
+    if (selected) fetchShipments(selected.id);
+  }
+
+  async function deleteShipment(id) {
+    if (!confirm('Delete this shipment?')) return;
+    setShipBusy(true);
+    await fetch(`/api/admin/orders/shipments?id=${id}`, { method: 'DELETE' });
+    setShipBusy(false);
+    if (selected) fetchShipments(selected.id);
   }
 
   const fmt = v => v != null ? `$${Number(v).toFixed(2)}` : '—';
@@ -353,7 +403,86 @@ export default function AdminOrdersPage() {
                   💬 Send Feedback Request
                 </button>
               </div>
-              <p style={{ fontSize: '11px', color: '#9CA3AF', margin: '8px 0 0' }}>Tip: fill tracking above before dispatching — it's included in the email. Feedback is best sent ~7 days after delivery.</p>
+              <p style={{ fontSize: '11px', color: '#9CA3AF', margin: '8px 0 0' }}>Tip: single-parcel orders can use the tracking above. For split orders sent to several addresses / over several days, use <strong>Shipments</strong> below.</p>
+            </Section>
+
+            {/* SHIPMENTS (multi-parcel) */}
+            <Section title="📮 Shipments — split / multi-address delivery">
+              <p style={{ fontSize: '12px', color: '#000', margin: '0 0 12px' }}>
+                For orders sent in more than one parcel (different addresses or different days), add each parcel here. Each gets its own tracking, and you can notify {selected.customer_name?.split(' ')[0] || 'the customer'} per parcel.
+              </p>
+
+              {/* Existing shipments */}
+              {shipments.length > 0 && (
+                <div style={{ marginBottom: '16px' }}>
+                  {shipments.map((s) => {
+                    const badge = s.status === 'delivered' ? { bg: '#DCFCE7', color: '#166534', label: '📦 Delivered' }
+                      : s.status === 'shipped' ? { bg: '#FEF9C3', color: '#854D0E', label: '🚚 Shipped' }
+                      : { bg: '#FEF3C7', color: '#92400E', label: '🕐 Pending' };
+                    const dd = s.ship_date ? s.ship_date.split('-').reverse().join('/') : null;
+                    return (
+                      <div key={s.id} style={{ border: '1.5px solid #E0DDD7', borderRadius: '10px', padding: '12px 14px', marginBottom: '10px', background: '#fff' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                          <div style={{ fontWeight: 700, color: NAVY, fontSize: '13px' }}>Parcel {s.seq || '—'}{s.recipient_name ? ` · ${s.recipient_name}` : ''}{s.recipient_email ? ` · ${s.recipient_email}` : ''}</div>
+                          <span style={{ background: badge.bg, color: badge.color, fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px' }}>{badge.label}</span>
+                        </div>
+                        {s.contents && <div style={{ fontSize: '12px', color: '#000', marginBottom: '3px' }}><strong>Contents:</strong> {s.contents}</div>}
+                        {s.address && <div style={{ fontSize: '12px', color: '#000', marginBottom: '3px' }}><strong>To:</strong> {s.address}</div>}
+                        <div style={{ fontSize: '12px', color: '#000', marginBottom: '3px' }}>
+                          {s.carrier || 'Carrier —'}{s.tracking_number ? ` · ${s.tracking_number}` : ''}{dd ? ` · shipped ${dd}` : ''}
+                          {s.tracking_url && <> · <a href={s.tracking_url} target="_blank" rel="noreferrer" style={{ color: GOLD, fontWeight: 600 }}>Track →</a></>}
+                        </div>
+                        {s.notified_at && <div style={{ fontSize: '11px', color: '#166534', marginBottom: '4px' }}>✓ Customer notified</div>}
+                        <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
+                          {s.status !== 'shipped' && s.status !== 'delivered' && (
+                            <button onClick={() => patchShipment(s.id, { status: 'shipped', notify: true })} disabled={shipBusy}
+                              style={miniBtn('#C9A96E', '#fff')}>🚚 Mark shipped + notify</button>
+                          )}
+                          {s.status !== 'delivered' && (
+                            <button onClick={() => patchShipment(s.id, { status: 'delivered', notify: false })} disabled={shipBusy}
+                              style={miniBtn('#fff', NAVY, NAVY)}>📦 Mark delivered</button>
+                          )}
+                          <button onClick={() => patchShipment(s.id, { notify: true, status: s.status === 'pending' ? 'shipped' : s.status })} disabled={shipBusy}
+                            style={miniBtn('#fff', '#000', '#E0DDD7')}>✉️ Notify</button>
+                          <button onClick={() => deleteShipment(s.id)} disabled={shipBusy}
+                            style={miniBtn('#fff', '#991B1B', '#E0DDD7')}>Delete</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Add shipment form */}
+              <div style={{ background: '#FDFBF7', border: '1.5px dashed #D8CFC0', borderRadius: '10px', padding: '14px' }}>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: NAVY, marginBottom: '10px' }}>➕ Add a parcel</div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                  <select value={shipForm.carrier} onChange={e => setShipForm(f => ({ ...f, carrier: e.target.value }))} style={shipInput}>
+                    <option value="">Carrier…</option>
+                    <option value="FedEx">FedEx</option>
+                    <option value="Australia Post">Australia Post</option>
+                    <option value="StarTrack">StarTrack</option>
+                    <option value="Direct Freight Express">Direct Freight Express</option>
+                    <option value="Courier">Other / Courier</option>
+                  </select>
+                  <input value={shipForm.trackingNumber} onChange={e => setShipForm(f => ({ ...f, trackingNumber: e.target.value }))} placeholder="Tracking number" style={shipInput} />
+                  <input value={shipForm.recipientName} onChange={e => setShipForm(f => ({ ...f, recipientName: e.target.value }))} placeholder="Recipient name (e.g. Sarah)" style={shipInput} />
+                  <input type="email" value={shipForm.recipientEmail} onChange={e => setShipForm(f => ({ ...f, recipientEmail: e.target.value }))} placeholder="Recipient email (tracking goes here)" style={shipInput} />
+                  <input type="date" value={shipForm.shipDate} onChange={e => setShipForm(f => ({ ...f, shipDate: e.target.value }))} style={shipInput} />
+                </div>
+                <input value={shipForm.address} onChange={e => setShipForm(f => ({ ...f, address: e.target.value }))} placeholder="Delivery address for this parcel" style={{ ...shipInput, width: '100%', marginBottom: '8px', boxSizing: 'border-box' }} />
+                <input value={shipForm.contents} onChange={e => setShipForm(f => ({ ...f, contents: e.target.value }))} placeholder="Contents, e.g. Badges ×4, Shirts ×2" style={{ ...shipInput, width: '100%', marginBottom: '8px', boxSizing: 'border-box' }} />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label style={{ fontSize: '12px', color: '#000', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                    <input type="checkbox" checked={shipForm.notify} onChange={e => setShipForm(f => ({ ...f, notify: e.target.checked }))} />
+                    Email {shipForm.recipientEmail ? shipForm.recipientEmail : 'the recipient'} this tracking{shipForm.recipientEmail ? '' : ' (falls back to buyer)'}
+                  </label>
+                  <button onClick={addShipment} disabled={shipBusy}
+                    style={{ background: shipBusy ? '#B0AAA3' : NAVY, color: '#fff', border: 'none', borderRadius: '8px', padding: '9px 18px', fontSize: '12px', fontWeight: 700, cursor: shipBusy ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                    {shipBusy ? 'Saving…' : 'Add parcel'}
+                  </button>
+                </div>
+              </div>
             </Section>
 
             {/* INTERNAL NOTES */}
@@ -399,6 +528,12 @@ function Section({ title, children }) {
       {children}
     </div>
   );
+}
+
+const shipInput = { padding: '8px 10px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '12px', fontFamily: '"DM Sans", sans-serif', color: '#000', outline: 'none', background: '#fff' };
+
+function miniBtn(bg, color, border) {
+  return { background: bg, color, border: border ? `1.5px solid ${border}` : 'none', borderRadius: '7px', padding: '6px 10px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' };
 }
 
 function Row({ label, value, bold }) {

@@ -75,6 +75,10 @@ export default function AdminProductionPage() {
     return pos.find(p => p.order_id === orderId || (orderNumber && p.order_number === orderNumber));
   }
 
+  function posForOrder(orderId, orderNumber) {
+    return pos.filter(p => p.order_id === orderId || (orderNumber && p.order_number === orderNumber));
+  }
+
   function linesFromOrder(o) {
     const init = (o.items || []).map(it => ({
       stockCode: it.sku || it.productSku || it.stockCode || '',
@@ -179,18 +183,22 @@ export default function AdminProductionPage() {
               </tr>
             </thead>
             <tbody>
-              {orders.map((o, i) => {
-                const po = poForOrder(o.id, o.order_number || o.invoice_number);
+              {orders.flatMap((o, i) => {
+                const list = posForOrder(o.id, o.order_number || o.invoice_number);
+                const rows = list.length ? list : [null];
                 const ready = isReady(o);
                 const job = o.job_name || o.customer_company || o.customer_name || '';
-                const ps = po ? (PO_STATUS[po.status] || PO_STATUS.draft) : null;
-                return (
-                  <tr key={o.id} style={{ background: i % 2 === 0 ? '#fff' : BG, borderBottom: '1px solid #F0EEED' }}>
-                    <td style={{ padding: '12px', fontWeight: 700, color: GOLD, fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{o.order_number || o.invoice_number}</td>
-                    <td style={{ padding: '12px', color: NAVY }}>{job}</td>
+                return rows.map((po, j) => {
+                  const first = j === 0;
+                  const last = j === rows.length - 1;
+                  const ps = po ? (PO_STATUS[po.status] || PO_STATUS.draft) : null;
+                  return (
+                  <tr key={o.id + '-' + (po ? po.id : 'none')} style={{ background: i % 2 === 0 ? '#fff' : BG, borderBottom: last ? '1px solid #F0EEED' : '1px dashed #F0EEED' }}>
+                    <td style={{ padding: '12px', fontWeight: 700, color: GOLD, fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{first ? (o.order_number || o.invoice_number) : ''}</td>
+                    <td style={{ padding: '12px', color: NAVY }}>{first ? job : ''}</td>
                     <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>
-                      {ready ? <span style={{ color: '#065F46', fontWeight: 700 }}>✅ Ready</span>
-                        : <span style={{ color: '#B0AAA3', fontSize: '11px' }}>{!isPaid(o) ? 'Awaiting payment' : 'Awaiting artwork'}</span>}
+                      {first ? (ready ? <span style={{ color: '#065F46', fontWeight: 700 }}>✅ Ready</span>
+                        : <span style={{ color: '#B0AAA3', fontSize: '11px' }}>{!isPaid(o) ? 'Awaiting payment' : 'Awaiting artwork'}</span>) : ''}
                     </td>
                     <td style={{ padding: '12px', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
                       {po ? <span><a href={`/api/admin/purchase-orders/pdf?id=${po.id}`} target="_blank" rel="noreferrer" style={{ color: NAVY, textDecoration: 'underline' }}>{po.po_number}</a> <span style={{ background: ps.bg, color: ps.color, fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '20px', marginLeft: '4px' }}>{ps.label}</span> <button onClick={() => sendPo(po)} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '2px 8px', fontSize: '10px', fontWeight: 700, color: NAVY, cursor: 'pointer', marginLeft: '4px', fontFamily: '"DM Sans", sans-serif' }}>✉ Send</button></span> : <span style={{ color: '#B0AAA3' }}>—</span>}
@@ -208,15 +216,16 @@ export default function AdminProductionPage() {
                         : <button onClick={() => { if (confirm('Mark supplier as paid?')) patchPo(po.id, { action: 'pay' }); }} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer', color: NAVY }}>Mark paid</button>) : ''}
                     </td>
                     <td style={{ padding: '12px' }}>
-                      {!po && (
+                      {last && (
                         <button onClick={() => openPo(o)} disabled={!ready}
                           style={{ background: ready ? GOLD : '#C8C4BC', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, cursor: ready ? 'pointer' : 'not-allowed', whiteSpace: 'nowrap' }}>
-                          Raise PO
+                          {list.length ? '+ PO' : 'Raise PO'}
                         </button>
                       )}
                     </td>
                   </tr>
-                );
+                  );
+                });
               })}
             </tbody>
           </table>
