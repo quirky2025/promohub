@@ -990,8 +990,12 @@ function QuoteModal({ product, colours, decorations, pricingTiers, calcUnit, sel
       return best;
     }, null) || pricingTiers[0];
 
-    // Price uses the SAME selection as the product page (calcUnit already includes chosen branding)
-    const unitPrice = matchedTier ? calcUnit(matchedTier.base_price, formQty) : 0;
+    // Price uses the SAME selection as the product page (calcUnit already includes chosen branding).
+    // Pass the matched tier's index so the quote uses the SAME tiered margin (×1.50/1.45/1.40)
+    // as the product page. Without it, calcUnit defaults to tierIndex 2 (×1.40) and underprices
+    // the first tiers (e.g. 25 units showed $5.98 instead of the site's $6.40).
+    const matchedTierIndex = matchedTier ? pricingTiers.findIndex(t => t.id === matchedTier.id) : 0;
+    const unitPrice = matchedTier ? calcUnit(matchedTier.base_price, formQty, matchedTierIndex) : 0;
     const subtotal = Math.round(unitPrice * formQty * 100) / 100;
     const gst = Math.round((subtotal + SHIPPING) * GST * 100) / 100;
     const total = subtotal + SHIPPING + gst;
