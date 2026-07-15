@@ -217,8 +217,9 @@ export default function AdminProductionPage() {
                     </td>
                     <td style={{ padding: '12px' }}>
                       {last && (
-                        <button onClick={() => openPo(o)} disabled={!ready}
-                          style={{ background: ready ? GOLD : '#C8C4BC', color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, cursor: ready ? 'pointer' : 'not-allowed', whiteSpace: 'nowrap' }}>
+                        <button onClick={() => openPo(o)}
+                          title={ready ? '' : '未满足"付清+审图"门槛,但可手动补录 PO'}
+                          style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                           {list.length ? '+ PO' : 'Raise PO'}
                         </button>
                       )}
