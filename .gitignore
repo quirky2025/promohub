@@ -40,6 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# image-migration pre-gen artifacts — R2-only, never commit
+# image-migration pre-gen artifacts ï¿½ R2-only, never commit
 _migrate/
 pregen-webp.log
+
+# scratchpad / working outputs â€” notes, one-off SQL, drafts (NOT part of the app)
+/outputs/
