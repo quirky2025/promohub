@@ -25,6 +25,13 @@ const STATUS_FLOW = [
 
 const STATUS_MAP = Object.fromEntries(STATUS_FLOW.map(s => [s.key, s]));
 
+// Per-line-item stages (a single order can have some items shipped, some still in production)
+const ITEM_STAGES = [
+  { key: 'in_production', label: 'In Production', emoji: '🏭', bg: '#EDE9FE', color: '#5B21B6' },
+  { key: 'dispatched',    label: 'Dispatched',    emoji: '🚚', bg: '#FEF9C3', color: '#854D0E' },
+  { key: 'delivered',     label: 'Delivered',     emoji: '📦', bg: '#DCFCE7', color: '#166534' },
+];
+
 function deriveStatus(order) {
   const s = order.status;
   if (s === 'cancelled') return 'cancelled';
@@ -128,6 +135,24 @@ export default function AdminOrdersPage() {
     setShipments([]);
     setShipForm({ carrier: '', trackingNumber: '', shipDate: '', recipientName: '', recipientEmail: '', address: '', contents: '', notify: true });
     fetchShipments(order.id);
+  }
+
+  async function setItemStatus(index, status) {
+    const items = (selected.items || []).map((it, i) => i === index ? { ...it, status } : it);
+    setSelected(prev => ({ ...prev, items }));
+    setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, items } : o));
+    try {
+      const res = await fetch('/api/admin/orders/item-status', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selected.id, index, status }),
+      });
+      const data = await res.json();
+      if (!res.ok) { alert('Could not update item status'); return; }
+      if (data.overall) {
+        setSelected(prev => ({ ...prev, status: data.overall }));
+        setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, status: data.overall } : o));
+      }
+    } catch { alert('Could not update item status'); }
   }
 
   async function fetchShipments(orderId) {
@@ -320,6 +345,7 @@ export default function AdminOrdersPage() {
                 const sub = item.subtotal ?? item.line_total;
                 const branding = item.brandingMethod || item.decoration_method || '';
                 const addons = Array.isArray(item.addons) ? item.addons : [];
+                const istatus = item.status || 'in_production';
                 return (
                 <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid #F0EEED' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -332,6 +358,18 @@ export default function AdminOrdersPage() {
                       <div style={{ fontSize: '12px', color: '#000' }}>Qty: {qty ?? '—'} × {fmt(unit)}</div>
                     </div>
                     <div style={{ fontWeight: 700, color: NAVY }}>{fmt(sub)}</div>
+                  </div>
+                  {/* per-product stage */}
+                  <div style={{ display: 'flex', gap: '5px', marginTop: '8px', flexWrap: 'wrap' }}>
+                    {ITEM_STAGES.map(s => {
+                      const on = istatus === s.key;
+                      return (
+                        <button key={s.key} onClick={() => setItemStatus(i, s.key)}
+                          style={{ padding: '4px 10px', borderRadius: '20px', border: `1.5px solid ${on ? s.color : '#E0DDD7'}`, background: on ? s.bg : '#fff', color: on ? s.color : '#000', fontSize: '11px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                          {s.emoji} {s.label}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 );
