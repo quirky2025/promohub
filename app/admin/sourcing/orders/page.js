@@ -204,6 +204,23 @@ function OrderDetail({ order, onPatch }) {
 
   const pdf = (doc) => window.open(`/api/admin/sourcing/orders/pdf?id=${order.id}&doc=${doc}`, '_blank');
   const setA = (k, v) => setActual((a) => ({ ...a, [k]: v }));
+  const [sendingPo, setSendingPo] = useState(false);
+  async function sendPo() {
+    const factoryEmail = order.factories?.email || '';
+    const to = window.prompt('发工厂 PO 到哪个邮箱?', factoryEmail);
+    if (!to) return;
+    setSendingPo(true);
+    try {
+      const res = await fetch('/api/admin/sourcing/orders/send-po', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: order.id, toOverride: to }),
+      });
+      const d = await res.json();
+      if (res.ok) alert(`工厂 PO 已发送到 ${d.to} ✅`);
+      else alert('发送失败:' + (d.error || 'unknown'));
+    } catch (e) { alert('发送失败:' + e.message); }
+    setSendingPo(false);
+  }
 
   return (
     <div className="srcx-landed" style={{ marginTop: 16 }}>
@@ -219,6 +236,7 @@ function OrderDetail({ order, onPatch }) {
         <div className="srcx-tag-row">
           <button className="srcx-btn srcx-btn-ghost srcx-btn-sm" onClick={() => pdf('oc')}>客户订单确认 PDF</button>
           <button className="srcx-btn srcx-btn-gold srcx-btn-sm" onClick={() => pdf('po')}>工厂 PO (RMB) PDF</button>
+          <button className="srcx-btn srcx-btn-sm" disabled={sendingPo} onClick={sendPo}>{sendingPo ? '发送中…' : '✉ 发工厂 PO'}</button>
         </div>
       </div>
 
