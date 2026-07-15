@@ -1,0 +1,707 @@
+product_code,category1,old_name,new_name,changed,type_used,note
+PS2012,Drinkware/Metal Bottles,Brit Bottle - 500ML Double Wall,Brit Bottle - 500ML Double Wall,N,Metal Bottle,already-has-type
+OCT100KID,Apparel/T-Shirts/Kids,Kids Essential Tee,Kids Essential Tee,N,Kid,already-has-type
+PS4106,Bags/Calico-Cotton Bags,Montana Calico Coloured Tote Bag,Montana Calico Coloured Tote Bag,N,Calico-Cotton Bag,already-has-type
+PS4004,Bags/Non-Woven Bags,Detroit Tote Bag,Detroit Tote Bag,N,Non-Woven Bag,already-has-type
+PS2501,Drinkware/Ceramic Mugs,White Sublimation Mug - 330Ml,White Sublimation Mug - 330Ml,N,Ceramic Mug,already-has-type
+PS7001,Notebooks/A5,A5 Notebook,A5 Notebook,N,,skip-cat
+PS1003,Office/Pens/Plastic Pens,Kingsford,Kingsford Plastic Pen,Y,Plastic Pen,appended
+PS3306,Novelties/Assorted,Thunder Cheering Sticks,Thunder Cheering Sticks,N,,skip-cat
+PS5010,Technology/USB,Tiger Usb Flash Drive,Tiger Usb Flash Drive,N,USB,already-has-type
+PS5100,Socks/Crew Socks,Snazzy Crew Jacquard Socks,Snazzy Crew Jacquard Socks,N,Crew Sock,already-has-type
+OCT100MS,Apparel/T-Shirts/Men,Men Essential Tees,Men Essential Tees,N,Men,already-has-type
+PS4004L,Bags/Full Colour Laminated Bags,Detroit Laminated Tote Bag,Detroit Laminated Tote Bag,N,Full Colour Laminated Bag,already-has-type
+BB5001,Bell Bottles,500ml Bell Bottle with Carry Handle,500ml Bell Bottle with Carry Handle,N,Bell Bottle,already-has-type
+PS4701,Bags/Bio Degradable Bags,Rpet Felt Tote Bag,Rpet Felt Tote Bag,N,Bio Degradable Bag,already-has-type
+PSBB03,Bags/Bio Degradable Bags,Cromwell Tote Bag,Cromwell Tote Bag,N,Bio Degradable Bag,already-has-type
+PSBB04,Bags/Bio Degradable Bags,Zefa Biodegradable Tote Bag,Zefa Biodegradable Tote Bag,N,Bio Degradable Bag,already-has-type
+PS4101,Bags/Calico-Cotton Bags,Indiana Short Handle Calico Bag,Indiana Short Handle Calico Bag,N,Calico-Cotton Bag,already-has-type
+PS4102,Bags/Calico-Cotton Bags,Maine Long Handle Calico Bag,Maine Long Handle Calico Bag,N,Calico-Cotton Bag,already-has-type
+PS4103,Bags/Calico-Cotton Bags,Clontarf Calico Bag,Clontarf Calico Bag,N,Calico-Cotton Bag,already-has-type
+PS4104,Bags/Calico-Cotton Bags,Dakota Calico Bag,Dakota Calico Bag,N,Calico-Cotton Bag,already-has-type
+PS4105,Bags/Calico-Cotton Bags,Snapper Calico Sling Bag,Snapper Calico Sling Bag,N,Calico-Cotton Bag,already-has-type
+PS4107,Bags/Calico-Cotton Bags,Coloured Calico Bag Short Handle,Coloured Calico Bag Short Handle,N,Calico-Cotton Bag,already-has-type
+PS4108,Bags/Calico-Cotton Bags,Boston Long Handle Coloured Calico Bag,Boston Long Handle Coloured Calico Bag,N,Calico-Cotton Bag,already-has-type
+PS4111,Bags/Calico-Cotton Bags,Large Calico Bag White,Large Calico Bag White,N,Calico-Cotton Bag,already-has-type
+PS4112,Bags/Calico-Cotton Bags,White Calico Bag With Long Handles,White Calico Bag With Long Handles,N,Calico-Cotton Bag,already-has-type
+PS4113,Bags/Calico-Cotton Bags,Cotton Tote Bag,Cotton Tote Bag,N,Calico-Cotton Bag,already-has-type
+PS4513,Bags/Calico-Cotton Bags,Hemp Tote Bag without Gusset,Hemp Tote Bag without Gusset,N,Calico-Cotton Bag,already-has-type
+PS4010L,Bags/Laminated Full Colour Bags,Ohio Laminated Tote Bag,Ohio Laminated Tote Bag,N,Laminated Full Colour Bag,already-has-type
+PS4011L,Bags/Laminated Full Colour Bags,Hollywood Laminated Tote Bag,Hollywood Laminated Tote Bag,N,Laminated Full Colour Bag,already-has-type
+PS4001,Bags/Non-Woven Bags,Chicago Tote Bag,Chicago Tote Bag,N,Non-Woven Bag,already-has-type
+PS4002,Bags/Non-Woven Bags,New York Tote Bag,New York Tote Bag,N,Non-Woven Bag,already-has-type
+PS4514,Bags/Calico-Cotton Bags,Hemp Tote Bag with Gusset,Hemp Tote Bag with Gusset,N,Calico-Cotton Bag,already-has-type
+OCHCD01,Bags/Canvas Bags,Nixson Two Tone Canvas Duffle Bag,Nixson Two Tone Canvas Duffle Bag,N,Canva Bag,already-has-type
+PS4202,Bags/Canvas Bags,Minnesota Canvas Natural Tote Bag,Minnesota Canvas Natural Tote Bag,N,Canva Bag,already-has-type
+PS4202C,Bags/Canvas Bags,Minnesota Canvas Coloured Tote Bag,Minnesota Canvas Coloured Tote Bag,N,Canva Bag,already-has-type
+PS4203,Bags/Canvas Bags,Denver Canvas Coloured Tote Bag,Denver Canvas Coloured Tote Bag,N,Canva Bag,already-has-type
+PS4204,Bags/Canvas Bags,Idaho Canvas Bag,Idaho Canvas Bag,N,Canva Bag,already-has-type
+PS4205,Bags/Canvas Bags,James Natural Canvas Tote Bag,James Natural Canvas Tote Bag,N,Canva Bag,already-has-type
+PS4205C,Bags/Canvas Bags,James Coloured Canvas Tote Bag,James Coloured Canvas Tote Bag,N,Canva Bag,already-has-type
+PS4206,Bags/Canvas Bags,Maxi Natural Canvas Tote Bag,Maxi Natural Canvas Tote Bag,N,Canva Bag,already-has-type
+PS4206C,Bags/Canvas Bags,Maxi Coloured Canvas Tote Bag,Maxi Coloured Canvas Tote Bag,N,Canva Bag,already-has-type
+PS4207,Bags/Canvas Bags,Manly PolyCanvas Bag,Manly PolyCanvas Bag,N,Canva Bag,already-has-type
+PS4209,Bags/Canvas Bags,Bondi Canvas Tote Bag - Natural,Bondi Canvas Tote Bag - Natural,N,Canva Bag,already-has-type
+PS4210,Bags/Canvas Bags,Bondi Canvas Tote Bag - Coloured,Bondi Canvas Tote Bag - Coloured,N,Canva Bag,already-has-type
+PS4211,Bags/Canvas Bags,Brighton Duffle Bag,Brighton Duffle Bag,N,Canva Bag,already-has-type
+PS4305,Bags/Cooler Bags,20 Litre Non Woven Cooler Bag,20 Litre Non Woven Cooler Bag,N,Cooler Bag,already-has-type
+PS4306,Bags/Cooler Bags,Budget Cooler Bag Nylon,Budget Cooler Bag Nylon,N,Cooler Bag,already-has-type
+PS4310,Bags/Cooler Bags,Budget Cooler Bag With Grip,Budget Cooler Bag With Grip,N,Cooler Bag,already-has-type
+PS8121,Bags/Cooler Bags,Neoprene Wine Bottle Holder,Neoprene Wine Bottle Holder Cooler Bag,Y,Cooler Bag,appended
+PS8122,Bags/Cooler Bags,Neoprene Twin Wine Bottle Holder,Neoprene Twin Wine Bottle Holder Cooler Bag,Y,Cooler Bag,appended
+PS4401,Bags/Drawstring Bags,Nylon Drawstring Bag,Nylon Drawstring Bag,N,Drawstring Bag,already-has-type
+PS4402,Bags/Foldable Bags,Nylon Foldable Bag,Nylon Foldable Bag,N,Foldable Bag,already-has-type
+PS4811,Bags/Foldable Bags,5L Waterproof Dry Bag,5L Waterproof Dry Bag,N,Foldable Bag,already-has-type
+PS4506,Bags/Jute Bags,Laminated Jute Supermarket Bag,Laminated Jute Supermarket Bag,N,Jute Bag,already-has-type
+PS4507,Bags/Jute Bags,Laminated Jute Supermarket Bag With Coloured Handles And Gussets,Laminated Jute Supermarket Bag With Coloured Handles And Gussets,N,Jute Bag,already-has-type
+PS4510,Bags/Jute Bags,Laminated Jute Beach Bag With Cotton Handles And Front Pocket,Laminated Jute Beach Bag With Cotton Handles And Front Pocket,N,Jute Bag,already-has-type
+PS4512,Bags/Jute Bags,Juco Bag,Juco Bag,N,Jute Bag,already-has-type
+PS4001L,Bags/Full Colour Laminated Bags,Chicago Laminated Tote Bag,Chicago Laminated Tote Bag,N,Full Colour Laminated Bag,already-has-type
+PS4003L,Bags/Full Colour Laminated Bags,Kansas Laminated Tote Bag,Kansas Laminated Tote Bag,N,Full Colour Laminated Bag,already-has-type
+PS4003,Bags/Non-Woven Bags,Kansas Tote Bag,Kansas Tote Bag,N,Non-Woven Bag,already-has-type
+PS4010,Bags/Non-Woven Bags,Ohio Tote Bag,Ohio Tote Bag,N,Non-Woven Bag,already-has-type
+PS4011,Bags/Non-Woven Bags,Hollywood Boutique Tote Bag,Hollywood Boutique Tote Bag,N,Non-Woven Bag,already-has-type
+PS4012,Bags/Non-Woven Bags,Texas Conference Bag,Texas Conference Bag,N,Non-Woven Bag,already-has-type
+PS4026,Bags/Non-Woven Bags,Noosa A4 Non Woven Promo Bag,Noosa A4 Non Woven Promo Bag,N,Non-Woven Bag,already-has-type
+PS4031,Bags/Non-Woven Bags,Large Non-Woven Shopping Bag,Large Non-Woven Shopping Bag,N,Non-Woven Bag,already-has-type
+PS4601l,Bags/Paper Bags,Kraft Paper Bag Brown Large Includes Twisted Paper Handle,Kraft Paper Bag Brown Large Includes Twisted Paper Handle,N,Paper Bag,already-has-type
+PS4601ls,Bags/Paper Bags,Kraft Paper Bag Brown Landscape Includes Twisted Paper Handle,Kraft Paper Bag Brown Landscape Includes Twisted Paper Handle,N,Paper Bag,already-has-type
+PS4601m,Bags/Paper Bags,Kraft Paper Bag Brown Medium Includes Twisted Paper Handle,Kraft Paper Bag Brown Medium Includes Twisted Paper Handle,N,Paper Bag,already-has-type
+PS4601s,Bags/Paper Bags,Kraft Paper Bag Brown Small Includes Twisted Paper Handle,Kraft Paper Bag Brown Small Includes Twisted Paper Handle,N,Paper Bag,already-has-type
+PS4602l,Bags/Paper Bags,Kraft Paper Bag White Large Includes Twisted Paper Handle,Kraft Paper Bag White Large Includes Twisted Paper Handle,N,Paper Bag,already-has-type
+PS4602ls,Bags/Paper Bags,Kraft Paper Bag White Landscape Includes Twisted Paper Handle,Kraft Paper Bag White Landscape Includes Twisted Paper Handle,N,Paper Bag,already-has-type
+PS4602m,Bags/Paper Bags,Kraft Paper Bag White Medium Includes Twisted Paper Handle,Kraft Paper Bag White Medium Includes Twisted Paper Handle,N,Paper Bag,already-has-type
+PS4602s,Bags/Paper Bags,Kraft Paper Bag White Small Includes Twisted Paper Handle,Kraft Paper Bag White Small Includes Twisted Paper Handle,N,Paper Bag,already-has-type
+BB5002,Bell Bottles,500ml Bell Bottle with Infuser Lid,500ml Bell Bottle with Infuser Lid,N,Bell Bottle,already-has-type
+BB5003,Bell Bottles,532ml Bell Bottle with Solid Handle,532ml Bell Bottle with Solid Handle,N,Bell Bottle,already-has-type
+BB5004,Bell Bottles,532ml Bell Bottle with Sipper Handle,532ml Bell Bottle with Sipper Handle,N,Bell Bottle,already-has-type
+PS2002,Drinkware/Metal Bottles,Sunshine Coast Water Bottle - 750Ml,Sunshine Coast Water Bottle - 750Ml,N,Metal Bottle,already-has-type
+PS2003,Drinkware/Metal Bottles,Central Coast Water Bottle - 800Ml,Central Coast Water Bottle - 800Ml,N,Metal Bottle,already-has-type
+PS2006,Drinkware/Metal Bottles,750Ml Aluminium Water Bottle With Straw,750Ml Aluminium Water Bottle With Straw,N,Metal Bottle,already-has-type
+PS2007,Drinkware/Metal Bottles,Bondi Vacuum Bottle - Steel Lid,Bondi Vacuum Bottle - Steel Lid,N,Metal Bottle,already-has-type
+PS2010,Drinkware/Metal Bottles,Bondi Vacuum Bottle With Bamboo Accent,Bondi Vacuum Bottle With Bamboo Accent,N,Metal Bottle,already-has-type
+PS2011,Drinkware/Sports Bottles,Bondi Wheat Straw Bottle,Bondi Wheat Straw Bottle,N,Sport Bottle,already-has-type
+PS2013,Drinkware/Metal Bottles,Penski Vacuum Bottle,Penski Vacuum Bottle,N,Metal Bottle,already-has-type
+PS2018,Drinkware/Metal Bottles,Brit Bottle - 750Ml Single Wall,Brit Bottle - 750Ml Single Wall,N,Metal Bottle,already-has-type
+PS2019,Drinkware/Metal Bottles,Brit Bottle - 750Ml Double  Wall,Brit Bottle - 750Ml Double  Wall,N,Metal Bottle,already-has-type
+PS2020,Drinkware/Metal Bottles,Brit Single Walled Bottle - 1L,Brit Single Walled Bottle - 1L,N,Metal Bottle,already-has-type
+PS2021,Drinkware/Metal Bottles,Brit Vacuum Bottle - 1L,Brit Vacuum Bottle - 1L,N,Metal Bottle,already-has-type
+PS2401LB,Drinkware/Glass Bottles,Glass Fusion Bottle With Bamboo Lid - 600Ml,Glass Fusion Bottle With Bamboo Lid - 600Ml,N,Glass Bottle,already-has-type
+PS2022,Drinkware/Coffee Cups,Banks Tumbler 300ml,Banks Tumbler 300ml Coffee Cup,Y,Coffee Cup,appended
+PS2031,Drinkware/Coffee Cups,Vacuum Cup,Vacuum Cup,N,Coffee Cup,already-has-type
+PS2502,Drinkware/Ceramic Mugs,Two Tone Sublimation Mug - 330Ml,Two Tone Sublimation Mug - 330Ml,N,Ceramic Mug,already-has-type
+PS2810,Drinkware/Ceramic Mugs,Enamel Camping Mug - 325Ml,Enamel Camping Mug - 325Ml,N,Ceramic Mug,already-has-type
+PS500X18,Drinkware/Sports Bottles,Bondi Tritan Bottle With Stainless Base And Cap,Bondi Tritan Bottle With Stainless Base And Cap,N,Sport Bottle,already-has-type
+PS8330,Drinkware/Bottle Openers,Bamboo Bar Blade,Bamboo Bar Blade Bottle Opener,Y,Bottle Opener,appended
+PS8401,Drinkware/Bottle Openers,Square Coaster Bottle Opener,Square Coaster Bottle Opener,N,Bottle Opener,already-has-type
+PS8402,Drinkware/Bottle Openers,Paddle Shaped Bottle Opener,Paddle Shaped Bottle Opener,N,Bottle Opener,already-has-type
+PS9212,Health and Beauty/Accessories,Bamboo Nail File,Bamboo Nail File,N,,skip-cat
+PSSAN01,Health and Beauty/Sanitizer,Hand Sanitiser 60Ml Made In Australia,Hand Sanitiser 60Ml Made In Australia,N,,skip-cat
+PSSUN01,Health and Beauty/Sunscreen,30Ml Spf50 Sunscreen Lotion,30Ml Spf50 Sunscreen Lotion,N,Sunscreen,already-has-type
+PSSUN02,Health and Beauty/Sunscreen,30Ml Spf50 Sunscreen Lotion With Carabiner,30Ml Spf50 Sunscreen Lotion With Carabiner,N,Sunscreen,already-has-type
+PSSUN03,Health and Beauty/Sunscreen,60Ml Spf50 Sunscreen Lotion,60Ml Spf50 Sunscreen Lotion,N,Sunscreen,already-has-type
+PSSUN04,Health and Beauty/Sunscreen,60Ml Spf50 Sunscreen Lotion With Carabiner,60Ml Spf50 Sunscreen Lotion With Carabiner,N,Sunscreen,already-has-type
+PSSUN05,Health and Beauty/Sunscreen,30Ml Spf50 Sunscreen Lotion Tube,30Ml Spf50 Sunscreen Lotion Tube,N,Sunscreen,already-has-type
+PSSUN06,Health and Beauty/Sunscreen,50Ml Spf50 Sunscreen Lotion Tube,50Ml Spf50 Sunscreen Lotion Tube,N,Sunscreen,already-has-type
+PSSUN07,Health and Beauty/Sunscreen,100Ml Spf50 Sunscreen Lotion Tube,100Ml Spf50 Sunscreen Lotion Tube,N,Sunscreen,already-has-type
+PSSUN08,Health and Beauty/Sunscreen,1L Spf50 Sunscreen Lotion,1L Spf50 Sunscreen Lotion,N,Sunscreen,already-has-type
+OCA100,Lifestyle/Homewares,Oc Chef / Waiters Apron,Oc Chef / Waiters Apron,N,,skip-cat
+PP731436,Lifestyle/Sunglasses and Accessories,Milla Pouch,Milla Pouch,N,,skip-cat
+PS4350,Lifestyle/Cooler Box,17L Metal Cooler Box,17L Metal Cooler Box,N,Cooler Box,already-has-type
+PS4351,Lifestyle/Cooler Box,25L Cooler Box,25L Cooler Box,N,Cooler Box,already-has-type
+PS4352,Lifestyle/Cooler Box,31L Cooler Box with Wheels,31L Cooler Box with Wheels,N,Cooler Box,already-has-type
+PS4353,Lifestyle/Cooler Box,31L Cooler Box,31L Cooler Box,N,Cooler Box,already-has-type
+PS4355,Lifestyle/Cooler Box,11L Premium Cooler Box,11L Premium Cooler Box,N,Cooler Box,already-has-type
+PS500X249,Lifestyle/Fitness and Sports,Plush Terry Sport Headband,Plush Terry Sport Headband,N,Fitness and Sport,already-has-type
+PS5051,Apparel/Beanies,Acrylic Beanie Hat,Acrylic Beanie Hat Beany,Y,Beany,appended
+PS5052,Apparel/Beanies,Acrylic Rollup Beanie Hat,Acrylic Rollup Beanie Hat Beany,Y,Beany,appended
+PS6005-1,Lanyards/Dye Sublimated,Dye Sublimated Lanyard With Swivel Clip 15mm,Dye Sublimated Lanyard With Swivel Clip 15mm,N,Dye Sublimated,already-has-type
+PS6005-2,Lanyards/Dye Sublimated,Dye Sublimated Lanyard With Swivel Clip 20mm,Dye Sublimated Lanyard With Swivel Clip 20mm,N,Dye Sublimated,already-has-type
+PS6005-3,Lanyards/Dye Sublimated,Dye Sublimated Lanyard With Swivel Clip 25mm,Dye Sublimated Lanyard With Swivel Clip 25mm,N,Dye Sublimated,already-has-type
+PS6001-1,Lanyards/Bootlace,Bootlace Lanyard 10mm Wide With Swivel Clip,Bootlace Lanyard 10mm Wide With Swivel Clip,N,Bootlace,already-has-type
+PS6001-2,Lanyards/Bootlace,Bootlace Lanyard 12mm Wide With Swivel Clip,Bootlace Lanyard 12mm Wide With Swivel Clip,N,Bootlace,already-has-type
+PS6002-1,Lanyards/Flat Ribbed,Flat Ribbed Lanyard 15mm Wide With Swivel Clip,Flat Ribbed Lanyard 15mm Wide With Swivel Clip,N,Flat Ribbed,already-has-type
+PS6002-2,Lanyards/Flat Ribbed,Flat Ribbed Lanyard 20mm Wide With Swivel Clip,Flat Ribbed Lanyard 20mm Wide With Swivel Clip,N,Flat Ribbed,already-has-type
+PS6002-3,Lanyards/Flat Ribbed,Flat Ribbed Lanyard 25mm Wide With Swivel Clip,Flat Ribbed Lanyard 25mm Wide With Swivel Clip,N,Flat Ribbed,already-has-type
+PS6003-1,Lanyards/Nylon,Nylon Lanyard 15mm Wide With Swivel Clip,Nylon Lanyard 15mm Wide With Swivel Clip,N,Nylon,already-has-type
+PS6003-2,Lanyards/Nylon,Nylon Lanyard 20mm Wide With Swivel Clip,Nylon Lanyard 20mm Wide With Swivel Clip,N,Nylon,already-has-type
+PS6003-3,Lanyards/Nylon,Nylon Lanyard 25mm Wide With Swivel Clip,Nylon Lanyard 25mm Wide With Swivel Clip,N,Nylon,already-has-type
+PS5053,Apparel/Beanies,Pom Pom Beanie Hat,Pom Pom Beanie Hat Beany,Y,Beany,appended
+PS5054,Apparel/Beanies,Winter Fleece Beanie Hat,Winter Fleece Beanie Hat Beany,Y,Beany,appended
+PS8001,Lifestyle/Beach Ball,Beach Ball - 30cm,Beach Ball - 30cm,N,Beach Ball,already-has-type
+PS8002,Lifestyle/Beach Ball,30cm Multi-Colour Beach Ball,30cm Multi-Colour Beach Ball,N,Beach Ball,already-has-type
+PS8015,Lifestyle/Beach Ball,Beach Ball - 20cm,Beach Ball - 20cm,N,Beach Ball,already-has-type
+PS8016,Lifestyle/Beach Ball,Beach Ball - 40cm,Beach Ball - 40cm,N,Beach Ball,already-has-type
+PS8501,Lifestyle/Towels,Cooling Towel Large,Cooling Towel Large,N,Towel,already-has-type
+PS8503,Lifestyle/Towels,Cooling Towel Medium,Cooling Towel Medium,N,Towel,already-has-type
+PS8504,Lifestyle/Towels,Sublimated Sports Towel,Sublimated Sports Towel,N,Towel,already-has-type
+PS8504B,Lifestyle/Towels,Sublimated Beach Towel,Sublimated Beach Towel,N,Towel,already-has-type
+PS9122,Drinkware/Straws,Reusable Steel Straw Set - Natural,Reusable Steel Straw Set - Natural,N,Straw,already-has-type
+PS9123,Drinkware/Straws,Reusable Steel Straw Set,Reusable Steel Straw Set,N,Straw,already-has-type
+PS2232,Drinkware/Coffee Cups,350Ml Double Wall Glass Cup With Bamboo Lid,350Ml Double Wall Glass Cup With Bamboo Lid,N,Coffee Cup,already-has-type
+PS2225,Drinkware/Coffee Cups,Kosmo Metal Coffee Cup - 350Ml,Kosmo Metal Coffee Cup - 350Ml,N,Coffee Cup,already-has-type
+PS2228S,Drinkware/Coffee Cups,Genova Glass Coffee Cup - 240Ml With Silicon Lid And Band,Genova Glass Coffee Cup - 240Ml With Silicon Lid And Band,N,Coffee Cup,already-has-type
+PS2228M,Drinkware/Coffee Cups,Genova Glass Coffee Cup - 350Ml With Silicon Lid And Band,Genova Glass Coffee Cup - 350Ml With Silicon Lid And Band,N,Coffee Cup,already-has-type
+PS2223S,Drinkware/Coffee Cups,Moama Glass Coffee Cup - 240Ml With Silicon Lid And Band,Moama Glass Coffee Cup - 240Ml With Silicon Lid And Band,N,Coffee Cup,already-has-type
+PS2223M,Drinkware/Coffee Cups,Moama Glass Coffee Cup - 350Ml With Silicon Lid And Band,Moama Glass Coffee Cup - 350Ml With Silicon Lid And Band,N,Coffee Cup,already-has-type
+PS6012,Lanyards/PVC Card Holders,PVC Pocket Portrait,PVC Pocket Portrait PVC Card Holder,Y,PVC Card Holder,appended
+PS6011,Lanyards/PVC Card Holders,PVC Pocket Landscape,PVC Pocket Landscape PVC Card Holder,Y,PVC Card Holder,appended
+PS6010,Lanyards/Express Lanyard 3 Days,Express Flat Ribbed Lanyard - 20mm,Express Flat Ribbed Lanyard - 20mm,N,,skip-cat
+PS7003,Notebooks/A5,Elegance A5 Notebook,Elegance A5 Notebook,N,,skip-cat
+PS7005,Notebooks/A5,Fabric Covered A5 Notebook,Fabric Covered A5 Notebook,N,,skip-cat
+PS7006,Notebooks/A5,Soft Smooth Pu Covered Notebook,Soft Smooth Pu Covered Notebook,N,,skip-cat
+PS7011,Notebooks/A5,Premium Hard Cover Notebook - A5,Premium Hard Cover Notebook - A5,N,,skip-cat
+PS7009,Notebooks/ECO Notebooks,RPET Notebook,RPET Notebook,N,ECO Notebook,already-has-type
+PS7020,Notebooks/ECO Notebooks,Bamboo Notebook,Bamboo Notebook,N,ECO Notebook,already-has-type
+PS7013,Notebooks/ECO Notebooks,Recycled Notebook,Recycled Notebook,N,ECO Notebook,already-has-type
+PS7015,Notebooks/A5,A5 Carbon Notebook,A5 Carbon Notebook,N,,skip-cat
+PS8113,Neoprene/Stubby Holders,Sublimated Stubby With Magnets,Sublimated Stubby With Magnets Stubby Holder,Y,Stubby Holder,appended
+PS8118,Neoprene/Stubby Holders,Neoprene Stubby Cooler Collapsible,Neoprene Stubby Cooler Collapsible Stubby Holder,Y,Stubby Holder,appended
+PS8119,Neoprene/Stubby Holders,Collapsible Sublimation Stubby Cooler,Collapsible Sublimation Stubby Cooler Stubby Holder,Y,Stubby Holder,appended
+PS8115,Neoprene/Stubby Holders,Stubby Cooler Without Base,Stubby Cooler Without Base Stubby Holder,Y,Stubby Holder,appended
+PS8116,Neoprene/Stubby Holders,Neoprene Stubby Cooler Premium,Neoprene Stubby Cooler Premium Stubby Holder,Y,Stubby Holder,appended
+PS8101,Neoprene/Stubby Holders,Neoprene Stubby Cooler,Neoprene Stubby Cooler Stubby Holder,Y,Stubby Holder,appended
+PS8102,Neoprene/Stubby Holders,Dye Sublimation Stubby Cooler Standard,Dye Sublimation Stubby Cooler Standard Stubby Holder,Y,Stubby Holder,appended
+PS8117,Neoprene/Stubby Holders,Premium Sublimation Cooler,Premium Sublimation Cooler Stubby Holder,Y,Stubby Holder,appended
+PS8103,Neoprene/Stubby Holders,Stainless Steel Stubby Holder,Stainless Steel Stubby Holder,N,Stubby Holder,already-has-type
+PS8120,Neoprene/Stubby Holders,Slap Can Stubby Coolers,Slap Can Stubby Coolers Stubby Holder,Y,Stubby Holder,appended
+PS0088,Office/Pencil Cases,Neoprene Sublimated Pencil Case,Neoprene Sublimated Pencil Case,N,Pencil Case,already-has-type
+PS1005,Office/Pens/Plastic Pens,Lazarus,Lazarus Plastic Pen,Y,Plastic Pen,appended
+PS1008,Office/Pens/Plastic Pens,Origin,Origin Plastic Pen,Y,Plastic Pen,appended
+PS1101,Office/Pens/Metal Pens,Slimline,Slimline Metal Pen,Y,Metal Pen,appended
+PS1103,Office/Pens/Metal Pens,Governor,Governor Metal Pen,Y,Metal Pen,appended
+PS1112,Office/Pens/Metal Pens,Wave,Wave Metal Pen,Y,Metal Pen,appended
+PS1115,Office/Pens/Metal Pens,Negan,Negan Metal Pen,Y,Metal Pen,appended
+PS1120,Office/Pens/Metal Pens,Extige,Extige Metal Pen,Y,Metal Pen,appended
+PS1121,Office/Pens/Metal Pens,Grid,Grid Metal Pen,Y,Metal Pen,appended
+PS1157,Office/Pens/Metal Pens,Spyder,Spyder Metal Pen,Y,Metal Pen,appended
+PS1188,Office/Pencil Cases,Large Neoprene Sublimated Pencil Case,Large Neoprene Sublimated Pencil Case,N,Pencil Case,already-has-type
+PS1201,Office/Pens/Eco Friendly,Wheat Straw Lazarus 2,Wheat Straw Lazarus 2 Eco Friendly,Y,Eco Friendly,appended
+PS1203,Office/Pens/Eco Friendly,Wheat Straw Slimline Silver,Wheat Straw Slimline Silver Eco Friendly,Y,Eco Friendly,appended
+PS1204,Office/Pens/Eco Friendly,Wheat Straw Slimline Black,Wheat Straw Slimline Black Eco Friendly,Y,Eco Friendly,appended
+PS1205,Office/Pens/Metal Pens,Aluminium Pen with Bamboo Grip,Aluminium Pen with Bamboo Grip,N,Metal Pen,already-has-type
+PS1208,Office/Pens/Eco Friendly,Bamboo Grip Wheat Straw Pen,Bamboo Grip Wheat Straw Pen Eco Friendly,Y,Eco Friendly,appended
+PS1301,Office/Pens/Pencils,Mini Pencil Tube,Mini Pencil Tube,N,Pencil,already-has-type
+PS1341,Office/Notepads,Sticky Note Book,Sticky Note Book Notepad,Y,Notepad,appended
+PS1404,Office/Pens/Highlighters,3 Piece Wax Highlighter,3 Piece Wax Highlighter,N,Highlighter,already-has-type
+PS1600,Office/Pens/Gift Set and Pouches,Pen Pouch,Pen Pouch Gift Set and Pouche,Y,Gift Set and Pouche,appended
+PS1601,Office/Pens/Gift Set and Pouches,Recycled Cardboard Pen Pouch,Recycled Cardboard Pen Pouch Gift Set and Pouche,Y,Gift Set and Pouche,appended
+PS1602,Office/Pens/Gift Set and Pouches,Clear Pen Box,Clear Pen Box Gift Set and Pouche,Y,Gift Set and Pouche,appended
+PS1603,Office/Pens/Gift Set and Pouches,Aluminium Gold Pen Box,Aluminium Gold Pen Box Gift Set and Pouche,Y,Gift Set and Pouche,appended
+PS1604,Office/Pens/Gift Set and Pouches,Aluminium Silver Pen Box,Aluminium Silver Pen Box Gift Set and Pouche,Y,Gift Set and Pouche,appended
+PS7105,Office/Pencil Cases,Clear Pvc Pencil Case,Clear Pvc Pencil Case,N,Pencil Case,already-has-type
+PS8312,Office/Keyrings,Brighton Metal Keyring Bottle Opener,Brighton Metal Keyring Bottle Opener,N,Keyring,already-has-type
+PS8322,Office/Keyrings,Aluminium Keyring Bottle Opener,Aluminium Keyring Bottle Opener,N,Keyring,already-has-type
+PS8340,Office/Keyrings,Bamboo Keyring - House Shape,Bamboo Keyring - House Shape,N,Keyring,already-has-type
+PS8510,Lifestyle/Towels,Bondi Gym Cotton Towel,Bondi Gym Cotton Towel,N,Towel,already-has-type
+PS8511,Lifestyle/Towels,Coogee Gym Cotton Towel Large,Coogee Gym Cotton Towel Large,N,Towel,already-has-type
+PS8774,Lifestyle/Auto Accessories,Custom Air Fresheners,Custom Air Fresheners Auto Accessory,Y,Auto Accessory,appended
+PS9111,Lifestyle/Sunglasses and Accessories,Sublimated Sunglasses Strap,Sublimated Sunglasses Strap,N,,skip-cat
+PS9120,Lifestyle/Personal,Rain Poncho,Rain Poncho Personal,Y,Personal,appended
+PS9202,Lifestyle/Homewares,Natural Lunch Box,Natural Lunch Box,N,,skip-cat
+PS9204,Lifestyle/Homewares,Set Of Four Measuring Spoons,Set Of Four Measuring Spoons,N,,skip-cat
+PS9211,Lifestyle/Personal,Swivel Nail Care Kit,Swivel Nail Care Kit Personal,Y,Personal,appended
+PS9220,Lifestyle/Homewares,Foldable Chair Cushion,Foldable Chair Cushion,N,,skip-cat
+PS9403,Lifestyle/Homewares,4Pcs Wooden Cutlery,4Pcs Wooden Cutlery,N,,skip-cat
+PS9449,Lifestyle/Pet Accessories,Doggie Waste Bag,Doggie Waste Bag Pet Accessory,Y,Pet Accessory,appended
+PS9451,Lifestyle/Pet Accessories,Silicone Collapsible Pet Bowl,Silicone Collapsible Pet Bowl Pet Accessory,Y,Pet Accessory,appended
+PS3101,Novelties/Wrist Band,Silicone Wrist Band,Silicone Wrist Band,N,Wrist Band,already-has-type
+PS3109,Novelties/Wrist Band,Silicone Wrist-Band With Tri Colour,Silicone Wrist-Band With Tri Colour,N,Wrist Band,already-has-type
+PS3121,Novelties/Wrist Band,Silicone Slap-Band,Silicone Slap-Band,N,Wrist Band,already-has-type
+PS3304,Novelties/Assorted,Nylon Foldable Flyer,Nylon Foldable Flyer,N,,skip-cat
+PS3310,Novelties/Assorted,Cardboard Clapper,Cardboard Clapper,N,,skip-cat
+PS9107,Technology/Microfibre Cloths,Small Microfibre Cleaning Cloth,Small Microfibre Cleaning Cloth,N,Microfibre Cloth,already-has-type
+PS9127,Technology/Microfibre Cloths,Large Microfibre Cleaning Cloth,Large Microfibre Cleaning Cloth,N,Microfibre Cloth,already-has-type
+PS9003,Technology/Phone Wallet,Wavy Silicone Phone Wallet,Wavy Silicone Phone Wallet,N,Phone Wallet,already-has-type
+PAT05-01,Technology/USB,Black Gift Box: Magnetic,Black Gift Box: Magnetic USB,Y,USB,appended
+PAT06-04,Technology/USB,Tin Gift Box: Rectangular With Window,Tin Gift Box: Rectangular With Window USB,Y,USB,appended
+PAT08,Technology/USB,Velvet Pouch For Usb Drive,Velvet Pouch For Usb Drive,N,USB,already-has-type
+PAT10-03,Technology/USB,Clear Plastic Case: Magnetic Short,Clear Plastic Case: Magnetic Short USB,Y,USB,appended
+PAT199,Technology/USB,Otg Swivel Drive,Otg Swivel Drive USB,Y,USB,appended
+PAT200,Technology/USB,Wooden Swivel Drive,Wooden Swivel Drive USB,Y,USB,appended
+PAT201,Technology/USB,Classic Swivel Drive 3.0,Classic Swivel Drive 3.0 USB,Y,USB,appended
+PAT222,Technology/USB,Silver Metal Swivel Drive,Silver Metal Swivel Drive USB,Y,USB,appended
+PS5002,Technology/USB,Ox Usb Flash Drive,Ox Usb Flash Drive,N,USB,already-has-type
+PS5004,Technology/USB,Yak Usb Flash Drive,Yak Usb Flash Drive,N,USB,already-has-type
+PS5023,Technology/USB,Leopard Usb Flash Drive,Leopard Usb Flash Drive,N,USB,already-has-type
+PS5071,Technology/USB,Starling Usb Flash Drive,Starling Usb Flash Drive,N,USB,already-has-type
+PS5092,Technology/USB,Metal Swivel Usb Flash Drive,Metal Swivel Usb Flash Drive,N,USB,already-has-type
+PS5115,Technology/USB,Credit Card Flash Drive,Credit Card Flash Drive USB,Y,USB,appended
+PS5302,Technology/USB,Castle Key Drive,Castle Key Drive USB,Y,USB,appended
+PS5303,Technology/USB,Whipbird Bamboo Usb Flash Drive,Whipbird Bamboo Usb Flash Drive,N,USB,already-has-type
+PS553D,Technology/USB,Custom 3D Usb,Custom 3D Usb,N,USB,already-has-type
+PS9004,Technology/Phone Wallet,Phone Wallet Standard No Earbud,Phone Wallet Standard No Earbud,N,Phone Wallet,already-has-type
+PS500X54,Technology/Tech Accessories,Microfibre Tablet Pouch,Microfibre Tablet Pouch Tech Accessory,Y,Tech Accessory,appended
+PS500X55,Technology/Tech Accessories,Microfibre Sunglass / Phone Pouch,Microfibre Sunglass / Phone Pouch Tech Accessory,Y,Tech Accessory,appended
+PS9301,Technology/Wireless Chargers,Bamboo Wireless Charger,Bamboo Wireless Charger,N,Wireless Charger,already-has-type
+PS5112,Socks/Crew Socks,Snazzy Crew Sublimated Socks,Snazzy Crew Sublimated Socks,N,Crew Sock,already-has-type
+PS5103,Socks/Crew Socks,Snazzy Crew Gripper Socks,Snazzy Crew Gripper Socks,N,Crew Sock,already-has-type
+PS5108,Socks/Long Socks,Snazzy Knee High Sublimated Socks,Snazzy Knee High Sublimated Socks,N,Long Sock,already-has-type
+PS5110,Socks/Long Socks,Snazzy Knee High Jacquard Socks,Snazzy Knee High Jacquard Socks,N,Long Sock,already-has-type
+PS5102,Socks/Short Socks,Snazzy Custom Short Gripper Socks,Snazzy Custom Short Gripper Socks,N,Short Sock,already-has-type
+PS5111,Socks/Short Socks,Snazzy Ankle Cut Jacquard Socks,Snazzy Ankle Cut Jacquard Socks,N,Short Sock,already-has-type
+BB5005,Bell Bottles,Bell 3-In-1 Copper Vacuum Bottle Kit 950ml,Bell 3-In-1 Copper Vacuum Bottle Kit 950ml,N,Bell Bottle,already-has-type
+PS2028,Drinkware/Metal Bottles,1L Stainless Steel Thermos with Silicone Handle,1L Stainless Steel Thermos with Silicone Handle Metal Bottle,Y,Metal Bottle,appended
+OCT100LS,Apparel/T-Shirts/Women,Women's Essential Tees,Women's Essential Tees,N,Women,already-has-type
+OCT500MS,Apparel/T-Shirts/Men,Redland Cotton Tee,Redland Cotton Tee Men,Y,Men,appended
+OCT200MS,Apparel/T-Shirts/Men,Men’s Urban Chill,Men’s Urban Chill,N,Men,already-has-type
+OCT300MS,Apparel/T-Shirts/Men,Men's Marvel Tee,Men's Marvel Tee,N,Men,already-has-type
+OCT400MS,Apparel/T-Shirts/Men,Long Sleeve T-Shirt,Long Sleeve T-Shirt Men,Y,Men,appended
+OCSG100MS,Apparel/T-Shirts/Men,Men's Singlet,Men's Singlet,N,Men,already-has-type
+OCSG200MS,Apparel/T-Shirts/Men,Men's Tank Top,Men's Tank Top,N,Men,already-has-type
+OCH100,Apparel/Hoodies,Eagle Hoodie,Eagle Hoodie Hoody,Y,Hoody,appended
+OCH200,Apparel/Hoodies,Celtic Full-Zip Hoodie,Celtic Full-Zip Hoodie Hoody,Y,Hoody,appended
+OCH300,Apparel/Hoodies,Clipper Hoodie,Clipper Hoodie Hoody,Y,Hoody,appended
+5001,Apparel/Hydro Headwear,Hunter 5 Panel Foam/Polyester Trucker Cap with Mesh Back,Hunter 5 Panel Foam/Polyester Trucker Cap with Mesh Back Hydro Headwear,Y,Hydro Headwear,appended
+5002,Apparel/Hydro Headwear,Alpine 6 Panel Brushed Twill Cap,Alpine 6 Panel Brushed Twill Cap Hydro Headwear,Y,Hydro Headwear,appended
+5003,Apparel/Hydro Headwear,Arrow 6 Panel Recycled Polyester Jaquard Eco Cap,Arrow 6 Panel Recycled Polyester Jaquard Eco Cap Hydro Headwear,Y,Hydro Headwear,appended
+5004,Apparel/Hydro Headwear,Bay 6 Panel Cotton Cap with Metal Buckle,Bay 6 Panel Cotton Cap with Metal Buckle Hydro Headwear,Y,Hydro Headwear,appended
+5005,Apparel/Hydro Headwear,"Peak 6 Panel Polyester Cap with Flat Visor, Perforated Sides","Peak 6 Panel Polyester Cap with Flat Visor, Perforated Sides Hydro Headwear",Y,Hydro Headwear,appended
+5006,Apparel/Hydro Headwear,Everett 6 Panel Two Tone Polyester Cap,Everett 6 Panel Two Tone Polyester Cap Hydro Headwear,Y,Hydro Headwear,appended
+5007,Apparel/Hydro Headwear,Stone 6 Panel Chino Cotton Twill Cap,Stone 6 Panel Chino Cotton Twill Cap Hydro Headwear,Y,Hydro Headwear,appended
+5008,Apparel/Hydro Headwear,Scout 5 Panel Military Style Cotton Twill Cap,Scout 5 Panel Military Style Cotton Twill Cap Hydro Headwear,Y,Hydro Headwear,appended
+5009,Apparel/Hydro Headwear,Forest Chino Cotton Twill Bucket Hat,Forest Chino Cotton Twill Bucket Hat Hydro Headwear,Y,Hydro Headwear,appended
+5010,Apparel/Hydro Headwear,Woody 6 Panel PolyCotton Trucker Cap with Mesh Back,Woody 6 Panel PolyCotton Trucker Cap with Mesh Back Hydro Headwear,Y,Hydro Headwear,appended
+5011,Apparel/Hydro Headwear,Ranger 6 Panel Cotton Twill Cap,Ranger 6 Panel Cotton Twill Cap Hydro Headwear,Y,Hydro Headwear,appended
+5012,Apparel/Hydro Headwear,Clay 6 Panel Polyester Cap with Flat Visor,Clay 6 Panel Polyester Cap with Flat Visor Hydro Headwear,Y,Hydro Headwear,appended
+5013,Apparel/Hydro Headwear,Lake 6 Panel Polyester Stretch Cap,Lake 6 Panel Polyester Stretch Cap Hydro Headwear,Y,Hydro Headwear,appended
+5014,Apparel/Hydro Headwear,Rocky 6 Panel PolyCotton Cap with Curved Visor,Rocky 6 Panel PolyCotton Cap with Curved Visor Hydro Headwear,Y,Hydro Headwear,appended
+5015,Apparel/Hydro Headwear,Nixon 6 Panel Cotton Spandex Stretch Cap with Fully Closed Back,Nixon 6 Panel Cotton Spandex Stretch Cap with Fully Closed Back Hydro Headwear,Y,Hydro Headwear,appended
+5016,Apparel/Hydro Headwear,Rays 6 Panel Polyester Stretch Cap,Rays 6 Panel Polyester Stretch Cap Hydro Headwear,Y,Hydro Headwear,appended
+5017,Hydro Headwear,Ashmore 5 Panel Quick Dry Recycled Nylon Eco Cap with Flat Visor,Ashmore 5 Panel Quick Dry Recycled Nylon Eco Cap with Flat Visor Hydro Headwear,Y,Hydro Headwear,appended
+5018,Apparel/Hydro Headwear,Freshwater Quick Dry Recycled Nylon Eco Bucket Hat,Freshwater Quick Dry Recycled Nylon Eco Bucket Hat Hydro Headwear,Y,Hydro Headwear,appended
+5019,Apparel/Headwear/OC Black,Odyssey 5 Panel PolyCotton Cap with Striped Mesh Sides,Odyssey 5 Panel PolyCotton Cap with Striped Mesh Sides OC Black,Y,OC Black,appended
+5020,Apparel/Hydro Headwear,Pace 6 Panel Eco Cap with Curved Sandwich Visor,Pace 6 Panel Eco Cap with Curved Sandwich Visor Hydro Headwear,Y,Hydro Headwear,appended
+5021,Apparel/Headwear/OC Black,Discovery 6 Panel Brushed Cotton Baseball Cap,Discovery 6 Panel Brushed Cotton Baseball Cap OC Black,Y,OC Black,appended
+5022,Apparel/Headwear/OC Black,Alphard 5 Panel Nylon Foam Trucker Cap,Alphard 5 Panel Nylon Foam Trucker Cap OC Black,Y,OC Black,appended
+OCB100,Apparel/Beanies,Warm Knitted Acrylic Beanie,Warm Knitted Acrylic Beanie Beany,Y,Beany,appended
+OCBH01,Apparel/Bucket hat,Cotton Bucket Hat,Cotton Bucket Hat,N,Bucket hat,already-has-type
+OCP700MS,Apparel/Polos,Men's Prime Polo,Men's Prime Polo,N,Polo,already-has-type
+OCP700LS,Apparel/Polos,Women's Prime Polo,Women's Prime Polo,N,Polo,already-has-type
+OCP100MS,Apparel/Polos,Men's Sundance Polo,Men's Sundance Polo,N,Polo,already-has-type
+OCP100LS,Apparel/Polos,Women's Sundance Polo,Women's Sundance Polo,N,Polo,already-has-type
+OCP300MS,Apparel/Polos,Men's Ranger Polo,Men's Ranger Polo,N,Polo,already-has-type
+5101,Peninsula Bags,Colorado Backpack,Colorado Backpack Peninsula Bag,Y,Peninsula Bag,appended
+5103,Peninsula Bags,Eiger Backpack,Eiger Backpack Peninsula Bag,Y,Peninsula Bag,appended
+5102,Peninsula Bags,Fitzroy Backpack,Fitzroy Backpack Peninsula Bag,Y,Peninsula Bag,appended
+5105,Peninsula Bags,Fairweather Backpack,Fairweather Backpack Peninsula Bag,Y,Peninsula Bag,appended
+5104,Peninsula Bags,Blackburn Backpack,Blackburn Backpack Peninsula Bag,Y,Peninsula Bag,appended
+PS4356,Lifestyle/Cooler Box,Paradise 12L Cooler Box,Paradise 12L Cooler Box,N,Cooler Box,already-has-type
+NWTB3035,Bags/Non-Woven Bags,Non-Woven Garment Bag,Non-Woven Garment Bag,N,Non-Woven Bag,already-has-type
+NWTB30,Bags/Non-Woven Bags,Blueys Tote Bag,Blueys Tote Bag,N,Non-Woven Bag,already-has-type
+NWTB3391,Bags/Non-Woven Bags,Heat Sealed Non-Woven Exhibition Tote,Heat Sealed Non-Woven Exhibition Tote Non-Woven Bag,Y,Non-Woven Bag,appended
+NWTB14,Bags/Non-Woven Bags/Wine Carriers,Longreef 2 Bottle Bag,Longreef 2 Bottle Bag Wine Carrier,Y,Wine Carrier,appended
+NWTB15,Bags/Non-Woven Bags/Wine Carriers,Shelly 6 Bottle Bag,Shelly 6 Bottle Bag Wine Carrier,Y,Wine Carrier,appended
+NWTB20,Bags/Non-Woven Bags,Curl Sling Bag,Curl Sling Bag,N,Non-Woven Bag,already-has-type
+OCWINETOTE4,Bags/Non-Woven Bags/Wine Carriers,Non-Woven Polypropylene 4-Bottle Wine Tote Bag,Non-Woven Polypropylene 4-Bottle Wine Tote Bag Wine Carrier,Y,Wine Carrier,appended
+OCBAB101,Bags/Non-Woven Bags,Recession Buster Non-Woven Tote Bag,Recession Buster Non-Woven Tote Bag,N,Non-Woven Bag,already-has-type
+OCBAB104,Bags/Non-Woven Bags,Non-Woven Essential Briefcase Tote With Zipper Closure,Non-Woven Essential Briefcase Tote With Zipper Closure Non-Woven Bag,Y,Non-Woven Bag,appended
+OCBAB105,Bags/Non-Woven Bags,Non-Woven Laundry Duffel Bag With Over The Shoulder Strap,Non-Woven Laundry Duffel Bag With Over The Shoulder Strap,N,Non-Woven Bag,already-has-type
+OCBMS130,Bags/Non-Woven Bags,Shopping Bag Extra Large Non Woven,Shopping Bag Extra Large Non Woven,N,Non-Woven Bag,already-has-type
+IGWB01,Bags/Waist Bags,Budget Waist Bag,Budget Waist Bag,N,Waist Bag,already-has-type
+CALB20,Bags/Calico-Cotton Bags,Coloured Cotton Tote,Coloured Cotton Tote Calico-Cotton Bag,Y,Calico-Cotton Bag,appended
+OCC018,Bags/Calico-Cotton Bags,Recycled Cotton Tote Bag,Recycled Cotton Tote Bag,N,Calico-Cotton Bag,already-has-type
+OCBBP1010,Bags/Canvas Bags,Cotton Canvas Tote Bag With Zipper Closure,Cotton Canvas Tote Bag With Zipper Closure,N,Canva Bag,already-has-type
+OCBSB104,Bags/Canvas Bags,The Overnight Duffel Bag,The Overnight Duffel Bag,N,Canva Bag,already-has-type
+OCBMS158,Bags/Canvas Bags/Wine Carriers,Canvas Drawstring Wine Gift Bag,Canvas Drawstring Wine Gift Bag Wine Carrier,Y,Wine Carrier,appended
+COLB01,Bags/Cooler Bags,Perisher Cooler Bag,Perisher Cooler Bag,N,Cooler Bag,already-has-type
+COLB03,Bags/Cooler Bags,Smiggins Cooler Bag,Smiggins Cooler Bag,N,Cooler Bag,already-has-type
+COLB16,Bags/Cooler Bags,Monaro Cooler Bag,Monaro Cooler Bag,N,Cooler Bag,already-has-type
+OC24X141,Bags/Cooler Bags,Frostbite Cooler Bag,Frostbite Cooler Bag,N,Cooler Bag,already-has-type
+OC24X148,Bags/Cooler Bags,Frostbite Jumbo 30-Can Cooler,Frostbite Jumbo 30-Can Cooler Cooler Bag,Y,Cooler Bag,appended
+NWTB09,Bags/Drawstring Bags,Non Woven Drawstring Bag,Non Woven Drawstring Bag,N,Drawstring Bag,already-has-type
+DUFB34,Bags/Drawstring Bags,Clear PVC Drawstring Bag,Clear PVC Drawstring Bag,N,Drawstring Bag,already-has-type
+DUFB33,Bags/Drawstring Bags,Economy Duffle Bag,Economy Duffle Bag,N,Drawstring Bag,already-has-type
+OCBMS115,Bags/Drawstring Bags,Full Colour Printed Drawstring Backpack,Full Colour Printed Drawstring Backpack Drawstring Bag,Y,Drawstring Bag,appended
+OCBMS152,Bags/Drawstring Bags,Drawstring Cooler Pack,Drawstring Cooler Pack Drawstring Bag,Y,Drawstring Bag,appended
+OC35X230,Bags/Drawstring Bags,Big Drawstring Shoe Pouch,Big Drawstring Shoe Pouch Drawstring Bag,Y,Drawstring Bag,appended
+OCBB01,Bags/Bio Degradable Bags,Levin Tote Bag,Levin Tote Bag,N,Bio Degradable Bag,already-has-type
+OCBB11,Bags/Bio Degradable Bags,Renwick Boutiquer Bag,Renwick Boutiquer Bag,N,Bio Degradable Bag,already-has-type
+OC514,Bags/Bio Degradable Bags,Bamboo Tote,Bamboo Tote Bio Degradable Bag,Y,Bio Degradable Bag,appended
+FOLB10,Bags/Foldable Bags,Shopping Trolley Bags,Shopping Trolley Bags,N,Foldable Bag,already-has-type
+FOLB01,Bags/Foldable Bags,Melbourne Foldable Bag With Gusset,Melbourne Foldable Bag With Gusset,N,Foldable Bag,already-has-type
+FOLB05,Bags/Foldable Bags,Adelaide Shopping Bag With Gusset,Adelaide Shopping Bag With Gusset,N,Foldable Bag,already-has-type
+WPPB01,Bags/Full Colour Laminated Bags,Full Colour Printed Conference Bag,Full Colour Printed Conference Bag,N,Full Colour Laminated Bag,already-has-type
+OCBMS118,Bags/Full Colour Laminated Bags/Wine Carriers,Single Bottle Wine Bag,Single Bottle Wine Bag Wine Carrier,Y,Wine Carrier,appended
+OCBMS121,Bags/Full Colour Laminated Bags,Full Colour Printed Tote Bag,Full Colour Printed Tote Bag,N,Full Colour Laminated Bag,already-has-type
+JUTB04,Bags/Jute Bags,Large Jute Shopping Bag,Large Jute Shopping Bag,N,Jute Bag,already-has-type
+JUTB23,Bags/Jute Bags,Jute Shopping Bag,Jute Shopping Bag,N,Jute Bag,already-has-type
+JUTB11,Bags/Jute Bags,Jute Boutique Bag With Gusset,Jute Boutique Bag With Gusset,N,Jute Bag,already-has-type
+JUTB10,Bags/Jute Bags,6 Can Jute Cooler Bag,6 Can Jute Cooler Bag,N,Jute Bag,already-has-type
+JUTB03,Bags/Jute Bags,Large Jute Tote Bag With Gusset,Large Jute Tote Bag With Gusset,N,Jute Bag,already-has-type
+OCBBP1011,Bags/Jute Bags,Calico Pocket Jute Tote Bag,Calico Pocket Jute Tote Bag,N,Jute Bag,already-has-type
+PAPB01KCL,Bags/Paper Bags,Large Coloured Kraft Paper Bag,Large Coloured Kraft Paper Bag,N,Paper Bag,already-has-type
+PAPB01GLXL,Bags/Paper Bags,Extra Large Full Coloured Laminated Bag,Extra Large Full Coloured Laminated Bag,N,Paper Bag,already-has-type
+PAPB01GLM,Bags/Paper Bags,Medium Full Coloured Laminated Bag,Medium Full Coloured Laminated Bag,N,Paper Bag,already-has-type
+PAPB01GLL,Bags/Paper Bags,Large Full Coloured Laminated Bag,Large Full Coloured Laminated Bag,N,Paper Bag,already-has-type
+PAPB01KWXL,Bags/Paper Bags,Kraft Paper Bag White Extra Large Includes Twisted Paper Handle,Kraft Paper Bag White Extra Large Includes Twisted Paper Handle,N,Paper Bag,already-has-type
+PAPB01KCXL,Bags/Paper Bags,Medium Coloured Kraft Paper Bag,Medium Coloured Kraft Paper Bag,N,Paper Bag,already-has-type
+PAPB01KCS,Bags/Paper Bags,Small  Coloured Kraft Paper Bag,Small  Coloured Kraft Paper Bag,N,Paper Bag,already-has-type
+PAPB01GLS,Bags/Paper Bags,Small Full Coloured Laminated Bag,Small Full Coloured Laminated Bag,N,Paper Bag,already-has-type
+OCBAB109,Bags/Paper Bags,Full Colour Print Landscape Bag,Full Colour Print Landscape Bag,N,Paper Bag,already-has-type
+OCBAB112,Bags/Paper Bags/Wine Carriers,1 Bottle White Kraft Paper Wine Tote,1 Bottle White Kraft Paper Wine Tote Wine Carrier,Y,Wine Carrier,appended
+OCPB800,Bags/Paper Bags,100% Recycled Paper Bag with Paper Webbed Handle,100% Recycled Paper Bag with Paper Webbed Handle,N,Paper Bag,already-has-type
+OCBMS423,Bags/Paper Bags,50% Recycled Natural Kraft Shopping Bag,50% Recycled Natural Kraft Shopping Bag,N,Paper Bag,already-has-type
+OCBBC108,Bags/Wine Carriers/Calico-Cotton Bags,Cotton Wine Bottle Gift Tote,Cotton Wine Bottle Gift Tote Calico-Cotton Bag,Y,Calico-Cotton Bag,appended
+LIFE110,Bags/Wine Carriers,Chill Wine Bag With Gel,Chill Wine Bag With Gel Wine Carrier,Y,Wine Carrier,appended
+COSD05,Drinkware/Bar Accessories,Stainless Steel Coaster,Stainless Steel Coaster Bar Accessory,Y,Bar Accessory,appended
+BMTD02,Drinkware/Bar Accessories,Rubber Bar Mat Sublimated,Rubber Bar Mat Sublimated Bar Accessory,Y,Bar Accessory,appended
+BMTD01,Drinkware/Bar Accessories,Rubber Bar Mat,Rubber Bar Mat Bar Accessory,Y,Bar Accessory,appended
+OCP781796,Drinkware/Bar Accessories,Bondi Cocktail Shaker,Bondi Cocktail Shaker Bar Accessory,Y,Bar Accessory,appended
+OCB-OPEN8A,Drinkware/Bottle Openers,Vinyl Wrapped Paddle Style Bottle Opener,Vinyl Wrapped Paddle Style Bottle Opener,N,Bottle Opener,already-has-type
+OCB-OPEN8C,Drinkware/Bottle Openers,Paddle Style Powder Coated Steel Bottle Opener,Paddle Style Powder Coated Steel Bottle Opener,N,Bottle Opener,already-has-type
+OCB-OPEN11,Drinkware/Bottle Openers,Credit Card Polished Bottle Opener,Credit Card Polished Bottle Opener,N,Bottle Opener,already-has-type
+MUGD05,Drinkware/Ceramic Mugs,Coffee Mug,Coffee Mug,N,Ceramic Mug,already-has-type
+MUGD7125,Drinkware/Ceramic Mugs,325ml Coloured Stoneware Mug With C-Handle,325ml Coloured Stoneware Mug With C-Handle,N,Ceramic Mug,already-has-type
+OC104193,Drinkware/Ceramic Mugs,Avery Coffee Mug,Avery Coffee Mug,N,Ceramic Mug,already-has-type
+OCP721707,Drinkware/Ceramic Mugs,Classic Mug,Classic Mug,N,Ceramic Mug,already-has-type
+OCC0014,Drinkware/Ceramic Mugs,Plain Ceramic Mug 300ml,Plain Ceramic Mug 300ml,N,Ceramic Mug,already-has-type
+OC9390,Drinkware/Glass Bottles,600ml Jupiter Glass Bottle With Neoprene Sleeve,600ml Jupiter Glass Bottle With Neoprene Sleeve,N,Glass Bottle,already-has-type
+OC2402,Drinkware/Glass Bottles,Genesis Glass Bottle,Genesis Glass Bottle,N,Glass Bottle,already-has-type
+PS2027,Drinkware/Metal Bottles,650ml Stainless Steel Thermos with Silicone Handle,650ml Stainless Steel Thermos with Silicone Handle Metal Bottle,Y,Metal Bottle,appended
+OC2016B,Drinkware/Metal Bottles,500ml Japanese Style Vacuum Bottle,500ml Japanese Style Vacuum Bottle,N,Metal Bottle,already-has-type
+PLAD01,Drinkware/Sports Bottles,Plastic Cups With Domed Cap,Plastic Cups With Domed Cap Sport Bottle,Y,Sport Bottle,appended
+SPBD31,Drinkware/Sports Bottles,2.2 Litre Gym bottle,2.2 Litre Gym bottle,N,Sport Bottle,already-has-type
+OCDR10,Drinkware/Sports Bottles,Flex Water Bottle With Carabiner,Flex Water Bottle With Carabiner,N,Sport Bottle,already-has-type
+OC0441,Drinkware/Travel Mugs,350ml Matador Coffee Cup,350ml Matador Coffee Cup Travel Mug,Y,Travel Mug,appended
+OCP721953,Drinkware/Travel Mugs,Diamond Cut Insulated Travel Mug,Diamond Cut Insulated Travel Mug,N,Travel Mug,already-has-type
+FAN001,Novelties/Assorted,Foldable Fan,Foldable Fan,N,,skip-cat
+ASSN01,Novelties/Assorted,Hacky Sack,Hacky Sack,N,,skip-cat
+ASSN10,Novelties/Assorted,Printed Shoelaces,Printed Shoelaces,N,,skip-cat
+OCLS117,Novelties/Assorted,Classic Cow Bell,Classic Cow Bell,N,,skip-cat
+OH4888,Novelties/Assorted,Plastic Hand Fan,Plastic Hand Fan,N,,skip-cat
+AUTO03,Lifestyle/Auto Accessories,Helios Foldable Car Sun Visor,Helios Foldable Car Sun Visor Auto Accessory,Y,Auto Accessory,appended
+AUTO21,Lifestyle/Auto Accessories,Astro Side Window Car Sunshade,Astro Side Window Car Sunshade Auto Accessory,Y,Auto Accessory,appended
+OCC109,Lifestyle/Auto Accessories,Tyre Gauge,Tyre Gauge Auto Accessory,Y,Auto Accessory,appended
+OCAEM101,Lifestyle/Auto Accessories,Expandable Boot Organizer,Expandable Boot Organizer Auto Accessory,Y,Auto Accessory,appended
+OC30X168,Lifestyle/Auto Accessories,AMG Folding Car Sunshade,AMG Folding Car Sunshade Auto Accessory,Y,Auto Accessory,appended
+LIFE32,Lifestyle/Fitness and Sports,Sweat Band With Zipper,Sweat Band With Zipper Fitness and Sport,Y,Fitness and Sport,appended
+SCSE04,Lifestyle/Fitness and Sports,Padded Nylon Stadium Cushion,Padded Nylon Stadium Cushion Fitness and Sport,Y,Fitness and Sport,appended
+OC31X293,Lifestyle/Fitness and Sports,Terry Wrist Sweatband,Terry Wrist Sweatband Fitness and Sport,Y,Fitness and Sport,appended
+OC5601,Lifestyle/Fitness and Sports,Swimming Caps - Silicone,Swimming Caps - Silicone Fitness and Sport,Y,Fitness and Sport,appended
+FRBN03,Lifestyle/Games,Foldable Nylon Fun Flyer,Foldable Nylon Fun Flyer Game,Y,Game,appended
+OH59,Lifestyle/Games,Playing Cards In Case,Playing Cards In Case Game,Y,Game,appended
+OCNRPC01,Lifestyle/Games,Recycled Paper Playing Cards,Recycled Paper Playing Cards Game,Y,Game,appended
+MEKR02,Office/Keyrings,Curved Bottle Opener Keyring,Curved Bottle Opener Keyring,N,Keyring,already-has-type
+MEKR03,Office/Keyrings,Bradford Aluminium Bottle Opener Keyring,Bradford Aluminium Bottle Opener Keyring,N,Keyring,already-has-type
+OH2080,Office/Keyrings,Metal Keyring With Bottle Opener,Metal Keyring With Bottle Opener,N,Keyring,already-has-type
+STRS02,Novelties/Assorted,Round Ball Stress Shape,Round Ball Stress Shape,N,,skip-cat
+STRS03,Novelties/Assorted,Football Stress Shape,Football Stress Shape,N,,skip-cat
+STRS04,Novelties/Assorted,Basketball Stress Shape,Basketball Stress Shape,N,,skip-cat
+STRS14,Novelties/Assorted,Australia Stress Shape,Australia Stress Shape,N,,skip-cat
+STRS29,Novelties/Assorted,Safety Helmet Stress Shape,Safety Helmet Stress Shape,N,,skip-cat
+STRS34,Novelties/Assorted,Oval Stress Shape Keyring,Oval Stress Shape Keyring,N,,skip-cat
+STRS41,Novelties/Assorted,Earth Stress Shape,Earth Stress Shape,N,,skip-cat
+TRAV07,Lifestyle/Travel,PU Leather Luggage Tag,PU Leather Luggage Tag Travel,Y,Travel,appended
+EYE01,Lifestyle/Travel,Eye Mask,Eye Mask Travel,Y,Travel,appended
+OH9752,Lifestyle/Travel,Journey Luggage Tag,Journey Luggage Tag Travel,Y,Travel,appended
+UMBR07,Lifestyle/Umbrellas,London Business Umbrella,London Business Umbrella,N,Umbrella,already-has-type
+PS8017,Lifestyle/Beach Ball,Beach Ball - 60cm,Beach Ball - 60cm,N,Beach Ball,already-has-type
+NEOP52,Neoprene/Tech Sleeves,"15"" Premium Sublimated Neoprene Laptop Sleeve With Zipper","15"" Premium Sublimated Neoprene Laptop Sleeve With Zipper",N,Tech Sleeve,already-has-type
+NEOP56,Neoprene/Tech Sleeves,"12"" Neoprene Laptop Sleeve with Zipper","12"" Neoprene Laptop Sleeve with Zipper",N,Tech Sleeve,already-has-type
+IPAD15S,Neoprene/Tech Sleeves,"Sublimated Neoprene 15"" Sleeve","Sublimated Neoprene 15"" Sleeve",N,Tech Sleeve,already-has-type
+OC31X203,Bags/Laptop Bags,Portable LSS Soft Laptop Sleeve Case,Portable LSS Soft Laptop Sleeve Case Laptop Bag,Y,Laptop Bag,appended
+NEOP32,Neoprene/Stubby Holders,Long Neck Bottle Cooler with Zip,Long Neck Bottle Cooler with Zip Stubby Holder,Y,Stubby Holder,appended
+NEOP35,Neoprene/Stubby Holders,Fake Grass Stubby Cooler,Fake Grass Stubby Cooler Stubby Holder,Y,Stubby Holder,appended
+NEOP02,Neoprene/Stubby Holders,Puffer Jacket Stubby Holder,Puffer Jacket Stubby Holder,N,Stubby Holder,already-has-type
+PS7030,Notebooks/A5,Penguin A5 Notebook,Penguin A5 Notebook,N,,skip-cat
+IG1901,Neoprene/Mouse Mats,Round Mouse Pad,Round Mouse Pad Mouse Mat,Y,Mouse Mat,appended
+IG1902,Neoprene/Mouse Mats,Round Neoprene Mouse Pad 23cm Dia,Round Neoprene Mouse Pad 23cm Dia Mouse Mat,Y,Mouse Mat,appended
+IG1903,Neoprene/Mouse Mats,Thin Rubber Mouse Mat Textured Top Surface,Thin Rubber Mouse Mat Textured Top Surface,N,Mouse Mat,already-has-type
+IG1904,Neoprene/Mouse Mats,Neoprene Sublimation Mouse Mat,Neoprene Sublimation Mouse Mat,N,Mouse Mat,already-has-type
+IG1905,Neoprene/Mouse Mats,Full Colour Hard Mouse Pad With PVC Coating,Full Colour Hard Mouse Pad With PVC Coating Mouse Mat,Y,Mouse Mat,appended
+AUTO06,Lifestyle/Auto Accessories,Shadex Foldable Car Sunshade,Shadex Foldable Car Sunshade Auto Accessory,Y,Auto Accessory,appended
+PS2301,Drinkware/Sports Bottles,Fitness Shaker - 600Ml,Fitness Shaker - 600Ml Sport Bottle,Y,Sport Bottle,appended
+UMBR01,Lifestyle/Umbrellas,Bonville Golf Umbrella,Bonville Golf Umbrella,N,Umbrella,already-has-type
+UMBR04,Lifestyle/Umbrellas,Central Park Umbrella,Central Park Umbrella,N,Umbrella,already-has-type
+UMBB01,Lifestyle/Umbrellas,Beach Umbrella,Beach Umbrella,N,Umbrella,already-has-type
+LANY14,Lifestyle/Pet Accessories,Dog Collars And Leads,Dog Collars And Leads Pet Accessory,Y,Pet Accessory,appended
+LANY14a,Lifestyle/Pet Accessories,Dog Lead,Dog Lead Pet Accessory,Y,Pet Accessory,appended
+SUNG03,Lifestyle/Sunglasses and Accessories,Wayferer Sunglasses,Wayferer Sunglasses,N,,skip-cat
+OCA810395,Lifestyle/Sunglasses and Accessories,Sunbus Sunglasses,Sunbus Sunglasses,N,,skip-cat
+OC721908,Lifestyle/Sunglasses and Accessories,Sigma RPET Sunglasses,Sigma RPET Sunglasses,N,,skip-cat
+UMBR10,Lifestyle/Umbrellas,The Dunes Golf Umbrella,The Dunes Golf Umbrella,N,Umbrella,already-has-type
+RUKY01,Lifestyle/Keyrings,Moulded PVC Custom Keyring,Moulded PVC Custom Keyring,N,Keyring,already-has-type
+YOYO01,Lifestyle/Games,Premium Plastic Yoyo,Premium Plastic Yoyo Game,Y,Game,appended
+YOYO03,Lifestyle/Games,Standard Plastic Yoyo,Standard Plastic Yoyo Game,Y,Game,appended
+PS7031,Notebooks/A5,A5 Thin PU Cover Notebook,A5 Thin PU Cover Notebook,N,,skip-cat
+PS9610,Health and Beauty,First Aid Travel Kit,First Aid Travel Kit Health and Beauty,Y,Health and Beauty,appended
+BB5006,Bell Bottles/Drinkware/Metal Bottles,SILVERWATER 1L Vacuum Bottle,SILVERWATER 1L Vacuum Bottle,N,Metal Bottle,already-has-type
+IG201,Drinkware/Metal Bottles,LAPEN 500ml Vacuum Bottle with Screw Cap Lid,LAPEN 500ml Vacuum Bottle with Screw Cap Lid,N,Metal Bottle,already-has-type
+IG207,Drinkware/Metal Bottles,LAPEN 1L Vacuum Bottle - 3 Different Lid Options,LAPEN 1L Vacuum Bottle - 3 Different Lid Options,N,Metal Bottle,already-has-type
+IG201,Drinkware/Metal Bottles,LAPEN 500ml Vacuum Bottle - 3 Different Lid Options,LAPEN 500ml Vacuum Bottle - 3 Different Lid Options,N,Metal Bottle,already-has-type
+IG204,Drinkware/Metal Bottles,LAPEN 750ml Vacuum Bottle - 3 Different Lid Options,LAPEN 750ml Vacuum Bottle - 3 Different Lid Options,N,Metal Bottle,already-has-type
+5023,Apparel/Hydro Headwear,Oxford 6-Panel Cap with PU-Coated Trim,Oxford 6-Panel Cap with PU-Coated Trim Hydro Headwear,Y,Hydro Headwear,appended
+PS4357,Lifestyle/Cooler Box,Cooler Box With Table and Chair,Cooler Box With Table and Chair,N,Cooler Box,already-has-type
+PS2032,Drinkware/Coffee Cups,Atlas 360ml Double Walled Coffee Cup,Atlas 360ml Double Walled Coffee Cup,N,Coffee Cup,already-has-type
+IG8505,Lifestyle/Towels,Sandless Beach Towel,Sandless Beach Towel,N,Towel,already-has-type
+IG8506,Lifestyle/Towels,Maroubra Sublimation Polycotton Towel,Maroubra Sublimation Polycotton Towel,N,Towel,already-has-type
+IG8507,Lifestyle/Towels,Sandless Golf Towel,Sandless Golf Towel,N,Towel,already-has-type
+IG8508,Lifestyle/Towels,Cotton Golf Towel,Cotton Golf Towel,N,Towel,already-has-type
+IG8509,Lifestyle/Towels,Foldable Drawstring Towel,Foldable Drawstring Towel,N,Towel,already-has-type
+UMBR03,Lifestyle/Umbrellas,St Andrews Golf Umbrella,St Andrews Golf Umbrella,N,Umbrella,already-has-type
+IG210,Drinkware/Metal Bottles,LAPEN 1800ml Vacuum Bottle - 3 Different Lid Options,LAPEN 1800ml Vacuum Bottle - 3 Different Lid Options,N,Metal Bottle,already-has-type
+IG7050,Notebooks/A4,Fourth Estate A4 Hard Cover Notebook,Fourth Estate A4 Hard Cover Notebook,N,,skip-cat
+IG7051,Notebooks/A5,A5 Full Colour Hard Cover Notebook,A5 Full Colour Hard Cover Notebook,N,,skip-cat
+IG7052,Notebooks/Spiral Bound Notebook,Gulliver A5 Spiral Bound Notebook,Gulliver A5 Spiral Bound Notebook,N,Spiral Bound Notebook,already-has-type
+IG7054,Notebooks/ECO Notebooks,Idina Notebook,Idina Notebook,N,ECO Notebook,already-has-type
+IG8515,Lifestyle/Towels,Sublimated Tea Towel,Sublimated Tea Towel,N,Towel,already-has-type
+OCB-OPEN11P,Drinkware/Bottle Openers,Credit Card 4 Colour Process Bottle Opener,Credit Card 4 Colour Process Bottle Opener,N,Bottle Opener,already-has-type
+5106,Bags/Cooler Bags,Lumi Cooler Bag,Lumi Cooler Bag,N,Cooler Bag,already-has-type
+5107,Bags/Cooler Bags,Orion Cooler Bag,Orion Cooler Bag,N,Cooler Bag,already-has-type
+IG901,Bags/Laptop Bags,Essential Laptop Bag,Essential Laptop Bag,N,Laptop Bag,already-has-type
+IG951,Bags/Backpacks,Axis Backpack,Axis Backpack,N,Backpack,already-has-type
+DW201,Drinkware/Metal Bottles,Darby Wells 700ml Stainless Steel Insulated Bottle,Darby Wells 700ml Stainless Steel Insulated Bottle,N,Metal Bottle,already-has-type
+IG952,Bags/Backpacks,Slate Backpack,Slate Backpack,N,Backpack,already-has-type
+IG953,Bags/Backpacks,Drift Backpack,Drift Backpack,N,Backpack,already-has-type
+IG954,Bags/Backpacks,Mono Backpack,Mono Backpack,N,Backpack,already-has-type
+IG251,Drinkware/Sports Bottles,Novo Collapsible Bottle,Novo Collapsible Bottle,N,Sport Bottle,already-has-type
+IG5301,Lifestyle/Footwear,Bondi PVC Slides,Bondi PVC Slides Footwear,Y,Footwear,appended
+IG5302,Lifestyle/Footwear,Bondi EVA Slides,Bondi EVA Slides Footwear,Y,Footwear,appended
+IG281,Drinkware/Coffee Cups,Flow Coffee Cup,Flow Coffee Cup,N,Coffee Cup,already-has-type
+IG291,Drinkware/Coffee Cups,Crest 350ml Coffee Mug,Crest 350ml Coffee Mug Coffee Cup,Y,Coffee Cup,appended
+IG292,Drinkware/Coffee Cups,Crest 400ml Coffee Mug,Crest 400ml Coffee Mug Coffee Cup,Y,Coffee Cup,appended
+OCC100,Clearance,Brushed Cotton Baseball Cap,Brushed Cotton Baseball Cap,N,,skip-cat
+OCC200,Clearance,Half Mesh Nylon Foam Trucker Cap,Half Mesh Nylon Foam Trucker Cap,N,,skip-cat
+SCP001,Apparel/Sublimated,Sublimated Crafted Polo,Sublimated Crafted Polo,N,Sublimated,already-has-type
+SCT001,Apparel/Sublimated,Sublimated Crafted Tee,Sublimated Crafted Tee,N,Sublimated,already-has-type
+SCH001,Apparel/Sublimated,Sublimated Crafted Hood,Sublimated Crafted Hood,N,Sublimated,already-has-type
+PS4114,Bags/Calico-Cotton Bags,Coloured Cotton Tote Bag,Coloured Cotton Tote Bag,N,Calico-Cotton Bag,already-has-type
+PS4115,Bags/Calico-Cotton Bags,Long Handle Natural Cotton Bag,Long Handle Natural Cotton Bag,N,Calico-Cotton Bag,already-has-type
+PS4116,Bags/Calico-Cotton Bags,Long Handle Coloured Cotton Bag,Long Handle Coloured Cotton Bag,N,Calico-Cotton Bag,already-has-type
+SCF001,Apparel/Sublimated,Sublimated Crafted Fishing Tee L/S,Sublimated Crafted Fishing Tee L/S,N,Sublimated,already-has-type
+SCS001,Apparel/Sublimated,Sublimated Crafted Shirt,Sublimated Crafted Shirt,N,Sublimated,already-has-type
+SCSI001,Apparel/Sublimated,Sublimated Crafted Singlet,Sublimated Crafted Singlet,N,Sublimated,already-has-type
+SCB001,Apparel/Sublimated,Sublimated Crafted Basketball Top,Sublimated Crafted Basketball Top,N,Sublimated,already-has-type
+SCA001,Apparel/Sublimated,Sublimated Crafted AFL Jersey,Sublimated Crafted AFL Jersey,N,Sublimated,already-has-type
+SCR001,Apparel/Sublimated,Sublimated Crafted Rugby Jersey,Sublimated Crafted Rugby Jersey,N,Sublimated,already-has-type
+SCN001,Apparel/Sublimated,Sublimated Crafted NFL Jersey,Sublimated Crafted NFL Jersey,N,Sublimated,already-has-type
+SCC001,Apparel/Sublimated,Sublimated Crafted Crew,Sublimated Crafted Crew,N,Sublimated,already-has-type
+SCSH001,Apparel/Sublimated,Sublimated Crafted Basketball Shorts,Sublimated Crafted Basketball Shorts,N,Sublimated,already-has-type
+SCSH002,Apparel/Sublimated,Sublimated Crafted AFL & NRL Shorts,Sublimated Crafted AFL & NRL Shorts,N,Sublimated,already-has-type
+IG5304,Lifestyle/Footwear,Crown Closed Toe Hotel Slippers,Crown Closed Toe Hotel Slippers Footwear,Y,Footwear,appended
+IGBL01,Lifestyle/Sports Ball,Tennis Ball,Tennis Ball,N,Sport Ball,already-has-type
+IGBL02,Lifestyle/Sports Ball,Promotional Basketball,Promotional Basketball,N,Sport Ball,already-has-type
+IGBL03,Lifestyle/Sports Ball,Baseball,Baseball,N,Sport Ball,already-has-type
+IGBL04,Lifestyle/Sports Ball,Soccer Ball,Soccer Ball,N,Sport Ball,already-has-type
+IGBL05,Lifestyle/Sports Ball,Volleyball,Volleyball,N,Sport Ball,already-has-type
+IGBL06,Lifestyle/Sports Ball,American Football,American Football,N,Sport Ball,already-has-type
+IG5305,Lifestyle/Footwear,Crown Open Toe Hotel Slippers,Crown Open Toe Hotel Slippers Footwear,Y,Footwear,appended
+IGBL07,Lifestyle/Sports Ball,Golf Ball,Golf Ball,N,Sport Ball,already-has-type
+IGBL08,Lifestyle/Sports Ball,Rugby Ball,Rugby Ball,N,Sport Ball,already-has-type
+IGBL09,Lifestyle/Sports Ball,AFL Ball,AFL Ball,N,Sport Ball,already-has-type
+IG5306,Lifestyle/Footwear,Manly Clog Slides,Manly Clog Slides Footwear,Y,Footwear,appended
+IG5307,Lifestyle/Footwear,Coogee Rubber Classic Thongs,Coogee Rubber Classic Thongs Footwear,Y,Footwear,appended
+5024,Apparel/Hydro Headwear,Baker 6-Panel Cap with Cotton Twill Contrast Piping,Baker 6-Panel Cap with Cotton Twill Contrast Piping Hydro Headwear,Y,Hydro Headwear,appended
+IGB-OPEN1,Drinkware/Bottle Openers,Magnetic Bottle Shaped Opener,Magnetic Bottle Shaped Opener,N,Bottle Opener,already-has-type
+IGBOPEN2,Drinkware/Bottle Openers,Custom Shaped PVC Bottle Opener,Custom Shaped PVC Bottle Opener,N,Bottle Opener,already-has-type
+IGBOPEN3,Drinkware/Bottle Openers,Custom Shaped Metal Bottle Opener,Custom Shaped Metal Bottle Opener,N,Bottle Opener,already-has-type
+PS7107,Office/Pencil Cases,Canvas Pencil Case,Canvas Pencil Case,N,Pencil Case,already-has-type
+IG0080,Office/Pencil Cases,Polyester Pencil Case,Polyester Pencil Case,N,Pencil Case,already-has-type
+IGSIL01,Lifestyle/Homewares,Sillicone Ice Tray with Custom Moulds,Sillicone Ice Tray with Custom Moulds,N,,skip-cat
+IG5113,Apparel/Socks/Short Socks,Snazzy Yoga Sock,Snazzy Yoga Sock,N,Short Sock,already-has-type
+IG5114,Apparel/Socks/Short Socks,Snazzy Yoga Sock – Open Top,Snazzy Yoga Sock – Open Top,N,Short Sock,already-has-type
+IG4358,Lifestyle/Cooler Box,16L Water Dispenser Cooler Box,16L Water Dispenser Cooler Box,N,Cooler Box,already-has-type
+IG4359,Lifestyle/Cooler Box,28L Water Dispenser Cooler Box,28L Water Dispenser Cooler Box,N,Cooler Box,already-has-type
+IG3320,Novelties/Assorted,EVA Foam Supporters Hand,EVA Foam Supporters Hand,N,,skip-cat
+IG3321,Novelties/Assorted,Full Colour EVA Foam Supporters Hand,Full Colour EVA Foam Supporters Hand,N,,skip-cat
+IGCOS01,Drinkware/Bar Accessories,Cardboard Coaster,Cardboard Coaster Bar Accessory,Y,Bar Accessory,appended
+5025,Apparel/Headwear,Prado 5 Panel Cotton Cap with Snapback Closure,Prado 5 Panel Cotton Cap with Snapback Closure Headwear,Y,Headwear,appended
+IG5101,Apparel/Socks/Crew Socks,Snazzy Premium Crew Socks,Snazzy Premium Crew Socks,N,Crew Sock,already-has-type
+UMBR21,Lifestyle/Umbrellas,Vienna Inverted Umbrella,Vienna Inverted Umbrella,N,Umbrella,already-has-type
+PS5104,Apparel/Socks,Snazzy Bamboo Socks,Snazzy Bamboo Socks,N,Sock,already-has-type
+IG221,Drinkware/Metal Bottles,Titan 1L Bottle with Metal Lid,Titan 1L Bottle with Metal Lid,N,Metal Bottle,already-has-type
+IG222,Drinkware/Metal Bottles,Titan 1L Bottle with Bamboo Lid,Titan 1L Bottle with Bamboo Lid,N,Metal Bottle,already-has-type
+IG223,Drinkware/Metal Bottles,Titan 600ml Bottle with Metal Lid,Titan 600ml Bottle with Metal Lid,N,Metal Bottle,already-has-type
+IG224,Drinkware/Metal Bottles,Titan 600ml Bottle with Bamboo Lid,Titan 600ml Bottle with Bamboo Lid,N,Metal Bottle,already-has-type
+5026,Apparel/Headwear,Chelsea Two-Tone Cap,Chelsea Two-Tone Cap Headwear,Y,Headwear,appended
+IG7055,Notebooks/A5,Bondi A5 Leather Notebook,Bondi A5 Leather Notebook,N,,skip-cat
+IG293,Drinkware/Coffee Cups,Collapsible Sillicone Cup -355ml,Collapsible Sillicone Cup -355ml,N,Coffee Cup,already-has-type
+IGBH01,Apparel/Bucket hat,All Over Sublimation Bucket Hat,All Over Sublimation Bucket Hat,N,Bucket hat,already-has-type
+IG4811,Bags/Foldable Bags,5L Sublimated Waterproof Dry Bag,5L Sublimated Waterproof Dry Bag,N,Foldable Bag,already-has-type
+5027,Apparel/Headwear,Sun Visor,Sun Visor Headwear,Y,Headwear,appended
+IG214,Drinkware/Metal Bottles/New,Emily Bottle – 550ml Thermal Drink Bottle,Emily Bottle – 550ml Thermal Drink Bottle,N,,skip-cat
+IG421,Canvas Bags/Bags/New,PERU Canvas Bag With Leather Handle,PERU Canvas Bag With Leather Handle,N,,skip-cat
+IG422,Canvas Bags/Bags/New,EMMANUEL Yoga Mat Canvas Bag,EMMANUEL Yoga Mat Canvas Bag,N,,skip-cat
+IG215,Drinkware/Metal Bottles/New/Eco Friendly,BOLIVIA 500ml Eco Friendly Double Wall Vacuum Flask,BOLIVIA 500ml Eco Friendly Double Wall Vacuum Flask,N,Eco Friendly,already-has-type
+IG4812,Bags/Foldable Bags,Foldable Non-Woven Shopping Bag,Foldable Non-Woven Shopping Bag,N,Foldable Bag,already-has-type
+IG2503,Drinkware/Ceramic Mugs,350ml Inside Coloured Coffee Mug,350ml Inside Coloured Coffee Mug,N,Ceramic Mug,already-has-type
+IG216,Drinkware/Metal Bottles,Ocean 900ml Vacuum Tumbler,Ocean 900ml Vacuum Tumbler Metal Bottle,Y,Metal Bottle,appended
+IG294,Drinkware/Travel Mugs,Colour Changing Cup,Colour Changing Cup Travel Mug,Y,Travel Mug,appended
+IG225,Drinkware/Metal Bottles,HYDRO - 532ml Vacuum Bottle - 3 Different Lid Options,HYDRO - 532ml Vacuum Bottle - 3 Different Lid Options,N,Metal Bottle,already-has-type
+IG228,Drinkware/Metal Bottles,HYDRO - 750ml Vacuum Bottle - 3 Different Lid Options,HYDRO - 750ml Vacuum Bottle - 3 Different Lid Options,N,Metal Bottle,already-has-type
+IG231,Drinkware/Metal Bottles,HYDRO - 1L Vacuum Bottle - 3 Different Lid Options,HYDRO - 1L Vacuum Bottle - 3 Different Lid Options,N,Metal Bottle,already-has-type
+IG282,Drinkware/Travel Mugs,Cuppra 550ml Stainless Steel Cup,Cuppra 550ml Stainless Steel Cup Travel Mug,Y,Travel Mug,appended
+IGSTH01,Apparel/Straw Hats,Dimsa Straw Hat,Dimsa Straw Hat,N,Straw Hat,already-has-type
+IGSTH02,Apparel/Straw Hats,Licem Straw Hat,Licem Straw Hat,N,Straw Hat,already-has-type
+IGSTH03,Apparel/Straw Hats,Suncrest Straw Hat,Suncrest Straw Hat,N,Straw Hat,already-has-type
+IGSTH04,Apparel/Straw Hats,Fedora Paper Straw Hat,Fedora Paper Straw Hat,N,Straw Hat,already-has-type
+IGSTH05,Apparel/Straw Hats,Loom Paper Straw Hat,Loom Paper Straw Hat,N,Straw Hat,already-has-type
+IG902,Office/Rulers/New,30cm Plastic Ruler with Magnifying Viewer,30cm Plastic Ruler with Magnifying Viewer,N,,skip-cat
+IG3322,Novelties/Assorted,Hand Clapper,Hand Clapper,N,,skip-cat
+IG906,Rulers/Office/New/ECO Green/Eco Friendly,30cm Wooden Ruler,30cm Wooden Ruler Eco Friendly,Y,Eco Friendly,appended
+IG131,Office/Pencils/New,SENNA 12-Piece Wooden Pencil Set in Cardboard Box,SENNA 12-Piece Wooden Pencil Set in Cardboard Box,N,,skip-cat
+IG911,Office/Homewares/New,CORDOBA 5 Metre Rubber-Coated Flexometer,CORDOBA 5 Metre Rubber-Coated Flexometer,N,,skip-cat
+IG311,Novelties/Keyrings/New,SANTOS Metal Keyring with Shopping Trolley Coin Holder,SANTOS Metal Keyring with Shopping Trolley Coin Holder,N,,skip-cat
+FAN002,Novelties/Assorted,RPET Foldable Fan,RPET Foldable Fan,N,,skip-cat
+IGBAND01,Apparel/Bandana,Twistal Triangular Bandana,Twistal Triangular Bandana,N,Bandana,already-has-type
+FAN003,Novelties/Assorted,Bamboo Hand Fan,Bamboo Hand Fan,N,,skip-cat
+FAN004,Novelties/Assorted,Wood Hand Fan,Wood Hand Fan,N,,skip-cat
+IGBAND02,Apparel/Bandana,Clora Triangular Bandana,Clora Triangular Bandana,N,Bandana,already-has-type
+IG217,Drinkware/Metal Bottles,Glacier 1.2 L Stainless Steel Tumbler,Glacier 1.2 L Stainless Steel Tumbler Metal Bottle,Y,Metal Bottle,appended
+IG321,Novelties/New,NAVARRE Polyester Handheld Flag with Pole,NAVARRE Polyester Handheld Flag with Pole,N,,skip-cat
+IG121,Pens/Eco Friendly/New/ECO Green,VERDE Eco Push-Action Recycled Cardboard Pen,VERDE Eco Push-Action Recycled Cardboard Pen ECO Green,Y,ECO Green,appended
+IG122,Pens/Plastic Pens/New,NOVA Frosted Twist-Action Plastic Pen,NOVA Frosted Twist-Action Plastic Pen,N,,skip-cat
+IG123,Metal Pens/Pens/New,LUXOR Glossy Aluminium Twist-Action Pen,LUXOR Glossy Aluminium Twist-Action Pen,N,,skip-cat
+IG124,Plastic Pens/Pens/New,EUROPA Push-Action Plastic Ballpen,EUROPA Push-Action Plastic Ballpen,N,,skip-cat
+IG125,Pens/ECO Green/Eco Friendly/New,TERRA Bamboo & Wheat Straw Eco Ball Pen with Holder,TERRA Bamboo & Wheat Straw Eco Ball Pen with Holder,N,,skip-cat
+IG126,Plastic Pens/Pens/New,ORION Twist-Action Ballpoint Pen with Styled Clip,ORION Twist-Action Ballpoint Pen with Styled Clip,N,,skip-cat
+IG127,Pens/Plastic Pens/New,VECTRA Push-Action Ballpoint Pen with Rubber Grip,VECTRA Push-Action Ballpoint Pen with Rubber Grip,N,,skip-cat
+IG128,Metal Pens/Pens/New,AURORA Slimline Metal Twist-Action Stylus Pen,AURORA Slimline Metal Twist-Action Stylus Pen,N,,skip-cat
+IG129,Pens/ECO Green/Eco Friendly/New,SIENNA Bamboo Push-Action Ball Pen,SIENNA Bamboo Push-Action Ball Pen,N,,skip-cat
+IG130,Pens/Plastic Pens/ECO Green/Eco Friendly/New,VENUS Wheat Straw Push-Up Ball Pen,VENUS Wheat Straw Push-Up Ball Pen,N,,skip-cat
+IG9121,Lifestyle/Personal,Rainsol Poncho in Case with Carabiner,Rainsol Poncho in Case with Carabiner Personal,Y,Personal,appended
+IG9122,Lifestyle/Personal,Glacia LDPE Poncho,Glacia LDPE Poncho Personal,Y,Personal,appended
+IG9123,Lifestyle/Personal,Soro Kids Poncho,Soro Kids Poncho Personal,Y,Personal,appended
+IG9124,Lifestyle/Personal,Kira PVC Poncho,Kira PVC Poncho Personal,Y,Personal,appended
+IG9125,Lifestyle/Personal,Lyn LDPE Poncho with RPET Pouch,Lyn LDPE Poncho with RPET Pouch Personal,Y,Personal,appended
+IG9126,Lifestyle/Personal,Haze Kids Poncho with RPET Pouch,Haze Kids Poncho with RPET Pouch Personal,Y,Personal,appended
+IG5308,Lifestyle/Footwear,PVC Shoe Charms,PVC Shoe Charms Footwear,Y,Footwear,appended
+IG5501,Technology/USB,Scope 2 in 1 USB Flash Drive,Scope 2 in 1 USB Flash Drive,N,USB,already-has-type
+IG5502,Technology/USB,Apex LED USB Flash Drive,Apex LED USB Flash Drive,N,USB,already-has-type
+IG5503,Technology/USB,Arc Bracelet LED USB Flash Drive,Arc Bracelet LED USB Flash Drive,N,USB,already-has-type
+IG5504,Technology/USB,Ring 3 in 1 USB Flash Drive,Ring 3 in 1 USB Flash Drive,N,USB,already-has-type
+IG5505,Technology/USB,Node 2 in 1 USB Flash Drive,Node 2 in 1 USB Flash Drive,N,USB,already-has-type
+IG5506,Technology/USB,Block Natural Straw USB Flash Drive,Block Natural Straw USB Flash Drive,N,USB,already-has-type
+IG5507,Technology/USB,Seal Leather USb Flash Drive,Seal Leather USb Flash Drive,N,USB,already-has-type
+IG8516,Lifestyle/Towels,NOOSA Foldable Beach Towel Bag,NOOSA Foldable Beach Towel Bag,N,Towel,already-has-type
+IGTAT01,Lifestyle/Tattoos,Waterproof Temporary Tattoo 4cm x 4cm,Waterproof Temporary Tattoo 4cm x 4cm,N,Tattoo,already-has-type
+OCT700MS,Apparel/T-Shirts/Men,Everyday Tee,Everyday Tee Men,Y,Men,appended
+OCT600MS,Apparel/T-Shirts/Men,Classic Fit Tee,Classic Fit Tee Men,Y,Men,appended
+IGTAT02,Lifestyle/Tattoos,Waterproof Temporary Tattoo 4cm x 6cm,Waterproof Temporary Tattoo 4cm x 6cm,N,Tattoo,already-has-type
+IGTAT03,Lifestyle/Tattoos,Waterproof Temporary Tattoo 5cm x 5cm,Waterproof Temporary Tattoo 5cm x 5cm,N,Tattoo,already-has-type
+IGTAT04,Lifestyle/Tattoos,Waterproof Temporary Tattoo 6cm x 8cm,Waterproof Temporary Tattoo 6cm x 8cm,N,Tattoo,already-has-type
+IG132,Pens/ECO Green/Eco Friendly,OSLO Eco Push-Action Ball Pen with Wooden Clip,OSLO Eco Push-Action Ball Pen with Wooden Clip Eco Friendly,Y,Eco Friendly,appended
+IG133,Pens/Eco Friendly/ECO Green,NORDIC Eco Recycled Cardboard Push-Action Pen,NORDIC Eco Recycled Cardboard Push-Action Pen ECO Green,Y,ECO Green,appended
+IGAUTO07,Lifestyle/Auto Accessories,Shadex Full Colour Foldable Car Sunshade,Shadex Full Colour Foldable Car Sunshade Auto Accessory,Y,Auto Accessory,appended
+IGAUTO08,Lifestyle/Auto Accessories,AMG Full Colour Folding Car Sunshade,AMG Full Colour Folding Car Sunshade Auto Accessory,Y,Auto Accessory,appended
+IGAUTO09,Lifestyle/Auto Accessories,Astro Full Colour Side Window Car Sunshade,Astro Full Colour Side Window Car Sunshade Auto Accessory,Y,Auto Accessory,appended
+IGAUTO10,Lifestyle/Auto Accessories,Helios Full Colour Foldable Car Sun Visor,Helios Full Colour Foldable Car Sun Visor Auto Accessory,Y,Auto Accessory,appended
+IGAUTO11,Lifestyle/Auto Accessories,Aurora Car Sunshade Umbrella,Aurora Car Sunshade Umbrella Auto Accessory,Y,Auto Accessory,appended
+IGBALL01,Lifestyle/Games,Bouncy Ball,Bouncy Ball Game,Y,Game,appended
+IGTIS01,Lifestyle/Homewares,Rectangular Tissue Box,Rectangular Tissue Box,N,,skip-cat
+IGTIS02,Lifestyle/Homewares,Car Cup Tissue,Car Cup Tissue,N,,skip-cat
+5109,Peninsula Bags,Essential Tote Bag,Essential Tote Bag,N,Peninsula Bag,already-has-type
+5110,Peninsula Bags,Classic Tote Bag,Classic Tote Bag,N,Peninsula Bag,already-has-type
+5111,Peninsula Bags,Proper Tote Bag with 3 Pockets,Proper Tote Bag with 3 Pockets,N,Peninsula Bag,already-has-type
+IGPLSH01,Plush Toys,RUDY Plush Reindeer with Customisable Belly,RUDY Plush Reindeer with Customisable Belly Plush Toy,Y,Plush Toy,appended
+IG220,Drinkware/Coffee Cups,NAIROD 350ml Recycled Stainless Steel Thermo Mug,NAIROD 350ml Recycled Stainless Steel Thermo Mug Coffee Cup,Y,Coffee Cup,appended
+IGBMBPN01,ECO Green/Pens,"KOBY Bamboo Writing Set – Ball Pen, Touch Pen & Mechanical Pencil","KOBY Bamboo Writing Set – Ball Pen, Touch Pen & Mechanical Pencil",N,Pen,already-has-type
+IGMEMO01,New/Note Flags/Notepads,Malta Memo Holder with Sticky Notes & Weekly Planner,Malta Memo Holder with Sticky Notes & Weekly Planner Notepad,Y,Notepad,appended
+IG6101,Lifestyle/Outdoor,Vector Folding Chair,Vector Folding Chair Outdoor,Y,Outdoor,appended
+IGWB02,Bags/Waist Bags,Star Running Pouch,Star Running Pouch Waist Bag,Y,Waist Bag,appended
+IG6103,Lifestyle/Outdoor/Games,Molkky Wooden Throwing Game,Molkky Wooden Throwing Game,N,Game,already-has-type
+IGTRAV02,Lifestyle/Travel,Amplify Bag Hanger,Amplify Bag Hanger Travel,Y,Travel,appended
+XMAS01,Bell Bottles,Christmas Red 532ml Bell Bottle with Solid Handle,Christmas Red 532ml Bell Bottle with Solid Handle,N,Bell Bottle,already-has-type
+XMAS02,Bell Bottles,Christmas White 532ml Bell Bottle with Solid Handle,Christmas White 532ml Bell Bottle with Solid Handle,N,Bell Bottle,already-has-type
+XMAS03,Christmas,Christmas Santa Hat,Christmas Santa Hat,N,Christma,already-has-type
+IGTRAV03,Lifestyle/Travel,Dune Travel Padlock,Dune Travel Padlock,N,Travel,already-has-type
+IGTRAV05,Lifestyle/Travel,Flight Bamboo Lauggage Tag,Flight Bamboo Lauggage Tag Travel,Y,Travel,appended
+IGTRAV06,Lifestyle/Travel,Lagos PVC Cosmetic Bag,Lagos PVC Cosmetic Bag Travel,Y,Travel,appended
+IGTRAV08,Lifestyle/Travel,Rise Pocket Fan,Rise Pocket Fan Travel,Y,Travel,appended
+IGTRAV09,Lifestyle/Travel,Shine Recycled Cotton Cosmetic Bag,Shine Recycled Cotton Cosmetic Bag Travel,Y,Travel,appended
+XMAS04,Drinkware/Coffee Cups,Christmas White Atlas 360ml Double Walled Coffee Cup,Christmas White Atlas 360ml Double Walled Coffee Cup,N,Coffee Cup,already-has-type
+IG135,Office/Pencils,Vista Custom Colouring Set with 6 Coloured Pencils,Vista Custom Colouring Set with 6 Coloured Pencils,N,Pencil,already-has-type
+IG955,Bags/Backpacks,Zurich Document Backpack,Zurich Document Backpack,N,Backpack,already-has-type
+XMAS05,Bags/Canvas Bags,Christmas Red Minnesota Canvas Tote Bag,Christmas Red Minnesota Canvas Tote Bag,N,Canva Bag,already-has-type
+XMAS06,Bags/Canvas Bags,Christmas Red James Canvas Tote Bag,Christmas Red James Canvas Tote Bag,N,Canva Bag,already-has-type
+IG6104,Lifestyle/Personal,Coiny Piggy Bank,Coiny Piggy Bank Personal,Y,Personal,appended
+IGGAME01,Lifestyle/Games,Cardo Eco Custom Playing Cards,Cardo Eco Custom Playing Cards Game,Y,Game,appended
+IG8093,New/Accessories,LUMEN Reflective Wrist Band,LUMEN Reflective Wrist Band,N,,skip-cat
+IG8740,New/Accessories,NOVA Square Reflective Sticker,NOVA Square Reflective Sticker,N,,skip-cat
+IG7166,Accessories/Backpacks/New/Eco Friendly,AERO Custom Reflective RPET Backpack Cover,AERO Custom Reflective RPET Backpack Cover Eco Friendly,Y,Eco Friendly,appended
+IG7316,Accessories/Novelties/New,ORBIT Poncho in Ball Keyring,ORBIT Poncho in Ball Keyring,N,,skip-cat
+IG8003,Accessories/Auto Accessories/New,ATLAS 22-Piece Tool Set in Carry Case,ATLAS 22-Piece Tool Set in Carry Case,N,,skip-cat
+IG8641,Power Banks/Tech Accessories/Technology/New,RABO 5000mAh ABS Power Bank,RABO 5000mAh ABS Power Bank,N,,skip-cat
+IG8005,New/Tech Accessories/Technology,NOVA Telescopic Bamboo & Recycled ABS USB Charger Cable,NOVA Telescopic Bamboo & Recycled ABS USB Charger Cable Technology,Y,Technology,appended
+IG8644,Technology/Speakers,Explorer Wireless Speaker,Explorer Wireless Speaker,N,Speaker,already-has-type
+5028,Apparel/Visors,PVC Sun Visor,PVC Sun Visor,N,Visor,already-has-type
+XMAS07,Bell Bottles/Drinkware/Metal Bottles,Christmas Red 500ml Bell Bottle with Carry Handle,Christmas Red 500ml Bell Bottle with Carry Handle,N,Metal Bottle,already-has-type
+XMAS08,Bell Bottles/Drinkware/Metal Bottles,Christmas White 500ml Bell Bottle with Carry Handle,Christmas White 500ml Bell Bottle with Carry Handle,N,Metal Bottle,already-has-type
+IG295,Drinkware/Coffee Cups,Tunis Thermo Mug,Tunis Thermo Mug Coffee Cup,Y,Coffee Cup,appended
+5029,Apparel/OC Black/Bucket hat,Terry Bucket Hat,Terry Bucket Hat,N,Bucket hat,already-has-type
+IG252,Drinkware/Sports Bottles,Essence RPET Sports Bottle,Essence RPET Sports Bottle,N,Sport Bottle,already-has-type
+IG253,Drinkware/Sports Bottles,Motion RPET Sports Bottle,Motion RPET Sports Bottle,N,Sport Bottle,already-has-type
+IG254,Drinkware/Sports Bottles,Stellar RPET Sports Bottle,Stellar RPET Sports Bottle,N,Sport Bottle,already-has-type
+IG255,Drinkware/Sports Bottles,Skywell RPET Sports Bottle,Skywell RPET Sports Bottle,N,Sport Bottle,already-has-type
+IG256,Drinkware/Glass Bottles,Oasis Frosted Glass Bottle,Oasis Frosted Glass Bottle,N,Glass Bottle,already-has-type
+IG257,Drinkware/Metal Bottles,Dynamo 600ml Aluminium Bottle,Dynamo 600ml Aluminium Bottle,N,Metal Bottle,already-has-type
+IG258,Drinkware/Metal Bottles,Power 500ml Vacuum Flask,Power 500ml Vacuum Flask Metal Bottle,Y,Metal Bottle,appended
+IG259,Drinkware/Metal Bottles,Cyclone 500ml Vacuum Flask,Cyclone 500ml Vacuum Flask Metal Bottle,Y,Metal Bottle,appended
+PS4213,Canvas Bags/Bags/New,Plain Jane Tote Bag,Plain Jane Tote Bag,N,,skip-cat
+IGTRAV10,Lifestyle/Travel,Surge Survival Bracelet,Surge Survival Bracelet Travel,Y,Travel,appended
+IG260,Drinkware/Coffee Cups,HeatLock 300ml RPP Thermo Cup,HeatLock 300ml RPP Thermo Cup,N,Coffee Cup,already-has-type
+IG907,Rulers/Office,NOVA Magnifying Ruler 15cm,NOVA Magnifying Ruler 15cm Office,Y,Office,appended
+IG136,Novelties/Office/New,ORION Sliding Webcam Blocker,ORION Sliding Webcam Blocker,N,,skip-cat
+IG6106,Lifestyle/Homewares,BELLA Bamboo Cheese Set,BELLA Bamboo Cheese Set,N,,skip-cat
+IG6107,Lifestyle/Homewares,ASPEN Pinewood Cutting Board,ASPEN Pinewood Cutting Board,N,,skip-cat
+IG6108,Lifestyle/Homewares,VEGA Bamboo Cheese Board Set,VEGA Bamboo Cheese Board Set,N,,skip-cat
+IGLAP01,Novelties/Assorted,Custom Enamel Lapel Pins,Custom Enamel Lapel Pins,N,,skip-cat
+IG263,Drinkware/Metal Bottles,SEAL 350ml Stainless Steel Kids Metal Bottle,SEAL 350ml Stainless Steel Kids Metal Bottle,N,Metal Bottle,already-has-type
+IG6109,Lifestyle/Outdoor,Centennial PVC Picnic Blanket,Centennial PVC Picnic Blanket Outdoor,Y,Outdoor,appended
+IG6110,Lifestyle/Outdoor,HYDE Foldable Camping Chair with Cooler Bag,HYDE Foldable Camping Chair with Cooler Bag Outdoor,Y,Outdoor,appended
+IG6111,Lifestyle/Outdoor,Polyester Picnic Blanket in Pouch,Polyester Picnic Blanket in Pouch Outdoor,Y,Outdoor,appended
+IGSET01,Apparel/T-Shirts,Men's Essential Discovery T-Shirt and Cap Combo,Men's Essential Discovery T-Shirt and Cap Combo,N,T-Shirt,already-has-type
+IGSET02,Apparel/T-Shirts,Women's Essential Discovery T-Shirt and Cap Combo,Women's Essential Discovery T-Shirt and Cap Combo,N,T-Shirt,already-has-type
+5030,Apparel/Headwear,Heather One Panel Cap without Sewing,Heather One Panel Cap without Sewing Headwear,Y,Headwear,appended
+5031,Apparel/Headwear,Shadow Two Panel Cap Without Sewing,Shadow Two Panel Cap Without Sewing Headwear,Y,Headwear,appended
+5032,Apparel/Headwear,Cork Mesh Trucker Cap,Cork Mesh Trucker Cap Headwear,Y,Headwear,appended
+5033,Apparel/Headwear,Heritage 5 Panel Polyester Cap with Custom Braid,Heritage 5 Panel Polyester Cap with Custom Braid Headwear,Y,Headwear,appended
+IG4360,Lifestyle/Cooler Box,6L Cooler Box,6L Cooler Box,N,Cooler Box,already-has-type
+IG4361,Lifestyle/Cooler Box,13L Cooler Box,13L Cooler Box,N,Cooler Box,already-has-type
+OCT800MS,Apparel/T-Shirts,Reborn Tee,Reborn Tee T-Shirt,Y,T-Shirt,appended
+IG264,Drinkware/Metal Bottles,Pulse 420ml Stainless Steel Kids Metal Bottle,Pulse 420ml Stainless Steel Kids Metal Bottle,N,Metal Bottle,already-has-type
+IG265,Drinkware/Coffee Cups/Travel Mugs/Metal Bottles,Flare 360ml Stainless Steel Kids Cup,Flare 360ml Stainless Steel Kids Cup Metal Bottle,Y,Metal Bottle,appended
+IGSF01,Apparel/Sublimated/T-Shirts,Men's Polyester Sublimated Fishing Tee,Men's Polyester Sublimated Fishing Tee T-Shirt,Y,T-Shirt,appended
+IGSF02,Apparel/Sublimated/Polos,Men's Long Sleeve Polyester Sublimated Fishing Polo,Men's Long Sleeve Polyester Sublimated Fishing Polo,N,Polo,already-has-type
+IGSF03,Apparel/Sublimated/T-Shirts,Men's Long Sleeve Polyester Sublimated Crew Neck Fishing Tee,Men's Long Sleeve Polyester Sublimated Crew Neck Fishing Tee T-Shirt,Y,T-Shirt,appended
+IGSF04,Apparel/Sublimated/Hoodies,Men's Polyester Sublimated 1/4 Zip Fishing Hoodie,Men's Polyester Sublimated 1/4 Zip Fishing Hoodie Hoody,Y,Hoody,appended
+OCT100MS-I,Apparel/T-Shirts/Men,Men Essential Tees - Indent Only,Men Essential Tees - Indent Only,N,Men,already-has-type
+OCP300MS-I,Apparel/Polos,Men's Ranger Polo - Indent Only,Men's Ranger Polo - Indent Only,N,Polo,already-has-type
+IG956,Bags/Backpacks,Field Backpack,Field Backpack,N,Backpack,already-has-type
+IG3101,Novelties,Teddy Bear Plush Toy,Teddy Bear Plush Toy,N,,skip-cat
+IG3102,Novelties,Dog Plush Toy,Dog Plush Toy,N,,skip-cat
+IG3103,Novelties,Koala Plush Toy,Koala Plush Toy,N,,skip-cat
+IG3104,Novelties,Kangaroo Plush Toy,Kangaroo Plush Toy,N,,skip-cat
+NOOSA01,Lifestyle/Towels,Palm Beach Towel - 150 x 75cm,Palm Beach Towel - 150 x 75cm,N,Towel,already-has-type
+NOOSA02,Lifestyle/Towels,Cronulla Beach Towel XL- 180 x 90cm,Cronulla Beach Towel XL- 180 x 90cm,N,Towel,already-has-type
+NOOSA03,Lifestyle/Towels,Surfers Gym Towel - 100 x 40cm,Surfers Gym Towel - 100 x 40cm,N,Towel,already-has-type
+NOOSA04,Lifestyle/Towels,Maroubra Beach Towel - 150 x 75cm,Maroubra Beach Towel - 150 x 75cm,N,Towel,already-has-type
+NOOSA05,Lifestyle/Towels,Hamilton Beach Towel XL - 180 x 90cm,Hamilton Beach Towel XL - 180 x 90cm,N,Towel,already-has-type
+NOOSA06,Lifestyle/Towels,Coffs Gym Towel - 100 x 40cm,Coffs Gym Towel - 100 x 40cm,N,Towel,already-has-type
+NOOSA07,Lifestyle/Towels,Apollo Tea Towel - 70 x 50cm,Apollo Tea Towel - 70 x 50cm,N,Towel,already-has-type
+NOOSA08,Lifestyle/Towels,Bronte Round Beach Towel - 150cm D,Bronte Round Beach Towel - 150cm D,N,Towel,already-has-type
+NOOSA09,Lifestyle/Towels,Flinders Bar Towel - 70cm x 25cm,Flinders Bar Towel - 70cm x 25cm,N,Towel,already-has-type
+NOOSA10,Lifestyle/Towels,Cable Sports Fit Towel - 85 x 40cm,Cable Sports Fit Towel - 85 x 40cm,N,Towel,already-has-type
+NOOSA11,Lifestyle/Towels,Byron Sports Towel - 90 x 30cm,Byron Sports Towel - 90 x 30cm,N,Towel,already-has-type
+NOOSA12,Lifestyle/Towels,Jervis Yoga Towel - 172 x 61cm,Jervis Yoga Towel - 172 x 61cm,N,Towel,already-has-type
+IG296,Drinkware/Coffee Cups,Grain Ceramic Coffee Cup,Grain Ceramic Coffee Cup,N,Coffee Cup,already-has-type
+IGT101,Technology/Charging Cables,Phase Round Bamboo Charging Cable,Phase Round Bamboo Charging Cable,N,Charging Cable,already-has-type
+IGT102,Tech Accessories/Charging Cables,Phase Square Bamboo Charging Cable,Phase Square Bamboo Charging Cable,N,Charging Cable,already-has-type
+IGT103,Technology/Charging Cables,Omni Square Glow Charging Cable,Omni Square Glow Charging Cable,N,Charging Cable,already-has-type
+IGT104,Technology/Charging Cables,Axis Round Cable Set,Axis Round Cable Set,N,Charging Cable,already-has-type
+IGT105,Technology/Charging Cables,Axis Square Cable Set,Axis Square Cable Set,N,Charging Cable,already-has-type
+IGT106,Technology/Wireless Chargers,Matrix 3 in 1 Wireless Charger,Matrix 3 in 1 Wireless Charger,N,Wireless Charger,already-has-type
+IGT107,Technology/Wireless Chargers,Element Fast Wireless Charger,Element Fast Wireless Charger,N,Wireless Charger,already-has-type
+IGT108,Technology/Charging Cables,Unity USB & Note Hub,Unity USB & Note Hub Charging Cable,Y,Charging Cable,appended
+IGBB05,Bags/Bio Degradable Bags,Recycled PET Felt Shopper Bag,Recycled PET Felt Shopper Bag,N,Bio Degradable Bag,already-has-type
+BAXSY001,Apparel/T-Shirts,Everyday Tee,Everyday Tee T-Shirt,Y,T-Shirt,appended
+BAXSY002,Apparel/T-Shirts,Core Tee,Core Tee T-Shirt,Y,T-Shirt,appended
+IGT109,Technology/Lamps,LED Desk Lamp,LED Desk Lamp,N,Lamp,already-has-type
+IGBB06,Bags/Bio Degradable Bags,RPET Felt Mini Cosmetic Bag,RPET Felt Mini Cosmetic Bag,N,Bio Degradable Bag,already-has-type
+IG410,Bags/Calico-Cotton Bags,Urban Cotton Drawstring Backpack,Urban Cotton Drawstring Backpack Calico-Cotton Bag,Y,Calico-Cotton Bag,appended
+IGTRAV11,Lifestyle/Travel,Cork Lauggage Tag,Cork Lauggage Tag Travel,Y,Travel,appended
+IG4501,Bags/Jute Bags,Jute Cosmetic Bag,Jute Cosmetic Bag,N,Jute Bag,already-has-type
+IGT110,Technology/Wireless Chargers,Edge 3 in 1 Wireless Charger,Edge 3 in 1 Wireless Charger,N,Wireless Charger,already-has-type
+IGT111,Technology/Handheld Fans,Rapid Rechargeable Handheld Mini Fan,Rapid Rechargeable Handheld Mini Fan,N,Handheld Fan,already-has-type
+IGT112,Technology/Speakers,Cloud Wireless Speaker,Cloud Wireless Speaker,N,Speaker,already-has-type
