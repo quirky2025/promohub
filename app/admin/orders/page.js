@@ -312,19 +312,30 @@ export default function AdminOrdersPage() {
 
             {/* ORDER ITEMS */}
             <Section title="📦 Order Items">
-              {Array.isArray(selected.items) && selected.items.map((item, i) => (
+              {Array.isArray(selected.items) && selected.items.map((item, i) => {
+                const name = item.productName || item.product_description || item.name || 'Product';
+                const sku = item.sku || item.stock_code || item.productSku || item.stockCode || '';
+                const qty = item.qty ?? item.quantity;
+                const unit = item.unitPrice ?? item.unit_price;
+                const sub = item.subtotal ?? item.line_total;
+                const branding = item.brandingMethod || item.decoration_method || '';
+                const addons = Array.isArray(item.addons) ? item.addons : [];
+                return (
                 <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid #F0EEED' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
-                      <div style={{ fontWeight: 600, color: NAVY, fontSize: '13px' }}>{item.productName}</div>
-                      {item.colour && <div style={{ fontSize: '12px', color: '#7A7570' }}>Colour: {item.colour}</div>}
-                      {item.addons?.map((a, j) => <div key={j} style={{ fontSize: '12px', color: '#7A7570' }}>+ {a.name}</div>)}
-                      <div style={{ fontSize: '12px', color: '#7A7570' }}>Qty: {item.qty} × {fmt(item.unitPrice)}</div>
+                      <div style={{ fontWeight: 600, color: NAVY, fontSize: '13px' }}>{name}</div>
+                      {sku && <div style={{ fontSize: '12px', color: '#000', fontFamily: 'monospace' }}>SKU: {sku}</div>}
+                      {item.colour && <div style={{ fontSize: '12px', color: '#000' }}>Colour: {item.colour}</div>}
+                      {branding && <div style={{ fontSize: '12px', color: '#000' }}>Branding: {branding}</div>}
+                      {addons.map((a, j) => <div key={j} style={{ fontSize: '12px', color: '#000' }}>+ {a.name || a}</div>)}
+                      <div style={{ fontSize: '12px', color: '#000' }}>Qty: {qty ?? '—'} × {fmt(unit)}</div>
                     </div>
-                    <div style={{ fontWeight: 700, color: NAVY }}>{fmt(item.subtotal)}</div>
+                    <div style={{ fontWeight: 700, color: NAVY }}>{fmt(sub)}</div>
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </Section>
 
             {/* PRICING */}
