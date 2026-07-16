@@ -21,20 +21,24 @@ export async function GET(request) {
     const { data: order } = await db.from('orders').select('*').eq('id', id).single();
     if (!order) return Response.json({ error: 'Order not found' }, { status: 404 });
 
-    const paid = order.amount_paid != null ? Number(order.amount_paid) : Number(order.total) || 0;
-    const delta = round2((Number(order.total) || 0) - paid);   // + = customer owes more, − = credit
-    if (Math.abs(delta) < 0.01) return Response.json({ error: 'No adjustment to note (paid = revised total)' }, { status: 400 });
+    // Adjustment lines (ex-GST, signed): − credit to customer, + they owe more.
+    const adj = Array.isArray(order.adjustments) ? order.adjustments : [];
+    const net = round2(adj.reduce((s, a) => s + (Number(a.amount) || 0), 0));
+    if (!adj.length || Math.abs(net) < 0.01) {
+      return Response.json({ error: 'No adjustment lines recorded on this order' }, { status: 400 });
+    }
 
-    const credit = delta < 0;
-    const amt = Math.abs(delta);               // inc GST
-    const ex = round2(amt / 1.1);
-    const gst = round2(amt - ex);
+    const credit = net < 0;
+    const gst = round2(net * 0.10);
+    const total = round2(net + gst);
 
     const orderNumber = order.order_number || order.invoice_number || '';
     const docType = credit ? 'CREDIT NOTE' : 'ADJUSTMENT - BALANCE DUE';
-    const lineName = reason || (credit
-      ? 'Credit - final specification change'
-      : 'Additional charge - final specification change');
+
+    const items = adj.map((a) => ({
+      stockCode: '', name: a.desc || 'Adjustment', colour: '', branding: '', addons: [],
+      qty: 1, unit: round2(a.amount), lineTotal: round2(a.amount),
+    }));
 
     const bytes = await generateOrderDocPDF({
       docType,
@@ -45,11 +49,11 @@ export async function GET(request) {
         email: order.customer_email || '', phone: order.customer_phone || '',
       },
       deliveryAddress: order.delivery_address || '',
-      items: [{ stockCode: '', name: lineName, colour: '', branding: '', addons: [], qty: 1, unit: ex, lineTotal: ex }],
-      subtotal: ex,
+      items,
+      subtotal: net,
       shipping: 0,
       gst,
-      total: amt,
+      total,
       paymentStatus: credit ? 'paid' : 'awaiting',
       leadTimeDays: '3-7',
       bank: QUIRKY_BANK,
