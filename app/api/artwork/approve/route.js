@@ -72,6 +72,24 @@ export async function POST(req) {
       status: 'approved', approved_by: approvedBy, approved_at: approvedAt, ip_address: ip, notes: notes || '',
     }).eq('token', token);
 
+    // Per-product production gate: flip THIS product's artwork_approved on the
+    // order, and roll the order-level artwork_status up to 'approved' only once
+    // every item is approved (that, plus payment received, unlocks production).
+    if (artwork.order_item_index != null) {
+      try {
+        const { data: ord } = await supabase.from('orders')
+          .select('id, items, artwork_approved_at').eq('invoice_number', artwork.order_number).single();
+        if (ord && Array.isArray(ord.items)) {
+          const idx = Number(artwork.order_item_index);
+          const items2 = ord.items.map((it, i) => (i === idx ? { ...it, artwork_approved: true } : it));
+          const allApproved = items2.length > 0 && items2.every((it) => it.artwork_approved);
+          const upd = { items: items2, artwork_status: allApproved ? 'approved' : 'mockup_sent' };
+          if (allApproved && !ord.artwork_approved_at) upd.artwork_approved_at = approvedAt;
+          await supabase.from('orders').update(upd).eq('id', ord.id);
+        }
+      } catch (_) { /* non-fatal — approval already recorded on the artwork */ }
+    }
+
     // Certificate, then combine: ARTWORK (front) + CERTIFICATE (back)
     const certBytes = await generateApprovalCertificate({
       brandLogoUrl: site + '/quirky-logo-light.png',
