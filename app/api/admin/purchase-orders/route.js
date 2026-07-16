@@ -44,6 +44,7 @@ export async function POST(request) {
       cost_total: Number((subtotal + freight).toFixed(2)),
       items: b.items || null,
       notes: b.notes || null,
+      deliver_to: b.deliverTo || null,
       ...(b.poDate ? { created_at: new Date(b.poDate + 'T00:00:00').toISOString() } : {}),
     }).select('*').single();
     if (error) return Response.json({ error: error.message }, { status: 500 });
@@ -123,6 +124,7 @@ export async function PATCH(request) {
       if (b.notes !== undefined) updates.notes = b.notes || null;
       if (b.supplierId !== undefined) updates.supplier_id = b.supplierId || null;
       if (b.items !== undefined) updates.items = b.items || null;
+      if (b.deliverTo !== undefined) updates.deliver_to = b.deliverTo || null;
       if (b.poDate) updates.created_at = new Date(b.poDate + 'T00:00:00').toISOString();
     } else if (b.action === 'send') {
       // Email the PO PDF straight to the supplier's email on file.
@@ -144,12 +146,14 @@ export async function PATCH(request) {
         date: new Date(po.created_at || Date.now()).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
         ourRef: po.order_number || order?.order_number || '',
         jobName: order?.job_name || order?.customer_company || '',
-        deliver: {
-          company: order?.customer_company || '',
-          name: order?.customer_name || '',
-          phone: order?.customer_phone || '',
-          address: order?.delivery_address || '',
-        },
+        deliver: po.deliver_to
+          ? { company: '', name: '', phone: '', address: po.deliver_to }
+          : {
+              company: order?.customer_company || '',
+              name: order?.customer_name || '',
+              phone: order?.customer_phone || '',
+              address: order?.delivery_address || '',
+            },
         items: items.map(it => ({ stockCode: it.stockCode, name: it.name, qty: it.qty, unitCost: it.unitCost, branding: it.branding })),
         freight: po.freight_cost,
       });

@@ -56,6 +56,7 @@ export default function AdminProductionPage() {
   const [uploadPoId, setUploadPoId] = useState(null);
   const invFileRef = useRef(null);
   const [poDate, setPoDate]         = useState('');
+  const [poDeliverTo, setPoDeliverTo] = useState('');
   const [newSupplier, setNewSupplier] = useState('');
   const [newSupplierTerms, setNewSupplierTerms] = useState('prepaid');
   const [lines, setLines] = useState([]);
@@ -108,11 +109,13 @@ export default function AdminProductionPage() {
     setLines([{ stockCode: '', name: '', qty: 1, unitCost: '', branding: '' }]);
     setCatQuery(''); setCatResults([]); setCatPick(null);
     setPoDate(new Date().toISOString().slice(0, 10));
+    setPoDeliverTo('');
   }
 
   function openEdit(o, po) {
     setPoFor(o); setEditingPoId(po.id);
     setPoDate(po.created_at ? String(po.created_at).slice(0, 10) : new Date().toISOString().slice(0, 10));
+    setPoDeliverTo(po.deliver_to || '');
     setSupplierId(po.supplier_id || ''); setNewSupplier(''); setNewSupplierTerms('prepaid');
     setFreight(po.freight_cost ?? ''); setNotes(po.notes || '');
     const ls = (Array.isArray(po.items) ? po.items : []).map(it => ({
@@ -160,7 +163,7 @@ export default function AdminProductionPage() {
     Object.entries(catSize).forEach(([sz, q]) => { sizeSurcharge += (Number(p.sizePricing?.[sz]) || 0) * (Number(q) || 0); });
     const sizeNote = (p.sizes?.length && sizeTotal) ? ' · ' + Object.entries(catSize).filter(([, q]) => Number(q) > 0).map(([s, q]) => `${q}×${s}`).join(', ') : '';
     const decoNote = (p.decorations || []).filter(d => catDeco[d.id]).map(d => d.name).join(' + ');
-    const newLines = [{ stockCode: p.sku || '', name: p.name + (decoNote ? ` (${decoNote})` : '') + sizeNote, qty, unitCost: Math.round(perUnit * 100) / 100, branding: decoNote }];
+    const newLines = [{ stockCode: p.sku || '', name: p.name + sizeNote, qty, unitCost: Math.round(perUnit * 100) / 100, branding: decoNote }];
     if (setup > 0) newLines.push({ stockCode: '', name: 'Setup / plate', qty: 1, unitCost: Math.round(setup * 100) / 100, branding: '' });
     if (sizeSurcharge > 0) newLines.push({ stockCode: '', name: 'Oversize surcharge', qty: 1, unitCost: Math.round(sizeSurcharge * 100) / 100, branding: '' });
     setLines(ls => [...ls.filter(l => l.name || l.stockCode || l.unitCost), ...newLines]);
@@ -184,12 +187,12 @@ export default function AdminProductionPage() {
     if (editingPoId) {
       res = await fetch('/api/admin/purchase-orders', {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: editingPoId, action: 'details', supplierId: sid || null, costSubtotal: subtotal, freightCost: Number(freight) || 0, notes, items, poDate }),
+        body: JSON.stringify({ id: editingPoId, action: 'details', supplierId: sid || null, costSubtotal: subtotal, freightCost: Number(freight) || 0, notes, items, poDate, deliverTo: poDeliverTo }),
       });
     } else {
       res = await fetch('/api/admin/purchase-orders', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: poFor.id, orderNumber: poFor.order_number || poFor.invoice_number, supplierId: sid || null, costSubtotal: subtotal, freightCost: Number(freight) || 0, notes, status: 'sent', items, poDate }),
+        body: JSON.stringify({ orderId: poFor.id, orderNumber: poFor.order_number || poFor.invoice_number, supplierId: sid || null, costSubtotal: subtotal, freightCost: Number(freight) || 0, notes, status: 'sent', items, poDate, deliverTo: poDeliverTo }),
       });
     }
     const data = await res.json();
@@ -435,6 +438,8 @@ export default function AdminProductionPage() {
               <div style={{ marginLeft: 'auto', fontSize: '13px', color: NAVY, fontWeight: 700 }}>Total cost: {money(subtotalOf() + (Number(freight) || 0))}</div>
             </div>
 
+            <input value={poDeliverTo} onChange={e => setPoDeliverTo(e.target.value)} placeholder="送货至(留空=用客户地址;样品/发到自己填这里)"
+              style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', margin: '0 0 10px', boxSizing: 'border-box' }} />
             <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Notes (optional)"
               style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', margin: '0 0 18px', boxSizing: 'border-box' }} />
 
