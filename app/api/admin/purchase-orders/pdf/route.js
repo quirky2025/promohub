@@ -30,12 +30,14 @@ export async function GET(request) {
       date: new Date(po.created_at || Date.now()).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
       ourRef: po.order_number || order?.order_number || '',
       jobName: order?.job_name || order?.customer_company || '',
-      deliver: {
-        company: order?.customer_company || '',
-        name: order?.customer_name || '',
-        phone: order?.customer_phone || '',
-        address: order?.delivery_address || '',
-      },
+      deliver: po.deliver_to
+        ? { company: '', name: '', phone: '', address: po.deliver_to }
+        : {
+            company: order?.customer_company || '',
+            name: order?.customer_name || '',
+            phone: order?.customer_phone || '',
+            address: order?.delivery_address || '',
+          },
       items: items.map(it => ({ stockCode: it.stockCode, name: it.name, qty: it.qty, unitCost: it.unitCost, branding: it.branding })),
       freight: po.freight_cost,
     });
