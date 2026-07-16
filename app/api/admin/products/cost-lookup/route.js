@@ -15,8 +15,8 @@ export async function GET(request) {
   const db = sourcingDb();
   const { data, error } = await db
     .from('products')
-    .select('id, name, sku, size_chart, size_pricing, pricing_tiers(min_qty, max_qty, base_price, sort_order), decoration_options(id, name, detail, per_unit, has_setup, setup_fee, type, sort_order)')
-    .or(`sku.ilike.%${q}%,name.ilike.%${q}%`)
+    .select('id, name, supplier_sku, size_chart, size_pricing, pricing_tiers(min_qty, max_qty, base_price, sort_order), decoration_options(id, name, detail, per_unit, has_setup, setup_fee, type, sort_order)')
+    .or(`supplier_sku.ilike.%${q}%,name.ilike.%${q}%`)
     .limit(12);
 
   if (error) return Response.json({ error: error.message }, { status: 500 });
@@ -24,7 +24,7 @@ export async function GET(request) {
   const products = (data || []).map((p) => ({
     id: p.id,
     name: p.name,
-    sku: p.sku,
+    sku: p.supplier_sku,
     sizes: Array.isArray(p.size_chart?.sizes) ? p.size_chart.sizes : [],
     sizePricing: p.size_pricing || {},
     tiers: (p.pricing_tiers || [])
