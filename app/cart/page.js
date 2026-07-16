@@ -189,7 +189,7 @@ export default function CartPage() {
             </div>
 
             <div style={{ fontSize: '11px', color: '#9CA3AF', fontFamily: '"DM Sans", sans-serif', marginBottom: '20px' }}>
-              All prices in AUD · $30 flat rate shipping · ABN 95 656 714 270
+              All prices in AUD · Shipping $25 per item, per domestic address · ABN 95 656 714 270
             </div>
 
             <Link href="/place-order?pay=now" style={{ display: 'block', background: GOLD, color: '#fff', textAlign: 'center', padding: '16px', borderRadius: '10px', fontSize: '16px', fontWeight: 700, textDecoration: 'none', fontFamily: '"DM Sans", sans-serif', boxShadow: '0 4px 16px rgba(201,169,110,.4)', marginBottom: '10px' }}>
@@ -209,7 +209,7 @@ export default function CartPage() {
             <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #F0EEED', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               {[
                 { icon: '🎨', text: 'Free digital proof' },
-                { icon: '🚚', text: '$30 flat shipping' },
+                { icon: '🚚', text: '$25 / item shipping' },
                 { icon: '✅', text: 'Quality guarantee' },
                 { icon: '💬', text: 'Reply within 3 business hours' },
               ].map(b => (

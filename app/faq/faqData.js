@@ -17,7 +17,7 @@ export const FAQ_SECTIONS = [
 <li><strong>Call us</strong> — order over the phone on <a href="tel:0294774748">02 9477 4748</a>.</li>
 <li><strong>Email us</strong> — send your details to <a href="mailto:hello@quirkypromo.com.au">hello@quirkypromo.com.au</a>.</li>
 </ul>
-<p>Whichever you choose, the process is the same: we send a free digital proof, you approve it, we produce (7–10 business days after approval), then ship Australia-wide ($30 flat) with tracking. <a href="/account">Create a free account</a> to track every order and see your full history.</p>`,
+<p>Whichever you choose, the process is the same: we send a free digital proof, you approve it, we produce (7–10 business days after approval), then ship with tracking ($25 per item, per domestic address). <a href="/account">Create a free account</a> to track every order and see your full history.</p>`,
       },
       {
         q: 'Can I see a proof before production starts?',
@@ -105,11 +105,11 @@ export const FAQ_SECTIONS = [
     questions: [
       {
         q: 'How much is shipping?',
-        a: `<p>$30 flat rate, Australia-wide — no matter how big your order is.</p>`,
+        a: `<p>$25 per item, per domestic address, with tracking. International orders are quoted separately.</p>`,
       },
       {
         q: 'How long does delivery take?',
-        a: `<p>Shipping is $30 flat, Australia-wide. After production, typical delivery times are:</p>
+        a: `<p>Shipping is $25 per item, per domestic address. After production, typical delivery times are:</p>
 <ul>
 <li>Sydney, Melbourne &amp; Brisbane — 2–5 business days</li>
 <li>Adelaide — 3–5 business days</li>

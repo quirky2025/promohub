@@ -45,7 +45,7 @@ Time for payment is of the essence. Interest on overdue invoices shall accrue da
 
 Delivery timeframes are estimates only. The Seller will not be liable for any loss or damage as a result of late delivery.
 
-A flat shipping fee of $30 applies per domestic delivery address. Additional charges may apply for remote areas or oversized items.
+A shipping fee of $25 applies per item, per domestic delivery address. International shipping is quoted separately. Additional charges may apply for remote areas or oversized items.
 
 Risk of damage or loss passes to the Customer on delivery. The Customer must insure the Goods on or before delivery.`,
   },
