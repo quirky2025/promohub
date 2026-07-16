@@ -118,7 +118,7 @@ export default function PlaceOrderPage() {
   }, []);
 
   const totalSubtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
-  const orderShipping = SHIPPING;
+  const orderShipping = SHIPPING * (cart.length || 1); // $25 per product (single address)
   const orderGst = Math.round((totalSubtotal + orderShipping) * GST * 100) / 100;
   const orderTotal = totalSubtotal + orderShipping + orderGst;
   const stripeSurcharge = Math.round(orderTotal * STRIPE_SURCHARGE * 100) / 100;
