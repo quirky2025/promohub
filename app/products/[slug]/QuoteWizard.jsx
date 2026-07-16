@@ -40,10 +40,24 @@ export default function QuoteWizard({ product, colours = [], decorations = [], p
   });
 
   const brandingDecos = decorations.filter((d) => d.type !== 'addon');
+  const addonDecos = decorations.filter((d) => d.type === 'addon');
   const selectedDecos = decorations.filter((d) => addonState?.[d.id]?.on);
   const brandingSel = selectedDecos.filter((d) => d.type !== 'addon');
   const addonSel = selectedDecos.filter((d) => d.type === 'addon');
-  const brandingSummary = brandingSel.map((d) => brandingLabel(d, addonState?.[d.id]?.setupQty)).join(' · ') || 'Unbranded';
+  // Print pricing is per COLOUR, per POSITION. We drive the existing engine by
+  // setting setupQty = colours × positions (calcUnit already multiplies both the
+  // per-unit rate AND the setup fee by setupQty — so the maths comes out exactly right).
+  const isEngrave = (d) => /laser|engrav|deboss|emboss|etch/i.test(d?.name || '');
+  const dimOf = (d) => { const st = addonState?.[d.id] || {}; return { c: Math.max(1, st.colours ?? st.setupQty ?? 1), p: Math.max(1, st.positions ?? 1) }; };
+  const bumpDim = (id, key, delta) => setAddonState((prev) => {
+    const st = prev[id] || {};
+    let c = Math.max(1, st.colours ?? st.setupQty ?? 1);
+    let p = Math.max(1, st.positions ?? 1);
+    if (key === 'c') c = Math.max(1, c + delta);
+    if (key === 'p') p = Math.max(1, p + delta);
+    return { ...prev, [id]: { ...st, on: true, colours: c, positions: p, setupQty: c * p } };
+  });
+  const brandingSummary = brandingSel.map((d) => { const { c, p } = dimOf(d); return isEngrave(d) ? `${d.name} — ${p} POS` : `${d.name} — ${c} COL × ${p} POS`; }).join(' · ') || 'Unbranded';
 
   const formQty = parseInt(form.qty) || qty;
   const matchedTier = pricingTiers.reduce((best, t) => (formQty >= t.min_qty ? (!best || t.min_qty > best.min_qty ? t : best) : best), null) || pricingTiers[0];
@@ -165,18 +179,45 @@ export default function QuoteWizard({ product, colours = [], decorations = [], p
                     {brandingDecos.length > 0 && (
                       <>
                         <label style={LB}>Print method</label>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        <div style={{ display: 'grid', gap: '8px' }}>
                           {brandingDecos.map((d) => {
+                            const on = !!addonState?.[d.id]?.on;
+                            const { c, p } = dimOf(d);
+                            const eng = isEngrave(d);
+                            return (
+                              <div key={d.id} style={{ border: on ? `2px solid ${GOLD}` : '1px solid #E0DDD7', background: on ? '#FDF8F0' : '#fff', borderRadius: '8px', padding: '9px 11px' }}>
+                                <div onClick={() => toggleDeco(d.id)} style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '8px' }}>
+                                  <span style={{ fontSize: '12.5px', fontWeight: 700, color: NAVY }}>{on ? '☑ ' : '☐ '}{d.name}</span>
+                                  <span style={{ fontSize: '11px', color: BLACK, textAlign: 'right' }}>+{money(decoUnitPrice(d.per_unit))}/unit{d.has_setup ? ` · setup ${money(d.setup_fee ?? SETUP_FEE)}` : ''}<br /><span style={{ color: '#6B7280', fontSize: '10px' }}>per colour · per position</span></span>
+                                </div>
+                                {on && (
+                                  <div style={{ display: 'flex', gap: '20px', marginTop: '10px', flexWrap: 'wrap' }}>
+                                    {!eng && <Stepper label="Colours" val={c} onDec={() => bumpDim(d.id, 'c', -1)} onInc={() => bumpDim(d.id, 'c', 1)} />}
+                                    <Stepper label="Positions" val={p} onDec={() => bumpDim(d.id, 'p', -1)} onInc={() => bumpDim(d.id, 'p', 1)} />
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div style={{ fontSize: '11px', color: BLACK, marginTop: '8px' }}>Tap to add or remove. Choose colours &amp; positions — pricing is per colour, per position. Leave all off for unbranded.</div>
+                      </>
+                    )}
+
+                    {addonDecos.length > 0 && (
+                      <>
+                        <label style={{ ...LB, marginTop: '16px' }}>Add-ons (optional)</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                          {addonDecos.map((d) => {
                             const on = !!addonState?.[d.id]?.on;
                             return (
                               <button key={d.id} onClick={() => toggleDeco(d.id)} style={{ textAlign: 'left', border: on ? `2px solid ${GOLD}` : '1px solid #E0DDD7', background: on ? '#FDF8F0' : '#fff', borderRadius: '8px', padding: '9px 11px', cursor: 'pointer' }}>
-                                <div style={{ fontSize: '12.5px', fontWeight: 700, color: NAVY }}>{d.name}</div>
-                                <div style={{ fontSize: '11px', color: BLACK }}>+{money(decoUnitPrice(d.per_unit))}/unit{d.has_setup ? ` · setup ${money(d.setup_fee ?? SETUP_FEE)}` : ''}</div>
+                                <div style={{ fontSize: '12.5px', fontWeight: 700, color: NAVY }}>{on ? '☑ ' : '☐ '}{d.name}</div>
+                                <div style={{ fontSize: '11px', color: BLACK }}>+{money(decoUnitPrice(d.per_unit))}/unit</div>
                               </button>
                             );
                           })}
                         </div>
-                        <div style={{ fontSize: '11px', color: BLACK, marginTop: '8px' }}>Tap to add or remove. Leave all off for unbranded.</div>
                       </>
                     )}
                   </>
@@ -261,6 +302,18 @@ export default function QuoteWizard({ product, colours = [], decorations = [], p
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+const stBtn = { width: '26px', height: '26px', border: '1.5px solid #E0DDD7', background: '#fff', borderRadius: '6px', cursor: 'pointer', fontWeight: 700, fontSize: '15px', color: NAVY, lineHeight: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 };
+function Stepper({ label, val, onDec, onInc }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <span style={{ fontSize: '11px', fontWeight: 700, color: BLACK, fontFamily: DM }}>{label}</span>
+      <button type="button" onClick={onDec} style={stBtn}>−</button>
+      <span style={{ minWidth: '18px', textAlign: 'center', fontWeight: 700, color: NAVY, fontFamily: MONO }}>{val}</span>
+      <button type="button" onClick={onInc} style={stBtn}>+</button>
     </div>
   );
 }
