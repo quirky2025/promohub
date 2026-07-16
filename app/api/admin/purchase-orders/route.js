@@ -87,6 +87,32 @@ export async function PATCH(request) {
     } else if (b.action === 'pay') {
       updates.supplier_payment_status = 'paid';
       updates.supplier_paid_at = new Date().toISOString();
+      // Mirror the payment as money OUT in the Finance bank ledger, so the bank
+      // balance drops automatically. NON-FATAL — never block marking paid.
+      try {
+        const { data: po } = await db.from('purchase_orders').select('*').eq('id', b.id).single();
+        let supplier = null;
+        if (po?.supplier_id) { const r = await db.from('suppliers').select('name').eq('id', po.supplier_id).single(); supplier = r.data; }
+        const amt = Number(b.paidAmount) || Number(po?.cost_total) || 0;
+        if (amt > 0) {
+          await db.from('bank_transactions').insert({
+            txn_date: new Date().toISOString().slice(0, 10),
+            direction: 'out',
+            amount_aud: amt,
+            gst_aud: Math.round((amt / 11) * 100) / 100,
+            business_line: 'local_stock',
+            category: 'purchases',
+            counterparty: supplier?.name || null,
+            description: `Supplier payment · ${po?.po_number || ''}${po?.supplier_invoice_number ? ' · inv ' + po.supplier_invoice_number : ''}`,
+            reference: po?.po_number || null,
+            reconciled: true,
+            source: 'system',
+            linked_type: 'purchase_order',
+            linked_id: b.id,
+            created_by: user.email,
+          });
+        }
+      } catch (_) { /* finance ledger optional / may not exist yet */ }
     } else if (b.action === 'details') {
       const subtotal = Number(b.costSubtotal) || 0;
       const freight = Number(b.freightCost) || 0;
