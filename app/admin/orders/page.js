@@ -583,10 +583,14 @@ export default function AdminOrdersPage() {
             {/* PAYMENT RECEIVED banner (whole order, one combined invoice) */}
             {(() => {
               const paid = selected.payment_status === 'paid';
+              const netAdj = Math.round((selected.adjustments || []).reduce((s, a) => s + (Number(a.amount) || 0), 0) * 1.1 * 100) / 100;
+              const settled = !!selected.adjustment_settled_at && Math.abs(netAdj) >= 0.01;
+              const netPaid = Math.round(((Number(selected.total) || 0) + netAdj) * 100) / 100;
               return (
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', background: paid ? '#F0FDF4' : '#FFFBEB', border: `1px solid ${paid ? '#BBF7D0' : '#FDE68A'}`, borderRadius: '10px', padding: '10px 16px', marginBottom: '16px' }}>
                   <div style={{ fontSize: '13px', fontWeight: 700, color: paid ? '#166534' : '#92400E' }}>
-                    {paid ? '✅ Payment received' : '⏳ Payment not received'} — {fmt(selected.total)}
+                    {paid ? '✅ Payment received' : '⏳ Payment not received'} — {fmt(settled ? netPaid : selected.total)}
+                    {settled && <span style={{ fontWeight: 400, color: '#7A7570' }}> (paid {fmt(selected.total)} {netAdj < 0 ? '− ' + fmt(Math.abs(netAdj)) + ' refunded' : '+ ' + fmt(netAdj) + ' balance'})</span>}
                   </div>
                   <button onClick={() => window.open(`/api/admin/orders/invoice-pdf?id=${selected.id}`, '_blank')}
                     style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
