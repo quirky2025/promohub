@@ -425,19 +425,22 @@ export default function AdminOrdersPage() {
   const currentStatus = selected ? (STATUS_MAP[deriveStatus(selected)] || STATUS_FLOW[0]) : null;
   const shown = statusFilter ? orders.filter(o => deriveStatus(o) === statusFilter) : orders;
 
-  // Addresses already known for this order → offered in the "Deliver to" pickers.
+  // Addresses / recipients / emails already known for this order → offered in
+  // the per-parcel "Deliver to", "Recipient" and "Notify email" pickers.
+  const uniq = (arr) => { const o = []; arr.forEach(v => { const s = (v || '').trim(); if (s && !o.includes(s)) o.push(s); }); return o; };
   const knownAddresses = (() => {
     const out = [];
-    const push = (a) => { const s = (a || '').trim(); if (s && !out.includes(s)) out.push(s); };
     if (selected) {
-      push(selected.delivery_address);
+      out.push(selected.delivery_address);
       const j = selected.delivery_address_json;
-      if (j) push([j.line1, j.line2, j.suburb, j.state, j.postcode].filter(Boolean).join(', '));
-      (shipments || []).forEach(s => push(s.address));
-      (selected.items || []).forEach(it => (it.parcels || []).forEach(p => push(p.deliverTo)));
+      if (j) out.push([j.line1, j.line2, j.suburb, j.state, j.postcode].filter(Boolean).join(', '));
+      (shipments || []).forEach(s => out.push(s.address));
+      (selected.items || []).forEach(it => (it.parcels || []).forEach(p => out.push(p.deliverTo)));
     }
-    return out;
+    return uniq(out);
   })();
+  const knownRecipients = selected ? uniq([selected.customer_name, ...(shipments || []).map(s => s.recipient_name), ...(selected.items || []).flatMap(it => (it.parcels || []).map(p => p.recipient))]) : [];
+  const knownEmails = selected ? uniq([selected.customer_email, ...(shipments || []).map(s => s.recipient_email), ...(selected.items || []).flatMap(it => (it.parcels || []).map(p => p.notifyEmail))]) : [];
 
   return (
     <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', minHeight: '100vh' }}>
@@ -621,6 +624,12 @@ export default function AdminOrdersPage() {
             <datalist id="deliverToOpts">
               {knownAddresses.map(a => <option key={a} value={a} />)}
             </datalist>
+            <datalist id="recipientOpts">
+              {knownRecipients.map(a => <option key={a} value={a} />)}
+            </datalist>
+            <datalist id="emailOpts">
+              {knownEmails.map(a => <option key={a} value={a} />)}
+            </datalist>
 
             {/* ORDER ITEMS */}
             <Section title="📦 Order Items">
@@ -715,12 +724,14 @@ export default function AdminOrdersPage() {
                             {CARRIERS.map(c => <option key={c} value={c}>{c}</option>)}
                           </select>
                           <input placeholder="Tracking #" value={pc.tracking || ''} onChange={e => setParcel(i, item, pIdx, 'tracking', e.target.value)} style={{ ...shipInput, width: '125px', fontFamily: 'monospace' }} />
-                          <input list="deliverToOpts" placeholder="Deliver to — pick or type" value={pc.deliverTo || ''} onChange={e => setParcel(i, item, pIdx, 'deliverTo', e.target.value)} style={{ ...shipInput, flex: 1, minWidth: '150px' }} />
+                          <input list="deliverToOpts" placeholder="Deliver to — pick or type" value={pc.deliverTo || ''} onChange={e => setParcel(i, item, pIdx, 'deliverTo', e.target.value)} style={{ ...shipInput, flex: 1, minWidth: '140px' }} />
                           {multi && <button onClick={() => removeParcel(i, item, pIdx)} title="Remove this address" style={{ background: 'none', border: 'none', color: '#B4413E', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}>✕</button>}
                         </div>
                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginTop: '5px', marginLeft: '22px' }}>
+                          <span style={{ fontSize: '11px', color: '#7A7570' }}>Recipient</span>
+                          <input list="recipientOpts" placeholder="pick or add" value={pc.recipient || ''} onChange={e => setParcel(i, item, pIdx, 'recipient', e.target.value)} style={{ ...shipInput, width: '140px' }} />
                           <span style={{ fontSize: '11px', color: '#7A7570' }}>Notify</span>
-                          <input placeholder="customer email" value={emailVal} onChange={e => setNotifyEmail(p => ({ ...p, [nkey]: e.target.value }))} style={{ ...shipInput, width: '210px' }} />
+                          <input list="emailOpts" placeholder="pick or type email" value={emailVal} onChange={e => setNotifyEmail(p => ({ ...p, [nkey]: e.target.value }))} style={{ ...shipInput, width: '190px' }} />
                           <button onClick={() => notifyShipment(i, pIdx, pc)} style={miniBtn('#166534', '#fff')}>📧 Notify customer</button>
                           {pc.notified_at && <span style={{ fontSize: '10px', color: '#166534' }}>✓ sent {fmtDateTime(pc.notified_at)}</span>}
                         </div>
