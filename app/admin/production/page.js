@@ -296,9 +296,8 @@ export default function AdminProductionPage() {
                           {po.supplier_invoice_number
                             ? <span style={{ color: '#5A5550' }}>{po.supplier_invoice_number}</span>
                             : <button onClick={() => { const n = prompt('Supplier invoice number:'); if (n) patchPo(po.id, { action: 'invoice', supplierInvoiceNumber: n }); }} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer', color: NAVY }}>+ Invoice</button>}
-                          {po.supplier_invoice_url
-                            ? <a href={po.supplier_invoice_url} target="_blank" rel="noreferrer" title="打开发票原件" style={{ marginLeft: '5px', textDecoration: 'none' }}>📄</a>
-                            : <button onClick={() => pickInvFile(po.id)} title="上传供应商发票原件" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', marginLeft: '3px' }}>📎</button>}
+                          {po.supplier_invoice_url && <a href={po.supplier_invoice_url} target="_blank" rel="noreferrer" title="打开发票原件" style={{ marginLeft: '5px', textDecoration: 'none' }}>📄</a>}
+                          <button onClick={() => pickInvFile(po.id)} title={po.supplier_invoice_url ? '重新上传(替换)' : '上传供应商发票原件'} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', marginLeft: '3px' }}>📎</button>
                         </span>
                       ) : ''}
                     </td>
