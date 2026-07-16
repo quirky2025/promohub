@@ -177,3 +177,17 @@ export async function PATCH(request) {
     return Response.json({ error: e.message }, { status: 500 });
   }
 }
+
+// DELETE ?id=… → remove a whole PO (and any bank ledger entry it posted).
+export async function DELETE(request) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorized();
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get('id');
+  if (!id) return Response.json({ error: 'Missing id' }, { status: 400 });
+  const db = sourcingDb();
+  try { await db.from('bank_transactions').delete().eq('linked_type', 'purchase_order').eq('linked_id', id); } catch (_) { /* finance optional */ }
+  const { error } = await db.from('purchase_orders').delete().eq('id', id);
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  return Response.json({ success: true });
+}
