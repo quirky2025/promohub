@@ -155,7 +155,7 @@ export default function AdminProductionPage() {
     const p = catPick; if (!p) return;
     const sizeTotal = Object.values(catSize).reduce((s, v) => s + (Number(v) || 0), 0);
     const qty = (p.sizes?.length && sizeTotal) ? sizeTotal : (Number(catQty) || 0);
-    if (!qty) { alert('请填数量'); return; }
+    if (!qty) { alert('Please enter a quantity'); return; }
     const base = catBaseFor(p, qty);
     let perUnit = base, setup = 0;
     (p.decorations || []).forEach(d => { if (catDeco[d.id]) { perUnit += d.perUnit; if (d.hasSetup) setup += d.setupFee; } });
@@ -208,16 +208,16 @@ export default function AdminProductionPage() {
     if (!file || !uploadPoId) return;
     const fd = new FormData(); fd.append('file', file); fd.append('poId', uploadPoId);
     const res = await fetch('/api/admin/purchase-orders/invoice-upload', { method: 'POST', body: fd });
-    if (!res.ok) { const d = await res.json().catch(() => ({})); alert('上传失败:' + (d.error || 'unknown')); return; }
+    if (!res.ok) { const d = await res.json().catch(() => ({})); alert('Upload failed: ' + (d.error || 'unknown')); return; }
     load();
   }
 
   async function deletePo(id) {
-    if (!confirm('删除这张 PO?此操作不可撤销(会连带删掉它记的银行支出)。')) return;
+    if (!confirm('Delete this PO? This cannot be undone (its bank ledger entry is removed too).')) return;
     setSaving(true);
     const res = await fetch(`/api/admin/purchase-orders?id=${id}`, { method: 'DELETE' });
     setSaving(false);
-    if (!res.ok) { const d = await res.json().catch(() => ({})); alert('删除失败:' + (d.error || 'unknown')); return; }
+    if (!res.ok) { const d = await res.json().catch(() => ({})); alert('Delete failed: ' + (d.error || 'unknown')); return; }
     setPoFor(null); setEditingPoId(null); load();
   }
 
@@ -249,7 +249,7 @@ export default function AdminProductionPage() {
 
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 32px' }}>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', fontWeight: 600, color: NAVY, margin: '0 0 6px' }}>Production</h1>
-        <p style={{ fontSize: '13px', color: '#7A7570', margin: '0 0 20px' }}>Raise supplier POs, track supplier invoices &amp; payments. Orders unlock when <strong>paid in full + artwork approved</strong>.</p>
+        <p style={{ fontSize: '13px', color: '#000', margin: '0 0 20px' }}>Raise supplier POs, track supplier invoices &amp; payments. Orders unlock when <strong>paid in full + artwork approved</strong>.</p>
         <input ref={invFileRef} type="file" onChange={onInvFile} style={{ display: 'none' }} />
 
         {loading ? (
@@ -259,7 +259,7 @@ export default function AdminProductionPage() {
             <thead>
               <tr style={{ borderBottom: '2px solid #E0DDD7' }}>
                 {['Order #', 'Job', 'Gate', 'Supplier PO', 'Supplier', 'Cost', 'Supplier Invoice', 'Pay', ''].map(h => (
-                  <th key={h} style={{ padding: '12px 12px', textAlign: 'left', color: '#7A7570', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
+                  <th key={h} style={{ padding: '12px 12px', textAlign: 'left', color: '#000', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -282,22 +282,29 @@ export default function AdminProductionPage() {
                         ['dispatched', 'delivered', 'completed'].includes(o.status)
                           ? <span style={{ color: '#166534', fontWeight: 700, fontSize: '11px' }}>{o.status === 'completed' ? '✅ Completed' : o.status === 'delivered' ? '📦 Delivered' : '🚚 Dispatched'}</span>
                           : (ready ? <span style={{ color: '#065F46', fontWeight: 700 }}>✅ Ready</span>
-                            : <span style={{ color: '#B0AAA3', fontSize: '11px' }}>{!isPaid(o) ? 'Awaiting payment' : 'Awaiting artwork'}</span>)
+                            : <span style={{ color: '#8A1C1C', fontSize: '11px', fontWeight: 600 }}>{!isPaid(o) ? 'Awaiting payment' : 'Awaiting artwork'}</span>)
                       ) : ''}
                     </td>
-                    <td style={{ padding: '12px', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
-                      {po ? <span><a href={`/api/admin/purchase-orders/pdf?id=${po.id}`} target="_blank" rel="noreferrer" style={{ color: NAVY, textDecoration: 'underline' }}>{po.po_number}</a> <span style={{ background: ps.bg, color: ps.color, fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '20px', marginLeft: '4px' }}>{ps.label}</span> <button onClick={() => sendPo(po)} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '2px 8px', fontSize: '10px', fontWeight: 700, color: NAVY, cursor: 'pointer', marginLeft: '4px', fontFamily: '"DM Sans", sans-serif' }}>✉ Send</button></span> : <span style={{ color: '#B0AAA3' }}>—</span>}
+                    <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>
+                      {po ? (
+                        <div>
+                          <div style={{ fontFamily: 'monospace' }}><a href={`/api/admin/purchase-orders/pdf?id=${po.id}`} target="_blank" rel="noreferrer" style={{ color: NAVY, textDecoration: 'underline' }}>{po.po_number}</a> <span style={{ background: ps.bg, color: ps.color, fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '20px', marginLeft: '4px' }}>{ps.label}</span> <button onClick={() => sendPo(po)} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '2px 8px', fontSize: '10px', fontWeight: 700, color: NAVY, cursor: 'pointer', marginLeft: '4px', fontFamily: '"DM Sans", sans-serif' }}>✉ Send</button></div>
+                          {Array.isArray(po.items) && po.items.length > 0 && (
+                            <div style={{ fontSize: '11px', color: '#000', marginTop: '3px', whiteSpace: 'normal', maxWidth: '230px', lineHeight: 1.3 }}>{po.items.map(i => i.name).filter(Boolean).join(', ') || `${po.items.length} item(s)`}</div>
+                          )}
+                        </div>
+                      ) : <span style={{ color: '#000' }}>—</span>}
                     </td>
-                    <td style={{ padding: '12px', color: '#5A5550' }}>{po ? <span>{supplierName(po.supplier_id)}{termsBadge(po.supplier_id)}</span> : ''}</td>
+                    <td style={{ padding: '12px', color: '#000' }}>{po ? <span>{supplierName(po.supplier_id)}{termsBadge(po.supplier_id)}</span> : ''}</td>
                     <td style={{ padding: '12px', whiteSpace: 'nowrap', color: NAVY }}>{po ? <span>{money(po.cost_total)} <button onClick={() => openEdit(o, po)} style={{ background: 'none', border: 'none', color: GOLD, fontSize: '11px', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>edit</button></span> : ''}</td>
                     <td style={{ padding: '12px', whiteSpace: 'nowrap', fontSize: '12px' }}>
                       {po ? (
                         <span>
                           {po.supplier_invoice_number
-                            ? <span style={{ color: '#5A5550' }}>{po.supplier_invoice_number}</span>
+                            ? <span style={{ color: '#000' }}>{po.supplier_invoice_number}</span>
                             : <button onClick={() => { const n = prompt('Supplier invoice number:'); if (n) patchPo(po.id, { action: 'invoice', supplierInvoiceNumber: n }); }} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer', color: NAVY }}>+ Invoice</button>}
-                          {po.supplier_invoice_url && <a href={po.supplier_invoice_url} target="_blank" rel="noreferrer" title="打开发票原件" style={{ marginLeft: '5px', textDecoration: 'none' }}>📄</a>}
-                          <button onClick={() => pickInvFile(po.id)} title={po.supplier_invoice_url ? '重新上传(替换)' : '上传供应商发票原件'} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', marginLeft: '3px' }}>📎</button>
+                          {po.supplier_invoice_url && <a href={po.supplier_invoice_url} target="_blank" rel="noreferrer" title="Open invoice file" style={{ marginLeft: '5px', textDecoration: 'none' }}>📄</a>}
+                          <button onClick={() => pickInvFile(po.id)} title={po.supplier_invoice_url ? 'Re-upload (replace)' : 'Upload supplier invoice'} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', marginLeft: '3px' }}>📎</button>
                         </span>
                       ) : ''}
                     </td>
@@ -309,7 +316,7 @@ export default function AdminProductionPage() {
                     <td style={{ padding: '12px' }}>
                       {last && (
                         <button onClick={() => openPo(o)}
-                          title={ready ? '' : '未满足"付清+审图"门槛,但可手动补录 PO'}
+                          title={ready ? '' : 'Gate not met (paid + approved) — you can still record a PO manually'}
                           style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                           {list.length ? '+ PO' : 'Raise PO'}
                         </button>
@@ -348,19 +355,19 @@ export default function AdminProductionPage() {
             )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
-              <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.06em' }}>PO 日期</label>
+              <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.06em' }}>PO Date</label>
               <input type="date" value={poDate} onChange={e => setPoDate(e.target.value)}
                 style={{ padding: '8px 10px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
-              <span style={{ fontSize: '11px', color: '#7A7570' }}>默认今天;补录旧单可改</span>
+              <span style={{ fontSize: '11px', color: '#000' }}>Defaults to today; backdate old POs</span>
             </div>
 
             {/* Cost from catalog — search SKU → auto-fill supplier COST (no margin) */}
             <div style={{ background: '#FDFBF7', border: '1px dashed #D8CFC0', borderRadius: '8px', padding: '10px', marginBottom: '10px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '6px' }}>🔍 从目录算成本(搜 SKU / 名称,自动填成本行)</div>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '6px' }}>🔍 Cost from catalog (search SKU / name → auto-fill cost line)</div>
               <div style={{ display: 'flex', gap: '6px' }}>
-                <input value={catQuery} onChange={e => setCatQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && searchCatalog()} placeholder="SKU 或 产品名"
+                <input value={catQuery} onChange={e => setCatQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && searchCatalog()} placeholder="SKU or product name"
                   style={{ flex: 1, padding: '8px 10px', border: '1px solid #E0DDD7', borderRadius: '6px', fontSize: '13px', boxSizing: 'border-box' }} />
-                <button onClick={searchCatalog} disabled={catBusy} style={{ background: NAVY, color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>{catBusy ? '…' : '搜'}</button>
+                <button onClick={searchCatalog} disabled={catBusy} style={{ background: NAVY, color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>{catBusy ? '…' : 'Search'}</button>
               </div>
               {catResults.length > 0 && !catPick && (
                 <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
@@ -376,14 +383,14 @@ export default function AdminProductionPage() {
                   <div style={{ fontSize: '12px', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>{catPick.sku} · {catPick.name}</div>
                   {!(catPick.sizes && catPick.sizes.length) && (
                     <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '6px' }}>
-                      <span style={{ fontSize: '12px', color: '#000' }}>数量</span>
+                      <span style={{ fontSize: '12px', color: '#000' }}>Qty</span>
                       <input type="number" value={catQty} onChange={e => setCatQty(e.target.value)} style={{ width: '80px', padding: '6px', border: '1px solid #E0DDD7', borderRadius: '6px', fontSize: '13px' }} />
-                      <span style={{ fontSize: '11px', color: '#000' }}>底价 ${catBaseFor(catPick, catQty).toFixed(2)}/件</span>
+                      <span style={{ fontSize: '11px', color: '#000' }}>Base ${catBaseFor(catPick, catQty).toFixed(2)}/unit</span>
                     </div>
                   )}
                   {catPick.sizes && catPick.sizes.length > 0 && (
                     <div style={{ marginBottom: '6px' }}>
-                      <div style={{ fontSize: '11px', color: '#000', marginBottom: '3px' }}>按尺码填数量:</div>
+                      <div style={{ fontSize: '11px', color: '#000', marginBottom: '3px' }}>Qty per size:</div>
                       <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
                         {catPick.sizes.map(sz => (
                           <div key={sz} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -396,19 +403,19 @@ export default function AdminProductionPage() {
                   )}
                   {catPick.decorations && catPick.decorations.length > 0 && (
                     <div style={{ marginBottom: '6px' }}>
-                      <div style={{ fontSize: '11px', color: '#000', marginBottom: '3px' }}>印刷方式(可多选):</div>
+                      <div style={{ fontSize: '11px', color: '#000', marginBottom: '3px' }}>Print method (multi-select):</div>
                       {catPick.decorations.map(d => (
                         <label key={d.id} style={{ display: 'block', fontSize: '12px', color: '#000', marginBottom: '2px', cursor: 'pointer' }}>
-                          <input type="checkbox" checked={!!catDeco[d.id]} onChange={e => setCatDeco(x => ({ ...x, [d.id]: e.target.checked }))} /> {d.name} <span style={{ color: '#7A7570' }}>(+${d.perUnit.toFixed(2)}/件{d.hasSetup ? ` · 版费 $${d.setupFee}` : ''})</span>
+                          <input type="checkbox" checked={!!catDeco[d.id]} onChange={e => setCatDeco(x => ({ ...x, [d.id]: e.target.checked }))} /> {d.name} <span style={{ color: '#000' }}>(+${d.perUnit.toFixed(2)}/unit{d.hasSetup ? ` · setup $${d.setupFee}` : ''})</span>
                         </label>
                       ))}
                     </div>
                   )}
                   <div style={{ display: 'flex', gap: '6px' }}>
-                    <button onClick={addCatToLines} style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '6px', padding: '7px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>加入 PO(成本)</button>
-                    <button onClick={() => setCatPick(null)} style={{ background: '#fff', color: '#7A7570', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '7px 12px', fontSize: '12px', cursor: 'pointer' }}>取消</button>
+                    <button onClick={addCatToLines} style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '6px', padding: '7px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>Add to PO (cost)</button>
+                    <button onClick={() => setCatPick(null)} style={{ background: '#fff', color: '#000', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '7px 12px', fontSize: '12px', cursor: 'pointer' }}>Cancel</button>
                   </div>
-                  <div style={{ fontSize: '10px', color: '#7A7570', marginTop: '5px' }}>算出的是"我们的成本"(底价+印刷+开版,不加 margin),加入后仍可手改。</div>
+                  <div style={{ fontSize: '10px', color: '#000', marginTop: '5px' }}>This is OUR cost (base + print + setup, no margin). Editable after adding.</div>
                 </div>
               )}
             </div>
@@ -437,7 +444,7 @@ export default function AdminProductionPage() {
               <div style={{ marginLeft: 'auto', fontSize: '13px', color: NAVY, fontWeight: 700 }}>Total cost: {money(subtotalOf() + (Number(freight) || 0))}</div>
             </div>
 
-            <input value={poDeliverTo} onChange={e => setPoDeliverTo(e.target.value)} placeholder="送货至(留空=用客户地址;样品/发到自己填这里)"
+            <input value={poDeliverTo} onChange={e => setPoDeliverTo(e.target.value)} placeholder="Deliver to (blank = customer address; fill for samples / ship-to-self)"
               style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', margin: '0 0 10px', boxSizing: 'border-box' }} />
             <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Notes (optional)"
               style={{ width: '100%', padding: '10px 12px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', margin: '0 0 18px', boxSizing: 'border-box' }} />
