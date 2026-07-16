@@ -44,6 +44,7 @@ export async function POST(request) {
       cost_total: Number((subtotal + freight).toFixed(2)),
       items: b.items || null,
       notes: b.notes || null,
+      ...(b.poDate ? { created_at: new Date(b.poDate + 'T00:00:00').toISOString() } : {}),
     }).select('*').single();
     if (error) return Response.json({ error: error.message }, { status: 500 });
 
@@ -122,6 +123,7 @@ export async function PATCH(request) {
       if (b.notes !== undefined) updates.notes = b.notes || null;
       if (b.supplierId !== undefined) updates.supplier_id = b.supplierId || null;
       if (b.items !== undefined) updates.items = b.items || null;
+      if (b.poDate) updates.created_at = new Date(b.poDate + 'T00:00:00').toISOString();
     } else if (b.action === 'send') {
       // Email the PO PDF straight to the supplier's email on file.
       const { data: po } = await db.from('purchase_orders').select('*').eq('id', b.id).single();

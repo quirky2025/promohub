@@ -55,6 +55,7 @@ export default function AdminProductionPage() {
   const [catSize, setCatSize]       = useState({});
   const [uploadPoId, setUploadPoId] = useState(null);
   const invFileRef = useRef(null);
+  const [poDate, setPoDate]         = useState('');
   const [newSupplier, setNewSupplier] = useState('');
   const [newSupplierTerms, setNewSupplierTerms] = useState('prepaid');
   const [lines, setLines] = useState([]);
@@ -106,10 +107,12 @@ export default function AdminProductionPage() {
     // that supplier's lines via the 🔍 catalog search (or type them).
     setLines([{ stockCode: '', name: '', qty: 1, unitCost: '', branding: '' }]);
     setCatQuery(''); setCatResults([]); setCatPick(null);
+    setPoDate(new Date().toISOString().slice(0, 10));
   }
 
   function openEdit(o, po) {
     setPoFor(o); setEditingPoId(po.id);
+    setPoDate(po.created_at ? String(po.created_at).slice(0, 10) : new Date().toISOString().slice(0, 10));
     setSupplierId(po.supplier_id || ''); setNewSupplier(''); setNewSupplierTerms('prepaid');
     setFreight(po.freight_cost ?? ''); setNotes(po.notes || '');
     const ls = (Array.isArray(po.items) ? po.items : []).map(it => ({
@@ -181,12 +184,12 @@ export default function AdminProductionPage() {
     if (editingPoId) {
       res = await fetch('/api/admin/purchase-orders', {
         method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: editingPoId, action: 'details', supplierId: sid || null, costSubtotal: subtotal, freightCost: Number(freight) || 0, notes, items }),
+        body: JSON.stringify({ id: editingPoId, action: 'details', supplierId: sid || null, costSubtotal: subtotal, freightCost: Number(freight) || 0, notes, items, poDate }),
       });
     } else {
       res = await fetch('/api/admin/purchase-orders', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: poFor.id, orderNumber: poFor.order_number || poFor.invoice_number, supplierId: sid || null, costSubtotal: subtotal, freightCost: Number(freight) || 0, notes, status: 'sent', items }),
+        body: JSON.stringify({ orderId: poFor.id, orderNumber: poFor.order_number || poFor.invoice_number, supplierId: sid || null, costSubtotal: subtotal, freightCost: Number(freight) || 0, notes, status: 'sent', items, poDate }),
       });
     }
     const data = await res.json();
@@ -337,6 +340,13 @@ export default function AdminProductionPage() {
                 <option value="account">New supplier terms: Monthly account</option>
               </select>
             )}
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+              <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.06em' }}>PO 日期</label>
+              <input type="date" value={poDate} onChange={e => setPoDate(e.target.value)}
+                style={{ padding: '8px 10px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', boxSizing: 'border-box' }} />
+              <span style={{ fontSize: '11px', color: '#7A7570' }}>默认今天;补录旧单可改</span>
+            </div>
 
             {/* Cost from catalog — search SKU → auto-fill supplier COST (no margin) */}
             <div style={{ background: '#FDFBF7', border: '1px dashed #D8CFC0', borderRadius: '8px', padding: '10px', marginBottom: '10px' }}>
