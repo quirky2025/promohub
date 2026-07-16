@@ -208,6 +208,29 @@ export default function AdminOrdersPage() {
     } catch { alert('Could not save freight'); }
   }
 
+  const [notifyEmail, setNotifyEmail] = useState({});
+  async function notifyShipment(index, parcelIndex, pc) {
+    if (freightEdit[index]) { alert('Save freight first, then Notify.'); return; }
+    const key = `${index}:${parcelIndex}`;
+    const to = (notifyEmail[key] ?? pc.notifyEmail ?? selected.customer_email ?? '').trim();
+    if (!to) { alert('Enter a recipient email.'); return; }
+    if (!pc.carrier && !pc.tracking) { alert('Add carrier + tracking (and Save freight) first.'); return; }
+    if (!confirm(`Email the shipping notice for product ${index + 1} to ${to}?`)) return;
+    try {
+      const res = await fetch('/api/admin/orders/notify-shipment', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selected.id, index, parcelIndex, to }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { alert('Notify failed: ' + (data.error || '')); return; }
+      if (data.items) {
+        setSelected(prev => ({ ...prev, items: data.items }));
+        setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, items: data.items } : o));
+      }
+      alert('Shipping notice sent ✅');
+    } catch { alert('Notify failed'); }
+  }
+
   async function uploadItemDoc(index, docType, file) {
     if (!file || !selected) return;
     setDocBusy(`${index}:${docType}`);
@@ -568,6 +591,7 @@ export default function AdminOrdersPage() {
                 <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid #F0EEED' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
+                      <div style={{ fontSize: '11px', color: GOLD, fontWeight: 700, fontFamily: 'monospace' }}>{selected.invoice_number}-{i + 1}</div>
                       <div style={{ fontWeight: 600, color: NAVY, fontSize: '13px' }}>{name}</div>
                       {sku && <div style={{ fontSize: '12px', color: '#000', fontFamily: 'monospace' }}>SKU: {sku}</div>}
                       {item.colour && <div style={{ fontSize: '12px', color: '#000' }}>Colour: {item.colour}</div>}
@@ -616,15 +640,28 @@ export default function AdminOrdersPage() {
                   {/* per-product FREIGHT — one or more parcels (a product can ship to >1 address) */}
                   <div style={{ marginTop: '10px', background: '#FAF8F4', borderRadius: '8px', padding: '9px 11px' }}>
                     <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#7A7570', marginBottom: '6px', fontWeight: 700 }}>🚚 Freight — this product ({parcelsOf(i, item).length} parcel{parcelsOf(i, item).length !== 1 ? 's' : ''})</div>
-                    {parcelsOf(i, item).map((pc, pIdx) => (
-                      <div key={pIdx} style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '6px' }}>
-                        <span style={{ fontSize: '11px', color: '#7A7570', width: '16px' }}>{pIdx + 1}.</span>
-                        <input placeholder="Carrier" value={pc.carrier || ''} onChange={e => setParcel(i, item, pIdx, 'carrier', e.target.value)} style={{ ...shipInput, width: '105px' }} />
-                        <input placeholder="Tracking #" value={pc.tracking || ''} onChange={e => setParcel(i, item, pIdx, 'tracking', e.target.value)} style={{ ...shipInput, width: '125px', fontFamily: 'monospace' }} />
-                        <input placeholder="Deliver to (suburb, state, PC)" value={pc.deliverTo || ''} onChange={e => setParcel(i, item, pIdx, 'deliverTo', e.target.value)} style={{ ...shipInput, flex: 1, minWidth: '150px' }} />
-                        {parcelsOf(i, item).length > 1 && <button onClick={() => removeParcel(i, item, pIdx)} title="Remove this address" style={{ background: 'none', border: 'none', color: '#B4413E', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}>✕</button>}
+                    {parcelsOf(i, item).map((pc, pIdx) => {
+                      const nkey = `${i}:${pIdx}`;
+                      const emailVal = notifyEmail[nkey] ?? pc.notifyEmail ?? selected.customer_email ?? '';
+                      const multi = parcelsOf(i, item).length > 1;
+                      return (
+                      <div key={pIdx} style={{ marginBottom: '8px', paddingBottom: multi ? '8px' : '0', borderBottom: multi ? '1px dashed #E8E2D6' : 'none' }}>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                          <span style={{ fontSize: '11px', color: '#7A7570', width: '16px' }}>{pIdx + 1}.</span>
+                          <input placeholder="Carrier" value={pc.carrier || ''} onChange={e => setParcel(i, item, pIdx, 'carrier', e.target.value)} style={{ ...shipInput, width: '105px' }} />
+                          <input placeholder="Tracking #" value={pc.tracking || ''} onChange={e => setParcel(i, item, pIdx, 'tracking', e.target.value)} style={{ ...shipInput, width: '125px', fontFamily: 'monospace' }} />
+                          <input placeholder="Deliver to (suburb, state, PC)" value={pc.deliverTo || ''} onChange={e => setParcel(i, item, pIdx, 'deliverTo', e.target.value)} style={{ ...shipInput, flex: 1, minWidth: '150px' }} />
+                          {multi && <button onClick={() => removeParcel(i, item, pIdx)} title="Remove this address" style={{ background: 'none', border: 'none', color: '#B4413E', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}>✕</button>}
+                        </div>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginTop: '5px', marginLeft: '22px' }}>
+                          <span style={{ fontSize: '11px', color: '#7A7570' }}>Notify</span>
+                          <input placeholder="customer email" value={emailVal} onChange={e => setNotifyEmail(p => ({ ...p, [nkey]: e.target.value }))} style={{ ...shipInput, width: '210px' }} />
+                          <button onClick={() => notifyShipment(i, pIdx, pc)} style={miniBtn('#166534', '#fff')}>📧 Notify customer</button>
+                          {pc.notified_at && <span style={{ fontSize: '10px', color: '#166534' }}>✓ sent {fmtDateTime(pc.notified_at)}</span>}
+                        </div>
                       </div>
-                    ))}
+                      );
+                    })}
                     <div style={{ display: 'flex', gap: '8px', marginTop: '2px' }}>
                       <button onClick={() => addParcel(i, item)} style={miniBtn('#fff', NAVY, NAVY)}>＋ Add address</button>
                       <button onClick={() => saveItemFreight(i, item)} style={miniBtn(NAVY, '#fff')}>Save freight</button>
