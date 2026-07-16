@@ -45,8 +45,9 @@ export async function POST(request) {
     const address = pc.deliverTo || '';
     const trackUrl = (carrier && tracking && TRACK_URL[carrier]) ? TRACK_URL[carrier](tracking) : '';
 
+    const greetName = (pc.recipient || order.customer_name || 'there');
     const body = `
-      <p style="font-size:15px;margin:0 0 16px;">Hi ${order.customer_name || 'there'},</p>
+      <p style="font-size:15px;margin:0 0 16px;">Hi ${greetName},</p>
       <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Good news — <strong>${productName}</strong> from your order has been dispatched${address ? ` to <strong>${address}</strong>` : ''}.</p>
       <div style="background:#ffffff;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
         <table style="width:100%;font-size:14px;">

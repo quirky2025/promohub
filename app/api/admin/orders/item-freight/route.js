@@ -23,6 +23,9 @@ export async function POST(request) {
           carrier: (p.carrier || '').trim(),
           tracking: (p.tracking || '').trim(),
           deliverTo: (p.deliverTo || '').trim(),
+          recipient: (p.recipient || '').trim(),
+          notifyEmail: (p.notifyEmail || '').trim(),
+          notified_at: p.notified_at || null,
         }))
       : [];
 
