@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 
 const NAVY = '#1B2A4A';
@@ -53,6 +53,8 @@ export default function AdminProductionPage() {
   const [catQty, setCatQty]         = useState('');
   const [catDeco, setCatDeco]       = useState({});
   const [catSize, setCatSize]       = useState({});
+  const [uploadPoId, setUploadPoId] = useState(null);
+  const invFileRef = useRef(null);
   const [newSupplier, setNewSupplier] = useState('');
   const [newSupplierTerms, setNewSupplierTerms] = useState('prepaid');
   const [lines, setLines] = useState([]);
@@ -100,7 +102,10 @@ export default function AdminProductionPage() {
   function openPo(o) {
     setPoFor(o); setEditingPoId(null);
     setSupplierId(''); setNewSupplier(''); setNewSupplierTerms('prepaid'); setFreight(''); setNotes('');
-    setLines(linesFromOrder(o));
+    // Start blank — one supplier PO usually covers ONE supplier's items. Add just
+    // that supplier's lines via the 🔍 catalog search (or type them).
+    setLines([{ stockCode: '', name: '', qty: 1, unitCost: '', branding: '' }]);
+    setCatQuery(''); setCatResults([]); setCatPick(null);
   }
 
   function openEdit(o, po) {
@@ -190,6 +195,26 @@ export default function AdminProductionPage() {
     setPoFor(null); setEditingPoId(null); load();
   }
 
+  function pickInvFile(poId) { setUploadPoId(poId); setTimeout(() => invFileRef.current?.click(), 0); }
+  async function onInvFile(e) {
+    const file = e.target.files?.[0];
+    if (invFileRef.current) invFileRef.current.value = '';
+    if (!file || !uploadPoId) return;
+    const fd = new FormData(); fd.append('file', file); fd.append('poId', uploadPoId);
+    const res = await fetch('/api/admin/purchase-orders/invoice-upload', { method: 'POST', body: fd });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); alert('上传失败:' + (d.error || 'unknown')); return; }
+    load();
+  }
+
+  async function deletePo(id) {
+    if (!confirm('删除这张 PO?此操作不可撤销(会连带删掉它记的银行支出)。')) return;
+    setSaving(true);
+    const res = await fetch(`/api/admin/purchase-orders?id=${id}`, { method: 'DELETE' });
+    setSaving(false);
+    if (!res.ok) { const d = await res.json().catch(() => ({})); alert('删除失败:' + (d.error || 'unknown')); return; }
+    setPoFor(null); setEditingPoId(null); load();
+  }
+
   async function patchPo(id, body) {
     const res = await fetch('/api/admin/purchase-orders', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, ...body }) });
     if (res.ok) load(); else alert('Update failed');
@@ -219,6 +244,7 @@ export default function AdminProductionPage() {
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 32px' }}>
         <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '30px', fontWeight: 600, color: NAVY, margin: '0 0 6px' }}>Production</h1>
         <p style={{ fontSize: '13px', color: '#7A7570', margin: '0 0 20px' }}>Raise supplier POs, track supplier invoices &amp; payments. Orders unlock when <strong>paid in full + artwork approved</strong>.</p>
+        <input ref={invFileRef} type="file" onChange={onInvFile} style={{ display: 'none' }} />
 
         {loading ? (
           <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570' }}>Loading...</div>
@@ -255,9 +281,16 @@ export default function AdminProductionPage() {
                     <td style={{ padding: '12px', color: '#5A5550' }}>{po ? <span>{supplierName(po.supplier_id)}{termsBadge(po.supplier_id)}</span> : ''}</td>
                     <td style={{ padding: '12px', whiteSpace: 'nowrap', color: NAVY }}>{po ? <span>{money(po.cost_total)} <button onClick={() => openEdit(o, po)} style={{ background: 'none', border: 'none', color: GOLD, fontSize: '11px', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>edit</button></span> : ''}</td>
                     <td style={{ padding: '12px', whiteSpace: 'nowrap', fontSize: '12px' }}>
-                      {po ? (po.supplier_invoice_number
-                        ? <span style={{ color: '#5A5550' }}>{po.supplier_invoice_number}</span>
-                        : <button onClick={() => { const n = prompt('Supplier invoice number:'); if (n) patchPo(po.id, { action: 'invoice', supplierInvoiceNumber: n }); }} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer', color: NAVY }}>+ Invoice</button>) : ''}
+                      {po ? (
+                        <span>
+                          {po.supplier_invoice_number
+                            ? <span style={{ color: '#5A5550' }}>{po.supplier_invoice_number}</span>
+                            : <button onClick={() => { const n = prompt('Supplier invoice number:'); if (n) patchPo(po.id, { action: 'invoice', supplierInvoiceNumber: n }); }} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer', color: NAVY }}>+ Invoice</button>}
+                          {po.supplier_invoice_url
+                            ? <a href={po.supplier_invoice_url} target="_blank" rel="noreferrer" title="打开发票原件" style={{ marginLeft: '5px', textDecoration: 'none' }}>📄</a>
+                            : <button onClick={() => pickInvFile(po.id)} title="上传供应商发票原件" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', marginLeft: '3px' }}>📎</button>}
+                        </span>
+                      ) : ''}
                     </td>
                     <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>
                       {po ? (po.supplier_payment_status === 'paid'
@@ -400,6 +433,12 @@ export default function AdminProductionPage() {
                 style={{ background: '#fff', color: '#7A7570', border: '1.5px solid #E0DDD7', borderRadius: '8px', padding: '12px 18px', fontSize: '14px', cursor: 'pointer' }}>
                 Cancel
               </button>
+              {editingPoId && (
+                <button onClick={() => deletePo(editingPoId)} disabled={saving}
+                  style={{ background: '#fff', color: '#991B1B', border: '1.5px solid #E9C9C9', borderRadius: '8px', padding: '12px 16px', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}>
+                  Delete PO
+                </button>
+              )}
             </div>
           </div>
         </div>
