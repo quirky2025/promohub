@@ -48,6 +48,8 @@ function deriveStatus(order) {
   return 'pending';
 }
 
+const CARRIERS = ['Australia Post', 'StarTrack', 'FedEx', 'DHL', 'TNT', 'Direct Freight Express', 'Courier'];
+
 // Simplified list status — Lily wants the board to show only two states.
 function simpleStatus(order) {
   const d = deriveStatus(order);
@@ -648,7 +650,10 @@ export default function AdminOrdersPage() {
                       <div key={pIdx} style={{ marginBottom: '8px', paddingBottom: multi ? '8px' : '0', borderBottom: multi ? '1px dashed #E8E2D6' : 'none' }}>
                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
                           <span style={{ fontSize: '11px', color: '#7A7570', width: '16px' }}>{pIdx + 1}.</span>
-                          <input placeholder="Carrier" value={pc.carrier || ''} onChange={e => setParcel(i, item, pIdx, 'carrier', e.target.value)} style={{ ...shipInput, width: '105px' }} />
+                          <select value={pc.carrier || ''} onChange={e => setParcel(i, item, pIdx, 'carrier', e.target.value)} style={{ ...shipInput, width: '150px', cursor: 'pointer' }}>
+                            <option value="">Carrier…</option>
+                            {CARRIERS.map(c => <option key={c} value={c}>{c}</option>)}
+                          </select>
                           <input placeholder="Tracking #" value={pc.tracking || ''} onChange={e => setParcel(i, item, pIdx, 'tracking', e.target.value)} style={{ ...shipInput, width: '125px', fontFamily: 'monospace' }} />
                           <input placeholder="Deliver to (suburb, state, PC)" value={pc.deliverTo || ''} onChange={e => setParcel(i, item, pIdx, 'deliverTo', e.target.value)} style={{ ...shipInput, flex: 1, minWidth: '150px' }} />
                           {multi && <button onClick={() => removeParcel(i, item, pIdx)} title="Remove this address" style={{ background: 'none', border: 'none', color: '#B4413E', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}>✕</button>}
