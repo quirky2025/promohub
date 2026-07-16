@@ -1,4 +1,5 @@
 'use client';
+// admin orders board — per-item artwork approval + production gate + invoice PDF
 
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
@@ -110,35 +111,43 @@ export default function AdminOrdersPage() {
     if (selected?.id === id) setSelected(prev => ({ ...prev, ...updates }));
   }
 
-  const [artBusy, setArtBusy] = useState(false);
+  const [artBusyIdx, setArtBusyIdx] = useState(null);
 
-  // Record artwork approval (offline line). Sets artwork_status=approved + timestamp,
-  // and nudges the order label to "Artwork Approved" if still pre-approval.
-  async function markArtworkApproved(id) {
-    const now = new Date().toISOString();
-    const o = orders.find(x => x.id === id) || (selected?.id === id ? selected : null);
-    const updates = { artwork_status: 'approved', artwork_approved_at: now };
-    if (o && ['pending', 'artwork_sent', 'confirmed'].includes(o.status)) updates.status = 'artwork_approved';
-    await supabase.from('orders').update(updates).eq('id', id);
-    setOrders(prev => prev.map(x => x.id === id ? { ...x, ...updates } : x));
-    if (selected?.id === id) setSelected(prev => ({ ...prev, ...updates }));
+  // Per-item artwork approval. Persists items[index].artwork_approved server-side;
+  // the order-level artwork_status rolls up to 'approved' only when ALL items are.
+  async function applyItemArtwork(index, { approved, fileUrl, fileName }) {
+    try {
+      const res = await fetch('/api/admin/orders/item-artwork', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selected.id, index, approved, fileUrl, fileName }),
+      });
+      const data = await res.json();
+      if (!res.ok) { alert('Could not update artwork'); return; }
+      const patch = { items: data.items, artwork_status: data.artwork_status, artwork_approved_at: data.artwork_approved_at };
+      setSelected(prev => ({ ...prev, ...patch }));
+      setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, ...patch } : o));
+    } catch { alert('Could not update artwork'); }
   }
 
-  // Upload the customer-approved artwork file → stored as evidence, then mark approved.
-  async function uploadApprovedArtwork(file) {
+  // Upload the customer-approved artwork for ONE product → saved as evidence,
+  // then that item is marked approved.
+  async function uploadItemArtwork(index, file) {
     if (!file || !selected) return;
-    setArtBusy(true);
+    setArtBusyIdx(index);
     try {
+      const it = (selected.items || [])[index] || {};
+      const pname = it.productName || it.product_description || it.name || `item ${index + 1}`;
       const fd = new FormData();
       fd.append('file', file);
       fd.append('orderNumber', selected.invoice_number || selected.order_number);
       fd.append('docType', 'approved_artwork');
-      fd.append('title', 'Approved artwork');
-      const res = await fetch('/api/admin/orders/documents', { method: 'POST', body: fd });
-      if (!res.ok) { alert('Upload failed'); setArtBusy(false); return; }
-      await markArtworkApproved(selected.id);
+      fd.append('title', `Approved artwork — ${pname}`);
+      const up = await fetch('/api/admin/orders/documents', { method: 'POST', body: fd });
+      const upData = await up.json();
+      if (!up.ok) { alert('Upload failed'); setArtBusyIdx(null); return; }
+      await applyItemArtwork(index, { approved: true, fileUrl: upData.document?.file_url, fileName: upData.document?.file_name });
     } catch { alert('Upload failed'); }
-    setArtBusy(false);
+    setArtBusyIdx(null);
   }
 
   async function saveDetails(id) {
@@ -400,45 +409,30 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            {/* ARTWORK APPROVAL + PRODUCTION GATE */}
+            {/* PRODUCTION GATE — summary (upload/approve is per product, below) */}
             {(() => {
-              const approved = selected.artwork_status === 'approved';
+              const its = Array.isArray(selected.items) ? selected.items : [];
+              const nApproved = its.filter(it => it.artwork_approved).length;
+              const artOk = its.length > 0 && nApproved === its.length;
               const paid = selected.payment_status === 'paid';
-              const ready = approved && paid;
+              const ready = artOk && paid;
               const chip = (ok, label) => (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '16px', fontSize: '12px', fontWeight: 700, background: ok ? '#D1FAE5' : '#FEE2E2', color: ok ? '#065F46' : '#991B1B' }}>
                   {ok ? '✓' : '✗'} {label}
                 </span>
               );
               return (
-                <div style={{ background: ready ? '#F0FDF4' : '#FFFBEB', border: `1px solid ${ready ? '#BBF7D0' : '#FDE68A'}`, borderRadius: '12px', padding: '16px', marginBottom: '20px' }}>
+                <div style={{ background: ready ? '#F0FDF4' : '#FFFBEB', border: `1px solid ${ready ? '#BBF7D0' : '#FDE68A'}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '20px' }}>
                   <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Production Gate — both required</div>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                    {chip(approved, 'Artwork approved')}
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {chip(artOk, `Artwork approved (${nApproved}/${its.length})`)}
                     {chip(paid, 'Payment received')}
                     {ready
                       ? <span style={{ fontSize: '12px', fontWeight: 700, color: '#166534' }}>→ Ready for production ✅</span>
                       : <span style={{ fontSize: '12px', fontWeight: 700, color: '#92400E' }}>→ Production locked 🔒</span>}
                   </div>
-
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <label style={{ display: 'inline-block' }}>
-                      <input type="file" style={{ display: 'none' }} disabled={artBusy}
-                        onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) uploadApprovedArtwork(f); }} />
-                      <span style={{ display: 'inline-block', padding: '8px 14px', borderRadius: '8px', background: NAVY, color: '#fff', fontSize: '13px', fontWeight: 700, cursor: artBusy ? 'wait' : 'pointer' }}>
-                        {artBusy ? '⏳ Uploading…' : '⬆ Upload approved artwork'}
-                      </span>
-                    </label>
-                    {!approved && (
-                      <button onClick={() => { if (confirm('Mark artwork as approved (approved offline by the customer)?')) markArtworkApproved(selected.id); }}
-                        style={{ padding: '8px 14px', borderRadius: '8px', background: '#fff', border: `1.5px solid ${NAVY}`, color: NAVY, fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
-                        ✓ Mark approved (offline)
-                      </button>
-                    )}
-                    {approved && <span style={{ fontSize: '12px', color: '#065F46' }}>✅ Approved{selected.artwork_approved_at ? ` · ${fmtDateTime(selected.artwork_approved_at)}` : ''}</span>}
-                  </div>
                   <div style={{ fontSize: '11px', color: '#7A7570', marginTop: '9px' }}>
-                    Uploading the customer-approved artwork records approval automatically. The file is saved in Documents / Evidence below. Payment is marked in the Payment section.
+                    Approve each product's artwork below (upload the approved file). Payment is marked in the Payment section.
                   </div>
                 </div>
               );
@@ -467,6 +461,29 @@ export default function AdminOrdersPage() {
                       <div style={{ fontSize: '12px', color: '#000' }}>Qty: {qty ?? '—'} × {fmt(unit)}</div>
                     </div>
                     <div style={{ fontWeight: 700, color: NAVY }}>{fmt(sub)}</div>
+                  </div>
+                  {/* per-product ARTWORK approval */}
+                  <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {item.artwork_approved ? (
+                      <>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 9px', borderRadius: '16px', fontSize: '11px', fontWeight: 700, background: '#D1FAE5', color: '#065F46' }}>✓ Artwork approved</span>
+                        {item.artwork_url && <a href={item.artwork_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', fontWeight: 700, color: NAVY }}>View file →</a>}
+                        <button onClick={() => applyItemArtwork(i, { approved: false })} style={{ fontSize: '11px', fontWeight: 700, color: '#991B1B', background: 'none', border: 'none', cursor: 'pointer' }}>Reopen</button>
+                      </>
+                    ) : (
+                      <>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 9px', borderRadius: '16px', fontSize: '11px', fontWeight: 700, background: '#FEF3C7', color: '#92400E' }}>⏳ Artwork pending</span>
+                        <label style={{ display: 'inline-block' }}>
+                          <input type="file" style={{ display: 'none' }} disabled={artBusyIdx === i}
+                            onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) uploadItemArtwork(i, f); }} />
+                          <span style={{ display: 'inline-block', padding: '5px 11px', borderRadius: '7px', background: NAVY, color: '#fff', fontSize: '11px', fontWeight: 700, cursor: artBusyIdx === i ? 'wait' : 'pointer' }}>
+                            {artBusyIdx === i ? '⏳ Uploading…' : '⬆ Upload approved artwork'}
+                          </span>
+                        </label>
+                        <button onClick={() => { if (confirm("Mark this product's artwork approved (approved offline)?")) applyItemArtwork(i, { approved: true }); }}
+                          style={{ fontSize: '11px', fontWeight: 700, color: NAVY, background: 'none', border: `1.5px solid ${NAVY}`, borderRadius: '7px', padding: '4px 10px', cursor: 'pointer' }}>✓ Mark approved</button>
+                      </>
+                    )}
                   </div>
                   {/* per-product stage */}
                   <div style={{ display: 'flex', gap: '5px', marginTop: '8px', flexWrap: 'wrap' }}>
