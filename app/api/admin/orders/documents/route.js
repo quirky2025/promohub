@@ -56,10 +56,14 @@ export async function POST(request) {
     const file_url = `${PUBLIC}/${key}`;
 
     const db = sourcingDb();
-    const { data, error } = await db.from('order_documents').insert({
-      order_number: orderNumber, doc_type: docType, title: title || name,
-      file_url, file_name: name, mime: file.type || null,
-    }).select('*').single();
+    const baseRow = { order_number: orderNumber, title: title || name, file_url, file_name: name, mime: file.type || null };
+    let { data, error } = await db.from('order_documents').insert({ ...baseRow, doc_type: docType }).select('*').single();
+    // Fallback: if the DB has an older CHECK constraint that doesn't yet include
+    // this doc_type (e.g. 'approved_artwork'), store it as 'other' so the upload
+    // still succeeds instead of hard-failing.
+    if (error && /check|constraint|invalid input value|violates/i.test(error.message || '')) {
+      ({ data, error } = await db.from('order_documents').insert({ ...baseRow, doc_type: 'other' }).select('*').single());
+    }
     if (error) return Response.json({ error: error.message }, { status: 500 });
     return Response.json({ document: data });
   } catch (e) {
