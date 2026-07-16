@@ -259,6 +259,26 @@ export default function AdminOrdersPage() {
     } catch { alert('Could not save'); }
   }
 
+  // Credit-note / balance adjustment lines (ex-GST, signed): − credit, + charge.
+  const [adjRows, setAdjRows] = useState([]);
+  const setAdjRow = (idx, k, v) => setAdjRows(p => p.map((r, j) => j === idx ? { ...r, [k]: v } : r));
+  const addAdjRow = () => setAdjRows(p => [...p, { desc: '', amount: '' }]);
+  const removeAdjRow = (idx) => setAdjRows(p => p.filter((_, j) => j !== idx));
+  async function saveAdjustments() {
+    const adjustments = adjRows.map(r => ({ desc: r.desc, amount: Number(r.amount) || 0 })).filter(r => r.desc || r.amount);
+    try {
+      const res = await fetch('/api/admin/orders/adjustments', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selected.id, adjustments }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { alert('Could not save: ' + (data.error || '')); return; }
+      setSelected(data.order);
+      setOrders(prev => prev.map(o => o.id === selected.id ? data.order : o));
+      alert('Adjustments saved ✅');
+    } catch { alert('Could not save'); }
+  }
+
   async function uploadItemDoc(index, docType, file) {
     if (!file || !selected) return;
     setDocBusy(`${index}:${docType}`);
@@ -340,6 +360,9 @@ export default function AdminOrdersPage() {
     fetchShipments(order.id);
     setFreightEdit({});
     fetchDocs(order.invoice_number || order.order_number);
+    setAdjRows(Array.isArray(order.adjustments) && order.adjustments.length
+      ? order.adjustments.map(a => ({ desc: a.desc || '', amount: String(a.amount ?? '') }))
+      : []);
   }
 
   async function setItemStatus(index, status) {
@@ -799,25 +822,40 @@ export default function AdminOrdersPage() {
                 <span style={{ fontSize: '11px', color: '#7A7570', alignSelf: 'center' }}>Opens a PDF you can save or send to the customer.</span>
               </div>
 
-              {/* ADJUSTMENT — final spec changed after payment → credit / balance */}
-              {selected.amount_paid != null && Math.abs((Number(selected.total) || 0) - Number(selected.amount_paid)) >= 0.01 && (() => {
-                const paidAmt = Number(selected.amount_paid);
-                const delta = Math.round(((Number(selected.total) || 0) - paidAmt) * 100) / 100;
-                const credit = delta < 0;
+              {/* CREDIT NOTE / BALANCE — record spec-change adjustments (ex-GST, − credit / + charge) */}
+              {(() => {
+                const net = Math.round(adjRows.reduce((s, r) => s + (Number(r.amount) || 0), 0) * 100) / 100;
+                const credit = net < 0;
+                const gstAdj = Math.round(net * 0.10 * 100) / 100;
+                const totalAdj = Math.round((net + gstAdj) * 100) / 100;
                 return (
-                  <div style={{ marginTop: '14px', background: credit ? '#F0FDF4' : '#FFFBEB', border: `1px solid ${credit ? '#BBF7D0' : '#FDE68A'}`, borderRadius: '10px', padding: '12px 14px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Order adjustment (final spec changed)</div>
-                    <div style={{ fontSize: '13px', color: '#000', marginBottom: '2px' }}>Customer paid: <strong>{fmt(paidAmt)}</strong> · Revised total: <strong>{fmt(selected.total)}</strong></div>
-                    <div style={{ fontSize: '15px', fontWeight: 700, color: credit ? '#166534' : '#92400E', marginBottom: '10px' }}>
-                      {credit ? `↩ Credit due to customer: ${fmt(Math.abs(delta))}` : `➕ Balance owing from customer: ${fmt(delta)}`}
+                  <div style={{ marginTop: '14px', background: '#FAF8F4', borderRadius: '10px', padding: '12px 14px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Credit note / adjustment (spec changes — ex GST)</div>
+                    {adjRows.map((r, idx) => (
+                      <div key={idx} style={{ display: 'flex', gap: '6px', marginBottom: '6px', alignItems: 'center' }}>
+                        <input value={r.desc} onChange={e => setAdjRow(idx, 'desc', e.target.value)} placeholder="e.g. Pen: pad print → digital print" style={{ ...shipInput, flex: 1, minWidth: '180px' }} />
+                        <input value={r.amount} onChange={e => setAdjRow(idx, 'amount', e.target.value)} inputMode="decimal" placeholder="± $" style={{ ...shipInput, width: '90px', textAlign: 'right' }} />
+                        <button onClick={() => removeAdjRow(idx)} style={{ background: 'none', border: 'none', color: '#B4413E', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}>✕</button>
+                      </div>
+                    ))}
+                    <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '8px' }}>Enter each change: <strong>−</strong> credit to customer (cheaper), <strong>+</strong> extra charge (dearer). Amounts are ex GST.</div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '8px' }}>
+                      <button onClick={addAdjRow} style={miniBtn('#fff', NAVY, NAVY)}>＋ Add line</button>
+                      <button onClick={saveAdjustments} style={miniBtn(NAVY, '#fff')}>Save adjustments</button>
                     </div>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                      <input value={cnReason} onChange={e => setCnReason(e.target.value)} placeholder="Reason (e.g. Pen: pad print → digital print)" style={{ ...shipInput, flex: 1, minWidth: '220px' }} />
-                      <button onClick={() => window.open(`/api/admin/orders/credit-note-pdf?id=${selected.id}&reason=${encodeURIComponent(cnReason)}`, '_blank')}
-                        style={{ padding: '9px 16px', borderRadius: '8px', background: NAVY, color: '#fff', border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
-                        {credit ? '🧾 Generate Credit Note' : '🧾 Generate Balance Invoice'}
-                      </button>
-                    </div>
+                    {Math.abs(net) >= 0.01 && (
+                      <div style={{ background: credit ? '#F0FDF4' : '#FFFBEB', border: `1px solid ${credit ? '#BBF7D0' : '#FDE68A'}`, borderRadius: '8px', padding: '10px 12px' }}>
+                        <div style={{ fontSize: '12px', color: '#000' }}>Net ex GST: <strong>{fmt(net)}</strong> · GST: <strong>{fmt(gstAdj)}</strong></div>
+                        <div style={{ fontSize: '15px', fontWeight: 700, color: credit ? '#166534' : '#92400E', margin: '4px 0 8px' }}>
+                          {credit ? `↩ Credit due to customer: ${fmt(Math.abs(totalAdj))} (inc GST)` : `➕ Balance owing from customer: ${fmt(totalAdj)} (inc GST)`}
+                        </div>
+                        <button onClick={() => window.open(`/api/admin/orders/credit-note-pdf?id=${selected.id}`, '_blank')}
+                          style={{ padding: '9px 16px', borderRadius: '8px', background: NAVY, color: '#fff', border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                          {credit ? '🧾 Generate Credit Note' : '🧾 Generate Balance Invoice'}
+                        </button>
+                        <span style={{ fontSize: '11px', color: '#7A7570', marginLeft: '8px' }}>Save first, then generate.</span>
+                      </div>
+                    )}
                   </div>
                 );
               })()}
