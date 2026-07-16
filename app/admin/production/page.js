@@ -46,6 +46,13 @@ export default function AdminProductionPage() {
   const [poFor, setPoFor] = useState(null);
   const [editingPoId, setEditingPoId] = useState(null);
   const [supplierId, setSupplierId] = useState('');
+  const [catQuery, setCatQuery]     = useState('');
+  const [catResults, setCatResults] = useState([]);
+  const [catBusy, setCatBusy]       = useState(false);
+  const [catPick, setCatPick]       = useState(null);
+  const [catQty, setCatQty]         = useState('');
+  const [catDeco, setCatDeco]       = useState({});
+  const [catSize, setCatSize]       = useState({});
   const [newSupplier, setNewSupplier] = useState('');
   const [newSupplierTerms, setNewSupplierTerms] = useState('prepaid');
   const [lines, setLines] = useState([]);
@@ -109,6 +116,48 @@ export default function AdminProductionPage() {
   function updateLine(i, k, v) { setLines(ls => ls.map((l, idx) => idx === i ? { ...l, [k]: v } : l)); }
   function addLine() { setLines(ls => [...ls, { stockCode: '', name: '', qty: 1, unitCost: '', branding: '' }]); }
   function removeLine(i) { setLines(ls => ls.filter((_, idx) => idx !== i)); }
+
+  // ── Cost-from-catalog (search SKU → auto-fill supplier COST line, no margin) ──
+  async function searchCatalog() {
+    const q = catQuery.trim();
+    if (!q) return;
+    setCatBusy(true); setCatPick(null);
+    try {
+      const r = await fetch(`/api/admin/products/cost-lookup?q=${encodeURIComponent(q)}`).then(x => x.json());
+      setCatResults(Array.isArray(r.products) ? r.products : []);
+    } catch { setCatResults([]); }
+    setCatBusy(false);
+  }
+  function pickCatProduct(p) {
+    setCatPick(p);
+    setCatQty(String(p.tiers?.[0]?.minQty || 1));
+    setCatDeco({}); setCatSize({});
+  }
+  function catBaseFor(p, qty) {
+    const n = Number(qty) || 0;
+    const tiers = p?.tiers || [];
+    let t = tiers.find(x => n >= (x.minQty || 0) && (x.maxQty == null || n <= x.maxQty));
+    if (!t) t = tiers[tiers.length - 1] || tiers[0];
+    return t ? t.base : 0;
+  }
+  function addCatToLines() {
+    const p = catPick; if (!p) return;
+    const sizeTotal = Object.values(catSize).reduce((s, v) => s + (Number(v) || 0), 0);
+    const qty = (p.sizes?.length && sizeTotal) ? sizeTotal : (Number(catQty) || 0);
+    if (!qty) { alert('请填数量'); return; }
+    const base = catBaseFor(p, qty);
+    let perUnit = base, setup = 0;
+    (p.decorations || []).forEach(d => { if (catDeco[d.id]) { perUnit += d.perUnit; if (d.hasSetup) setup += d.setupFee; } });
+    let sizeSurcharge = 0;
+    Object.entries(catSize).forEach(([sz, q]) => { sizeSurcharge += (Number(p.sizePricing?.[sz]) || 0) * (Number(q) || 0); });
+    const sizeNote = (p.sizes?.length && sizeTotal) ? ' · ' + Object.entries(catSize).filter(([, q]) => Number(q) > 0).map(([s, q]) => `${q}×${s}`).join(', ') : '';
+    const decoNote = (p.decorations || []).filter(d => catDeco[d.id]).map(d => d.name).join(' + ');
+    const newLines = [{ stockCode: p.sku || '', name: p.name + (decoNote ? ` (${decoNote})` : '') + sizeNote, qty, unitCost: Math.round(perUnit * 100) / 100, branding: decoNote }];
+    if (setup > 0) newLines.push({ stockCode: '', name: 'Setup / plate', qty: 1, unitCost: Math.round(setup * 100) / 100, branding: '' });
+    if (sizeSurcharge > 0) newLines.push({ stockCode: '', name: 'Oversize surcharge', qty: 1, unitCost: Math.round(sizeSurcharge * 100) / 100, branding: '' });
+    setLines(ls => [...ls.filter(l => l.name || l.stockCode || l.unitCost), ...newLines]);
+    setCatPick(null); setCatResults([]); setCatQuery('');
+  }
 
   const subtotalOf = () => lines.reduce((s, l) => s + (Number(l.qty) || 0) * (Number(l.unitCost) || 0), 0);
 
@@ -255,6 +304,65 @@ export default function AdminProductionPage() {
                 <option value="account">New supplier terms: Monthly account</option>
               </select>
             )}
+
+            {/* Cost from catalog — search SKU → auto-fill supplier COST (no margin) */}
+            <div style={{ background: '#FDFBF7', border: '1px dashed #D8CFC0', borderRadius: '8px', padding: '10px', marginBottom: '10px' }}>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: NAVY, marginBottom: '6px' }}>🔍 从目录算成本(搜 SKU / 名称,自动填成本行)</div>
+              <div style={{ display: 'flex', gap: '6px' }}>
+                <input value={catQuery} onChange={e => setCatQuery(e.target.value)} onKeyDown={e => e.key === 'Enter' && searchCatalog()} placeholder="SKU 或 产品名"
+                  style={{ flex: 1, padding: '8px 10px', border: '1px solid #E0DDD7', borderRadius: '6px', fontSize: '13px', boxSizing: 'border-box' }} />
+                <button onClick={searchCatalog} disabled={catBusy} style={{ background: NAVY, color: '#fff', border: 'none', borderRadius: '6px', padding: '8px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>{catBusy ? '…' : '搜'}</button>
+              </div>
+              {catResults.length > 0 && !catPick && (
+                <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                  {catResults.map(p => (
+                    <button key={p.id} onClick={() => pickCatProduct(p)} style={{ textAlign: 'left', background: '#fff', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '6px 8px', fontSize: '12px', cursor: 'pointer', color: NAVY }}>
+                      <b>{p.sku || '—'}</b> · {p.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {catPick && (
+                <div style={{ marginTop: '8px', borderTop: '1px solid #E9E3D8', paddingTop: '8px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: NAVY, marginBottom: '4px' }}>{catPick.sku} · {catPick.name}</div>
+                  {!(catPick.sizes && catPick.sizes.length) && (
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '6px' }}>
+                      <span style={{ fontSize: '12px', color: '#000' }}>数量</span>
+                      <input type="number" value={catQty} onChange={e => setCatQty(e.target.value)} style={{ width: '80px', padding: '6px', border: '1px solid #E0DDD7', borderRadius: '6px', fontSize: '13px' }} />
+                      <span style={{ fontSize: '11px', color: '#000' }}>底价 ${catBaseFor(catPick, catQty).toFixed(2)}/件</span>
+                    </div>
+                  )}
+                  {catPick.sizes && catPick.sizes.length > 0 && (
+                    <div style={{ marginBottom: '6px' }}>
+                      <div style={{ fontSize: '11px', color: '#000', marginBottom: '3px' }}>按尺码填数量:</div>
+                      <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                        {catPick.sizes.map(sz => (
+                          <div key={sz} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <span style={{ fontSize: '10px', color: '#000' }}>{sz}{catPick.sizePricing && catPick.sizePricing[sz] ? ` +$${catPick.sizePricing[sz]}` : ''}</span>
+                            <input type="number" value={catSize[sz] || ''} onChange={e => setCatSize(s => ({ ...s, [sz]: e.target.value }))} style={{ width: '48px', padding: '5px', border: '1px solid #E0DDD7', borderRadius: '5px', fontSize: '12px', textAlign: 'center' }} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {catPick.decorations && catPick.decorations.length > 0 && (
+                    <div style={{ marginBottom: '6px' }}>
+                      <div style={{ fontSize: '11px', color: '#000', marginBottom: '3px' }}>印刷方式(可多选):</div>
+                      {catPick.decorations.map(d => (
+                        <label key={d.id} style={{ display: 'block', fontSize: '12px', color: '#000', marginBottom: '2px', cursor: 'pointer' }}>
+                          <input type="checkbox" checked={!!catDeco[d.id]} onChange={e => setCatDeco(x => ({ ...x, [d.id]: e.target.checked }))} /> {d.name} <span style={{ color: '#7A7570' }}>(+${d.perUnit.toFixed(2)}/件{d.hasSetup ? ` · 版费 $${d.setupFee}` : ''})</span>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button onClick={addCatToLines} style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '6px', padding: '7px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>加入 PO(成本)</button>
+                    <button onClick={() => setCatPick(null)} style={{ background: '#fff', color: '#7A7570', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '7px 12px', fontSize: '12px', cursor: 'pointer' }}>取消</button>
+                  </div>
+                  <div style={{ fontSize: '10px', color: '#7A7570', marginTop: '5px' }}>算出的是"我们的成本"(底价+印刷+开版,不加 margin),加入后仍可手改。</div>
+                </div>
+              )}
+            </div>
 
             <label style={{ fontSize: '11px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Cost lines (supplier's prices)</label>
             <div style={{ marginTop: '6px', marginBottom: '8px' }}>
