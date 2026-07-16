@@ -21,8 +21,9 @@ export async function POST(request) {
   const user = await getAdminUser(request);
   if (!user) return unauthorized();
   try {
-    const { orderId, index, parcelIndex = 0, to } = await request.json();
+    const { orderId, index, parcelIndex = 0, to, type = 'shipped' } = await request.json();
     if (!orderId || index == null) return Response.json({ error: 'Missing fields' }, { status: 400 });
+    const delivered = type === 'delivered';
 
     const db = sourcingDb();
     const { data: order } = await db.from('orders').select('*').eq('id', orderId).single();
@@ -46,9 +47,12 @@ export async function POST(request) {
     const trackUrl = (carrier && tracking && TRACK_URL[carrier]) ? TRACK_URL[carrier](tracking) : '';
 
     const greetName = (pc.recipient || order.customer_name || 'there');
+    const lead = delivered
+      ? `<strong>${productName}</strong> from your order has been <strong>delivered</strong>${address ? ` to <strong>${address}</strong>` : ''}. We hope it's perfect!`
+      : `<strong>${productName}</strong> from your order has been dispatched${address ? ` to <strong>${address}</strong>` : ''}.`;
     const body = `
       <p style="font-size:15px;margin:0 0 16px;">Hi ${greetName},</p>
-      <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">Good news — <strong>${productName}</strong> from your order has been dispatched${address ? ` to <strong>${address}</strong>` : ''}.</p>
+      <p style="font-size:15px;line-height:1.6;margin:0 0 16px;">${delivered ? 'Great news' : 'Good news'} — ${lead}</p>
       <div style="background:#ffffff;border-radius:10px;padding:14px 18px;margin:16px 0;font-size:14px;">
         <table style="width:100%;font-size:14px;">
           <tr><td style="color:#7A7570;padding:3px 0;">Item</td><td style="text-align:right;font-weight:600;color:#1B2A4A;">${lineRef}</td></tr>
@@ -56,14 +60,15 @@ export async function POST(request) {
           ${tracking ? `<tr><td style="color:#7A7570;padding:3px 0;">Tracking</td><td style="text-align:right;font-weight:600;font-family:monospace;">${tracking}</td></tr>` : ''}
         </table>
       </div>
-      ${trackUrl ? `<div style="text-align:center;margin:24px 0;"><a href="${trackUrl}" style="display:inline-block;background:#C9A96E;color:#fff;text-decoration:none;padding:13px 34px;border-radius:10px;font-weight:700;font-size:15px;">Track your parcel →</a></div>` : ''}
+      ${(!delivered && trackUrl) ? `<div style="text-align:center;margin:24px 0;"><a href="${trackUrl}" style="display:inline-block;background:#C9A96E;color:#fff;text-decoration:none;padding:13px 34px;border-radius:10px;font-weight:700;font-size:15px;">Track your parcel -&gt;</a></div>` : ''}
+      ${delivered ? `<p style="font-size:14px;line-height:1.6;color:#3D3A36;margin:0 0 16px;">If anything isn't quite right, just let us know within 7 days and we'll sort it out.</p>` : ''}
       <p style="font-size:14px;line-height:1.6;color:#3D3A36;margin:16px 0 0;">Any questions, just reply or call us on <strong>02 9477 4748</strong>.</p>`;
 
     await resend.emails.send({
       from: 'QuirkyPromo <noreply@quirkypromo.com.au>',
       replyTo: 'hello@quirkypromo.com.au',
       to: [recipient],
-      subject: `Your order ${lineRef} has shipped`,
+      subject: delivered ? `Your order ${lineRef} has been delivered` : `Your order ${lineRef} has shipped`,
       html: quirkyEmail(body),
     });
 
@@ -71,7 +76,7 @@ export async function POST(request) {
     const items = order.items.map((it, i) => {
       if (i !== idx) return it;
       const ps = Array.isArray(it.parcels) ? it.parcels.slice() : [];
-      if (ps[Number(parcelIndex)]) ps[Number(parcelIndex)] = { ...ps[Number(parcelIndex)], notified_at: new Date().toISOString(), notifyEmail: recipient };
+      if (ps[Number(parcelIndex)]) ps[Number(parcelIndex)] = { ...ps[Number(parcelIndex)], [delivered ? 'delivered_notified_at' : 'notified_at']: new Date().toISOString(), notifyEmail: recipient };
       return { ...it, parcels: ps };
     });
     await db.from('orders').update({ items }).eq('id', orderId);

@@ -4,6 +4,17 @@ import { generateOrderDocPDF, QUIRKY_BANK } from '@/lib/orderDocPdf';
 
 const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 
+// pdf-lib's standard fonts are WinAnsi (Latin-1) only — arrows / em-dashes /
+// smart quotes crash encoding. Map the common ones, strip anything else > 0xFF.
+const winSafe = (s) => String(s || '')
+  .replace(/[→⟶➔➜]/g, '->')
+  .replace(/[←]/g, '<-')
+  .replace(/[–—]/g, '-')
+  .replace(/[“”]/g, '"')
+  .replace(/[‘’]/g, "'")
+  .replace(/[×]/g, 'x')
+  .replace(/[^\x00-\xff]/g, '');
+
 // GET ?id=<order id>&reason=... → a Credit Note (customer overpaid after a
 // spec change) OR an Adjustment / Balance-due note (customer owes more).
 // The amount is the difference between the revised order total and what the
@@ -36,7 +47,7 @@ export async function GET(request) {
     const docType = credit ? 'CREDIT NOTE' : 'ADJUSTMENT - BALANCE DUE';
 
     const items = adj.map((a) => ({
-      stockCode: '', name: a.desc || 'Adjustment', colour: '', branding: '', addons: [],
+      stockCode: '', name: winSafe(a.desc || 'Adjustment'), colour: '', branding: '', addons: [],
       qty: 1, unit: round2(a.amount), lineTotal: round2(a.amount),
     }));
 
@@ -45,10 +56,10 @@ export async function GET(request) {
       orderNumber,
       date: new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
       customer: {
-        company: order.customer_company || '', name: order.customer_name || '',
-        email: order.customer_email || '', phone: order.customer_phone || '',
+        company: winSafe(order.customer_company || ''), name: winSafe(order.customer_name || ''),
+        email: winSafe(order.customer_email || ''), phone: winSafe(order.customer_phone || ''),
       },
-      deliveryAddress: order.delivery_address || '',
+      deliveryAddress: winSafe(order.delivery_address || ''),
       items,
       subtotal: net,
       shipping: 0,
