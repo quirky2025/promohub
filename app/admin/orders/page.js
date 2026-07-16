@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 import OrderDocuments from '@/components/OrderDocuments';
+import { tierMargin, SHIPPING, GST } from '@/lib/pricing';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -69,6 +70,8 @@ export default function AdminOrdersPage() {
   const [shipBusy, setShipBusy]       = useState(false);
   const [editShipId, setEditShipId]   = useState(null);
   const [editShipForm, setEditShipForm] = useState({});
+  const [showNew, setShowNew]         = useState(false);
+  const [artworkBusy, setArtworkBusy] = useState(false);
 
   useEffect(() => { fetchOrders(); }, [statusFilter]);
 
@@ -148,6 +151,25 @@ export default function AdminOrdersPage() {
       await applyItemArtwork(index, { approved: true, fileUrl: upData.document?.file_url, fileName: upData.document?.file_name });
     } catch { alert('Upload failed'); }
     setArtBusyIdx(null);
+  }
+
+  // Create one artwork card per product for this order (old/offline orders that
+  // have no artwork records yet) → they appear on the Artwork Management board.
+  async function sendForArtworkApproval() {
+    if (!selected) return;
+    setArtworkBusy(true);
+    try {
+      const res = await fetch('/api/admin/orders/create-artworks', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selected.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) { alert('Failed: ' + (data.error || '')); setArtworkBusy(false); return; }
+      alert(data.created > 0
+        ? `Created ${data.created} artwork card(s). Go to Artwork Management to upload & send each product's proof.`
+        : 'Artwork cards already exist for every product — open Artwork Management to send the proofs.');
+    } catch { alert('Failed'); }
+    setArtworkBusy(false);
   }
 
   async function saveDetails(id) {
@@ -287,6 +309,10 @@ export default function AdminOrdersPage() {
           <Link href="/admin" style={{ color: 'rgba(255,255,255,.5)', fontSize: '13px', textDecoration: 'none' }}>← Admin</Link>
           <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: '#fff', margin: 0 }}>Orders</h1>
           <span style={{ background: GOLD, color: '#fff', fontSize: '12px', fontWeight: 700, padding: '3px 10px', borderRadius: '20px' }}>{orders.length}</span>
+          <button onClick={() => setShowNew(true)}
+            style={{ background: '#fff', color: NAVY, border: 'none', borderRadius: '8px', padding: '7px 16px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+            ＋ New Order
+          </button>
         </div>
         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
           <button onClick={() => setStatusFilter('')}
@@ -437,6 +463,16 @@ export default function AdminOrdersPage() {
                 </div>
               );
             })()}
+
+            {/* SEND PRODUCTS FOR ONLINE ARTWORK APPROVAL */}
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap' }}>
+              <button onClick={sendForArtworkApproval} disabled={artworkBusy}
+                style={{ background: NAVY, color: '#fff', border: 'none', borderRadius: '8px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, cursor: artworkBusy ? 'wait' : 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                {artworkBusy ? '⏳ Creating…' : '🎨 Send for artwork approval'}
+              </button>
+              <Link href="/admin/artworks" style={{ fontSize: '12px', color: GOLD, fontWeight: 700, textDecoration: 'none' }}>Open Artwork Management →</Link>
+              <span style={{ fontSize: '11px', color: '#7A7570' }}>Creates one proof card per product; upload &amp; send each from the Artwork board.</span>
+            </div>
 
             {/* ORDER ITEMS */}
             <Section title="📦 Order Items">
@@ -728,6 +764,8 @@ export default function AdminOrdersPage() {
           </div>
         )}
       </div>
+
+      {showNew && <NewOrderModal onClose={() => setShowNew(false)} onCreated={() => { setShowNew(false); fetchOrders(); }} />}
     </div>
   );
 }
@@ -753,6 +791,156 @@ function Row({ label, value, bold }) {
     <div style={{ display: 'flex', gap: '12px', marginBottom: '8px', fontSize: '13px' }}>
       <span style={{ color: '#7A7570', width: '140px', flexShrink: 0 }}>{label}</span>
       <span style={{ color: '#1B2A4A', fontWeight: bold ? 700 : 400, flex: 1 }}>{value}</span>
+    </div>
+  );
+}
+
+// ─── New Order (backend create for old / offline customers) ───
+const niStyle = { width: '100%', padding: '9px 11px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', color: '#000', boxSizing: 'border-box', background: '#fff', outline: 'none' };
+const niLabel = { fontSize: '11px', fontWeight: 700, color: '#1B2A4A', marginBottom: '4px', display: 'block' };
+const money2 = (n) => '$' + (Number(n) || 0).toFixed(2);
+function blankNewItem() { return { sku: '', name: '', colour: '', branding: '', qty: '', unitPrice: '', tiers: null, results: [], searching: false }; }
+
+// Sell unit price for a qty from catalog cost tiers (base cost × tier margin).
+function sellFromTiers(tiers, qty) {
+  if (!Array.isArray(tiers) || !tiers.length) return 0;
+  let idx = 0;
+  for (let i = 0; i < tiers.length; i++) { if ((Number(qty) || 0) >= (tiers[i].minQty || 0)) idx = i; }
+  const t = tiers[idx];
+  return Math.round((t.base || 0) * tierMargin(idx) * 100) / 100;
+}
+
+function NewOrderModal({ onClose, onCreated }) {
+  const [cust, setCust] = useState({ name: '', company: '', email: '', phone: '', address: '' });
+  const [items, setItems] = useState([blankNewItem()]);
+  const [shipping, setShipping] = useState('');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState('');
+
+  const setC = (k, v) => setCust(p => ({ ...p, [k]: v }));
+  const setI = (i, patch) => setItems(prev => prev.map((it, j) => j === i ? { ...it, ...patch } : it));
+  const addRow = () => setItems(prev => [...prev, blankNewItem()]);
+  const delRow = (i) => setItems(prev => prev.length > 1 ? prev.filter((_, j) => j !== i) : prev);
+
+  async function searchSku(i, q) {
+    setI(i, { sku: q });
+    if (!q || q.trim().length < 2) { setI(i, { results: [] }); return; }
+    setI(i, { searching: true });
+    try {
+      const res = await fetch(`/api/admin/products/cost-lookup?q=${encodeURIComponent(q.trim())}`);
+      const data = await res.json();
+      setI(i, { results: Array.isArray(data.products) ? data.products.slice(0, 8) : [], searching: false });
+    } catch { setI(i, { results: [], searching: false }); }
+  }
+
+  function pick(i, p) {
+    const qty = Number(items[i].qty) || (p.tiers?.[0]?.minQty) || 1;
+    const unit = sellFromTiers(p.tiers, qty);
+    setI(i, { sku: p.sku || '', name: p.name || '', tiers: p.tiers || [], results: [], qty: String(qty), unitPrice: unit ? String(unit) : items[i].unitPrice });
+  }
+
+  // Qty change re-derives the auto sell price (still editable afterwards).
+  function setQty(i, v) {
+    const it = items[i];
+    const patch = { qty: v };
+    if (it.tiers && it.tiers.length) { const u = sellFromTiers(it.tiers, Number(v) || 0); if (u) patch.unitPrice = String(u); }
+    setI(i, patch);
+  }
+
+  const lineTotal = (it) => (Number(it.qty) || 0) * (Number(it.unitPrice) || 0);
+  const subtotal = Math.round(items.reduce((s, it) => s + lineTotal(it), 0) * 100) / 100;
+  const nLines = items.filter(it => (it.name || it.sku)).length || items.length;
+  const shipVal = shipping === '' ? SHIPPING * nLines : (Number(shipping) || 0);
+  const gst = Math.round((subtotal + shipVal) * GST * 100) / 100;
+  const total = Math.round((subtotal + shipVal + gst) * 100) / 100;
+
+  async function submit() {
+    setErr('');
+    if (!cust.name.trim() || !cust.email.trim()) { setErr('Customer name and email are required.'); return; }
+    const good = items.filter(it => (it.name || it.sku) && (Number(it.qty) > 0));
+    if (!good.length) { setErr('Add at least one product with a quantity.'); return; }
+    setBusy(true);
+    try {
+      const payload = {
+        customer: cust,
+        items: good.map(it => ({ productName: it.name || it.sku, sku: it.sku, colour: it.colour, branding: it.branding, qty: Number(it.qty) || 1, unitPrice: Number(it.unitPrice) || 0, subtotal: Math.round(lineTotal(it) * 100) / 100 })),
+        subtotal, shipping: shipVal, gst, total, paymentMethod: 'eft', paymentTerms: 'prepaid', makeArtworks: true,
+      };
+      const res = await fetch('/api/admin/orders/create', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      if (!res.ok) { setErr(data.error || 'Failed to create order'); setBusy(false); return; }
+      alert(`Order ${data.orderNumber} created` + (data.artworks ? ` · ${data.artworks} artwork card(s) — send proofs from Artwork Management.` : '.'));
+      onCreated();
+    } catch { setErr('Failed to create order'); setBusy(false); }
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(27,42,74,0.55)', zIndex: 1200, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '24px', overflowY: 'auto' }}>
+      <div style={{ background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '760px', boxShadow: '0 24px 64px rgba(27,42,74,0.3)', marginBottom: '40px' }}>
+        <div style={{ background: NAVY, color: '#fff', padding: '16px 24px', borderRadius: '16px 16px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'sticky', top: 0 }}>
+          <div style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', fontWeight: 600 }}>New Order — offline / old customer</div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '22px', cursor: 'pointer' }}>✕</button>
+        </div>
+
+        <div style={{ padding: '20px 24px', fontFamily: '"DM Sans", sans-serif' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+            <div><label style={niLabel}>Customer name *</label><input style={niStyle} value={cust.name} onChange={e => setC('name', e.target.value)} /></div>
+            <div><label style={niLabel}>Company</label><input style={niStyle} value={cust.company} onChange={e => setC('company', e.target.value)} /></div>
+            <div><label style={niLabel}>Email *</label><input style={niStyle} value={cust.email} onChange={e => setC('email', e.target.value)} /></div>
+            <div><label style={niLabel}>Phone</label><input style={niStyle} value={cust.phone} onChange={e => setC('phone', e.target.value)} /></div>
+          </div>
+          <div style={{ marginBottom: '16px' }}><label style={niLabel}>Delivery address</label><input style={niStyle} value={cust.address} onChange={e => setC('address', e.target.value)} placeholder="Street, suburb, state, postcode" /></div>
+
+          <div style={{ fontSize: '12px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Products</div>
+          {items.map((it, i) => (
+            <div key={i} style={{ border: '1px solid #ECE8E1', borderRadius: '10px', padding: '12px', marginBottom: '10px', position: 'relative' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+                <div style={{ position: 'relative' }}>
+                  <label style={niLabel}>SKU (search catalog)</label>
+                  <input style={niStyle} value={it.sku} onChange={e => searchSku(i, e.target.value)} placeholder="Type SKU or name…" />
+                  {it.results && it.results.length > 0 && (
+                    <div style={{ position: 'absolute', zIndex: 5, top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #E0DDD7', borderRadius: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.12)', maxHeight: '200px', overflowY: 'auto' }}>
+                      {it.results.map(p => (
+                        <div key={p.id} onClick={() => pick(i, p)} style={{ padding: '8px 10px', cursor: 'pointer', fontSize: '12px', borderBottom: '1px solid #F0EEED' }}>
+                          <strong style={{ color: NAVY }}>{p.sku}</strong> — {p.name}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <div><label style={niLabel}>Product name</label><input style={niStyle} value={it.name} onChange={e => setI(i, { name: e.target.value })} /></div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.4fr 0.7fr 1fr 0.9fr', gap: '8px', alignItems: 'end' }}>
+                <div><label style={niLabel}>Colour</label><input style={niStyle} value={it.colour} onChange={e => setI(i, { colour: e.target.value })} /></div>
+                <div><label style={niLabel}>Branding</label><input style={niStyle} value={it.branding} onChange={e => setI(i, { branding: e.target.value })} placeholder="e.g. Pad print 2 col" /></div>
+                <div><label style={niLabel}>Qty</label><input style={niStyle} inputMode="numeric" value={it.qty} onChange={e => setQty(i, e.target.value)} /></div>
+                <div><label style={niLabel}>Unit $ ex GST</label><input style={niStyle} inputMode="decimal" value={it.unitPrice} onChange={e => setI(i, { unitPrice: e.target.value })} /></div>
+                <div style={{ textAlign: 'right', fontSize: '13px', fontWeight: 700, color: NAVY, paddingBottom: '9px' }}>{money2(lineTotal(it))}</div>
+              </div>
+              {items.length > 1 && <button onClick={() => delRow(i)} style={{ position: 'absolute', top: '8px', right: '8px', background: 'none', border: 'none', color: '#B4413E', cursor: 'pointer', fontSize: '11px', fontWeight: 700 }}>Remove</button>}
+            </div>
+          ))}
+          <button onClick={addRow} style={{ background: '#fff', border: `1.5px solid ${NAVY}`, color: NAVY, borderRadius: '8px', padding: '7px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', marginBottom: '16px' }}>＋ Add product</button>
+
+          <div style={{ background: '#FAF8F4', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}><span style={{ color: '#7A7570' }}>Subtotal (excl GST)</span><strong style={{ color: NAVY }}>{money2(subtotal)}</strong></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px', alignItems: 'center' }}>
+              <span style={{ color: '#7A7570' }}>Shipping (${SHIPPING}/item · {nLines} item{nLines !== 1 ? 's' : ''})</span>
+              <input style={{ ...niStyle, width: '90px', textAlign: 'right' }} inputMode="decimal" value={shipping} onChange={e => setShipping(e.target.value)} placeholder={String(SHIPPING * nLines)} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}><span style={{ color: '#7A7570' }}>GST (10%)</span><strong style={{ color: NAVY }}>{money2(gst)}</strong></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', borderTop: '1px solid #E0DDD7', paddingTop: '8px' }}><span style={{ color: NAVY, fontWeight: 700 }}>Total (incl GST)</span><strong style={{ color: NAVY }}>{money2(total)}</strong></div>
+          </div>
+
+          {err && <div style={{ background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px', padding: '10px 14px', fontSize: '13px', color: '#B4413E', marginBottom: '12px' }}>{err}</div>}
+
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+            <button onClick={onClose} style={{ background: '#fff', border: '1.5px solid #E0DDD7', color: NAVY, borderRadius: '9px', padding: '11px 18px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+            <button onClick={submit} disabled={busy} style={{ background: busy ? '#D9CDB4' : GOLD, border: 'none', color: '#fff', borderRadius: '9px', padding: '11px 22px', fontSize: '13px', fontWeight: 700, cursor: busy ? 'wait' : 'pointer' }}>{busy ? '⏳ Creating…' : 'Create order + artwork cards'}</button>
+          </div>
+          <div style={{ fontSize: '11px', color: '#7A7570', marginTop: '10px', textAlign: 'right' }}>Creates a confirmed order (EFT · unpaid) + one artwork card per product. No email is sent to the customer.</div>
+        </div>
+      </div>
     </div>
   );
 }
