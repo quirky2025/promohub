@@ -250,7 +250,7 @@ export async function POST(req) {
       notes: notesCombined,
       subtotal: subtotal || 0,
       gst: gst || 0,
-      shipping: shipping || 30,
+      shipping: shipping || 25,
       total: total || 0,
       status: body.status || 'pending',
       valid_until: validUntil,
@@ -277,7 +277,7 @@ export async function POST(req) {
       addons: extraOptions?.join(', ') || '',
       unitPrice: unitPrice || 0,
       subtotal: subtotal || 0,
-      shipping: shipping || 30,
+      shipping: shipping || 25,
       gst: gst || 0,
       total: total || 0,
       deliveryAddress: deliveryAddress || '',
@@ -323,7 +323,7 @@ export async function POST(req) {
           <table style="width: 100%; font-size: 14px; margin-bottom: 24px;">
             <tr><td style="color: #7A7570; padding: 4px 0;">Unit Price (excl. GST)</td><td style="text-align: right; font-family: monospace;">$${(unitPrice||0).toFixed(2)}</td></tr>
             <tr><td style="color: #7A7570; padding: 4px 0;">Subtotal</td><td style="text-align: right; font-family: monospace;">$${(subtotal||0).toFixed(2)}</td></tr>
-            <tr><td style="color: #7A7570; padding: 4px 0;">Shipping</td><td style="text-align: right; font-family: monospace;">$${(shipping||30).toFixed(2)}</td></tr>
+            <tr><td style="color: #7A7570; padding: 4px 0;">Shipping</td><td style="text-align: right; font-family: monospace;">$${(shipping||25).toFixed(2)}</td></tr>
             <tr><td style="color: #7A7570; padding: 4px 0;">GST (10%)</td><td style="text-align: right; font-family: monospace;">$${(gst||0).toFixed(2)}</td></tr>
             <tr style="font-weight: 700; border-top: 2px solid #E0DDD7;"><td style="padding: 8px 0; color: #1B2A4A;">Total (incl. GST)</td><td style="text-align: right; color: #C9A96E; font-family: monospace;">$${(total||0).toFixed(2)}</td></tr>
           </table>

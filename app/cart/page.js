@@ -36,8 +36,9 @@ export default function CartPage() {
   }
 
   const totalSubtotal = cart.reduce((sum, item) => sum + item.subtotal, 0);
-  const gstAmt = Math.round((totalSubtotal + SHIPPING) * GST * 100) / 100;
-  const total = totalSubtotal + SHIPPING + gstAmt;
+  const shipping = SHIPPING * (cart.length || 1); // $25 per product (single address)
+  const gstAmt = Math.round((totalSubtotal + shipping) * GST * 100) / 100;
+  const total = totalSubtotal + shipping + gstAmt;
 
   if (!loaded) return null;
 
@@ -173,8 +174,8 @@ export default function CartPage() {
                 <span style={{ fontFamily: '"DM Mono", monospace' }}>${totalSubtotal.toFixed(2)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#000' }}>Shipping & Handling</span>
-                <span style={{ fontFamily: '"DM Mono", monospace' }}>${SHIPPING.toFixed(2)}</span>
+                <span style={{ color: '#000' }}>Shipping &amp; Handling ({cart.length} × ${SHIPPING})</span>
+                <span style={{ fontFamily: '"DM Mono", monospace' }}>${shipping.toFixed(2)}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: '#000' }}>GST (10%)</span>
