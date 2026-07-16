@@ -233,6 +233,32 @@ export default function AdminOrdersPage() {
     } catch { alert('Notify failed'); }
   }
 
+  // Revise a line to its FINAL spec / price (order recomputes; a paid order
+  // captures amount_paid so a credit note / balance can be worked out).
+  const [itemEdit, setItemEdit] = useState({});
+  const [cnReason, setCnReason] = useState('');
+  const startItemEdit = (i, item) => setItemEdit(p => ({ ...p, [i]: {
+    branding: item.brandingMethod || item.branding || '',
+    unitPrice: String(item.unitPrice ?? item.unit_price ?? ''),
+    qty: String(item.qty ?? item.quantity ?? ''),
+  } }));
+  const cancelItemEdit = (i) => setItemEdit(p => { const n = { ...p }; delete n[i]; return n; });
+  const setIE = (i, k, v) => setItemEdit(p => ({ ...p, [i]: { ...p[i], [k]: v } }));
+  async function saveItemEdit(i) {
+    const f = itemEdit[i] || {};
+    try {
+      const res = await fetch('/api/admin/orders/item-edit', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selected.id, index: i, branding: f.branding, unitPrice: f.unitPrice, qty: f.qty }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { alert('Could not save: ' + (data.error || '')); return; }
+      setSelected(data.order);
+      setOrders(prev => prev.map(o => o.id === selected.id ? data.order : o));
+      cancelItemEdit(i);
+    } catch { alert('Could not save'); }
+  }
+
   async function uploadItemDoc(index, docType, file) {
     if (!file || !selected) return;
     setDocBusy(`${index}:${docType}`);
@@ -398,6 +424,20 @@ export default function AdminOrdersPage() {
 
   const currentStatus = selected ? (STATUS_MAP[deriveStatus(selected)] || STATUS_FLOW[0]) : null;
   const shown = statusFilter ? orders.filter(o => deriveStatus(o) === statusFilter) : orders;
+
+  // Addresses already known for this order → offered in the "Deliver to" pickers.
+  const knownAddresses = (() => {
+    const out = [];
+    const push = (a) => { const s = (a || '').trim(); if (s && !out.includes(s)) out.push(s); };
+    if (selected) {
+      push(selected.delivery_address);
+      const j = selected.delivery_address_json;
+      if (j) push([j.line1, j.line2, j.suburb, j.state, j.postcode].filter(Boolean).join(', '));
+      (shipments || []).forEach(s => push(s.address));
+      (selected.items || []).forEach(it => (it.parcels || []).forEach(p => push(p.deliverTo)));
+    }
+    return out;
+  })();
 
   return (
     <div style={{ fontFamily: '"DM Sans", sans-serif', background: '#fff', minHeight: '100vh' }}>
@@ -578,6 +618,10 @@ export default function AdminOrdersPage() {
               <span style={{ fontSize: '11px', color: '#7A7570' }}>Creates one proof card per product; upload &amp; send each from the Artwork board.</span>
             </div>
 
+            <datalist id="deliverToOpts">
+              {knownAddresses.map(a => <option key={a} value={a} />)}
+            </datalist>
+
             {/* ORDER ITEMS */}
             <Section title="📦 Order Items">
               {Array.isArray(selected.items) && selected.items.map((item, i) => {
@@ -600,6 +644,22 @@ export default function AdminOrdersPage() {
                       {branding && <div style={{ fontSize: '12px', color: '#000' }}>Branding: {branding}</div>}
                       {addons.map((a, j) => <div key={j} style={{ fontSize: '12px', color: '#000' }}>+ {a.name || a}</div>)}
                       <div style={{ fontSize: '12px', color: '#000' }}>Qty: {qty ?? '—'} × {fmt(unit)}</div>
+                      {itemEdit[i] ? (
+                        <div style={{ marginTop: '6px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '8px', padding: '8px 10px' }}>
+                          <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#92400E', fontWeight: 700, marginBottom: '6px' }}>Revise to final spec</div>
+                          <input value={itemEdit[i].branding} onChange={e => setIE(i, 'branding', e.target.value)} placeholder="Branding (final, e.g. Digital Print / 3 colour)" style={{ ...shipInput, width: '100%', marginBottom: '6px', boxSizing: 'border-box' }} />
+                          <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '11px', color: '#7A7570' }}>Qty</span>
+                            <input value={itemEdit[i].qty} onChange={e => setIE(i, 'qty', e.target.value)} inputMode="numeric" style={{ ...shipInput, width: '70px' }} />
+                            <span style={{ fontSize: '11px', color: '#7A7570' }}>Unit $</span>
+                            <input value={itemEdit[i].unitPrice} onChange={e => setIE(i, 'unitPrice', e.target.value)} inputMode="decimal" style={{ ...shipInput, width: '90px' }} />
+                            <button onClick={() => saveItemEdit(i)} style={miniBtn(NAVY, '#fff')}>Save</button>
+                            <button onClick={() => cancelItemEdit(i)} style={miniBtn('#fff', '#7A7570', '#E0DDD7')}>Cancel</button>
+                          </div>
+                        </div>
+                      ) : (
+                        <button onClick={() => startItemEdit(i, item)} style={{ marginTop: '4px', background: 'none', border: 'none', color: GOLD, fontSize: '11px', fontWeight: 700, cursor: 'pointer', padding: 0 }}>✎ Edit final spec / price</button>
+                      )}
                     </div>
                     <div style={{ fontWeight: 700, color: NAVY }}>{fmt(sub)}</div>
                   </div>
@@ -655,7 +715,7 @@ export default function AdminOrdersPage() {
                             {CARRIERS.map(c => <option key={c} value={c}>{c}</option>)}
                           </select>
                           <input placeholder="Tracking #" value={pc.tracking || ''} onChange={e => setParcel(i, item, pIdx, 'tracking', e.target.value)} style={{ ...shipInput, width: '125px', fontFamily: 'monospace' }} />
-                          <input placeholder="Deliver to (suburb, state, PC)" value={pc.deliverTo || ''} onChange={e => setParcel(i, item, pIdx, 'deliverTo', e.target.value)} style={{ ...shipInput, flex: 1, minWidth: '150px' }} />
+                          <input list="deliverToOpts" placeholder="Deliver to — pick or type" value={pc.deliverTo || ''} onChange={e => setParcel(i, item, pIdx, 'deliverTo', e.target.value)} style={{ ...shipInput, flex: 1, minWidth: '150px' }} />
                           {multi && <button onClick={() => removeParcel(i, item, pIdx)} title="Remove this address" style={{ background: 'none', border: 'none', color: '#B4413E', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}>✕</button>}
                         </div>
                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginTop: '5px', marginLeft: '22px' }}>
@@ -727,6 +787,29 @@ export default function AdminOrdersPage() {
                 </button>
                 <span style={{ fontSize: '11px', color: '#7A7570', alignSelf: 'center' }}>Opens a PDF you can save or send to the customer.</span>
               </div>
+
+              {/* ADJUSTMENT — final spec changed after payment → credit / balance */}
+              {selected.amount_paid != null && Math.abs((Number(selected.total) || 0) - Number(selected.amount_paid)) >= 0.01 && (() => {
+                const paidAmt = Number(selected.amount_paid);
+                const delta = Math.round(((Number(selected.total) || 0) - paidAmt) * 100) / 100;
+                const credit = delta < 0;
+                return (
+                  <div style={{ marginTop: '14px', background: credit ? '#F0FDF4' : '#FFFBEB', border: `1px solid ${credit ? '#BBF7D0' : '#FDE68A'}`, borderRadius: '10px', padding: '12px 14px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Order adjustment (final spec changed)</div>
+                    <div style={{ fontSize: '13px', color: '#000', marginBottom: '2px' }}>Customer paid: <strong>{fmt(paidAmt)}</strong> · Revised total: <strong>{fmt(selected.total)}</strong></div>
+                    <div style={{ fontSize: '15px', fontWeight: 700, color: credit ? '#166534' : '#92400E', marginBottom: '10px' }}>
+                      {credit ? `↩ Credit due to customer: ${fmt(Math.abs(delta))}` : `➕ Balance owing from customer: ${fmt(delta)}`}
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <input value={cnReason} onChange={e => setCnReason(e.target.value)} placeholder="Reason (e.g. Pen: pad print → digital print)" style={{ ...shipInput, flex: 1, minWidth: '220px' }} />
+                      <button onClick={() => window.open(`/api/admin/orders/credit-note-pdf?id=${selected.id}&reason=${encodeURIComponent(cnReason)}`, '_blank')}
+                        style={{ padding: '9px 16px', borderRadius: '8px', background: NAVY, color: '#fff', border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                        {credit ? '🧾 Generate Credit Note' : '🧾 Generate Balance Invoice'}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
             </Section>
 
             {/* DELIVERY */}
