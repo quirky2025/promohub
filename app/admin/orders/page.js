@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
+import OrderDocuments from '@/components/OrderDocuments';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -65,6 +66,8 @@ export default function AdminOrdersPage() {
   const [shipments, setShipments]     = useState([]);
   const [shipForm, setShipForm]       = useState({ carrier: '', trackingNumber: '', shipDate: '', recipientName: '', recipientEmail: '', address: '', contents: '', notify: true });
   const [shipBusy, setShipBusy]       = useState(false);
+  const [editShipId, setEditShipId]   = useState(null);
+  const [editShipForm, setEditShipForm] = useState({});
 
   useEffect(() => { fetchOrders(); }, [statusFilter]);
 
@@ -189,6 +192,20 @@ export default function AdminOrdersPage() {
     setShipBusy(false);
     if (!res.ok) { alert('Update failed'); return; }
     if (selected) fetchShipments(selected.id);
+  }
+
+  function startEditShip(s) {
+    setEditShipId(s.id);
+    setEditShipForm({
+      carrier: s.carrier || '', trackingNumber: s.tracking_number || '',
+      recipientName: s.recipient_name || '', recipientEmail: s.recipient_email || '',
+      address: s.address || '', contents: s.contents || '', shipDate: s.ship_date || '',
+    });
+  }
+  async function saveEditShip() {
+    if (!editShipId) return;
+    await patchShipment(editShipId, editShipForm);
+    setEditShipId(null);
   }
 
   async function deleteShipment(id) {
@@ -493,9 +510,33 @@ export default function AdminOrdersPage() {
                           )}
                           <button onClick={() => patchShipment(s.id, { notify: true, status: s.status === 'pending' ? 'shipped' : s.status })} disabled={shipBusy}
                             style={miniBtn('#fff', '#000', '#E0DDD7')}>✉️ Notify</button>
+                          <button onClick={() => startEditShip(s)} disabled={shipBusy}
+                            style={miniBtn('#fff', '#000', '#E0DDD7')}>✏️ 编辑</button>
                           <button onClick={() => deleteShipment(s.id)} disabled={shipBusy}
                             style={miniBtn('#fff', '#991B1B', '#E0DDD7')}>Delete</button>
                         </div>
+                        {editShipId === s.id && (
+                          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed #E0DDD7', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                            <select value={editShipForm.carrier} onChange={e => setEditShipForm(f => ({ ...f, carrier: e.target.value }))} style={shipInput}>
+                              <option value="">Carrier…</option>
+                              <option value="FedEx">FedEx</option>
+                              <option value="Australia Post">Australia Post</option>
+                              <option value="StarTrack">StarTrack</option>
+                              <option value="Direct Freight Express">Direct Freight Express</option>
+                              <option value="Courier">Other / Courier</option>
+                            </select>
+                            <input value={editShipForm.trackingNumber} onChange={e => setEditShipForm(f => ({ ...f, trackingNumber: e.target.value }))} placeholder="Tracking number" style={shipInput} />
+                            <input value={editShipForm.recipientName} onChange={e => setEditShipForm(f => ({ ...f, recipientName: e.target.value }))} placeholder="Recipient name" style={shipInput} />
+                            <input type="email" value={editShipForm.recipientEmail} onChange={e => setEditShipForm(f => ({ ...f, recipientEmail: e.target.value }))} placeholder="Recipient email" style={shipInput} />
+                            <input type="date" value={editShipForm.shipDate} onChange={e => setEditShipForm(f => ({ ...f, shipDate: e.target.value }))} style={shipInput} />
+                            <input value={editShipForm.address} onChange={e => setEditShipForm(f => ({ ...f, address: e.target.value }))} placeholder="Delivery address" style={{ ...shipInput, gridColumn: '1 / -1' }} />
+                            <input value={editShipForm.contents} onChange={e => setEditShipForm(f => ({ ...f, contents: e.target.value }))} placeholder="Contents" style={{ ...shipInput, gridColumn: '1 / -1' }} />
+                            <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '6px', marginTop: '2px' }}>
+                              <button onClick={saveEditShip} disabled={shipBusy} style={{ ...miniBtn(NAVY, '#fff'), padding: '7px 16px' }}>{shipBusy ? '保存中…' : '保存'}</button>
+                              <button onClick={() => setEditShipId(null)} style={miniBtn('#fff', '#000', '#E0DDD7')}>取消</button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -533,6 +574,11 @@ export default function AdminOrdersPage() {
                 </div>
               </div>
             </Section>
+
+            {/* DOCUMENTS / EVIDENCE VAULT */}
+            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #F0EEED' }}>
+              <OrderDocuments orderNumber={selected.invoice_number || selected.order_number} />
+            </div>
 
             {/* INTERNAL NOTES */}
             <Section title="🔒 Internal Notes">
