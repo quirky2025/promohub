@@ -275,8 +275,12 @@ export default function AdminProductionPage() {
                     <td style={{ padding: '12px', fontWeight: 700, color: GOLD, fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{first ? (o.order_number || o.invoice_number) : ''}</td>
                     <td style={{ padding: '12px', color: NAVY }}>{first ? job : ''}</td>
                     <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>
-                      {first ? (ready ? <span style={{ color: '#065F46', fontWeight: 700 }}>✅ Ready</span>
-                        : <span style={{ color: '#B0AAA3', fontSize: '11px' }}>{!isPaid(o) ? 'Awaiting payment' : 'Awaiting artwork'}</span>) : ''}
+                      {first ? (
+                        ['dispatched', 'delivered', 'completed'].includes(o.status)
+                          ? <span style={{ color: '#166534', fontWeight: 700, fontSize: '11px' }}>{o.status === 'completed' ? '✅ Completed' : o.status === 'delivered' ? '📦 Delivered' : '🚚 Dispatched'}</span>
+                          : (ready ? <span style={{ color: '#065F46', fontWeight: 700 }}>✅ Ready</span>
+                            : <span style={{ color: '#B0AAA3', fontSize: '11px' }}>{!isPaid(o) ? 'Awaiting payment' : 'Awaiting artwork'}</span>)
+                      ) : ''}
                     </td>
                     <td style={{ padding: '12px', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>
                       {po ? <span><a href={`/api/admin/purchase-orders/pdf?id=${po.id}`} target="_blank" rel="noreferrer" style={{ color: NAVY, textDecoration: 'underline' }}>{po.po_number}</a> <span style={{ background: ps.bg, color: ps.color, fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '20px', marginLeft: '4px' }}>{ps.label}</span> <button onClick={() => sendPo(po)} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '2px 8px', fontSize: '10px', fontWeight: 700, color: NAVY, cursor: 'pointer', marginLeft: '4px', fontFamily: '"DM Sans", sans-serif' }}>✉ Send</button></span> : <span style={{ color: '#B0AAA3' }}>—</span>}
