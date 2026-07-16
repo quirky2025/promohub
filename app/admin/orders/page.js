@@ -278,6 +278,30 @@ export default function AdminOrdersPage() {
       alert('Adjustments saved ✅');
     } catch { alert('Could not save'); }
   }
+  async function settleAdjustment() {
+    const credit = (selected.adjustments || []).reduce((s, a) => s + (Number(a.amount) || 0), 0) < 0;
+    if (!confirm(credit ? 'Confirm you have REFUNDED the customer? This records a bank OUT.' : 'Confirm the customer has PAID the balance? This records a bank IN.')) return;
+    try {
+      const res = await fetch('/api/admin/orders/credit-settle', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selected.id }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { alert('Could not settle: ' + (data.error || '')); return; }
+      setSelected(data.order);
+      setOrders(prev => prev.map(o => o.id === selected.id ? data.order : o));
+      alert(credit ? 'Refund recorded — bank decreased ✅' : 'Balance received — bank increased ✅');
+    } catch { alert('Could not settle'); }
+  }
+  async function unsettleAdjustment() {
+    if (!confirm('Undo the settlement? Removes the bank transaction.')) return;
+    try {
+      const res = await fetch(`/api/admin/orders/credit-settle?id=${selected.id}`, { method: 'DELETE' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { alert('Could not undo: ' + (data.error || '')); return; }
+      if (data.order) { setSelected(data.order); setOrders(prev => prev.map(o => o.id === selected.id ? data.order : o)); }
+    } catch { alert('Could not undo'); }
+  }
 
   async function uploadItemDoc(index, docType, file) {
     if (!file || !selected) return;
@@ -854,6 +878,23 @@ export default function AdminOrdersPage() {
                           {credit ? '🧾 Generate Credit Note' : '🧾 Generate Balance Invoice'}
                         </button>
                         <span style={{ fontSize: '11px', color: '#7A7570', marginLeft: '8px' }}>Save first, then generate.</span>
+
+                        {/* Settle to bank (only for SAVED adjustments) */}
+                        {Array.isArray(selected.adjustments) && selected.adjustments.length > 0 && (
+                          <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid #E8E2D6' }}>
+                            {selected.adjustment_settled_at ? (
+                              <div style={{ fontSize: '12px', color: '#166534', fontWeight: 700 }}>
+                                ✓ {credit ? 'Refunded' : 'Balance received'} — bank updated {fmtDateTime(selected.adjustment_settled_at)}
+                                <button onClick={unsettleAdjustment} style={{ marginLeft: '10px', background: 'none', border: 'none', color: '#991B1B', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Undo</button>
+                              </div>
+                            ) : (
+                              <button onClick={settleAdjustment}
+                                style={{ padding: '8px 14px', borderRadius: '8px', background: credit ? '#991B1B' : '#166534', color: '#fff', border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                                {credit ? '💸 Mark refunded (bank −)' : '💰 Mark balance received (bank +)'}
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

@@ -4,4 +4,5 @@
 -- The original paid order is left untouched; the net becomes a Credit Note
 -- (net < 0) or a Balance-due note (net > 0).
 alter table public.orders
-  add column if not exists adjustments jsonb default '[]'::jsonb;
+  add column if not exists adjustments jsonb default '[]'::jsonb,
+  add column if not exists adjustment_settled_at timestamptz;   -- when the refund/balance hit the bank
