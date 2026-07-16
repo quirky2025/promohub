@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import { generateOrderDocPDF, QUIRKY_BANK } from '@/lib/orderDocPdf';
 import { nextOrderNumber } from '@/lib/docNumbers';
+import { createArtworkCards } from '@/lib/artworkCards';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const supabase = createClient(
@@ -90,6 +91,13 @@ export async function POST(req) {
       ({ error } = await supabase.from('orders').insert(legacy));
     }
     if (error) throw error;
+
+    // Auto-create one artwork card PER printed product → they appear on the
+    // Artwork Management board so we can send each proof for approval. Products
+    // with no print/decoration are skipped (they need no artwork).
+    try {
+      await createArtworkCards(supabase, { ...orderRow, order_number: orderNumber }, { onlyBranded: true, status: 'awaiting_logo' });
+    } catch (_) { /* non-fatal — order already saved */ }
 
     // Respond as soon as the order row is saved. Generate the PDF + send the emails
     // in the background (after the response is flushed) so the customer lands on the
