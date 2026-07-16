@@ -83,7 +83,22 @@ export default function AdminOrdersPage() {
     setLoading(false);
   }
 
+  // Production gate: an order may only enter production once BOTH
+  //   (1) artwork is approved  AND  (2) payment has been received.
+  function prodBlockReason(o) {
+    if (!o) return '';
+    const approved = o.artwork_status === 'approved';
+    const paid = o.payment_status === 'paid';
+    if (approved && paid) return '';
+    return `Can't start production yet:\n${approved ? '✓' : '✗'} Artwork approved\n${paid ? '✓' : '✗'} Payment received\n\nBoth are required before production.`;
+  }
+
   async function updateStatus(id, status) {
+    const o = orders.find(x => x.id === id) || (selected?.id === id ? selected : null);
+    if (status === 'in_production') {
+      const reason = prodBlockReason(o);
+      if (reason) { alert(reason); return; }
+    }
     const updates = { status };
     const now = new Date().toISOString();
     if (status === 'artwork_approved') updates.artwork_approved_at = now;
@@ -93,6 +108,37 @@ export default function AdminOrdersPage() {
     await supabase.from('orders').update(updates).eq('id', id);
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
     if (selected?.id === id) setSelected(prev => ({ ...prev, ...updates }));
+  }
+
+  const [artBusy, setArtBusy] = useState(false);
+
+  // Record artwork approval (offline line). Sets artwork_status=approved + timestamp,
+  // and nudges the order label to "Artwork Approved" if still pre-approval.
+  async function markArtworkApproved(id) {
+    const now = new Date().toISOString();
+    const o = orders.find(x => x.id === id) || (selected?.id === id ? selected : null);
+    const updates = { artwork_status: 'approved', artwork_approved_at: now };
+    if (o && ['pending', 'artwork_sent', 'confirmed'].includes(o.status)) updates.status = 'artwork_approved';
+    await supabase.from('orders').update(updates).eq('id', id);
+    setOrders(prev => prev.map(x => x.id === id ? { ...x, ...updates } : x));
+    if (selected?.id === id) setSelected(prev => ({ ...prev, ...updates }));
+  }
+
+  // Upload the customer-approved artwork file → stored as evidence, then mark approved.
+  async function uploadApprovedArtwork(file) {
+    if (!file || !selected) return;
+    setArtBusy(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('orderNumber', selected.invoice_number || selected.order_number);
+      fd.append('docType', 'approved_artwork');
+      fd.append('title', 'Approved artwork');
+      const res = await fetch('/api/admin/orders/documents', { method: 'POST', body: fd });
+      if (!res.ok) { alert('Upload failed'); setArtBusy(false); return; }
+      await markArtworkApproved(selected.id);
+    } catch { alert('Upload failed'); }
+    setArtBusy(false);
   }
 
   async function saveDetails(id) {
@@ -330,10 +376,12 @@ export default function AdminOrdersPage() {
                   const thisIdx = statusKeys.indexOf(s.key);
                   const isDone = thisIdx <= currentIdx;
                   const isCurrent = s.key === selected.status;
+                  const gated = s.key === 'in_production' && !!prodBlockReason(selected);
                   return (
                     <button key={s.key} onClick={() => updateStatus(selected.id, s.key)}
-                      style={{ padding: '6px 12px', borderRadius: '20px', border: `2px solid ${isCurrent ? s.color : isDone ? '#D1FAE5' : '#E0DDD7'}`, background: isCurrent ? s.bg : isDone ? '#F0FDF4' : '#fff', color: isCurrent ? s.color : isDone ? '#166534' : '#B0AAA3', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
-                      {s.emoji} {s.label}
+                      title={gated ? 'Needs artwork approved + payment received' : ''}
+                      style={{ padding: '6px 12px', borderRadius: '20px', border: `2px solid ${gated ? '#E0DDD7' : isCurrent ? s.color : isDone ? '#D1FAE5' : '#E0DDD7'}`, background: gated ? '#F5F3F0' : isCurrent ? s.bg : isDone ? '#F0FDF4' : '#fff', color: gated ? '#B0AAA3' : isCurrent ? s.color : isDone ? '#166534' : '#B0AAA3', fontSize: '12px', fontWeight: 700, cursor: gated ? 'not-allowed' : 'pointer', opacity: gated ? 0.7 : 1, fontFamily: '"DM Sans", sans-serif' }}>
+                      {gated ? '🔒 ' : ''}{s.emoji} {s.label}
                     </button>
                   );
                 })}
@@ -351,6 +399,50 @@ export default function AdminOrdersPage() {
                 {selected.dispatched_at && <span>🚚 Dispatched: {fmtDateTime(selected.dispatched_at)}</span>}
               </div>
             </div>
+
+            {/* ARTWORK APPROVAL + PRODUCTION GATE */}
+            {(() => {
+              const approved = selected.artwork_status === 'approved';
+              const paid = selected.payment_status === 'paid';
+              const ready = approved && paid;
+              const chip = (ok, label) => (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '16px', fontSize: '12px', fontWeight: 700, background: ok ? '#D1FAE5' : '#FEE2E2', color: ok ? '#065F46' : '#991B1B' }}>
+                  {ok ? '✓' : '✗'} {label}
+                </span>
+              );
+              return (
+                <div style={{ background: ready ? '#F0FDF4' : '#FFFBEB', border: `1px solid ${ready ? '#BBF7D0' : '#FDE68A'}`, borderRadius: '12px', padding: '16px', marginBottom: '20px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Production Gate — both required</div>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                    {chip(approved, 'Artwork approved')}
+                    {chip(paid, 'Payment received')}
+                    {ready
+                      ? <span style={{ fontSize: '12px', fontWeight: 700, color: '#166534' }}>→ Ready for production ✅</span>
+                      : <span style={{ fontSize: '12px', fontWeight: 700, color: '#92400E' }}>→ Production locked 🔒</span>}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    <label style={{ display: 'inline-block' }}>
+                      <input type="file" style={{ display: 'none' }} disabled={artBusy}
+                        onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) uploadApprovedArtwork(f); }} />
+                      <span style={{ display: 'inline-block', padding: '8px 14px', borderRadius: '8px', background: NAVY, color: '#fff', fontSize: '13px', fontWeight: 700, cursor: artBusy ? 'wait' : 'pointer' }}>
+                        {artBusy ? '⏳ Uploading…' : '⬆ Upload approved artwork'}
+                      </span>
+                    </label>
+                    {!approved && (
+                      <button onClick={() => { if (confirm('Mark artwork as approved (approved offline by the customer)?')) markArtworkApproved(selected.id); }}
+                        style={{ padding: '8px 14px', borderRadius: '8px', background: '#fff', border: `1.5px solid ${NAVY}`, color: NAVY, fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>
+                        ✓ Mark approved (offline)
+                      </button>
+                    )}
+                    {approved && <span style={{ fontSize: '12px', color: '#065F46' }}>✅ Approved{selected.artwork_approved_at ? ` · ${fmtDateTime(selected.artwork_approved_at)}` : ''}</span>}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#7A7570', marginTop: '9px' }}>
+                    Uploading the customer-approved artwork records approval automatically. The file is saved in Documents / Evidence below. Payment is marked in the Payment section.
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* ORDER ITEMS */}
             <Section title="📦 Order Items">
@@ -415,6 +507,13 @@ export default function AdminOrdersPage() {
                     </button>
                   );
                 })}
+              </div>
+              <div style={{ marginTop: '14px', paddingTop: '12px', borderTop: '1px solid #F0EEED', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button onClick={() => window.open(`/api/admin/orders/invoice-pdf?id=${selected.id}`, '_blank')}
+                  style={{ padding: '9px 16px', borderRadius: '8px', background: GOLD, color: '#fff', border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                  🧾 Generate Tax Invoice (PDF)
+                </button>
+                <span style={{ fontSize: '11px', color: '#7A7570', alignSelf: 'center' }}>Opens a PDF you can save or send to the customer.</span>
               </div>
             </Section>
 

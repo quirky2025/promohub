@@ -13,7 +13,7 @@ const r2 = new S3Client({
 const BUCKET = process.env.R2_BUCKET;
 const PUBLIC = process.env.R2_PUBLIC_BASE;
 
-const TYPES = ['factory_po', 'factory_invoice', 'payment_proof', 'product_image', 'customer_invoice', 'other'];
+const TYPES = ['factory_po', 'factory_invoice', 'payment_proof', 'product_image', 'customer_invoice', 'approved_artwork', 'other'];
 const safeSeg = (s) => String(s || '').trim().replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'x';
 
 // GET ?orderNumber=… → list docs
