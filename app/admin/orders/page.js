@@ -146,10 +146,10 @@ export default function AdminOrdersPage() {
       fd.append('docType', 'approved_artwork');
       fd.append('title', `Approved artwork — ${pname}`);
       const up = await fetch('/api/admin/orders/documents', { method: 'POST', body: fd });
-      const upData = await up.json();
-      if (!up.ok) { alert('Upload failed'); setArtBusyIdx(null); return; }
+      const upData = await up.json().catch(() => ({}));
+      if (!up.ok) { alert('Upload failed: ' + (upData.error || `HTTP ${up.status}`)); setArtBusyIdx(null); return; }
       await applyItemArtwork(index, { approved: true, fileUrl: upData.document?.file_url, fileName: upData.document?.file_name });
-    } catch { alert('Upload failed'); }
+    } catch (e) { alert('Upload failed: ' + (e?.message || 'network error')); }
     setArtBusyIdx(null);
   }
 
