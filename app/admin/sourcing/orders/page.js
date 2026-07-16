@@ -5,6 +5,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import OrderDocuments from '@/components/OrderDocuments';
 
 const aud = (v) =>
   v == null || v === '' || Number.isNaN(Number(v)) ? '—'
@@ -238,6 +239,10 @@ function OrderDetail({ order, onPatch }) {
           <button className="srcx-btn srcx-btn-gold srcx-btn-sm" onClick={() => pdf('po')}>工厂 PO (RMB) PDF</button>
           <button className="srcx-btn srcx-btn-sm" disabled={sendingPo} onClick={sendPo}>{sendingPo ? '发送中…' : '✉ 发工厂 PO'}</button>
         </div>
+      </div>
+
+      <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid #E0DDD7' }}>
+        <OrderDocuments orderNumber={order.order_number} />
       </div>
 
       {/* 客户 + 工厂 双栏 */}
