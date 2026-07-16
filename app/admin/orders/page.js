@@ -124,12 +124,12 @@ export default function AdminOrdersPage() {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ orderId: selected.id, index, approved, fileUrl, fileName }),
       });
-      const data = await res.json();
-      if (!res.ok) { alert('Could not update artwork'); return; }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { alert('Could not update artwork: ' + (data.error || `HTTP ${res.status}`)); return; }
       const patch = { items: data.items, artwork_status: data.artwork_status, artwork_approved_at: data.artwork_approved_at };
       setSelected(prev => ({ ...prev, ...patch }));
       setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, ...patch } : o));
-    } catch { alert('Could not update artwork'); }
+    } catch (e) { alert('Could not update artwork: ' + (e?.message || 'network error')); }
   }
 
   // Upload the customer-approved artwork for ONE product → saved as evidence,
@@ -151,6 +151,51 @@ export default function AdminOrdersPage() {
       await applyItemArtwork(index, { approved: true, fileUrl: upData.document?.file_url, fileName: upData.document?.file_name });
     } catch (e) { alert('Upload failed: ' + (e?.message || 'network error')); }
     setArtBusyIdx(null);
+  }
+
+  const [orderDocs, setOrderDocs]   = useState([]);
+  const [freightEdit, setFreightEdit] = useState({});
+  const [docBusy, setDocBusy]       = useState(null);
+
+  async function fetchDocs(orderNumber) {
+    if (!orderNumber) { setOrderDocs([]); return; }
+    try {
+      const res = await fetch(`/api/admin/orders/documents?orderNumber=${encodeURIComponent(orderNumber)}`, { cache: 'no-store' });
+      const data = await res.json();
+      setOrderDocs(Array.isArray(data.documents) ? data.documents : []);
+    } catch { setOrderDocs([]); }
+  }
+
+  async function saveItemFreight(index) {
+    const f = freightEdit[index] || {};
+    try {
+      const res = await fetch('/api/admin/orders/item-freight', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selected.id, index, carrier: f.carrier, tracking: f.tracking, deliverTo: f.deliverTo }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { alert('Could not save freight: ' + (data.error || '')); return; }
+      setSelected(prev => ({ ...prev, items: data.items }));
+      setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, items: data.items } : o));
+      setFreightEdit(prev => { const n = { ...prev }; delete n[index]; return n; });
+    } catch { alert('Could not save freight'); }
+  }
+
+  async function uploadItemDoc(index, docType, file) {
+    if (!file || !selected) return;
+    setDocBusy(`${index}:${docType}`);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('orderNumber', selected.invoice_number || selected.order_number);
+      fd.append('docType', docType);
+      fd.append('orderItemIndex', String(index));
+      const res = await fetch('/api/admin/orders/documents', { method: 'POST', body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { alert('Upload failed: ' + (data.error || `HTTP ${res.status}`)); setDocBusy(null); return; }
+      fetchDocs(selected.invoice_number || selected.order_number);
+    } catch (e) { alert('Upload failed: ' + (e?.message || 'network error')); }
+    setDocBusy(null);
   }
 
   // Create one artwork card per product for this order (old/offline orders that
@@ -215,6 +260,8 @@ export default function AdminOrdersPage() {
     setShipments([]);
     setShipForm({ carrier: '', trackingNumber: '', shipDate: '', recipientName: '', recipientEmail: '', address: '', contents: '', notify: true });
     fetchShipments(order.id);
+    setFreightEdit({});
+    fetchDocs(order.invoice_number || order.order_number);
   }
 
   async function setItemStatus(index, status) {
@@ -330,8 +377,8 @@ export default function AdminOrdersPage() {
 
       <div style={{ display: 'flex', height: 'calc(100vh - 65px)' }}>
 
-        {/* LEFT — LIST */}
-        <div style={{ width: selected ? '50%' : '100%', overflowY: 'auto', borderRight: '1px solid #E0DDD7', transition: 'width .2s' }}>
+        {/* LEFT — LIST (hidden full-screen when an order is open) */}
+        <div style={{ display: selected ? 'none' : 'block', width: '100%', overflowY: 'auto', borderRight: '1px solid #E0DDD7' }}>
           {loading ? (
             <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570' }}>Loading...</div>
           ) : shown.length === 0 ? (
@@ -385,9 +432,11 @@ export default function AdminOrdersPage() {
           )}
         </div>
 
-        {/* RIGHT — DETAIL */}
+        {/* RIGHT — DETAIL (full width, one product per block) */}
         {selected && (
-          <div style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', background: '#fff' }}>
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 28px', background: '#fff' }}>
+           <div style={{ maxWidth: '1080px', margin: '0 auto' }}>
+            <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: NAVY, padding: 0, marginBottom: '12px' }}>← Back to orders</button>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
               <div>
                 <div style={{ fontSize: '12px', color: GOLD, fontWeight: 700, fontFamily: 'monospace', marginBottom: '4px' }}>{selected.invoice_number}</div>
@@ -398,8 +447,23 @@ export default function AdminOrdersPage() {
                   {selected.customer_phone && ` · ${selected.customer_phone}`}
                 </div>
               </div>
-              <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px', color: '#B0AAA3' }}>×</button>
             </div>
+
+            {/* PAYMENT RECEIVED banner (whole order, one combined invoice) */}
+            {(() => {
+              const paid = selected.payment_status === 'paid';
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', background: paid ? '#F0FDF4' : '#FFFBEB', border: `1px solid ${paid ? '#BBF7D0' : '#FDE68A'}`, borderRadius: '10px', padding: '10px 16px', marginBottom: '16px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 700, color: paid ? '#166534' : '#92400E' }}>
+                    {paid ? '✅ Payment received' : '⏳ Payment not received'} — {fmt(selected.total)}
+                  </div>
+                  <button onClick={() => window.open(`/api/admin/orders/invoice-pdf?id=${selected.id}`, '_blank')}
+                    style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                    🧾 Generate Tax Invoice
+                  </button>
+                </div>
+              );
+            })()}
 
             {/* ORDER PROGRESS */}
             <div style={{ background: BG, borderRadius: '12px', padding: '16px', marginBottom: '20px' }}>
@@ -532,6 +596,37 @@ export default function AdminOrdersPage() {
                         </button>
                       );
                     })}
+                  </div>
+
+                  {/* per-product FREIGHT ($25 per product, per address) */}
+                  <div style={{ marginTop: '10px', background: '#FAF8F4', borderRadius: '8px', padding: '9px 11px' }}>
+                    <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#7A7570', marginBottom: '6px', fontWeight: 700 }}>🚚 Freight — this product</div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <input placeholder="Carrier" value={freightEdit[i]?.carrier ?? item.freight_carrier ?? ''} onChange={e => setFreightEdit(p => ({ ...p, [i]: { ...(p[i] || {}), carrier: e.target.value } }))} style={{ ...shipInput, width: '110px' }} />
+                      <input placeholder="Tracking #" value={freightEdit[i]?.tracking ?? item.freight_tracking ?? ''} onChange={e => setFreightEdit(p => ({ ...p, [i]: { ...(p[i] || {}), tracking: e.target.value } }))} style={{ ...shipInput, width: '130px', fontFamily: 'monospace' }} />
+                      <input placeholder="Deliver to (suburb, state, PC)" value={freightEdit[i]?.deliverTo ?? item.freight_deliver_to ?? ''} onChange={e => setFreightEdit(p => ({ ...p, [i]: { ...(p[i] || {}), deliverTo: e.target.value } }))} style={{ ...shipInput, flex: 1, minWidth: '160px' }} />
+                      <button onClick={() => saveItemFreight(i)} style={miniBtn(NAVY, '#fff')}>Save</button>
+                    </div>
+                  </div>
+
+                  {/* per-product DOCUMENTS */}
+                  <div style={{ marginTop: '8px' }}>
+                    <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#7A7570', marginBottom: '6px', fontWeight: 700 }}>Documents — this product</div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {[['invoice', '🧾 Invoice'], ['product_photo', '📷 Product photo'], ['supplier_payment_proof', '💳 Supplier payment proof']].map(([dt, label]) => (
+                        <label key={dt} style={{ display: 'inline-block' }}>
+                          <input type="file" style={{ display: 'none' }} disabled={docBusy === `${i}:${dt}`} onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) uploadItemDoc(i, dt, f); }} />
+                          <span style={{ display: 'inline-block', fontSize: '11px', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '5px 10px', color: NAVY, fontWeight: 700, cursor: docBusy === `${i}:${dt}` ? 'wait' : 'pointer' }}>{docBusy === `${i}:${dt}` ? '⏳ Uploading…' : '⬆ ' + label}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {orderDocs.filter(d => d.order_item_index === i).length > 0 && (
+                      <div style={{ marginTop: '6px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        {orderDocs.filter(d => d.order_item_index === i).map(d => (
+                          <a key={d.id} href={d.file_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: GOLD, textDecoration: 'none' }}>📎 {d.file_name || d.title} ↗</a>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
                 );
@@ -761,6 +856,7 @@ export default function AdminOrdersPage() {
             <div style={{ marginTop: '16px', fontSize: '12px', color: '#B0AAA3', textAlign: 'center' }}>
               {selected.created_at && `Ordered ${new Date(selected.created_at).toLocaleString('en-AU', { timeZone: 'Australia/Sydney', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`}
             </div>
+           </div>
           </div>
         )}
       </div>

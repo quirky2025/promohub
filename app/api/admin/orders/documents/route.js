@@ -13,7 +13,7 @@ const r2 = new S3Client({
 const BUCKET = process.env.R2_BUCKET;
 const PUBLIC = process.env.R2_PUBLIC_BASE;
 
-const TYPES = ['factory_po', 'factory_invoice', 'payment_proof', 'product_image', 'customer_invoice', 'approved_artwork', 'other'];
+const TYPES = ['factory_po', 'factory_invoice', 'payment_proof', 'product_image', 'customer_invoice', 'approved_artwork', 'invoice', 'product_photo', 'supplier_payment_proof', 'other'];
 const safeSeg = (s) => String(s || '').trim().replace(/[^a-zA-Z0-9._-]+/g, '-').replace(/^-+|-+$/g, '') || 'x';
 
 // GET ?orderNumber=… → list docs
@@ -41,6 +41,8 @@ export async function POST(request) {
     const orderNumber = form.get('orderNumber');
     const docType = TYPES.includes(form.get('docType')) ? form.get('docType') : 'other';
     const title = form.get('title') || '';
+    const rawIdx = form.get('orderItemIndex');
+    const orderItemIndex = (rawIdx === null || rawIdx === '' || rawIdx === undefined) ? null : Number(rawIdx);
     if (!file || typeof file === 'string') return Response.json({ error: 'no file' }, { status: 400 });
     if (!orderNumber) return Response.json({ error: 'orderNumber required' }, { status: 400 });
 
@@ -57,6 +59,7 @@ export async function POST(request) {
 
     const db = sourcingDb();
     const baseRow = { order_number: orderNumber, title: title || name, file_url, file_name: name, mime: file.type || null };
+    if (orderItemIndex != null && !Number.isNaN(orderItemIndex)) baseRow.order_item_index = orderItemIndex;
     let { data, error } = await db.from('order_documents').insert({ ...baseRow, doc_type: docType }).select('*').single();
     // Fallback: if the DB has an older CHECK constraint that doesn't yet include
     // this doc_type (e.g. 'approved_artwork'), store it as 'other' so the upload
