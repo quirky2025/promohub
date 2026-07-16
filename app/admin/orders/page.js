@@ -48,6 +48,14 @@ function deriveStatus(order) {
   return 'pending';
 }
 
+// Simplified list status — Lily wants the board to show only two states.
+function simpleStatus(order) {
+  const d = deriveStatus(order);
+  if (d === 'cancelled') return { label: 'Cancelled', bg: '#FEE2E2', color: '#991B1B' };
+  if (d === 'delivered') return { label: 'Completed', bg: '#DCFCE7', color: '#166534' };
+  return { label: 'In Process', bg: '#DBEAFE', color: '#1E40AF' };
+}
+
 const PAYMENT_STATUS = {
   paid:    { bg: '#D1FAE5', color: '#065F46', label: 'Paid' },
   unpaid:  { bg: '#FEE2E2', color: '#991B1B', label: 'Unpaid' },
@@ -166,12 +174,31 @@ export default function AdminOrdersPage() {
     } catch { setOrderDocs([]); }
   }
 
-  async function saveItemFreight(index) {
-    const f = freightEdit[index] || {};
+  // Parcels for a product: use the in-progress edit if present, else what's saved
+  // on the item (fall back to legacy single freight fields, else one blank row).
+  function parcelsOf(index, item) {
+    if (freightEdit[index]) return freightEdit[index];
+    if (Array.isArray(item.parcels) && item.parcels.length) return item.parcels;
+    if (item.freight_carrier || item.freight_tracking || item.freight_deliver_to) {
+      return [{ carrier: item.freight_carrier || '', tracking: item.freight_tracking || '', deliverTo: item.freight_deliver_to || '' }];
+    }
+    return [{ carrier: '', tracking: '', deliverTo: '' }];
+  }
+  const editParcels = (index, item, fn) => setFreightEdit(prev => {
+    const cur = prev[index] ? prev[index].map(p => ({ ...p })) : parcelsOf(index, item).map(p => ({ ...p }));
+    const next = fn(cur) || cur;
+    return { ...prev, [index]: next };
+  });
+  const setParcel = (index, item, pIdx, key, val) => editParcels(index, item, cur => { cur[pIdx] = { ...cur[pIdx], [key]: val }; return cur; });
+  const addParcel = (index, item) => editParcels(index, item, cur => { cur.push({ carrier: '', tracking: '', deliverTo: '' }); return cur; });
+  const removeParcel = (index, item, pIdx) => editParcels(index, item, cur => { cur.splice(pIdx, 1); return cur.length ? cur : [{ carrier: '', tracking: '', deliverTo: '' }]; });
+
+  async function saveItemFreight(index, item) {
+    const parcels = (freightEdit[index] ?? parcelsOf(index, item)).filter(p => p.carrier || p.tracking || p.deliverTo);
     try {
       const res = await fetch('/api/admin/orders/item-freight', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: selected.id, index, carrier: f.carrier, tracking: f.tracking, deliverTo: f.deliverTo }),
+        body: JSON.stringify({ orderId: selected.id, index, parcels }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { alert('Could not save freight: ' + (data.error || '')); return; }
@@ -361,18 +388,6 @@ export default function AdminOrdersPage() {
             ＋ New Order
           </button>
         </div>
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          <button onClick={() => setStatusFilter('')}
-            style={{ padding: '5px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: statusFilter === '' ? GOLD : 'rgba(255,255,255,.1)', color: '#fff' }}>
-            All
-          </button>
-          {STATUS_FLOW.map(s => (
-            <button key={s.key} onClick={() => setStatusFilter(s.key)}
-              style={{ padding: '5px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontSize: '11px', fontWeight: 600, background: statusFilter === s.key ? GOLD : 'rgba(255,255,255,.1)', color: '#fff' }}>
-              {s.emoji} {s.label}
-            </button>
-          ))}
-        </div>
       </div>
 
       <div style={{ display: 'flex', height: 'calc(100vh - 65px)' }}>
@@ -394,7 +409,7 @@ export default function AdminOrdersPage() {
               </thead>
               <tbody>
                 {orders.map((order, i) => {
-                  const st = STATUS_MAP[deriveStatus(order)] || STATUS_FLOW[0];
+                  const st = simpleStatus(order);
                   const pay = PAYMENT_STATUS[order.payment_status] || PAYMENT_STATUS.pending;
                   const isSelected = selected?.id === order.id;
                   const itemCount = Array.isArray(order.items) ? order.items.length : 0;
@@ -415,7 +430,7 @@ export default function AdminOrdersPage() {
                         <span style={{ background: pay.bg, color: pay.color, fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px' }}>{pay.label}</span>
                       </td>
                       <td style={{ padding: '12px 16px' }}>
-                        <span style={{ background: st.bg, color: st.color, fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{st.emoji} {st.label}</span>
+                        <span style={{ background: st.bg, color: st.color, fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{st.label}</span>
                       </td>
                       <td style={{ padding: '12px 16px' }}>
                         <a href={`mailto:${order.customer_email}?subject=Re: Order ${order.invoice_number}`}
@@ -598,14 +613,21 @@ export default function AdminOrdersPage() {
                     })}
                   </div>
 
-                  {/* per-product FREIGHT ($25 per product, per address) */}
+                  {/* per-product FREIGHT — one or more parcels (a product can ship to >1 address) */}
                   <div style={{ marginTop: '10px', background: '#FAF8F4', borderRadius: '8px', padding: '9px 11px' }}>
-                    <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#7A7570', marginBottom: '6px', fontWeight: 700 }}>🚚 Freight — this product</div>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-                      <input placeholder="Carrier" value={freightEdit[i]?.carrier ?? item.freight_carrier ?? ''} onChange={e => setFreightEdit(p => ({ ...p, [i]: { ...(p[i] || {}), carrier: e.target.value } }))} style={{ ...shipInput, width: '110px' }} />
-                      <input placeholder="Tracking #" value={freightEdit[i]?.tracking ?? item.freight_tracking ?? ''} onChange={e => setFreightEdit(p => ({ ...p, [i]: { ...(p[i] || {}), tracking: e.target.value } }))} style={{ ...shipInput, width: '130px', fontFamily: 'monospace' }} />
-                      <input placeholder="Deliver to (suburb, state, PC)" value={freightEdit[i]?.deliverTo ?? item.freight_deliver_to ?? ''} onChange={e => setFreightEdit(p => ({ ...p, [i]: { ...(p[i] || {}), deliverTo: e.target.value } }))} style={{ ...shipInput, flex: 1, minWidth: '160px' }} />
-                      <button onClick={() => saveItemFreight(i)} style={miniBtn(NAVY, '#fff')}>Save</button>
+                    <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#7A7570', marginBottom: '6px', fontWeight: 700 }}>🚚 Freight — this product ({parcelsOf(i, item).length} parcel{parcelsOf(i, item).length !== 1 ? 's' : ''})</div>
+                    {parcelsOf(i, item).map((pc, pIdx) => (
+                      <div key={pIdx} style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '11px', color: '#7A7570', width: '16px' }}>{pIdx + 1}.</span>
+                        <input placeholder="Carrier" value={pc.carrier || ''} onChange={e => setParcel(i, item, pIdx, 'carrier', e.target.value)} style={{ ...shipInput, width: '105px' }} />
+                        <input placeholder="Tracking #" value={pc.tracking || ''} onChange={e => setParcel(i, item, pIdx, 'tracking', e.target.value)} style={{ ...shipInput, width: '125px', fontFamily: 'monospace' }} />
+                        <input placeholder="Deliver to (suburb, state, PC)" value={pc.deliverTo || ''} onChange={e => setParcel(i, item, pIdx, 'deliverTo', e.target.value)} style={{ ...shipInput, flex: 1, minWidth: '150px' }} />
+                        {parcelsOf(i, item).length > 1 && <button onClick={() => removeParcel(i, item, pIdx)} title="Remove this address" style={{ background: 'none', border: 'none', color: '#B4413E', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}>✕</button>}
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '2px' }}>
+                      <button onClick={() => addParcel(i, item)} style={miniBtn('#fff', NAVY, NAVY)}>＋ Add address</button>
+                      <button onClick={() => saveItemFreight(i, item)} style={miniBtn(NAVY, '#fff')}>Save freight</button>
                     </div>
                   </div>
 
