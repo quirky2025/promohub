@@ -714,7 +714,7 @@ export default function PlaceOrderPage() {
               </div>
 
               <div style={{ marginTop: '16px', fontSize: '11px', color: '#9CA3AF', fontFamily: '"DM Sans", sans-serif' }}>
-                ABN: 95 656 714 270 · All prices in AUD · $30 flat rate shipping
+                ABN: 95 656 714 270 · All prices in AUD · Shipping $25 per item, per domestic address
               </div>
             </div>
           </div>

@@ -529,7 +529,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
           <div className="qp-pdp-benefits" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px', marginBottom: '24px' }}>
             {[
               { icon: '🎨', title: 'Free Digital Proof', sub: 'See it before we make it' },
-              { icon: '🚚', title: '$30 Flat Shipping', sub: 'Australia-wide, no surprises' },
+              { icon: '🚚', title: '$25 / item Shipping', sub: 'Per domestic address · tracked' },
               { icon: '✅', title: 'Quality Guarantee', sub: 'We stand behind every order' },
               { icon: '🏆', title: "13 Years' Experience", sub: "You're in good hands" },
             ].map((b) => (
@@ -683,7 +683,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                   <div style={{ padding: '14px', background: '#fff', borderRadius: '10px', borderTop: `3px solid ${GOLD}`, marginBottom: '20px' }}>
                     <div style={{ fontSize: '22px', marginBottom: '6px' }}>🚚</div>
                     <div style={{ fontSize: '12px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Flat Rate Shipping</div>
-                    <div style={{ fontSize: '13px' }}>$30 per domestic address, Australia-wide</div>
+                    <div style={{ fontSize: '13px' }}>$25 per item, per domestic address (international quoted separately)</div>
                   </div>
                   <h4 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '17px', color: NAVY, margin: '0 0 12px' }}>Delivery Times After Dispatch</h4>
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
@@ -704,7 +704,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
                 <div>
                   <p style={{ margin: '0 0 20px', fontSize: '14px' }}>Four simple steps from order to delivery — your branded products, done right.</p>
                   <div className="qp-steps-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
-                    {[['🛒', 'Place Your Order', 'Select colour, sizes & decoration, then Add to Cart or Get a Quote.'], ['🎨', 'Artwork & Mockup', 'Upload your logo. We create a free digital mockup for approval.'], ['⚙️', 'Approve & Produce', 'Approve your proof in writing and production begins.'], ['📦', 'Delivery', 'Dispatched Australia-wide, $30 flat rate, tracked to your door.']].map(([icon, title, desc], i) => (
+                    {[['🛒', 'Place Your Order', 'Select colour, sizes & decoration, then Add to Cart or Get a Quote.'], ['🎨', 'Artwork & Mockup', 'Upload your logo. We create a free digital mockup for approval.'], ['⚙️', 'Approve & Produce', 'Approve your proof in writing and production begins.'], ['📦', 'Delivery', 'Dispatched with tracking — $25 per item, per domestic address.']].map(([icon, title, desc], i) => (
                       <div key={i} style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '10px', padding: '16px', borderTop: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '24px', marginBottom: '8px' }}>{icon}</div>
                         <div style={{ fontSize: '13px', fontWeight: 700, color: NAVY, marginBottom: '6px' }}>{i + 1}. {title}</div>

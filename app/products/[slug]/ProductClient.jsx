@@ -628,7 +628,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           <div className="qp-pdp-benefits" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px', marginBottom: '24px' }}>
             {[
               { icon: '🎨', title: 'Free Digital Proof', sub: 'See it before we make it' },
-              { icon: '🚚', title: '$30 Flat Shipping', sub: 'Australia-wide, no surprises' },
+              { icon: '🚚', title: '$25 / item Shipping', sub: 'Per domestic address · tracked' },
               { icon: '✅', title: 'Quality Guarantee', sub: 'We stand behind every order' },
               { icon: '🏆', title: "13 Years' Experience", sub: "You're in good hands" },
             ].map(b => (
@@ -799,7 +799,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                 <div style={{ maxWidth: '760px' }}>
                   <div className="qp-pdp-2col" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px', marginBottom: '20px' }}>
                     {[
-                      { icon: '🚚', title: 'Flat Rate Shipping', value: '$30 per domestic address, Australia-wide' },
+                      { icon: '🚚', title: 'Shipping Rate', value: '$25 per item, per domestic address (international quoted separately)' },
                     ].map(c => (
                       <div key={c.title} style={{ padding: '14px', background: '#ffffff', borderRadius: '10px', borderTop: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '22px', marginBottom: '6px' }}>{c.icon}</div>
@@ -873,7 +873,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                       },
                       { num: 2, icon: '🎨', title: 'Artwork & Mockup', desc: 'Upload your logo. Our design team creates a free digital mockup for your approval.' },
                       { num: 3, icon: '⚙️', title: 'Approve & Produce', desc: 'Review and approve your proof. Once confirmed in writing, production begins immediately.' },
-                      { num: 4, icon: '📦', title: 'Delivery', desc: 'Your branded products are dispatched Australia-wide. $30 flat rate, tracked to your door.' },
+                      { num: 4, icon: '📦', title: 'Delivery', desc: 'Your branded products are dispatched with tracking — $25 per item, per domestic address.' },
                     ].map(s => (
                       <div key={s.num} style={{ background: '#ffffff', borderRadius: '10px', padding: '14px', border: '1px solid #E0DDD7', borderTop: `3px solid ${GOLD}`, position: 'relative' }}>
                         <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: GOLD, color: '#fff', fontSize: '10px', fontWeight: 700, borderRadius: '20px', padding: '2px 10px' }}>Step {s.num}</div>
