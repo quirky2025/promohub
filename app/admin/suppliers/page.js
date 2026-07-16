@@ -112,7 +112,7 @@ export default function AdminSuppliersPage() {
       </div>
 
       {adding && (
-        <div onClick={e => e.target === e.currentTarget && closeModal()}
+        <div
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
           <div style={{ background: '#fff', borderRadius: '16px', padding: '28px', maxWidth: '420px', width: '100%' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 16px' }}>{editingId ? 'Edit supplier' : 'Add supplier'}</h2>

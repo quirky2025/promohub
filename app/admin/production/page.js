@@ -234,7 +234,7 @@ export default function AdminProductionPage() {
       </div>
 
       {poFor && (
-        <div onClick={e => e.target === e.currentTarget && (setPoFor(null), setEditingPoId(null))}
+        <div
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
           <div style={{ background: '#fff', borderRadius: '16px', padding: '28px', maxWidth: '560px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '0 0 4px' }}>{editingPoId ? 'Edit Supplier PO' : 'Raise Supplier PO'}</h2>
