@@ -26,6 +26,7 @@ export async function POST(request) {
           recipient: (p.recipient || '').trim(),
           notifyEmail: (p.notifyEmail || '').trim(),
           notified_at: p.notified_at || null,
+          delivered_notified_at: p.delivered_notified_at || null,
         }))
       : [];
 

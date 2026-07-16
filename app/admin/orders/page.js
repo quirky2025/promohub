@@ -211,17 +211,18 @@ export default function AdminOrdersPage() {
   }
 
   const [notifyEmail, setNotifyEmail] = useState({});
-  async function notifyShipment(index, parcelIndex, pc) {
+  async function notifyShipment(index, parcelIndex, pc, type = 'shipped') {
     if (freightEdit[index]) { alert('Save freight first, then Notify.'); return; }
+    const delivered = type === 'delivered';
     const key = `${index}:${parcelIndex}`;
     const to = (notifyEmail[key] ?? pc.notifyEmail ?? selected.customer_email ?? '').trim();
     if (!to) { alert('Enter a recipient email.'); return; }
-    if (!pc.carrier && !pc.tracking) { alert('Add carrier + tracking (and Save freight) first.'); return; }
-    if (!confirm(`Email the shipping notice for product ${index + 1} to ${to}?`)) return;
+    if (!delivered && !pc.carrier && !pc.tracking) { alert('Add carrier + tracking (and Save freight) first.'); return; }
+    if (!confirm(`Email the ${delivered ? 'DELIVERED' : 'shipping'} notice for product ${index + 1} to ${to}?`)) return;
     try {
       const res = await fetch('/api/admin/orders/notify-shipment', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: selected.id, index, parcelIndex, to }),
+        body: JSON.stringify({ orderId: selected.id, index, parcelIndex, to, type }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { alert('Notify failed: ' + (data.error || '')); return; }
@@ -229,7 +230,7 @@ export default function AdminOrdersPage() {
         setSelected(prev => ({ ...prev, items: data.items }));
         setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, items: data.items } : o));
       }
-      alert('Shipping notice sent ✅');
+      alert(delivered ? 'Delivered notice sent ✅' : 'Shipping notice sent ✅');
     } catch { alert('Notify failed'); }
   }
 
@@ -779,8 +780,10 @@ export default function AdminOrdersPage() {
                           <input list="recipientOpts" placeholder="pick or add" value={pc.recipient || ''} onChange={e => setParcel(i, item, pIdx, 'recipient', e.target.value)} style={{ ...shipInput, width: '140px' }} />
                           <span style={{ fontSize: '11px', color: '#7A7570' }}>Notify</span>
                           <input list="emailOpts" placeholder="pick or type email" value={emailVal} onChange={e => setNotifyEmail(p => ({ ...p, [nkey]: e.target.value }))} style={{ ...shipInput, width: '190px' }} />
-                          <button onClick={() => notifyShipment(i, pIdx, pc)} style={miniBtn('#166534', '#fff')}>📧 Notify customer</button>
-                          {pc.notified_at && <span style={{ fontSize: '10px', color: '#166534' }}>✓ sent {fmtDateTime(pc.notified_at)}</span>}
+                          <button onClick={() => notifyShipment(i, pIdx, pc, 'shipped')} style={miniBtn('#166534', '#fff')}>📧 Notify shipped</button>
+                          <button onClick={() => notifyShipment(i, pIdx, pc, 'delivered')} style={miniBtn('#1B2A4A', '#fff')}>📦 Notify delivered</button>
+                          {pc.notified_at && <span style={{ fontSize: '10px', color: '#166534' }}>✓ shipped {fmtDateTime(pc.notified_at)}</span>}
+                          {pc.delivered_notified_at && <span style={{ fontSize: '10px', color: '#166534' }}>✓ delivered {fmtDateTime(pc.delivered_notified_at)}</span>}
                         </div>
                       </div>
                       );
