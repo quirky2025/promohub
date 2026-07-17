@@ -74,6 +74,8 @@ export default function AdminOrdersPage() {
   const [trackingNumber, setTrackingNumber] = useState('');
   const [trackingUrl, setTrackingUrl] = useState('');
   const [deliveryAddr, setDeliveryAddr] = useState('');
+  const [deliveryList, setDeliveryList] = useState(['']);   // order-level delivery addresses (first = primary)
+  const [acctAddrBusy, setAcctAddrBusy] = useState(false);
   const [carrier, setCarrier] = useState('');
   const [saving, setSaving]           = useState(false);
   const [shipments, setShipments]     = useState([]);
@@ -136,9 +138,11 @@ export default function AdminOrdersPage() {
     }
     const updates = { status };
     const now = new Date().toISOString();
+    if (status === 'artwork_sent')     updates.artwork_sent_at = now;
     if (status === 'artwork_approved') updates.artwork_approved_at = now;
     if (status === 'in_production')    updates.production_started_at = now;
     if (status === 'dispatched')       updates.dispatched_at = now;
+    if (status === 'delivered')        updates.delivered_at = now;
 
     await supabase.from('orders').update(updates).eq('id', id);
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
@@ -362,6 +366,41 @@ export default function AdminOrdersPage() {
     setArtworkBusy(false);
   }
 
+  // Pull the customer's default delivery address from their company account.
+  async function fillFromAccount(order, silent) {
+    const q = order.customer_company || order.customer_name || '';
+    if (!q) { if (!silent) alert('这单没有公司/客户名,无法从账户取地址'); return; }
+    setAcctAddrBusy(true);
+    try {
+      const res = await fetch(`/api/admin/quote-builder?customer=${encodeURIComponent(q)}`);
+      const data = await res.json().catch(() => ({}));
+      const hit = (data.customers || []).find(c => (c.delivery || '').trim());
+      if (hit && hit.delivery) {
+        setDeliveryList(prev => {
+          const base = prev.filter(a => (a || '').trim());
+          if (base.includes(hit.delivery)) return base.length ? base : [''];
+          return [hit.delivery, ...base];
+        });
+      } else if (!silent) alert('账户里没有找到默认地址');
+    } catch { if (!silent) alert('取账户地址失败'); }
+    setAcctAddrBusy(false);
+  }
+
+  async function saveDeliveryList(id) {
+    setSaving(true);
+    const clean = deliveryList.map(a => (a || '').trim()).filter(Boolean);
+    const updates = { delivery_addresses: clean, delivery_address: clean[0] || '' };
+    const res = await fetch('/api/admin/orders/update', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...updates }),
+    });
+    setSaving(false);
+    if (!res.ok) { const d = await res.json().catch(() => ({})); alert('保存失败: ' + (d.error || '')); return; }
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
+    if (selected?.id === id) setSelected(prev => ({ ...prev, ...updates }));
+    setDeliveryList(clean.length ? clean : ['']);
+  }
+
   async function saveDetails(id) {
     setSaving(true);
     const updates = {
@@ -401,6 +440,14 @@ export default function AdminOrdersPage() {
     setTrackingNumber(order.tracking_number || '');
     setTrackingUrl(order.tracking_url || '');
     setDeliveryAddr(order.delivery_address || '');
+    {
+      const list = Array.isArray(order.delivery_addresses) && order.delivery_addresses.length
+        ? order.delivery_addresses
+        : (order.delivery_address ? [order.delivery_address] : []);
+      setDeliveryList(list.length ? list : ['']);
+      // Default from the customer's account when the order has no address yet.
+      if (!list.length) fillFromAccount(order, true);
+    }
     setCarrier(order.carrier || '');
     setShipments([]);
     setShipForm({ carrier: '', trackingNumber: '', shipDate: '', recipientName: '', recipientEmail: '', address: '', contents: '', notify: true });
@@ -507,6 +554,7 @@ export default function AdminOrdersPage() {
     const out = [];
     if (selected) {
       out.push(selected.delivery_address);
+      if (Array.isArray(selected.delivery_addresses)) selected.delivery_addresses.forEach(a => out.push(a));
       const j = selected.delivery_address_json;
       if (j) out.push([j.line1, j.line2, j.suburb, j.state, j.postcode].filter(Boolean).join(', '));
       (shipments || []).forEach(s => out.push(s.address));
@@ -617,6 +665,27 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
+            {/* DELIVERY ADDRESS — order level, default from account, editable, add more */}
+            <div style={{ background: '#FBFAF8', border: '1px solid #E0DDD7', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.5px' }}>🚚 Delivery Address</div>
+                <button onClick={() => fillFromAccount(selected, false)} disabled={acctAddrBusy} style={{ background: 'none', border: '1px solid #D8CFC0', color: NAVY, fontSize: '11px', fontWeight: 700, cursor: 'pointer', borderRadius: '6px', padding: '3px 9px' }}>{acctAddrBusy ? '…' : '📇 用账户地址'}</button>
+              </div>
+              {deliveryList.map((addr, ai) => (
+                <div key={ai} style={{ display: 'flex', gap: '6px', alignItems: 'flex-start', marginBottom: '6px' }}>
+                  <textarea value={addr} onChange={e => setDeliveryList(prev => prev.map((a, j) => j === ai ? e.target.value : a))} rows={2}
+                    placeholder={ai === 0 ? 'Primary delivery address' : 'Another delivery address'}
+                    style={{ flex: 1, padding: '8px 10px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', color: '#000', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+                  {deliveryList.length > 1 && <button onClick={() => setDeliveryList(prev => prev.filter((_, j) => j !== ai))} title="删除这个地址" style={{ background: 'none', border: 'none', color: '#991B1B', fontSize: '16px', cursor: 'pointer', lineHeight: 1, paddingTop: '6px' }}>×</button>}
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: '8px', marginTop: '6px' }}>
+                <button onClick={() => setDeliveryList(prev => [...prev, ''])} style={{ background: '#fff', color: NAVY, border: `1px solid ${NAVY}`, borderRadius: '7px', padding: '6px 12px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>＋ Add address</button>
+                <button onClick={() => saveDeliveryList(selected.id)} disabled={saving} style={{ background: saving ? '#B0AAA3' : NAVY, color: '#fff', border: 'none', borderRadius: '7px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>{saving ? 'Saving…' : 'Save address'}</button>
+              </div>
+              <div style={{ fontSize: '11px', color: '#000', marginTop: '6px' }}>默认来自客户账户,可改、可加多个地址。第一个会显示在发票上。</div>
+            </div>
+
             {/* PAYMENT RECEIVED banner (whole order, one combined invoice) */}
             {(() => {
               const paid = selected.payment_status === 'paid';
@@ -664,13 +733,30 @@ export default function AdminOrdersPage() {
                 </button>
               </div>
 
-              {/* Timeline */}
-              <div style={{ marginTop: '12px', fontSize: '12px', color: '#000', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                {selected.created_at && <span>🕐 Ordered: {fmtDateTime(selected.created_at)}</span>}
-                {selected.artwork_approved_at && <span>✅ Approved: {fmtDateTime(selected.artwork_approved_at)}</span>}
-                {selected.production_started_at && <span>🏭 Production: {fmtDateTime(selected.production_started_at)}</span>}
-                {selected.dispatched_at && <span>🚚 Dispatched: {fmtDateTime(selected.dispatched_at)}</span>}
-              </div>
+              {/* Timeline — every step with its date (or 待定) */}
+              {(() => {
+                const noArt = selected.artwork_required === false;
+                const steps = [
+                  { emoji: '🕐', label: '下单 Ordered', at: selected.created_at },
+                  ...(noArt ? [] : [
+                    { emoji: '🎨', label: '发印刷稿 Artwork sent', at: selected.artwork_sent_at },
+                    { emoji: '✅', label: '印刷稿批准 Approved', at: selected.artwork_approved_at },
+                  ]),
+                  { emoji: '🏭', label: '进入生产 In production', at: selected.production_started_at },
+                  { emoji: '🚚', label: '已发货 Dispatched', at: selected.dispatched_at },
+                  { emoji: '📦', label: '已送达 Delivered', at: selected.delivered_at },
+                ];
+                return (
+                  <div style={{ marginTop: '12px', display: 'grid', gap: '5px' }}>
+                    {steps.map((s, k) => (
+                      <div key={k} style={{ display: 'flex', gap: '8px', fontSize: '12px', alignItems: 'center' }}>
+                        <span style={{ width: '180px', color: '#000', fontWeight: 600 }}>{s.emoji} {s.label}</span>
+                        <span style={{ color: s.at ? '#000' : '#B0AAA3', fontWeight: s.at ? 700 : 400 }}>{s.at ? fmtDateTime(s.at) : '待定 —'}</span>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* PRODUCTION GATE — summary (upload/approve is per product, below) */}
