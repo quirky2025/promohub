@@ -24,6 +24,7 @@ export default function FactoryDetailPage() {
   const [globalFx, setGlobalFx] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editQuote, setEditQuote] = useState(null);
+  const [quoteProduct, setQuoteProduct] = useState(null);
 
   async function load() {
     const [fRes, qRes, nRes, frRes, feRes] = await Promise.all([
@@ -127,14 +128,17 @@ export default function FactoryDetailPage() {
                 </div>
               </div>
             </div>
-            {list.length > 1 && (
-              <Link
-                className="srcx-link"
-                href={`/admin/sourcing/trends?factory=${id}&product=${encodeURIComponent(product)}`}
-              >
-                看价格趋势 →
-              </Link>
-            )}
+            <span style={{ display: 'inline-flex', gap: 14, alignItems: 'center', flexShrink: 0 }}>
+              <button className="srcx-link" onClick={() => setQuoteProduct(list[0])}>报价给客户 →</button>
+              {list.length > 1 && (
+                <Link
+                  className="srcx-link"
+                  href={`/admin/sourcing/trends?factory=${id}&product=${encodeURIComponent(product)}`}
+                >
+                  看价格趋势 →
+                </Link>
+              )}
+            </span>
           </div>
 
           {list.map((q) => (
@@ -187,6 +191,10 @@ export default function FactoryDetailPage() {
           ))}
         </div>
       ))}
+
+      {quoteProduct && (
+        <IndentQuoteModal product={quoteProduct} onClose={() => setQuoteProduct(null)} />
+      )}
     </div>
   );
 }
@@ -458,3 +466,113 @@ const inp = {
   width: '100%', boxSizing: 'border-box', border: '1px solid #d8d2c6',
   borderRadius: 6, padding: '6px 8px', fontSize: 14,
 };
+
+/* ---------------- 报价给客户 (INDENT) → 主报价板 ---------------- */
+
+const qmOverlay = { position: 'fixed', inset: 0, background: 'rgba(27,42,74,0.5)', zIndex: 1000, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 24, overflowY: 'auto' };
+const qmModal = { background: '#fff', borderRadius: 12, padding: 24, width: '100%', maxWidth: 560, marginTop: 40, boxShadow: '0 20px 60px rgba(0,0,0,0.25)' };
+const qmDrop = { position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #d8d2c6', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', zIndex: 5, maxHeight: 200, overflowY: 'auto' };
+const qmItem = { padding: '8px 10px', cursor: 'pointer', fontSize: 13, borderBottom: '1px solid #f1ede5' };
+
+function IndentQuoteModal({ product, onClose }) {
+  const tiers = [...(product.quote_tiers || [])].sort((a, b) => Number(a.quantity) - Number(b.quantity));
+  const first = tiers[0] || {};
+  const [qty, setQty] = useState(first.quantity != null ? String(first.quantity) : '');
+  const [unit, setUnit] = useState(first.customer_unit_price_aud != null ? String(first.customer_unit_price_aud) : '');
+  const [cust, setCust] = useState(null);
+  const [custQ, setCustQ] = useState('');
+  const [results, setResults] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(null);
+
+  function applyTierFor(qv) {
+    const n = Number(qv) || 0;
+    let best = null;
+    tiers.forEach((t) => { if (n >= Number(t.quantity)) best = t; });
+    if (best?.customer_unit_price_aud != null) setUnit(String(best.customer_unit_price_aud));
+  }
+  async function searchCust(v) {
+    setCustQ(v); setCust(null);
+    if (v.trim().length < 2) { setResults([]); return; }
+    try {
+      const r = await fetch(`/api/admin/quote-builder?customer=${encodeURIComponent(v.trim())}`);
+      const d = await r.json();
+      setResults(d.customers || []);
+    } catch { setResults([]); }
+  }
+  const qn = Number(qty) || 0, un = Number(unit) || 0;
+  const subtotal = Math.round(qn * un * 100) / 100;
+  const gst = Math.round(subtotal * 0.10 * 100) / 100;
+  const total = Math.round((subtotal + gst) * 100) / 100;
+
+  async function create() {
+    setError('');
+    if (!cust) { setError('先选一个客户'); return; }
+    if (!qn || !un) { setError('填数量和单价'); return; }
+    setSaving(true);
+    try {
+      const res = await fetch('/api/admin/quotes', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          quote_type: 'indent', sourcing_product_id: product.id,
+          product_name: product.product_name, product_sku: product.sku || '',
+          company_id: cust.company_id, customer_name: cust.name, customer_email: cust.email,
+          customer_phone: cust.phone, customer_company: cust.company,
+          delivery_address: cust.delivery || '', quantity: qn, unit_price: un,
+          subtotal, gst, total, shipping: 0, status: 'new',
+        }),
+      });
+      const d = await res.json();
+      setSaving(false);
+      if (!res.ok) { setError(d.error || '生成失败'); return; }
+      setDone(d.quote);
+    } catch { setSaving(false); setError('生成失败'); }
+  }
+
+  return (
+    <div style={qmOverlay} onClick={(e) => e.target === e.currentTarget && onClose()}>
+      <div style={qmModal}>
+        <h2 style={{ margin: '0 0 4px' }}>报价给客户 (INDENT)</h2>
+        <p style={{ margin: '0 0 14px', color: '#000', fontSize: 13 }}>{product.sku} · {product.product_name}</p>
+        {done ? (
+          <div>
+            <p style={{ color: '#1a7f37', fontWeight: 700 }}>✓ 报价 {done.quote_number} 已生成 → 主板 Enquiries &amp; Quotes(标 INDENT)</p>
+            <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+              <a className="srcx-btn" href="/admin/quotes">去主报价板 →</a>
+              <button className="srcx-btn srcx-btn-ghost" onClick={onClose}>关闭</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="srcx-field" style={{ position: 'relative' }}>
+              <label>客户(搜公司 / 联系人 / 邮箱)</label>
+              <input value={cust ? (cust.company || cust.name) : custQ} onChange={(e) => searchCust(e.target.value)} placeholder="输入客户名…" />
+              {!cust && results.length > 0 && (
+                <div style={qmDrop}>
+                  {results.map((c, i) => (
+                    <div key={i} style={qmItem} onClick={() => { setCust(c); setResults([]); }}>
+                      <strong>{c.company || c.name}</strong>{c.name && c.company ? ` · ${c.name}` : ''}{c.email ? ` · ${c.email}` : ''}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {cust && <div style={{ fontSize: 12, color: '#000', marginTop: 4 }}>{cust.name} · {cust.email}{cust.delivery ? ` · ${cust.delivery}` : ''} <button className="srcx-link" onClick={() => { setCust(null); setCustQ(''); }}>改</button></div>}
+            </div>
+            <div className="srcx-grid srcx-grid-3" style={{ marginTop: 12 }}>
+              <div className="srcx-field"><label>数量</label><input type="number" value={qty} onChange={(e) => { setQty(e.target.value); applyTierFor(e.target.value); }} /></div>
+              <div className="srcx-field"><label>单价 AUD(ex GST)</label><input type="number" step="0.0001" value={unit} onChange={(e) => setUnit(e.target.value)} /></div>
+              <div className="srcx-field"><label>&nbsp;</label><div style={{ padding: '6px 0', fontSize: 13, color: '#000' }}>小计 ${subtotal.toFixed(2)} · GST ${gst.toFixed(2)} · <strong>合计 ${total.toFixed(2)}</strong></div></div>
+            </div>
+            {tiers.length > 0 && <p style={{ fontSize: 12, color: '#000', margin: '8px 0 0' }}>档位:{tiers.map((t) => `${t.quantity}=$${t.customer_unit_price_aud ?? '—'}`).join(' · ')}(改数量自动带对应档价,可手改)</p>}
+            {error && <p className="srcx-error">{error}</p>}
+            <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+              <button className="srcx-btn" onClick={create} disabled={saving}>{saving ? '生成中…' : '生成报价 → 主板'}</button>
+              <button className="srcx-btn srcx-btn-ghost" onClick={onClose}>取消</button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

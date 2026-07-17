@@ -2,6 +2,8 @@
 
 Rule for this build: **discuss + confirm EVERY piece before writing code.** No building until the whole design is signed off. (Lesson from the Ian day: piecemeal fixing wasted time.)
 
+**STANDING RULE (Lily, 2026-07-17): EVERY record/entity in every step must have full CRUD — create, READ, EDIT, delete.** Never ship "delete-only". Edit = a pencil/编辑 button that opens the same form pre-filled, saves an update. Applies to: products (done), quotes, orders, factory POs, factory invoices, payments (RMB + Dad AUD), tracking, everything. Build edit in from the start — do not defer.
+
 ## Confirmed architecture
 
 - **One customer view.** Customer QUOTES live in the main **Enquiries & Quotes** board; customer ORDERS live in **/admin/orders**. China ones are tagged **INDENT** (local vs indent), same boards, not a separate system. Reuses all the per-product machinery built for local orders (artwork optional, freight, notify, invoice, credit note).
