@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 import OrderDocuments from '@/components/OrderDocuments';
+import FactoryProcurement from '@/components/FactoryProcurement';
 import { tierMargin, SHIPPING, GST } from '@/lib/pricing';
 
 const supabase = createClient(
@@ -1079,6 +1080,13 @@ export default function AdminOrdersPage() {
               </div>
             </Section>
             </>)}
+
+            {/* FACTORY PROCUREMENT (INDENT / China orders only) */}
+            {selected.order_type === 'indent' && (
+              <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #F0EEED' }}>
+                <FactoryProcurement orderNumber={selected.invoice_number || selected.order_number} order={selected} />
+              </div>
+            )}
 
             {/* DOCUMENTS / EVIDENCE VAULT */}
             <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #F0EEED' }}>
