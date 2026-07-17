@@ -1,6 +1,25 @@
 import { getAdminUser, unauthorized } from '@/lib/adminAuth';
 import { sourcingDb } from '@/lib/sourcingDb';
 import { generateOrderDocPDF, QUIRKY_BANK } from '@/lib/orderDocPdf';
+import { fmtAddrRow, fmtBilling, pickDefaultDelivery } from '@/lib/companyAddress';
+
+// When an order has no delivery address of its own (e.g. an INDENT order created
+// from a quote), fall back to the customer's company account address.
+async function resolveDeliveryAddress(db, order) {
+  if (order.delivery_address) return order.delivery_address;
+  let company = null;
+  if (order.company_id) {
+    const { data } = await db.from('companies').select('id, name, billing_address').eq('id', order.company_id).maybeSingle();
+    company = data;
+  }
+  if (!company && order.customer_company) {
+    const { data } = await db.from('companies').select('id, name, billing_address').ilike('name', order.customer_company).limit(1).maybeSingle();
+    company = data;
+  }
+  if (!company) return '';
+  const { data: addrs } = await db.from('company_addresses').select('*').eq('company_id', company.id);
+  return fmtAddrRow(pickDefaultDelivery(addrs || [])) || fmtBilling(company.billing_address) || '';
+}
 
 // GET ?id=<order id>  → on-demand Tax Invoice PDF for an existing order.
 // Used by the admin Orders modal "Generate Tax Invoice" button. Auth is by
@@ -20,6 +39,7 @@ export async function GET(request) {
     const orderNumber = order.order_number || order.invoice_number || '';
     const items = Array.isArray(order.items) ? order.items : [];
     const num = (v) => (v == null ? null : Number(v));
+    const deliveryAddress = await resolveDeliveryAddress(db, order);
 
     const bytes = await generateOrderDocPDF({
       docType: 'TAX INVOICE',
@@ -34,10 +54,11 @@ export async function GET(request) {
         email: order.customer_email || '',
         phone: order.customer_phone || '',
       },
-      deliveryAddress: order.delivery_address || '',
+      deliveryAddress,
       items: items.map((it) => ({
         stockCode: it.sku || it.stock_code || it.productSku || it.stockCode || '',
         name: it.productName || it.product_description || it.name || 'Product',
+        spec: it.spec || it.product_spec || '',
         colour: it.colour || '',
         branding: it.branding || it.brandingMethod || it.decoration_method || '',
         addons: Array.isArray(it.addons) ? it.addons.map((a) => a.name || a) : [],
