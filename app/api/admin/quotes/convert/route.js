@@ -29,6 +29,13 @@ export async function POST(request) {
       return Response.json({ error: `Already converted to ${q.converted_order_number}` }, { status: 400 });
     }
 
+    // INDENT (China) quotes: gate on PROCEED (status accepted), and do NOT email
+    // the customer or force an artwork card here (Lily controls those).
+    const isIndent = q.quote_type === 'indent';
+    if (isIndent && q.status !== 'won' && q.status !== 'accepted') {
+      return Response.json({ error: '请先标记 PROCEED(客户同意)再转订单' }, { status: 400 });
+    }
+
     const orderNumber = await nextOrderNumber(db);
     const qty = Number(q.quantity) || 1;
     const subtotal = Number(q.subtotal) || 0;
@@ -42,6 +49,7 @@ export async function POST(request) {
       qty,
       unitPrice,
       subtotal,
+      ...(isIndent ? { sourcing_product_id: q.sourcing_product_id || null, indent: true } : {}),
     }];
 
     const orderRow = {
@@ -65,6 +73,8 @@ export async function POST(request) {
       gst_total: Number(q.gst) || 0,
       total_gross: Number(q.total) || 0,
       quote_ref: q.quote_number || null,
+      order_type: isIndent ? 'indent' : 'local',
+      sourcing_quote_ref: isIndent ? (q.quote_number || null) : null,
       created_at: new Date().toISOString(),
     };
 
@@ -82,7 +92,9 @@ export async function POST(request) {
     if (error) return Response.json({ error: error.message }, { status: 500 });
 
     // Order Confirmation PDF + email (OC only — Pay Later). Non-fatal if it fails.
-    try {
+    // INDENT (China) orders skip the auto-email + auto-artwork entirely — Lily
+    // sends the invoice / proof herself and artwork may not apply (no print).
+    if (!isIndent) try {
       const ocBuffer = await generateOrderDocPDF({
         orderNumber,
         date: new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
@@ -113,7 +125,8 @@ export async function POST(request) {
 
     // Create an Artwork record + email the customer to upload their logo, so the
     // converted order appears in the Artworks board and we can produce the mockup.
-    try {
+    // INDENT orders skip this — Lily handles factory artwork/proof herself.
+    if (!isIndent) try {
       const token = crypto.randomBytes(32).toString('hex');
       const hasLogo = !!q.artwork_url;
       await db.from('artworks').insert({
