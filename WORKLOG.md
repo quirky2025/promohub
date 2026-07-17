@@ -134,6 +134,11 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
   - **PUSH**: `db/orders_step_dates.sql`, `app/admin/orders/page.js`.
   - FIX (Lily, Ian 多产品): 生产/发货/送达每个产品时间不同 → 从**订单级时间线拿掉**这三步(订单级只留 下单/印刷稿),改成**每个产品下面**显示 进入生产/已发货/已送达 的日期。item-status route 现在给 `item.stage_dates[stage]=now` 盖时间戳(存 items jsonb,无需 SQL)。点每个产品的阶段按钮就记该产品的日期。Files: `app/api/admin/orders/item-status/route.js`, `app/admin/orders/page.js`.
 
+- 2026-07-17 (Factory PO form = 下单给工厂 + Artworks text black):
+  - 新建工厂 PO 表单改成"给工厂下单"用:顶部 **搜产品/SKU**(查产品库 factory_quotes,/api/admin/sourcing/quotes?product=)→ 选中自动带出 产品名/SKU/工厂/**规格 SPEC**(尺寸·材质·工艺)/¥单价(首档 tier)。加 **规格 SPEC** 文本框(尺寸/颜色/3M adhesive backing 等)。**去掉** 汇率 + 本单成本 A$(成本写订单 Notes)。发票字段保留但标"可选,后补"。PO 卡片显示规格,不再显示 A$ 成本。⚠️ **RUN SQL** `db/factory_pos_spec.sql`(factory_pos += product_spec)。PO PDF 现在带 SKU · 规格。发工厂 = ✉ 发工厂(需工厂 Email)。Files: `db/factory_pos_spec.sql`, `app/api/admin/orders/factory-po/route.js`, `components/FactoryProcurement.jsx`.
+  - **Artworks 页文字全黑**: `app/admin/artworks/page.js` 所有灰(#7A7570/#9CA3AF/#C8C4BC)+ 金(color: GOLD)文字 → #000。状态色(绿/琥珀 pill)保留。
+  - **PUSH**: `db/factory_pos_spec.sql`, `app/api/admin/orders/factory-po/route.js`, `components/FactoryProcurement.jsx`, `app/admin/artworks/page.js`.
+
 - 2026-07-17 (Delivery address on every order) — Lily: 每单顶部一定要有 DELIVERY ADDRESS,默认来自客户账户,可改、可加多个(Ian 2 个地址)。
   - ⚠️ **RUN SQL** `db/orders_delivery_addresses.sql` (orders += `delivery_addresses` jsonb — array of address strings; first mirrors into delivery_address for the invoice).
   - Orders detail 顶部(客户信息下面、Payment banner 上面)新增 **🚚 Delivery Address** 块:多地址列表,每个可编辑;**＋ Add address** 加更多;每个可 ×删;**📇 用账户地址** 从客户账户拉默认地址(fetch /api/admin/quote-builder?customer=);**Save address** 存。openDetail 时若订单没地址,自动从账户拉一个默认显示。第一个地址镜像到 delivery_address → 显示在发票上(发票已有账户回退)。多地址也进 knownAddresses,per-product 运费的 Deliver-to 选择器能选到。

@@ -271,9 +271,9 @@ export default function AdminArtworksPage() {
         </div>
 
         {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570' }}>Loading...</div>
+          <div style={{ textAlign: 'center', padding: '60px', color: '#000' }}>Loading...</div>
         ) : artworks.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570', background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7' }}>No artworks found</div>
+          <div style={{ textAlign: 'center', padding: '60px', color: '#000', background: '#fff', borderRadius: '12px', border: '1px solid #E0DDD7' }}>No artworks found</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {artworks.map(art => (
@@ -281,16 +281,16 @@ export default function AdminArtworksPage() {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                      <span style={{ fontWeight: 700, color: GOLD, fontFamily: '"DM Mono", monospace', fontSize: '15px' }}>{art.order_number}</span>
+                      <span style={{ fontWeight: 700, color: '#000', fontFamily: '"DM Mono", monospace', fontSize: '15px' }}>{art.order_number}</span>
                       <span style={{ background: STATUS_COLORS[art.status]?.bg || '#F3F4F6', color: STATUS_COLORS[art.status]?.text || '#374151', padding: '2px 10px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>
                         {STATUS_COLORS[art.status]?.label || art.status}
                       </span>
-                      <span style={{ fontSize: '12px', color: '#7A7570' }}>{art.payment_method === 'eft' ? '🏦 EFT' : '💳 Card'}</span>
+                      <span style={{ fontSize: '12px', color: '#000' }}>{art.payment_method === 'eft' ? '🏦 EFT' : '💳 Card'}</span>
                     </div>
                     <div style={{ fontSize: '15px', fontWeight: 600, color: NAVY, marginBottom: '4px' }}>{art.customer_name}</div>
-                    <div style={{ fontSize: '13px', color: '#7A7570', marginBottom: '4px' }}>{art.customer_email}</div>
-                    <div style={{ fontSize: '13px', color: '#7A7570', marginBottom: '4px' }}>Product: <strong style={{ color: NAVY }}>{art.product_name}</strong></div>
-                    <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{new Date(art.created_at).toLocaleString('en-AU')}</div>
+                    <div style={{ fontSize: '13px', color: '#000', marginBottom: '4px' }}>{art.customer_email}</div>
+                    <div style={{ fontSize: '13px', color: '#000', marginBottom: '4px' }}>Product: <strong style={{ color: NAVY }}>{art.product_name}</strong></div>
+                    <div style={{ fontSize: '12px', color: '#000' }}>{new Date(art.created_at).toLocaleString('en-AU')}</div>
                     {art.notes && (
                       <div style={{ marginTop: '8px', background: '#FEF3C7', borderRadius: '6px', padding: '8px 12px', fontSize: '12px', color: '#92400E' }}>
                         <strong>Customer notes:</strong> {art.notes}
@@ -299,16 +299,16 @@ export default function AdminArtworksPage() {
                   </div>
 
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Logo</div>
+                    <div style={{ fontSize: '11px', color: '#000', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Logo</div>
                     {art.logo_url ? (
                       <>
                         <ProductImg src={(art.logo_png_url || art.logo_url)} size="thumb" alt="Logo" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
                         <div style={{ marginTop: '4px' }}>
-                          <a href={art.logo_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: GOLD, textDecoration: 'none' }}>Download</a>
+                          <a href={art.logo_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: '#000', textDecoration: 'none' }}>Download</a>
                         </div>
                       </>
                     ) : (
-                      <div style={{ width: '80px', height: '80px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #C8C4BC', borderRadius: '8px', color: '#C8C4BC', fontSize: '24px' }}>—</div>
+                      <div style={{ width: '80px', height: '80px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #C8C4BC', borderRadius: '8px', color: '#000', fontSize: '24px' }}>—</div>
                     )}
                     <div style={{ marginTop: '6px' }}>
                       <button onClick={() => document.getElementById('list-logo-' + art.id).click()}
@@ -322,7 +322,7 @@ export default function AdminArtworksPage() {
 
                   {art.mockup_url && (
                     <div style={{ textAlign: 'center' }}>
-                      <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Mockup</div>
+                      <div style={{ fontSize: '11px', color: '#000', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Mockup</div>
                       {/\.pdf(\?|$)/i.test(art.mockup_url) ? (
                         <a href={art.mockup_url} target="_blank" rel="noreferrer" title="Open mockup" style={{ display: 'block', width: '100px', height: '120px', margin: '0 auto', border: '1px solid #E0DDD7', borderRadius: '8px', overflow: 'hidden', background: '#fff' }}>
                           <iframe src={`${art.mockup_url}#toolbar=0&navpanes=0&view=FitH`} title="Mockup" style={{ width: '100%', height: '100%', border: 'none', pointerEvents: 'none' }} />
@@ -331,7 +331,7 @@ export default function AdminArtworksPage() {
                         <ProductImg src={toDisplayUrl(art.mockup_url)} size="thumb" alt="Mockup" style={{ width: '80px', height: '80px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '8px', padding: '4px', background: '#fff' }} />
                       )}
                       <div style={{ marginTop: '4px' }}>
-                        <a href={art.mockup_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: GOLD, textDecoration: 'none' }}>View</a>
+                        <a href={art.mockup_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: '#000', textDecoration: 'none' }}>View</a>
                       </div>
                     </div>
                   )}
@@ -353,8 +353,8 @@ export default function AdminArtworksPage() {
             <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: NAVY, margin: '0 0 8px' }}>
               {getModalTitle(selected)}
             </h2>
-            <p style={{ fontSize: '14px', color: '#7A7570', margin: '0 0 20px' }}>
-              Order: <strong style={{ color: GOLD }}>{selected.order_number}</strong> · {selected.customer_name}
+            <p style={{ fontSize: '14px', color: '#000', margin: '0 0 20px' }}>
+              Order: <strong style={{ color: '#000' }}>{selected.order_number}</strong> · {selected.customer_name}
             </p>
 
             {selected.status === 'changes_requested' && selected.notes && (
@@ -365,10 +365,10 @@ export default function AdminArtworksPage() {
 
             {selected.logo_url && (
               <div style={{ marginBottom: '20px' }}>
-                <div style={{ fontSize: '12px', color: '#7A7570', marginBottom: '8px' }}>Customer Logo:</div>
+                <div style={{ fontSize: '12px', color: '#000', marginBottom: '8px' }}>Customer Logo:</div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <ProductImg src={(selected.logo_png_url || selected.logo_url)} size="thumb" eager alt="Logo" style={{ width: '60px', height: '60px', objectFit: 'contain', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px' }} />
-                  <a href={selected.logo_url} target="_blank" rel="noreferrer" style={{ fontSize: '13px', color: GOLD, textDecoration: 'none', fontWeight: 600 }}>
+                  <a href={selected.logo_url} target="_blank" rel="noreferrer" style={{ fontSize: '13px', color: '#000', textDecoration: 'none', fontWeight: 600 }}>
                     Download Logo →
                   </a>
                 </div>
@@ -404,7 +404,7 @@ export default function AdminArtworksPage() {
               </button>
               {generatedUrl && (
                 <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px', justifyContent: 'space-between' }}>
-                  <a href={generatedUrl} target="_blank" rel="noreferrer" style={{ fontSize: '13px', color: GOLD, fontWeight: 600, textDecoration: 'none' }}>Preview generated proof</a>
+                  <a href={generatedUrl} target="_blank" rel="noreferrer" style={{ fontSize: '13px', color: '#000', fontWeight: 600, textDecoration: 'none' }}>Preview generated proof</a>
                   <button onClick={sendGenerated} disabled={uploading}
                     style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 16px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
                     {uploading ? 'Sending...' : 'Send this proof'}
@@ -413,7 +413,7 @@ export default function AdminArtworksPage() {
               )}
             </div>
 
-            <div style={{ textAlign: 'center', fontSize: '12px', color: '#9CA3AF', margin: '0 0 14px' }}>- or upload a mockup manually -</div>
+            <div style={{ textAlign: 'center', fontSize: '12px', color: '#000', margin: '0 0 14px' }}>- or upload a mockup manually -</div>
 
             <div onClick={() => document.getElementById('mockup-upload').click()}
               style={{ border: `2px dashed ${mockupFile ? GOLD : '#C8C4BC'}`, borderRadius: '10px', padding: '32px', textAlign: 'center', cursor: 'pointer', background: mockupFile ? '#FFFBF4' : '#ffffff', marginBottom: '20px' }}>
@@ -423,13 +423,13 @@ export default function AdminArtworksPage() {
                 <>
                   <div style={{ fontSize: '32px', marginBottom: '8px' }}>✅</div>
                   <div style={{ fontWeight: 600, color: NAVY }}>{mockupFile.name}</div>
-                  <div style={{ fontSize: '12px', color: '#7A7570', marginTop: '4px' }}>Click to change</div>
+                  <div style={{ fontSize: '12px', color: '#000', marginTop: '4px' }}>Click to change</div>
                 </>
               ) : (
                 <>
                   <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎨</div>
                   <div style={{ fontWeight: 600, color: NAVY, marginBottom: '4px' }}>Click to upload mockup</div>
-                  <div style={{ fontSize: '12px', color: '#7A7570' }}>PNG, JPG, PDF accepted</div>
+                  <div style={{ fontSize: '12px', color: '#000' }}>PNG, JPG, PDF accepted</div>
                 </>
               )}
             </div>
@@ -440,7 +440,7 @@ export default function AdminArtworksPage() {
                 {uploading ? 'Uploading...' : 'Send to Customer →'}
               </button>
               <button onClick={() => setSelected(null)}
-                style={{ background: '#fff', color: '#7A7570', border: '1.5px solid #E0DDD7', borderRadius: '8px', padding: '12px 20px', fontSize: '14px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                style={{ background: '#fff', color: '#000', border: '1.5px solid #E0DDD7', borderRadius: '8px', padding: '12px 20px', fontSize: '14px', cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
                 Cancel
               </button>
             </div>
