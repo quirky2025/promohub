@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { sourcingDb } from '@/lib/sourcingDb';
 import { isAdmin, unauthorized } from '@/lib/adminAuth';
 
+const isUuid = (v) => typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
+
 export async function GET(request) {
   if (!(await isAdmin(request))) return unauthorized();
   const db = sourcingDb();
@@ -54,11 +56,26 @@ export async function POST(request) {
     return NextResponse.json({ error: '至少填一档数量报价' }, { status: 400 });
 
   const db = sourcingDb();
+
+  // Auto-generate SKU = {factory short_code}-{seq} unless one is supplied.
+  let sku = body.sku?.trim() || null;
+  if (!sku) {
+    const { data: fac } = await db.from('factories').select('short_code, name').eq('id', body.factory_id).single();
+    let code = (fac?.short_code || '').trim().toUpperCase();
+    if (!code) code = (fac?.name || 'F').replace(/[^A-Za-z0-9]/g, '').slice(0, 4).toUpperCase() || 'F';
+    const { data: ctr } = await db.from('factory_sku_counters').select('next_seq').eq('factory_id', body.factory_id).single();
+    const seq = ctr?.next_seq || 1;
+    if (ctr) await db.from('factory_sku_counters').update({ next_seq: seq + 1 }).eq('factory_id', body.factory_id);
+    else await db.from('factory_sku_counters').insert({ factory_id: body.factory_id, next_seq: 2 });
+    sku = `${code}-${String(seq).padStart(3, '0')}`;
+  }
+
   const { data: quote, error } = await db
     .from('factory_quotes')
     .insert({
       factory_id: body.factory_id,
       quote_date: body.quote_date || new Date().toISOString().slice(0, 10),
+      sku,
       product_code: body.product_code?.trim() || null,
       product_name: body.product_name.trim(),
       product_spec: body.product_spec?.trim() || null,
@@ -72,9 +89,15 @@ export async function POST(request) {
       carton_width_cm: body.carton_width_cm ? Number(body.carton_width_cm) : null,
       carton_height_cm: body.carton_height_cm ? Number(body.carton_height_cm) : null,
       available_colours: body.available_colours?.trim() || null,
+      image_url: body.image_url?.trim() || null,
+      group_id: isUuid(body.group_id) ? body.group_id : null,
+      status: body.status?.trim() || 'active',
+      setup_cost_rmb: body.setup_cost_rmb ? Number(body.setup_cost_rmb) : null,
+      tooling_cost_rmb: body.tooling_cost_rmb ? Number(body.tooling_cost_rmb) : null,
+      sample_cost_rmb: body.sample_cost_rmb ? Number(body.sample_cost_rmb) : null,
       notes: body.notes?.trim() || null,
     })
-    .select('id')
+    .select('id, sku')
     .single();
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 

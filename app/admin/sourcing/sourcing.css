@@ -10,7 +10,7 @@
   --bg: #faf8f4;
   --line: #e6e1d8;
   --ink: #2b2b2b;
-  --muted: #8a8577;
+  --muted: #000000;   /* was grey #8a8577 — Lily: backend text must be black, never grey */
   --green: #2e7d52;
   --red: #b4413e;
   max-width: 1180px;

@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 const EMPTY = {
-  id: null, name: '', contact_person: '', wechat: '',
+  id: null, name: '', short_code: '', contact_person: '', wechat: '',
   phone: '', email: '', main_categories: '', notes: '',
 };
 
@@ -98,6 +98,10 @@ export default function FactoriesPage() {
             <div className="srcx-field">
               <label>工厂名称 *</label>
               <input value={form.name} onChange={set('name')} />
+            </div>
+            <div className="srcx-field">
+              <label>工厂短代码(生成产品 SKU 用,如 DGWC)</label>
+              <input value={form.short_code} onChange={set('short_code')} placeholder="如 DGWC" maxLength={8} style={{ textTransform: 'uppercase' }} />
             </div>
             <div className="srcx-field">
               <label>主营品类(用于快速找厂,逗号分隔)</label>
