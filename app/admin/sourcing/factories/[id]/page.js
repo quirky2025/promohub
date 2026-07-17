@@ -23,6 +23,7 @@ export default function FactoryDetailPage() {
   const [freight, setFreight] = useState({});
   const [globalFx, setGlobalFx] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [editQuote, setEditQuote] = useState(null);
 
   async function load() {
     const [fRes, qRes, nRes, frRes, feRes] = await Promise.all([
@@ -84,19 +85,21 @@ export default function FactoryDetailPage() {
             )}
             {factory.notes && <p className="srcx-muted" style={{ marginBottom: 0 }}>备注:{factory.notes}</p>}
           </div>
-          <button className="srcx-btn srcx-btn-gold" onClick={() => setShowForm(!showForm)}>
-            {showForm ? '收起表单' : '+ 录入产品 / 报价'}
+          <button className="srcx-btn srcx-btn-gold" onClick={() => { setEditQuote(null); setShowForm(!showForm); }}>
+            {showForm && !editQuote ? '收起表单' : '+ 录入产品 / 报价'}
           </button>
         </div>
       </div>
 
       {showForm && (
         <QuoteForm
+          key={editQuote?.id || 'new'}
           factoryId={id}
           names={names}
           freight={freight}
           globalFx={globalFx}
-          onSaved={() => { setShowForm(false); load(); }}
+          editQuote={editQuote}
+          onSaved={() => { setShowForm(false); setEditQuote(null); load(); }}
         />
       )}
 
@@ -146,7 +149,10 @@ export default function FactoryDetailPage() {
                   {q.est_unit_weight_g != null && <span className="srcx-muted"> · 约 {q.est_unit_weight_g}g/个</span>}
                   {q.domestic_freight_rmb != null && <span className="srcx-muted"> · 国内运费 ¥{q.domestic_freight_rmb}</span>}
                 </span>
-                <button className="srcx-link srcx-link-danger" onClick={() => removeQuote(q.id)}>删除</button>
+                <span style={{ display: 'inline-flex', gap: 12 }}>
+                  <button className="srcx-link" onClick={() => { setEditQuote(q); setShowForm(true); if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' }); }}>编辑</button>
+                  <button className="srcx-link srcx-link-danger" onClick={() => removeQuote(q.id)}>删除</button>
+                </span>
               </div>
               <table className="srcx-table" style={{ marginTop: 6 }}>
                 <thead>
@@ -187,18 +193,26 @@ export default function FactoryDetailPage() {
 
 /* ---------------- 录价表单(含三渠道到岸价试算) ---------------- */
 
-function QuoteForm({ factoryId, names, freight, globalFx, onSaved }) {
+function QuoteForm({ factoryId, names, freight, globalFx, editQuote, onSaved }) {
   const today = new Date().toISOString().slice(0, 10);
+  const q = editQuote;
+  const s = (v) => (v == null ? '' : String(v));
   const [head, setHead] = useState({
-    quote_date: today, product_code: '', product_name: '', product_spec: '',
-    printing_method: '', lead_time_days: '', exchange_rate: globalFx ? String(globalFx) : '',
-    est_unit_weight_g: '', domestic_freight_rmb: '', notes: '',
-    units_per_carton: '', carton_length_cm: '', carton_width_cm: '', carton_height_cm: '',
-    available_colours: '', image_url: '', status: 'active',
-    setup_cost_rmb: '', tooling_cost_rmb: '', sample_cost_rmb: '',
-    material: '', product_size: '', craft: '', packaging: '',
+    quote_date: q?.quote_date || today,
+    product_code: q?.product_code || '', product_name: q?.product_name || '', product_spec: q?.product_spec || '',
+    printing_method: q?.printing_method || '', lead_time_days: s(q?.lead_time_days),
+    exchange_rate: q?.exchange_rate != null ? String(q.exchange_rate) : (globalFx ? String(globalFx) : ''),
+    est_unit_weight_g: s(q?.est_unit_weight_g), domestic_freight_rmb: s(q?.domestic_freight_rmb), notes: q?.notes || '',
+    units_per_carton: s(q?.units_per_carton), carton_length_cm: s(q?.carton_length_cm), carton_width_cm: s(q?.carton_width_cm), carton_height_cm: s(q?.carton_height_cm),
+    available_colours: q?.available_colours || '', image_url: q?.image_url || '', status: q?.status || 'active',
+    setup_cost_rmb: s(q?.setup_cost_rmb), tooling_cost_rmb: s(q?.tooling_cost_rmb), sample_cost_rmb: s(q?.sample_cost_rmb),
+    material: q?.material || '', product_size: q?.product_size || '', craft: q?.craft || '', packaging: q?.packaging || '',
   });
-  const [tiers, setTiers] = useState([{ quantity: '', rmb: '', aud: '' }]);
+  const [tiers, setTiers] = useState(
+    q?.quote_tiers?.length
+      ? q.quote_tiers.map((t) => ({ quantity: s(t.quantity), rmb: s(t.exw_unit_price_rmb), aud: t.customer_unit_price_aud != null ? String(t.customer_unit_price_aud) : '' }))
+      : [{ quantity: '', rmb: '', aud: '' }]
+  );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -236,6 +250,7 @@ function QuoteForm({ factoryId, names, freight, globalFx, onSaved }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         factory_id: factoryId,
+        id: editQuote?.id,
         ...head,
         tiers: tiers.map((t) => ({
           quantity: t.quantity,
@@ -254,8 +269,8 @@ function QuoteForm({ factoryId, names, freight, globalFx, onSaved }) {
 
   return (
     <div className="srcx-card" style={{ borderColor: '#c9a45c' }}>
-      <h2>录入产品 / 报价</h2>
-      <p style={{ margin: '0 0 12px', fontSize: 13, color: '#000' }}>一步建好产品 + 价格。第一次填 = 新建产品(自动出 SKU);同一产品名再填 = 加一条新价格(历史)。</p>
+      <h2>{q ? `编辑产品:${q.sku || q.product_name}` : '录入产品 / 报价'}</h2>
+      <p style={{ margin: '0 0 12px', fontSize: 13, color: '#000' }}>{q ? '改产品详情 / 价格,保存后 SKU 不变。' : '一步建好产品 + 价格。第一次填 = 新建产品(自动出 SKU);同一产品名再填 = 加一条新价格(历史)。'}</p>
       <div className="srcx-grid srcx-grid-4">
         <div className="srcx-field">
           <label>报价日期 *</label>
@@ -433,7 +448,7 @@ function QuoteForm({ factoryId, names, freight, globalFx, onSaved }) {
 
       {error && <p className="srcx-error">{error}</p>}
       <button className="srcx-btn" onClick={save} disabled={saving} style={{ marginTop: 8 }}>
-        {saving ? '保存中…' : '保存产品 / 报价'}
+        {saving ? '保存中…' : q ? '保存修改' : '保存产品 / 报价'}
       </button>
     </div>
   );
