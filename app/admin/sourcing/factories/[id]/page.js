@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import ColourSwatches from '@/components/ColourSwatches';
+import ProductCostRecords from '@/components/ProductCostRecords';
 import { parseColours } from '@/lib/colourCards';
 
 const PRINTING = ['丝印', 'UV打印', '激光雕刻', '热转印', '刺绣', '烫金', '数码印刷', '无印刷'];
@@ -189,6 +190,7 @@ export default function FactoryDetailPage() {
               {q.notes && <p className="srcx-muted" style={{ margin: '6px 0 0' }}>备注:{q.notes}</p>}
             </div>
           ))}
+          <ProductCostRecords quoteId={list[0].id} sku={list[0].sku} />
         </div>
       ))}
 
