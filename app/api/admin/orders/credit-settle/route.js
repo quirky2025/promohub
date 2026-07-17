@@ -28,6 +28,19 @@ export async function POST(request) {
     const credit = net < 0;
     const orderNumber = order.order_number || order.invoice_number || '';
 
+    // 1) Save the "settled" flag FIRST. If this fails (e.g. the column doesn't
+    //    exist yet — run db/orders_adjustments.sql), abort BEFORE touching the
+    //    bank, so we never post a refund that isn't recorded as settled.
+    const settledAt = new Date().toISOString();
+    const { data: updated, error: upErr } = await db.from('orders')
+      .update({ adjustment_settled_at: settledAt }).eq('id', orderId).select('*').single();
+    if (upErr) {
+      return Response.json({ error: 'Could not save settlement — did you run orders_adjustments.sql? (' + upErr.message + ')' }, { status: 500 });
+    }
+
+    // 2) Clean up any earlier bank txns for this order's adjustment (in case it
+    //    was clicked multiple times before this fix), then post exactly one.
+    try { await db.from('bank_transactions').delete().eq('linked_type', 'order_adjustment').eq('linked_id', orderId); } catch (_) { /* finance optional */ }
     await db.from('bank_transactions').insert({
       txn_date: new Date().toISOString().slice(0, 10),
       direction: credit ? 'out' : 'in',
@@ -45,11 +58,7 @@ export async function POST(request) {
       created_by: user.email,
     });
 
-    const settledAt = new Date().toISOString();
-    const { data: updated } = await db.from('orders')
-      .update({ adjustment_settled_at: settledAt }).eq('id', orderId).select('*').single();
-
-    return Response.json({ success: true, order: updated || { ...order, adjustment_settled_at: settledAt }, direction: credit ? 'out' : 'in', amount: amt });
+    return Response.json({ success: true, order: updated, direction: credit ? 'out' : 'in', amount: amt });
   } catch (e) {
     return Response.json({ error: e.message }, { status: 500 });
   }
