@@ -10,6 +10,8 @@ const TRACK_URL = {
   'AusPost': (t) => `https://auspost.com.au/mypost/track/#/details/${t}`,
   'FedEx': (t) => `https://www.fedex.com/fedextrack/?trknbr=${t}`,
   'DHL': (t) => `https://www.dhl.com/au-en/home/tracking.html?tracking-id=${t}`,
+  'DHL (Hong Kong)': (t) => `https://www.dhl.com/au-en/home/tracking.html?tracking-id=${t}`,
+  'DHL (China Mainland)': (t) => `https://www.dhl.com/au-en/home/tracking.html?tracking-id=${t}`,
   'StarTrack': (t) => `https://startrack.com.au/track/search?id=${t}`,
   'TNT': (t) => `https://www.tnt.com/express/en_au/site/tracking.html?searchType=con&cons=${t}`,
 };
