@@ -1121,8 +1121,10 @@ export default function AdminOrdersPage() {
             </Section>
             </>)}
 
-            {/* FACTORY PROCUREMENT (INDENT / China orders only) */}
-            {selected.order_type === 'indent' && (
+            {/* FACTORY PROCUREMENT (INDENT / China orders). Robust check: order_type
+                may not have stuck, so also treat orders linked to a sourcing quote /
+                product as INDENT. */}
+            {(selected.order_type === 'indent' || selected.sourcing_quote_ref || (Array.isArray(selected.items) && selected.items.some(it => it && (it.indent || it.sourcing_product_id)))) && (
               <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #F0EEED' }}>
                 <FactoryProcurement orderNumber={selected.invoice_number || selected.order_number} order={selected} />
               </div>
