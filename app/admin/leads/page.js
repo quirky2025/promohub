@@ -113,18 +113,30 @@ export default function AdminDealsPage() {
 
   async function convertToOrder() {
     if (!selected || selected.kind !== 'quote') return;
-    if (!confirm('Convert this quote into an order? An Order Confirmation will be emailed to the customer.')) return;
+    const isIndent = detail?.record?.quote_type === 'indent';
+    const msg = isIndent
+      ? '转成 INDENT 订单？\n\n这是工厂订单，不会自动发邮件给客户或工厂。只在 Orders 里生成订单，之后你自己下工厂 PO、发发票。'
+      : 'Convert this quote into an order? An Order Confirmation will be emailed to the customer.';
+    if (!confirm(msg)) return;
     setConverting(true);
     const res = await fetch('/api/admin/quotes/convert', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ quoteId: selected.id }) });
     const data = await res.json().catch(() => ({}));
     setConverting(false);
     if (res.ok && data.orderNumber) {
-      alert(`Converted to order ${data.orderNumber}. Order Confirmation emailed — it's now in the Orders board.`);
+      alert(isIndent
+        ? `已转成订单 ${data.orderNumber}（INDENT，未发任何邮件）。在 Orders 里可以看到。`
+        : `Converted to order ${data.orderNumber}. Order Confirmation emailed — it's now in the Orders board.`);
       fetchDeals();
       openDetail(selected);
     } else {
       alert('Convert failed: ' + (data.error || 'unknown'));
     }
+  }
+
+  async function markProceed() {
+    if (!selected || selected.kind !== 'quote') return;
+    if (!confirm('标记 PROCEED — 表示客户已同意这张 INDENT 报价，可以转成订单了。')) return;
+    await patch('status', { status: 'won' });
   }
 
   async function addActivity() {
@@ -225,7 +237,7 @@ export default function AdminDealsPage() {
           {selected && (
             <div style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '12px', padding: '20px', position: 'sticky', top: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><KindTag kind={selected.kind} /><StatusPill status={selected.status} /></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><KindTag kind={selected.kind} />{detail?.record?.quote_type === 'indent' && <span style={{ background: '#7C2D12', color: '#fff', padding: '2px 8px', borderRadius: '5px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.05em' }}>INDENT</span>}<StatusPill status={selected.status} /></div>
                 <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', fontSize: '20px', color: '#B0AAA3', cursor: 'pointer', lineHeight: 1 }}>×</button>
               </div>
               <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '6px 0 2px' }}>{selected.customer_company || selected.customer_name || '(no name)'}</h2>
@@ -269,7 +281,14 @@ export default function AdminDealsPage() {
                   {selected.kind === 'quote' && (
                     detail.record.converted_order_number
                       ? <div style={{ background: '#EAF3DE', color: '#3B6D11', borderRadius: '8px', padding: '10px 14px', fontSize: '13px', fontWeight: 700, marginBottom: '14px' }}>✓ Converted to order {detail.record.converted_order_number}</div>
-                      : <button onClick={convertToOrder} disabled={converting} style={{ width: '100%', background: converting ? '#B0AAA3' : '#2D6A4F', color: '#fff', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: converting ? 'not-allowed' : 'pointer', marginBottom: '14px' }}>{converting ? 'Converting…' : '→ Convert to Order'}</button>
+                      : detail.record.quote_type === 'indent'
+                        ? ((selected.status === 'won' || selected.status === 'accepted')
+                            ? <button onClick={convertToOrder} disabled={converting} style={{ width: '100%', background: converting ? '#B0AAA3' : NAVY, color: '#fff', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: converting ? 'not-allowed' : 'pointer', marginBottom: '14px' }}>{converting ? '转换中…' : '→ 转成订单 (INDENT · 不发邮件)'}</button>
+                            : <div style={{ marginBottom: '14px' }}>
+                                <div style={{ background: '#FAEEDA', color: '#854F0B', borderRadius: '8px', padding: '9px 12px', fontSize: '12px', lineHeight: 1.5, marginBottom: '8px' }}>这是 INDENT（工厂）报价。客户同意后先点 PROCEED，才能转成订单。转订单不会自动发邮件。</div>
+                                <button onClick={markProceed} disabled={saving} style={{ width: '100%', background: saving ? '#B0AAA3' : GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: saving ? 'not-allowed' : 'pointer' }}>{saving ? '…' : '✓ 标记 PROCEED（客户同意）'}</button>
+                              </div>)
+                        : <button onClick={convertToOrder} disabled={converting} style={{ width: '100%', background: converting ? '#B0AAA3' : '#2D6A4F', color: '#fff', border: 'none', borderRadius: '8px', padding: '11px', fontSize: '14px', fontWeight: 700, cursor: converting ? 'not-allowed' : 'pointer', marginBottom: '14px' }}>{converting ? 'Converting…' : '→ Convert to Order'}</button>
                   )}
 
                   <div style={{ fontSize: '11px', color: '#7A7570', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Internal note</div>
