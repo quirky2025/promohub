@@ -10,7 +10,7 @@ export async function PATCH(request) {
     if (!b.id) return Response.json({ error: 'Missing id' }, { status: 400 });
     const db = sourcingDb();
     const updates = {};
-    for (const k of ['delivery_address', 'internal_notes', 'tracking_number', 'tracking_url']) {
+    for (const k of ['delivery_address', 'delivery_addresses', 'internal_notes', 'tracking_number', 'tracking_url']) {
       if (b[k] !== undefined) updates[k] = b[k];
     }
     if (Object.keys(updates).length === 0) {

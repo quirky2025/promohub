@@ -128,6 +128,17 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
 
 - 2026-07-16 (later 12): ⭐ ROOT CAUSE of "changes don't persist" (artwork approval / per-item status / freight parcels reverting on reload/deploy). `app/api/admin/orders/route.js` `legacyItems()` REBUILT each item keeping only a subset of fields → STRIPPED item.artwork_approved, item.parcels, item.status, item.branding, item.freight_* on every GET. Data WAS saved in orders.items jsonb; the list API dropped it on read. FIX: `legacyItems` now spreads `...item` first (keeps all original fields), then adds normalized aliases. Uploaded artwork survived because it's in order_documents (separate table). Refund persistence is separate: order-level cols (adjustments/adjustment_settled_at/amount_paid) are preserved by `...order` spread in normalizeOrder — they only "didn't save" because orders_adjustments.sql not yet run + credit-settle not yet deployed. PUSH: app/api/admin/orders/route.js. esbuild-clean.
 
+- 2026-07-17 (Step dates timeline) — Lily: 每个 process 都要有日期(下单/印刷批准/生产/发货/送达)。
+  - ⚠️ **RUN SQL** `db/orders_step_dates.sql` (orders += `artwork_sent_at`, `delivered_at`; 其余已存在).
+  - ORDER PROGRESS 下的 Timeline 重建成逐步列表:下单/发印刷稿/印刷稿批准/进入生产/已发货/已送达,每步显示日期或灰色"待定 —"。无印刷单自动跳过两个印刷步骤。updateStatus 现在也给 artwork_sent_at 和 delivered_at 盖时间戳(点进度按钮时)。File: `app/admin/orders/page.js`.
+  - **PUSH**: `db/orders_step_dates.sql`, `app/admin/orders/page.js`.
+
+- 2026-07-17 (Delivery address on every order) — Lily: 每单顶部一定要有 DELIVERY ADDRESS,默认来自客户账户,可改、可加多个(Ian 2 个地址)。
+  - ⚠️ **RUN SQL** `db/orders_delivery_addresses.sql` (orders += `delivery_addresses` jsonb — array of address strings; first mirrors into delivery_address for the invoice).
+  - Orders detail 顶部(客户信息下面、Payment banner 上面)新增 **🚚 Delivery Address** 块:多地址列表,每个可编辑;**＋ Add address** 加更多;每个可 ×删;**📇 用账户地址** 从客户账户拉默认地址(fetch /api/admin/quote-builder?customer=);**Save address** 存。openDetail 时若订单没地址,自动从账户拉一个默认显示。第一个地址镜像到 delivery_address → 显示在发票上(发票已有账户回退)。多地址也进 knownAddresses,per-product 运费的 Deliver-to 选择器能选到。
+  - Files: `app/admin/orders/page.js` (deliveryList state + fillFromAccount + saveDeliveryList + 顶部 UI 块 + knownAddresses), `app/api/admin/orders/update/route.js` (allow delivery_addresses).
+  - **PUSH**: `db/orders_delivery_addresses.sql`, `app/admin/orders/page.js`, `app/api/admin/orders/update/route.js`.
+
 - 2026-07-17 (SIMPLIFY Step 4) — Lily: 欠爸爸账本太复杂,看不到。砍掉。
   - Lily's model: per order = ¥付了多少 · 汇率 → =A$成本(打给爸爸)。就这样,不要全局账本/还爸爸记录/采购总览页。
   - **工厂 PO 面板砍简单** (`components/FactoryProcurement.jsx` rewritten): 只留 (a) 工厂 PO 建/编辑/删 + **📄 PO PDF** + **✉ 发工厂**; (b) **工厂发票** (号/额/日期/文件); (c) **支付凭证** 上传(微信截图,存 order_documents docType payment_proof, 缩略图+删除); (d) **本单成本**: 工厂总额 ¥ ÷ 汇率 = **A$ 成本**(绿字,PO 卡片直接显示 + 表单里实时算)。**删掉**: 欠爸爸结余卡、RMB 多笔付款腿的复杂 UI、还爸爸记录、Stat 组件。
