@@ -41,6 +41,24 @@ export async function GET(request) {
     const num = (v) => (v == null ? null : Number(v));
     const deliveryAddress = await resolveDeliveryAddress(db, order);
 
+    // Live spec fallback: for INDENT lines with no manual spec, read the factory
+    // product's size/material/craft so the invoice auto-updates when you edit the
+    // product in Sourcing (no need to touch each order).
+    const specMap = {};
+    try {
+      const ids = [...new Set(items.filter((it) => !it.spec && it.sourcing_product_id).map((it) => it.sourcing_product_id))];
+      if (ids.length) {
+        const { data: prods } = await db.from('factory_quotes').select('id, product_size, material, craft').in('id', ids);
+        (prods || []).forEach((p) => {
+          const parts = [];
+          if (p.product_size) parts.push(`Size: ${p.product_size}`);
+          if (p.material) parts.push(p.material);
+          if (p.craft) parts.push(p.craft);
+          specMap[p.id] = parts.join(' · ');
+        });
+      }
+    } catch (_) { /* spec columns may not exist yet */ }
+
     const bytes = await generateOrderDocPDF({
       docType: 'TAX INVOICE',
       orderNumber,
@@ -58,7 +76,7 @@ export async function GET(request) {
       items: items.map((it) => ({
         stockCode: it.sku || it.stock_code || it.productSku || it.stockCode || '',
         name: it.productName || it.product_description || it.name || 'Product',
-        spec: it.spec || it.product_spec || '',
+        spec: it.spec || it.product_spec || specMap[it.sourcing_product_id] || '',
         colour: it.colour || '',
         branding: it.branding || it.brandingMethod || it.decoration_method || '',
         addons: Array.isArray(it.addons) ? it.addons.map((a) => a.name || a) : [],

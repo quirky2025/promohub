@@ -40,6 +40,23 @@ export async function POST(request) {
     const qty = Number(q.quantity) || 1;
     const subtotal = Number(q.subtotal) || 0;
     const unitPrice = qty ? Number((subtotal / qty).toFixed(2)) : subtotal;
+
+    // For INDENT orders, pull the size/material/craft you entered once on the
+    // factory product (Sourcing product library) into the order line + invoice.
+    let indentSpec = null;
+    if (isIndent && q.sourcing_product_id) {
+      try {
+        const { data: prod } = await db.from('factory_quotes').select('product_size, material, craft').eq('id', q.sourcing_product_id).maybeSingle();
+        if (prod) {
+          const parts = [];
+          if (prod.product_size) parts.push(`Size: ${prod.product_size}`);
+          if (prod.material) parts.push(prod.material);
+          if (prod.craft) parts.push(prod.craft);
+          indentSpec = parts.join(' · ') || null;
+        }
+      } catch (_) { /* spec columns may not exist yet */ }
+    }
+
     const items = [{
       productName: q.product_name || 'Product',
       sku: q.product_sku || '',
@@ -49,7 +66,7 @@ export async function POST(request) {
       qty,
       unitPrice,
       subtotal,
-      ...(isIndent ? { sourcing_product_id: q.sourcing_product_id || null, indent: true } : {}),
+      ...(isIndent ? { sourcing_product_id: q.sourcing_product_id || null, indent: true, spec: indentSpec } : {}),
     }];
 
     const orderRow = {
