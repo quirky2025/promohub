@@ -21,19 +21,23 @@ export default function FactoryDetailPage() {
   const [quotes, setQuotes] = useState([]);
   const [names, setNames] = useState([]);
   const [freight, setFreight] = useState({});
+  const [globalFx, setGlobalFx] = useState('');
   const [showForm, setShowForm] = useState(false);
 
   async function load() {
-    const [fRes, qRes, nRes, frRes] = await Promise.all([
+    const [fRes, qRes, nRes, frRes, feRes] = await Promise.all([
       fetch(`/api/admin/sourcing/factories?id=${id}`),
       fetch(`/api/admin/sourcing/quotes?factory_id=${id}`),
       fetch(`/api/admin/sourcing/quotes?names=1`),
       fetch(`/api/admin/sourcing/freight`),
+      fetch(`/api/admin/sourcing/freight-engine`),
     ]);
     setFactory((await fRes.json()).factory || null);
     setQuotes((await qRes.json()).quotes || []);
     setNames((await nRes.json()).names || []);
     setFreight((await frRes.json()).current || {});
+    const fe = await feRes.json().catch(() => ({}));
+    setGlobalFx(fe?.settings?.fx_rate_rmb_to_aud ?? '');
   }
   useEffect(() => { load(); }, [id]);
 
@@ -81,7 +85,7 @@ export default function FactoryDetailPage() {
             {factory.notes && <p className="srcx-muted" style={{ marginBottom: 0 }}>备注:{factory.notes}</p>}
           </div>
           <button className="srcx-btn srcx-btn-gold" onClick={() => setShowForm(!showForm)}>
-            {showForm ? '收起表单' : '+ 录入报价'}
+            {showForm ? '收起表单' : '+ 录入产品 / 报价'}
           </button>
         </div>
       </div>
@@ -91,6 +95,7 @@ export default function FactoryDetailPage() {
           factoryId={id}
           names={names}
           freight={freight}
+          globalFx={globalFx}
           onSaved={() => { setShowForm(false); load(); }}
         />
       )}
@@ -182,15 +187,16 @@ export default function FactoryDetailPage() {
 
 /* ---------------- 录价表单(含三渠道到岸价试算) ---------------- */
 
-function QuoteForm({ factoryId, names, freight, onSaved }) {
+function QuoteForm({ factoryId, names, freight, globalFx, onSaved }) {
   const today = new Date().toISOString().slice(0, 10);
   const [head, setHead] = useState({
     quote_date: today, product_code: '', product_name: '', product_spec: '',
-    printing_method: '', lead_time_days: '', exchange_rate: '',
+    printing_method: '', lead_time_days: '', exchange_rate: globalFx ? String(globalFx) : '',
     est_unit_weight_g: '', domestic_freight_rmb: '', notes: '',
     units_per_carton: '', carton_length_cm: '', carton_width_cm: '', carton_height_cm: '',
     available_colours: '', image_url: '', status: 'active',
     setup_cost_rmb: '', tooling_cost_rmb: '', sample_cost_rmb: '',
+    material: '', product_size: '', craft: '', packaging: '',
   });
   const [tiers, setTiers] = useState([{ quantity: '', rmb: '', aud: '' }]);
   const [saving, setSaving] = useState(false);
@@ -248,7 +254,8 @@ function QuoteForm({ factoryId, names, freight, onSaved }) {
 
   return (
     <div className="srcx-card" style={{ borderColor: '#c9a45c' }}>
-      <h2>录入报价</h2>
+      <h2>录入产品 / 报价</h2>
+      <p style={{ margin: '0 0 12px', fontSize: 13, color: '#000' }}>一步建好产品 + 价格。第一次填 = 新建产品(自动出 SKU);同一产品名再填 = 加一条新价格(历史)。</p>
       <div className="srcx-grid srcx-grid-4">
         <div className="srcx-field">
           <label>报价日期 *</label>
@@ -271,6 +278,24 @@ function QuoteForm({ factoryId, names, freight, onSaved }) {
           <input value={head.product_spec} onChange={set('product_spec')} placeholder="如:A5 96页 亚麻封面" />
         </div>
       </div>
+      <div className="srcx-grid srcx-grid-4" style={{ marginTop: 12 }}>
+        <div className="srcx-field">
+          <label>材质 Material</label>
+          <input value={head.material} onChange={set('material')} placeholder="如 PU皮 / 304不锈钢" />
+        </div>
+        <div className="srcx-field">
+          <label>产品尺寸 Size(产品本身)</label>
+          <input value={head.product_size} onChange={set('product_size')} placeholder="如 9 × 6 cm" />
+        </div>
+        <div className="srcx-field">
+          <label>工艺 Craft</label>
+          <input value={head.craft} onChange={set('craft')} placeholder="如 烫金 / 压纹 / 激光" />
+        </div>
+        <div className="srcx-field">
+          <label>包装 Packaging</label>
+          <input value={head.packaging} onChange={set('packaging')} placeholder="如 OPP袋 / 礼盒" />
+        </div>
+      </div>
       <div className="srcx-grid srcx-grid-3" style={{ marginTop: 12 }}>
         <div className="srcx-field">
           <label>印刷方式</label>
@@ -284,9 +309,9 @@ function QuoteForm({ factoryId, names, freight, onSaved }) {
           <input type="number" value={head.lead_time_days} onChange={set('lead_time_days')} />
         </div>
         <div className="srcx-field">
-          <label>汇率 RMB→AUD *</label>
+          <label>汇率 RMB→AUD *(自动带全局汇率,可改)</label>
           <input type="number" step="0.0001" value={head.exchange_rate}
-            onChange={set('exchange_rate')} placeholder="如 0.2150" />
+            onChange={set('exchange_rate')} placeholder="如 0.21(在「运费价格」页设全局)" />
         </div>
       </div>
       <div className="srcx-grid srcx-grid-4" style={{ marginTop: 12 }}>
@@ -408,7 +433,7 @@ function QuoteForm({ factoryId, names, freight, onSaved }) {
 
       {error && <p className="srcx-error">{error}</p>}
       <button className="srcx-btn" onClick={save} disabled={saving} style={{ marginTop: 8 }}>
-        {saving ? '保存中…' : '保存报价'}
+        {saving ? '保存中…' : '保存产品 / 报价'}
       </button>
     </div>
   );
