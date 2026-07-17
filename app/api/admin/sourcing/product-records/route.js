@@ -45,6 +45,18 @@ export async function GET(request) {
   return NextResponse.json({ records: data || [] });
 }
 
+// Auto-sync the product's price list (quote_tiers) from a cost record: the qty's
+// customer price = your quote. Same qty → update; new qty → add a tier.
+async function syncTier(db, quoteId, quantity, exwUnitRmb, custUnitAud) {
+  if (!quoteId || !quantity || custUnitAud == null) return;
+  const { data: existing } = await db.from('quote_tiers').select('id').eq('quote_id', quoteId).eq('quantity', quantity).limit(1).maybeSingle();
+  if (existing) {
+    await db.from('quote_tiers').update({ customer_unit_price_aud: custUnitAud, ...(exwUnitRmb != null ? { exw_unit_price_rmb: exwUnitRmb } : {}) }).eq('id', existing.id);
+  } else {
+    await db.from('quote_tiers').insert({ quote_id: quoteId, quantity, exw_unit_price_rmb: exwUnitRmb || 0, customer_unit_price_aud: custUnitAud });
+  }
+}
+
 export async function POST(request) {
   const user = await getAdminUser(request);
   if (!user) return unauthorized();
@@ -72,11 +84,13 @@ export async function POST(request) {
     if (b.id) {
       const { data, error } = await db.from('product_cost_records').update(row).eq('id', b.id).select('*').single();
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      try { await syncTier(db, row.factory_quote_id, num(b.quantity), num(b.factoryCostRmb), d.quoteUnit); } catch (_) { /* non-fatal */ }
       return NextResponse.json({ record: data });
     }
     row.created_by = user.email;
     const { data, error } = await db.from('product_cost_records').insert(row).select('*').single();
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    try { await syncTier(db, row.factory_quote_id, num(b.quantity), num(b.factoryCostRmb), d.quoteUnit); } catch (_) { /* non-fatal */ }
     return NextResponse.json({ record: data });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
