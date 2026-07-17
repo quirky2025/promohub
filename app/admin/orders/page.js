@@ -260,6 +260,7 @@ export default function AdminOrdersPage() {
   const [itemEdit, setItemEdit] = useState({});
   const [cnReason, setCnReason] = useState('');
   const startItemEdit = (i, item) => setItemEdit(p => ({ ...p, [i]: {
+    spec: item.spec || item.product_spec || '',
     branding: item.brandingMethod || item.branding || '',
     unitPrice: String(item.unitPrice ?? item.unit_price ?? ''),
     qty: String(item.qty ?? item.quantity ?? ''),
@@ -271,7 +272,7 @@ export default function AdminOrdersPage() {
     try {
       const res = await fetch('/api/admin/orders/item-edit', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: selected.id, index: i, branding: f.branding, unitPrice: f.unitPrice, qty: f.qty }),
+        body: JSON.stringify({ orderId: selected.id, index: i, spec: f.spec, branding: f.branding, unitPrice: f.unitPrice, qty: f.qty }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) { alert('Could not save: ' + (data.error || '')); return; }
@@ -749,6 +750,7 @@ export default function AdminOrdersPage() {
                       <div style={{ fontSize: '11px', color: '#000', fontWeight: 700, fontFamily: 'monospace' }}>{selected.invoice_number}-{i + 1}</div>
                       <div style={{ fontWeight: 600, color: NAVY, fontSize: '13px' }}>{name}</div>
                       {sku && <div style={{ fontSize: '12px', color: '#000', fontFamily: 'monospace' }}>SKU: {sku}</div>}
+                      {(item.spec || item.product_spec) && <div style={{ fontSize: '12px', color: '#000' }}>{item.spec || item.product_spec}</div>}
                       {item.colour && <div style={{ fontSize: '12px', color: '#000' }}>Colour: {item.colour}</div>}
                       {branding && <div style={{ fontSize: '12px', color: '#000' }}>Branding: {branding}</div>}
                       {addons.map((a, j) => <div key={j} style={{ fontSize: '12px', color: '#000' }}>+ {a.name || a}</div>)}
@@ -756,6 +758,7 @@ export default function AdminOrdersPage() {
                       {itemEdit[i] ? (
                         <div style={{ marginTop: '6px', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '8px', padding: '8px 10px' }}>
                           <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#92400E', fontWeight: 700, marginBottom: '6px' }}>Revise to final spec</div>
+                          <input value={itemEdit[i].spec} onChange={e => setIE(i, 'spec', e.target.value)} placeholder="Size / spec (e.g. Size: 8.5cm · 3M adhesive backing)" style={{ ...shipInput, width: '100%', marginBottom: '6px', boxSizing: 'border-box' }} />
                           <input value={itemEdit[i].branding} onChange={e => setIE(i, 'branding', e.target.value)} placeholder="Branding (final, e.g. Digital Print / 3 colour)" style={{ ...shipInput, width: '100%', marginBottom: '6px', boxSizing: 'border-box' }} />
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
                             <span style={{ fontSize: '11px', color: '#000' }}>Qty</span>

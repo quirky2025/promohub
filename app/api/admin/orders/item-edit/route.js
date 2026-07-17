@@ -11,7 +11,7 @@ export async function POST(request) {
   const user = await getAdminUser(request);
   if (!user) return unauthorized();
   try {
-    const { orderId, index, branding, unitPrice, qty } = await request.json();
+    const { orderId, index, branding, unitPrice, qty, spec } = await request.json();
     if (!orderId || index == null) return Response.json({ error: 'Missing fields' }, { status: 400 });
 
     const db = sourcingDb();
@@ -25,6 +25,7 @@ export async function POST(request) {
       const u = unitPrice != null && unitPrice !== '' ? Number(unitPrice) : (Number(it.unitPrice ?? it.unit_price) || 0);
       const next = { ...it, qty: q, unitPrice: u, subtotal: round2(q * u) };
       if (branding != null) { next.branding = branding; next.brandingMethod = branding; }
+      if (spec != null) next.spec = spec;
       return next;
     });
 
