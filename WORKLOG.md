@@ -136,6 +136,14 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
 
 - 2026-07-17 DONE — 计价 ③ **手填国际运费**:③ 加了「手填 Manual · 货代一口价」输入框(不走引擎,填 ¥就自动选中 → ⑤到岸 ⑦客户价出数)。¥185 = DHL HK 国际运费,放这里。File: `app/admin/sourcing/costing/page.js`。**PUSH** 它。¥185 是国际段(不是 ② 中国端)—— Parcelle 用手填 185 即可。
 
+- 2026-07-17 DONE — 产品页报价记录:每个产品下加「报价记录」表(折叠)。⚠️ RUN SQL `db/product_cost_records.sql`(新表 product_cost_records,挂 factory_quote_id+sku)。列:日期·数量·工厂成本¥·国内¥·国际运费¥·**Carrier**(DHL HK/大陆/Air/Sea/Express/其他)·总成本到岸 A$·我的报价 A$/个·毛利%。报价 = 毛利%自动算 或 勾「报价手动填」直接输(反算毛利)。表单实时预览。全 CRUD。Files: `db/product_cost_records.sql`, `app/api/admin/sourcing/product-records/route.js`, `components/ProductCostRecords.jsx`, `app/admin/sourcing/factories/[id]/page.js`(import+每产品下挂 <ProductCostRecords quoteId sku>). **PUSH** 全部。NOTE: 计价页的「保存」暂未自动写这个记录表 —— 目前在产品页手动加/算,后续可把计价页保存也 drop 一条进来。
+
+- 2026-07-17 DESIGN（旧,已实现上面）— 计价/报价记录放在**产品页面**:
+  - Lily:每个产品会算很多次,记录挂到产品页最清楚。每算一次(保存计价)存一行,产品详情页开一个「报价记录」表。
+  - 列:日期 · 数量 · **工厂成本 EXW** · **国内部分**(内陆+单证+杂费)· **国际运费**(含手填 185,标 DHL HK/Air/Sea/手填)· **总成本(到岸)** · **我的报价(客户单价)** · 毛利%。一行 = 一次报价快照,工厂→国内→国际→总成本→报价 一条线。
+  - **报价两种方式**:① MARGIN 自动算,② **手动直接填客户价**(手填优先,系统反算实际毛利%)。历史一口价(如 2.30)直接填。
+  - 实现:保存计价时把这些字段(含 manualIntlRmb + 手填/算出的报价)写进记录,并 attach 到 factory product(factory_quotes.id / SKU);产品页(factories/[id])读该产品的记录列出来。数据可复用 sourcing_cost_sheets(加 sourcing_product_id 关联)或新表。⚠️ 待 Lily 说开工。
+
 - 2026-07-17 TODO（Lily 说全部都做）— 货代管理 + 供应商付款信息 + 交货日期提醒:
   - **货代管理(forwarder 主数据 + 银行/付款信息)** —— 像工厂那样能录入/编辑货代。Lily 给的第一家货代:
     - 名称 Zhejiang Bing Supply Chain Management Co., Ltd(微信联系)
