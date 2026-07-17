@@ -10,8 +10,12 @@ export async function PATCH(request) {
     if (!b.id) return Response.json({ error: 'Missing id' }, { status: 400 });
     const db = sourcingDb();
     const updates = {};
-    for (const k of ['delivery_address', 'delivery_addresses', 'internal_notes', 'tracking_number', 'tracking_url']) {
-      if (b[k] !== undefined) updates[k] = b[k];
+    for (const k of [
+      'delivery_address', 'delivery_addresses', 'internal_notes', 'tracking_number', 'tracking_url',
+      'pay_on_account',                         // monthly account → production without prepayment
+      'created_at', 'artwork_sent_at', 'artwork_approved_at', 'production_started_at', 'dispatched_at', 'delivered_at', // editable step dates (historical backfill)
+    ]) {
+      if (b[k] !== undefined) updates[k] = b[k] === '' ? null : b[k];
     }
     if (Object.keys(updates).length === 0) {
       return Response.json({ error: 'No fields to update' }, { status: 400 });
