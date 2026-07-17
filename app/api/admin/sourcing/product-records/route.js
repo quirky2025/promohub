@@ -12,7 +12,8 @@ const text = (v) => (typeof v === 'string' && v.trim() ? v.trim() : null);
 // Compute the derived cost/quote figures from the raw inputs.
 function derive(b) {
   const qty = num(b.quantity) || 0;
-  const totalRmb = (num(b.factoryCostRmb) || 0) + (num(b.cnLocalRmb) || 0) + (num(b.intlFreightRmb) || 0);
+  // factoryCostRmb is the EXW UNIT price (¥/个) → ×qty for the order total.
+  const totalRmb = (num(b.factoryCostRmb) || 0) * qty + (num(b.cnLocalRmb) || 0) + (num(b.intlFreightRmb) || 0);
   const fx = num(b.fxRate); // ¥ per A$1
   const totalAud = fx ? Number((totalRmb / fx).toFixed(2)) : null;
   const landedUnit = (totalAud != null && qty) ? Number((totalAud / qty).toFixed(4)) : null;

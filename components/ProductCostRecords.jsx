@@ -20,7 +20,7 @@ const blank = (sku) => ({ sku, recordDate: new Date().toISOString().slice(0, 10)
 // Live preview of derived numbers (mirrors the server derive()).
 function preview(f) {
   const qty = Number(f.quantity) || 0;
-  const totalRmb = (Number(f.factoryCostRmb) || 0) + (Number(f.cnLocalRmb) || 0) + (Number(f.intlFreightRmb) || 0);
+  const totalRmb = (Number(f.factoryCostRmb) || 0) * qty + (Number(f.cnLocalRmb) || 0) + (Number(f.intlFreightRmb) || 0);
   const fx = Number(f.fxRate) || 0;
   const totalAud = fx ? totalRmb / fx : null;
   const landedUnit = (totalAud != null && qty) ? totalAud / qty : null;
@@ -83,7 +83,7 @@ export default function ProductCostRecords({ quoteId, sku }) {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11.5, color: '#000', minWidth: 720 }}>
                 <thead>
                   <tr style={{ background: '#FBFAF8', textAlign: 'left' }}>
-                    {['日期', '数量', '工厂成本', '国内', '国际运费', 'Carrier', '总成本', '我的报价', '毛利', ''].map((h) => (
+                    {['日期', '数量', '工厂EXW/个', '国内', '国际运费', 'Carrier', '总成本', '我的报价', '毛利', ''].map((h) => (
                       <th key={h} style={{ padding: '6px 8px', fontWeight: 700, whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
@@ -93,7 +93,7 @@ export default function ProductCostRecords({ quoteId, sku }) {
                     <tr key={r.id} style={{ borderTop: '1px solid #F0EEED' }}>
                       <td style={{ padding: '6px 8px', whiteSpace: 'nowrap' }}>{r.record_date}</td>
                       <td style={{ padding: '6px 8px' }}>{r.quantity ?? '—'}</td>
-                      <td style={{ padding: '6px 8px' }}>{rmb(r.factory_cost_rmb)}</td>
+                      <td style={{ padding: '6px 8px' }}>{rmb(r.factory_cost_rmb)}/个</td>
                       <td style={{ padding: '6px 8px' }}>{rmb(r.cn_local_rmb)}</td>
                       <td style={{ padding: '6px 8px' }}>{rmb(r.intl_freight_rmb)}</td>
                       <td style={{ padding: '6px 8px', whiteSpace: 'nowrap' }}>{r.carrier || '—'}</td>
@@ -118,7 +118,7 @@ export default function ProductCostRecords({ quoteId, sku }) {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 8 }}>
                 <div><label style={lbl}>日期</label><input type="date" value={form.recordDate} onChange={(e) => set('recordDate', e.target.value)} style={inp} /></div>
                 <div><label style={lbl}>数量</label><input type="number" value={form.quantity} onChange={(e) => set('quantity', e.target.value)} style={inp} /></div>
-                <div><label style={lbl}>工厂成本 ¥(全单)</label><input type="number" value={form.factoryCostRmb} onChange={(e) => set('factoryCostRmb', e.target.value)} style={inp} /></div>
+                <div><label style={lbl}>工厂 EXW 单价 ¥/个</label><input type="number" value={form.factoryCostRmb} onChange={(e) => set('factoryCostRmb', e.target.value)} placeholder="2.6" style={inp} /></div>
                 <div><label style={lbl}>国内 ¥</label><input type="number" value={form.cnLocalRmb} onChange={(e) => set('cnLocalRmb', e.target.value)} style={inp} /></div>
                 <div><label style={lbl}>国际运费 ¥</label><input type="number" value={form.intlFreightRmb} onChange={(e) => set('intlFreightRmb', e.target.value)} style={inp} /></div>
                 <div><label style={lbl}>Carrier</label>
