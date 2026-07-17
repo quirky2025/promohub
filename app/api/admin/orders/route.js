@@ -40,14 +40,15 @@ function groupByOrder(rows) {
 function legacyItems(order) {
   if (!Array.isArray(order.items)) return [];
   return order.items.map((item, index) => ({
+    ...item,   // KEEP every original field: artwork_approved, parcels, status, freight_*, branding, etc.
     id: `legacy-${order.id}-${index}`,
     order_id: order.id,
-    stock_code: item.sku || item.productSku || '',
+    stock_code: item.sku || item.productSku || item.stockCode || '',
     product_description: item.productName || item.name || 'Product',
     colour: item.colour || '',
     quantity: Number(item.qty || item.quantity || 1),
     unit_price: money(item.unitPrice || item.unit_price),
-    decoration_method: item.brandingMethod || item.decoration_method || '',
+    decoration_method: item.brandingMethod || item.decoration_method || item.branding || '',
     setup_cost: money(item.setupCost || item.setup_cost),
     line_total: money(item.subtotal || item.line_total),
     notes: Array.isArray(item.addons) ? item.addons.map((a) => a.name).join(', ') : '',
