@@ -22,7 +22,7 @@ function poPdfPayload(po) {
     shipTo: { label: 'Our forwarder (EXW collection)', address: 'To be advised — please hold for collection and notify us when ready.' },
     incoterm: 'EXW',
     paymentTerms: f.payment_terms || '30% deposit, 70% before shipment',
-    items: [{ name: po.product_name || 'Product', spec: po.product_sku || '', qty: po.quantity, unitRmb: po.unit_price_rmb }],
+    items: [{ name: po.product_name || 'Product', spec: [po.product_sku, po.product_spec].filter(Boolean).join(' · '), qty: po.quantity, unitRmb: po.unit_price_rmb }],
     charges: Number(po.extra_rmb) ? [{ label: 'Setup / tooling / sample', amountRmb: po.extra_rmb }] : [],
     notes: po.notes || '',
   };
@@ -129,6 +129,7 @@ export async function POST(request) {
         factory_id: text(body.factoryId),
         product_sku: text(body.productSku),
         product_name: text(body.productName),
+        product_spec: text(body.productSpec),
         quantity: num(body.quantity),
         unit_price_rmb: num(body.unitPriceRmb),
         extra_rmb: num(body.extraRmb) || 0,
