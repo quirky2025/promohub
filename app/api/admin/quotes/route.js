@@ -116,6 +116,12 @@ export async function PATCH(request) {
       updates = { status: body.status };
     } else if (action === 'note') {
       updates = { internal_notes: body.internal_notes || null };
+    } else if (action === 'edit') {
+      const allowed = ['customer_name', 'customer_email', 'customer_phone', 'customer_company',
+        'product_name', 'product_sku', 'quantity', 'unit_price', 'colour', 'branding_summary',
+        'subtotal', 'shipping', 'gst', 'total', 'notes', 'sourcing_product_id', 'quote_type'];
+      updates = {};
+      allowed.forEach((k) => { if (Object.prototype.hasOwnProperty.call(body, k)) updates[k] = body[k] === '' ? null : body[k]; });
     } else {
       return Response.json({ error: 'Unsupported action' }, { status: 400 });
     }
@@ -133,5 +139,62 @@ export async function PATCH(request) {
     return Response.json({ quote: normalizeQuote(result.data) });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
+  }
+}
+
+async function nextQuoteNumber(db) {
+  const year = String(new Date().getFullYear()).slice(2);
+  const { count } = await db.from('quotes').select('*', { count: 'exact', head: true });
+  return `Q${year}${String((count || 0) + 1).padStart(4, '0')}`;
+}
+
+// POST — create a quote on the main board (used for INDENT / China quotes from
+// the sourcing product). Generates a Q… number; lands as status 'new'.
+export async function POST(request) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorized();
+  try {
+    const body = await request.json();
+    const db = sourcingDb();
+    const qty = Number(body.quantity) || 0;
+    const unit = Number(body.unit_price) || 0;
+    const subtotal = body.subtotal != null ? Number(body.subtotal) : Math.round(qty * unit * 100) / 100;
+    const shipping = Number(body.shipping) || 0;
+    const gst = body.gst != null ? Number(body.gst) : Math.round((subtotal + shipping) * 0.10 * 100) / 100;
+    const total = body.total != null ? Number(body.total) : Math.round((subtotal + shipping + gst) * 100) / 100;
+    const quote_number = await nextQuoteNumber(db);
+
+    const row = {
+      quote_number,
+      quote_type: body.quote_type === 'indent' ? 'indent' : 'local',
+      sourcing_product_id: body.sourcing_product_id || null,
+      customer_name: body.customer_name || '',
+      customer_email: body.customer_email || '',
+      customer_phone: body.customer_phone || '',
+      customer_company: body.customer_company || '',
+      company_id: body.company_id || null,
+      product_name: body.product_name || '',
+      product_sku: body.product_sku || '',
+      quantity: qty || null,
+      unit_price: unit || null,
+      colour: body.colour || '',
+      branding_summary: body.branding_summary || '',
+      subtotal, shipping, gst, total,
+      notes: body.notes || '',
+      status: body.status || 'new',
+      created_at: new Date().toISOString(),
+    };
+
+    let { data, error } = await db.from('quotes').insert(row).select('*').single();
+    if (error && missingColumn(error)) {
+      // Retry without the newer columns for older schemas.
+      const { quote_type, sourcing_product_id, unit_price, company_id, ...legacy } = row;
+      ({ data, error } = await db.from('quotes').insert(legacy).select('*').single());
+    }
+    if (error) return Response.json({ error: error.message }, { status: 500 });
+    await audit(db, user.email, 'quote_create_indent', data.id, null, data);
+    return Response.json({ quote: normalizeQuote(data) });
+  } catch (e) {
+    return Response.json({ error: e.message }, { status: 500 });
   }
 }
