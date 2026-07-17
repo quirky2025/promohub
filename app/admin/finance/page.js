@@ -41,6 +41,7 @@ export default function FinancePage() {
         <span className="srcx-subnav-title">Finance</span>
         <a className={tab === 'bank' ? 'active' : ''} onClick={() => setTab('bank')} style={{ cursor: 'pointer' }}>银行流水</a>
         <a className={tab === 'forwarder' ? 'active' : ''} onClick={() => setTab('forwarder')} style={{ cursor: 'pointer' }}>货代付款</a>
+        <a className={tab === 'invoices' ? 'active' : ''} onClick={() => setTab('invoices')} style={{ cursor: 'pointer' }}>发票 Invoices</a>
         <a className={tab === 'pl' ? 'active' : ''} onClick={() => setTab('pl')} style={{ cursor: 'pointer' }}>利润表 P&amp;L</a>
       </nav>
 
@@ -50,7 +51,92 @@ export default function FinancePage() {
 
       {tab === 'bank' && <BankLedger bank={bank} reload={load} />}
       {tab === 'forwarder' && <Forwarder fwd={fwd} reload={load} />}
+      {tab === 'invoices' && <Invoices />}
       {tab === 'pl' && <ProfitLoss />}
+    </div>
+  );
+}
+
+// All invoices — one row per order. Open/download the Tax Invoice PDF; see who's paid.
+function Invoices() {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [q, setQ] = useState('');
+  const [onlyUnpaid, setOnlyUnpaid] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/orders').then((r) => r.json())
+      .then((d) => setRows(d.orders || []))
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  const money = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const invNo = (o) => /^INV/i.test(o.invoice_number || '') ? o.invoice_number : `INV${(o.order_number || o.invoice_number || '').replace(/^OC/i, '')}`;
+
+  const filtered = rows.filter((o) => {
+    if (onlyUnpaid && o.payment_status === 'paid') return false;
+    if (q) {
+      const hay = [o.invoice_number, o.order_number, o.customer_name, o.customer_company].join(' ').toLowerCase();
+      if (!hay.includes(q.toLowerCase())) return false;
+    }
+    return true;
+  });
+
+  const totBilled = filtered.reduce((s, o) => s + (Number(o.total) || 0), 0);
+  const totPaid = filtered.filter((o) => o.payment_status === 'paid').reduce((s, o) => s + (Number(o.total) || 0), 0);
+  const totOwing = totBilled - totPaid;
+
+  return (
+    <div>
+      {(() => { const card = (label, val, color) => (
+        <div style={{ flex: '1 1 150px', minWidth: 150, background: '#FBFAF8', border: '1.5px solid #E0DDD7', borderRadius: 12, padding: '10px 14px' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#000', marginBottom: 4 }}>{label}</div>
+          <div style={{ fontSize: 18, fontWeight: 800, color }}>{val}</div>
+        </div>
+      ); return (
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 14 }}>
+          {card('已开票总额 (inc GST)', money(totBilled), '#000')}
+          {card('已收', money(totPaid), '#2D6A4F')}
+          {card('未收', money(totOwing), totOwing > 0.01 ? '#991B1B' : '#2D6A4F')}
+        </div>
+      ); })()}
+
+      <div style={{ display: 'flex', gap: 10, marginBottom: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜发票号 / 客户…" style={{ padding: '8px 12px', border: '1px solid #E0DDD7', borderRadius: 8, fontSize: 13, color: '#000', minWidth: 220 }} />
+        <label style={{ fontSize: 13, color: '#000', display: 'flex', gap: 6, alignItems: 'center', cursor: 'pointer' }}>
+          <input type="checkbox" checked={onlyUnpaid} onChange={(e) => setOnlyUnpaid(e.target.checked)} /> 只看未收
+        </label>
+      </div>
+
+      {loading ? <div style={{ color: '#000' }}>Loading…</div> : filtered.length === 0 ? <div style={{ color: '#000' }}>没有发票。</div> : (
+        <table className="srcx-table">
+          <thead>
+            <tr style={{ color: '#000' }}>
+              <th>Inv #</th><th>Order #</th><th>客户</th><th>日期</th><th style={{ textAlign: 'right' }}>金额</th><th>状态</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((o) => (
+              <tr key={o.id} style={{ color: '#000' }}>
+                <td style={{ fontFamily: 'monospace', fontWeight: 700 }}>{invNo(o)}</td>
+                <td style={{ fontFamily: 'monospace' }}>{o.order_number || o.invoice_number}</td>
+                <td>{o.customer_company || o.customer_name}</td>
+                <td>{o.created_at ? new Date(o.created_at).toLocaleDateString('en-AU') : '—'}</td>
+                <td style={{ textAlign: 'right', fontFamily: 'monospace' }}>{money(o.total)}</td>
+                <td>
+                  <span style={{ padding: '2px 8px', borderRadius: 12, fontSize: 11, fontWeight: 700, background: o.payment_status === 'paid' ? '#D1FAE5' : (o.pay_on_account ? '#EAF3DE' : '#FEF3C7'), color: o.payment_status === 'paid' ? '#065F46' : (o.pay_on_account ? '#3B6D11' : '#92400E') }}>
+                    {o.payment_status === 'paid' ? '已收 Paid' : (o.pay_on_account ? '月结 Account' : '未收 Unpaid')}
+                  </span>
+                </td>
+                <td style={{ textAlign: 'right' }}>
+                  <a href={`/api/admin/orders/invoice-pdf?id=${o.id}`} target="_blank" rel="noreferrer" style={{ color: '#1B2A4A', fontWeight: 700, textDecoration: 'none' }}>📄 Tax Invoice</a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 }

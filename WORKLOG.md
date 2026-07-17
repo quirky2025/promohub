@@ -134,6 +134,10 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
   - **PUSH**: `db/orders_step_dates.sql`, `app/admin/orders/page.js`.
   - FIX (Lily, Ian 多产品): 生产/发货/送达每个产品时间不同 → 从**订单级时间线拿掉**这三步(订单级只留 下单/印刷稿),改成**每个产品下面**显示 进入生产/已发货/已送达 的日期。item-status route 现在给 `item.stage_dates[stage]=now` 盖时间戳(存 items jsonb,无需 SQL)。点每个产品的阶段按钮就记该产品的日期。Files: `app/api/admin/orders/item-status/route.js`, `app/admin/orders/page.js`.
 
+- 2026-07-17 (Invoices 列表页) — Lily 问有没有"所有发票"页 → 没有,建了。放 **Finance → 发票 Invoices** 标签。
+  - 一张表:Inv# · Order# · 客户 · 日期 · 金额 · 状态(已收/未收/月结) · **📄 Tax Invoice** 按钮(开 /api/admin/orders/invoice-pdf?id=)。顶部三卡:已开票总额 / 已收 / 未收。搜索框 + "只看未收"勾选(方便追款)。数据来自 GET /api/admin/orders。无 SQL,无新路由(复用现有)。
+  - File: `app/admin/finance/page.js`(加 invoices tab + Invoices 组件)。**PUSH**: `app/admin/finance/page.js`。任务 #36 核心完成(mark-paid 暂没做,Lily 只要 PDF)。
+
 - 2026-07-17 (理顺订单顶部) — 可改日期 + 月结灵活 + 无需印刷:
   - **可改历史日期**: 订单级时间线每步(下单/印刷稿/批准)后面加 datetime-local 输入框,直接改;每个产品的 进入生产/发货/送达 也各有可改日期框。存:order-level→ /api/admin/orders/update(现允许 created_at/artwork_sent_at/artwork_approved_at/production_started_at/dispatched_at/delivered_at);per-product→ item-status route 加 `dateOnly` 模式(只改 stage_dates 不动 status)。无 SQL(日期列已有 + stage_dates 在 items jsonb)。
   - **月结灵活(每单自己控)**: ⚠️ RUN SQL `db/orders_pay_on_account.sql`(orders += pay_on_account bool)。生产闸门旁加按钮 **月结·先做后付**(每张单独立开关,不是全局政策 —— Lily 要 flexibility)。开了 → 闸门的"Payment received"算满足,不用真收款也能进生产。prodBlockReason + gate summary 都认 `pay_on_account`。
