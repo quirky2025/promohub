@@ -49,7 +49,12 @@ function deriveStatus(order) {
   return 'pending';
 }
 
-const CARRIERS = ['Australia Post', 'StarTrack', 'FedEx', 'DHL', 'TNT', 'Direct Freight Express', 'Courier'];
+const CARRIERS = [
+  // Domestic (AU)
+  'Australia Post', 'StarTrack', 'FedEx', 'DHL', 'TNT', 'Direct Freight Express', 'Courier',
+  // International (China → AU / direct to customer)
+  'DHL (Hong Kong)', 'DHL (China Mainland)', 'Air Freight', 'Sea Freight',
+];
 
 // Simplified list status — Lily wants the board to show only two states.
 function simpleStatus(order) {

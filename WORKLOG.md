@@ -134,6 +134,12 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
   - **PUSH**: `db/orders_step_dates.sql`, `app/admin/orders/page.js`.
   - FIX (Lily, Ian 多产品): 生产/发货/送达每个产品时间不同 → 从**订单级时间线拿掉**这三步(订单级只留 下单/印刷稿),改成**每个产品下面**显示 进入生产/已发货/已送达 的日期。item-status route 现在给 `item.stage_dates[stage]=now` 盖时间戳(存 items jsonb,无需 SQL)。点每个产品的阶段按钮就记该产品的日期。Files: `app/api/admin/orders/item-status/route.js`, `app/admin/orders/page.js`.
 
+- 2026-07-17 SOURCING Step 5 — 国际快递 carriers + tracking:
+  - 每产品运费的 Carrier 下拉里加了国际选项:**DHL (Hong Kong)**、**DHL (China Mainland)**、**Air Freight**、**Sea Freight**(本地 AusPost/StarTrack/FedEx/DHL/TNT/Direct Freight/Courier 保留)。INDENT 工厂直发客户就选 DHL (Hong Kong) 之类。
+  - Notify shipped 邮件的 Track 链接:DHL HK / DHL Mainland → DHL 官方跟踪页(和 DHL 一样)。Air/Sea 没有标准跟踪页,邮件只显示 carrier + 单号,无 Track 按钮。
+  - Files: `app/admin/orders/page.js` (CARRIERS), `app/api/admin/orders/notify-shipment/route.js` (TRACK_URL)。无 SQL。
+  - **PUSH**: `app/admin/orders/page.js`, `app/api/admin/orders/notify-shipment/route.js`. 这就是 China 5 步的最后一步 —— 全流程打通。
+
 - 2026-07-17 (Factory PO form = 下单给工厂 + Artworks text black):
   - 新建工厂 PO 表单改成"给工厂下单"用:顶部 **搜产品/SKU**(查产品库 factory_quotes,/api/admin/sourcing/quotes?product=)→ 选中自动带出 产品名/SKU/工厂/**规格 SPEC**(尺寸·材质·工艺)/¥单价(首档 tier)。加 **规格 SPEC** 文本框(尺寸/颜色/3M adhesive backing 等)。**去掉** 汇率 + 本单成本 A$(成本写订单 Notes)。发票字段保留但标"可选,后补"。PO 卡片显示规格,不再显示 A$ 成本。⚠️ **RUN SQL** `db/factory_pos_spec.sql`(factory_pos += product_spec)。PO PDF 现在带 SKU · 规格。发工厂 = ✉ 发工厂(需工厂 Email)。Files: `db/factory_pos_spec.sql`, `app/api/admin/orders/factory-po/route.js`, `components/FactoryProcurement.jsx`.
   - **Artworks 页文字全黑**: `app/admin/artworks/page.js` 所有灰(#7A7570/#9CA3AF/#C8C4BC)+ 金(color: GOLD)文字 → #000。状态色(绿/琥珀 pill)保留。
