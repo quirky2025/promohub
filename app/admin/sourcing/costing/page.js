@@ -1644,6 +1644,7 @@ function CleanQuote({ form, update, applyModes }) {
   const [postcode, setPostcode] = useState('');
   const [goodsClass, setGoodsClass] = useState('class1');
   const [freight, setFreight] = useState(null); // byChannel { express, air, sea }
+  const [manualIntlRmb, setManualIntlRmb] = useState(''); // 手填国际运费(货代一口价,不走引擎)
   const [loading, setLoading] = useState(false);
   const [pickMode, setPickMode] = useState('sea');
 
@@ -1674,17 +1675,25 @@ function CleanQuote({ form, update, applyModes }) {
   }
 
   function priceForMode(mode) {
-    const fr = freight?.[mode];
-    if (!fr || fr.totalRmb == null) return null;
-    const row = { quantity: qty, exwUnitRmb: form.exwUnitRmb, shippingMode: mode, internationalShippingRmb: fr.totalRmb };
+    let frRmb;
+    if (mode === 'manual') {
+      if (manualIntlRmb === '' || !(Number(manualIntlRmb) >= 0)) return null;
+      frRmb = Number(manualIntlRmb);
+    } else {
+      const fr = freight?.[mode];
+      if (!fr || fr.totalRmb == null) return null;
+      frRmb = Number(fr.totalRmb);
+    }
+    const row = { quantity: qty, exwUnitRmb: form.exwUnitRmb, shippingMode: mode === 'manual' ? 'sea' : mode, internationalShippingRmb: frRmb };
     const c = calculatePriceBreak(row, form, fx);
-    return { freightRmb: Number(fr.totalRmb), unit: c.quoteUnitExGstAud, total: c.quoteExGstAud, landedUnit: c.quoteUnitExGstAud ? c.quoteTotalCostAud / qty : 0 };
+    return { freightRmb: frRmb, unit: c.quoteUnitExGstAud, total: c.quoteExGstAud, landedUnit: c.quoteUnitExGstAud ? c.quoteTotalCostAud / qty : 0 };
   }
 
   const MODES = [
     { k: 'express', label: 'Express 快递', t: '5–7天' },
     { k: 'air', label: 'Air 空运', t: '6–10天' },
     { k: 'sea', label: 'Sea 海运', t: '20–30天' },
+    { k: 'manual', label: '手填 Manual', t: '货代一口价' },
   ];
   const priced = MODES.map((m) => ({ ...m, p: priceForMode(m.k) })).filter((m) => m.p);
   const cheapestK = priced.slice().sort((a, b) => a.p.unit - b.p.unit)[0]?.k;
@@ -1721,7 +1730,14 @@ function CleanQuote({ form, update, applyModes }) {
         <div style={{ ...ln, background: '#F4F3F0', fontWeight: 700 }}><span>中国端小计</span><span>¥{f2(exwTotal + cnLocal)}</span></div>
       </div>
       <div style={blk}><div style={bh('#1B2A4A')}>③ 国际运费 INTERNATIONAL · RMB(选一个)</div>
-        {freight ? MODES.map((m) => {
+        {/* 手填 — 直接问货代要的一口价,不用走引擎。填了就自动选中。 */}
+        <div onClick={() => manualIntlRmb !== '' && setPickMode('manual')} style={{ ...ln, cursor: manualIntlRmb !== '' ? 'pointer' : 'default', background: pickMode === 'manual' ? '#E1F5EE' : undefined }}>
+          <span>{pickMode === 'manual' ? '● ' : '○ '}手填 Manual · 货代一口价(如 DHL HK)</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontWeight: 700, color: '#1B2A4A' }}>
+            ¥<input type="number" value={manualIntlRmb} onClick={(ev) => ev.stopPropagation()} onChange={(e) => { setManualIntlRmb(e.target.value); if (e.target.value !== '') setPickMode('manual'); }} placeholder="185" style={{ width: 90, padding: '4px 7px', border: '1px solid #E0DDD7', borderRadius: 6, fontSize: 13, color: '#000' }} />
+          </span>
+        </div>
+        {freight && MODES.filter((m) => m.k !== 'manual').map((m) => {
           const fr = freight[m.k];
           const on = pickMode === m.k;
           return (
@@ -1730,7 +1746,8 @@ function CleanQuote({ form, update, applyModes }) {
               <span style={{ fontWeight: 700, color: '#1B2A4A' }}>{fr ? `¥${f2(fr.totalRmb)}` : '不可用'}</span>
             </div>
           );
-        }) : <div style={{ ...ln, color: '#8a857e' }}>点上面「算运费」后这里出现 Express / Air / Sea 三个价</div>}
+        })}
+        {!freight && <div style={{ ...ln, color: '#000' }}>或点上面「算运费」出 Express / Air / Sea 三个价(选一个)</div>}
       </div>
       <div style={blk}><div style={bh('#C9A96E')}>④ 本地费用 LOCAL · AUD</div>
         <div style={ln}><span className="srcx-muted">清关/派送/其它(常为0)</span><span style={{ fontWeight: 700, color: '#1B2A4A' }}>A${f2(localAud)}</span></div>

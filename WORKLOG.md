@@ -134,6 +134,22 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
   - **PUSH**: `db/orders_step_dates.sql`, `app/admin/orders/page.js`.
   - FIX (Lily, Ian 多产品): 生产/发货/送达每个产品时间不同 → 从**订单级时间线拿掉**这三步(订单级只留 下单/印刷稿),改成**每个产品下面**显示 进入生产/已发货/已送达 的日期。item-status route 现在给 `item.stage_dates[stage]=now` 盖时间戳(存 items jsonb,无需 SQL)。点每个产品的阶段按钮就记该产品的日期。Files: `app/api/admin/orders/item-status/route.js`, `app/admin/orders/page.js`.
 
+- 2026-07-17 DONE — 计价 ③ **手填国际运费**:③ 加了「手填 Manual · 货代一口价」输入框(不走引擎,填 ¥就自动选中 → ⑤到岸 ⑦客户价出数)。¥185 = DHL HK 国际运费,放这里。File: `app/admin/sourcing/costing/page.js`。**PUSH** 它。¥185 是国际段(不是 ② 中国端)—— Parcelle 用手填 185 即可。
+
+- 2026-07-17 TODO（Lily 说全部都做）— 货代管理 + 供应商付款信息 + 交货日期提醒:
+  - **货代管理(forwarder 主数据 + 银行/付款信息)** —— 像工厂那样能录入/编辑货代。Lily 给的第一家货代:
+    - 名称 Zhejiang Bing Supply Chain Management Co., Ltd(微信联系)
+    - 银行 Bank of China, Yiwu Branch · 地址 No.500, Chouzhou North Road, Yiwu City, Zhejiang, PR China
+    - SWIFT BKCHCNBJ92H · **AUD 账号 354577334824** · 备注 运费
+    - 用途:国际运费(DHL HK 等)。以后**付货代运费**要能记账(Finance 已有「货代付款」tab + forwarder API)。
+  - **供应商(suppliers)加付款信息字段** —— 供应商那块要能填付款信息(银行/账号/付款方式/条款等),像客户/货代一样。
+  - **预计交货日期 + Dashboard 提醒**(设计已确认):订单顶部 estimated_delivery_date(琥珀/红),Dashboard「⚠️交货提醒」高亮列表。
+  - 顺序建议:货代主数据(带银行)→ 供应商付款字段 → 交货日期+提醒。下一批做。
+
+- 2026-07-17 PLANNED（Lily 说先测流程,别改）— 预计交货日期 + 提醒:
+  - 确认设计:订单**顶部**加「预计交货日期 estimated_delivery_date」(可改),到期变琥珀、逾期变红。提醒 = **Dashboard 首页「⚠️ 交货提醒」高亮列表**(快到期/逾期的单红色置顶,不发邮件那版)。每日邮件提醒暂不做。
+  - 待建:SQL orders += estimated_delivery_date date;订单顶部日期输入+变色;Dashboard 加提醒块(查 orders where estimated_delivery_date 临近/已过 且未 delivered)。等 Lily 测完流程再开工。
+
 - 2026-07-17 (Invoices 列表页) — Lily 问有没有"所有发票"页 → 没有,建了。放 **Finance → 发票 Invoices** 标签。
   - 一张表:Inv# · Order# · 客户 · 日期 · 金额 · 状态(已收/未收/月结) · **📄 Tax Invoice** 按钮(开 /api/admin/orders/invoice-pdf?id=)。顶部三卡:已开票总额 / 已收 / 未收。搜索框 + "只看未收"勾选(方便追款)。数据来自 GET /api/admin/orders。无 SQL,无新路由(复用现有)。
   - File: `app/admin/finance/page.js`(加 invoices tab + Invoices 组件)。**PUSH**: `app/admin/finance/page.js`。任务 #36 核心完成(mark-paid 暂没做,Lily 只要 PDF)。
