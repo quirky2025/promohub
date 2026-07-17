@@ -85,7 +85,10 @@ export default function AdminDashboard() {
               </thead>
               <tbody>
                 {stats.recent_orders.map(order => (
-                  <tr key={order.id} style={{ borderBottom: '1px solid #F0EEED' }}>
+                  <tr key={order.id} onClick={() => router.push(`/admin/orders?order=${encodeURIComponent(order.invoice_number || order.order_number || '')}`)}
+                    style={{ borderBottom: '1px solid #F0EEED', cursor: 'pointer' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#FBFAF8'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                     <td style={{ padding: '10px 12px', fontWeight: 600, color: GOLD, fontFamily: '"DM Mono", monospace' }}>{order.invoice_number}</td>
                     <td style={{ padding: '10px 12px', color: NAVY }}>{order.customer_name}</td>
                     <td style={{ padding: '10px 12px', fontFamily: '"DM Mono", monospace' }}>${order.total?.toFixed(2)}</td>

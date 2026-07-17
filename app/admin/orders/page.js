@@ -93,6 +93,15 @@ export default function AdminOrdersPage() {
 
   useEffect(() => { fetchOrders(); }, [statusFilter]);
 
+  // Deep-link: /admin/orders?order=OC…  → auto-open that order (e.g. from Dashboard).
+  useEffect(() => {
+    if (!orders.length || selected) return;
+    const want = new URLSearchParams(window.location.search).get('order');
+    if (!want) return;
+    const hit = orders.find(o => o.invoice_number === want || o.order_number === want);
+    if (hit) openDetail(hit);
+  }, [orders]); // eslint-disable-line react-hooks/exhaustive-deps
+
   async function fetchOrders() {
     setLoading(true);
     try {
