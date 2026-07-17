@@ -26,7 +26,12 @@ export async function POST(request) {
     }
 
     const idx = Number(index);
-    const items = order.items.map((it, i) => (i === idx ? { ...it, status } : it));
+    const now = new Date().toISOString();
+    const items = order.items.map((it, i) => {
+      if (i !== idx) return it;
+      const stage_dates = { ...(it.stage_dates || {}), [status]: now };
+      return { ...it, status, stage_dates };
+    });
 
     const { error: upErr } = await db.from('orders').update({ items }).eq('id', orderId);
     if (upErr) return Response.json({ error: upErr.message }, { status: 500 });

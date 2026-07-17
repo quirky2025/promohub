@@ -742,9 +742,6 @@ export default function AdminOrdersPage() {
                     { emoji: '🎨', label: '发印刷稿 Artwork sent', at: selected.artwork_sent_at },
                     { emoji: '✅', label: '印刷稿批准 Approved', at: selected.artwork_approved_at },
                   ]),
-                  { emoji: '🏭', label: '进入生产 In production', at: selected.production_started_at },
-                  { emoji: '🚚', label: '已发货 Dispatched', at: selected.dispatched_at },
-                  { emoji: '📦', label: '已送达 Delivered', at: selected.delivered_at },
                 ];
                 return (
                   <div style={{ marginTop: '12px', display: 'grid', gap: '5px' }}>
@@ -754,6 +751,7 @@ export default function AdminOrdersPage() {
                         <span style={{ color: s.at ? '#000' : '#B0AAA3', fontWeight: s.at ? 700 : 400 }}>{s.at ? fmtDateTime(s.at) : '待定 —'}</span>
                       </div>
                     ))}
+                    <div style={{ fontSize: '11px', color: '#000', marginTop: '2px' }}>进入生产 / 发货 / 送达的日期按<strong>每个产品</strong>分开记 —— 见下方每个产品。</div>
                   </div>
                 );
               })()}
@@ -898,6 +896,23 @@ export default function AdminOrdersPage() {
                       );
                     })}
                   </div>
+
+                  {/* per-product stage DATES (production / dispatched / delivered differ per product) */}
+                  {(() => {
+                    const sd = item.stage_dates || {};
+                    const rows = [
+                      { emoji: '🏭', label: '进入生产', at: sd.in_production },
+                      { emoji: '🚚', label: '已发货', at: sd.dispatched },
+                      { emoji: '📦', label: '已送达', at: sd.delivered },
+                    ];
+                    return (
+                      <div style={{ marginTop: '6px', display: 'flex', gap: '14px', flexWrap: 'wrap', fontSize: '11px' }}>
+                        {rows.map((r, k) => (
+                          <span key={k} style={{ color: r.at ? '#000' : '#B0AAA3', fontWeight: r.at ? 700 : 400 }}>{r.emoji} {r.label}: {r.at ? fmtDateTime(r.at) : '待定'}</span>
+                        ))}
+                      </div>
+                    );
+                  })()}
 
                   {/* per-product FREIGHT — one or more parcels (a product can ship to >1 address) */}
                   <div style={{ marginTop: '10px', background: '#FAF8F4', borderRadius: '8px', padding: '9px 11px' }}>
