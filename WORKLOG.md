@@ -128,6 +128,13 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
 
 - 2026-07-16 (later 12): ⭐ ROOT CAUSE of "changes don't persist" (artwork approval / per-item status / freight parcels reverting on reload/deploy). `app/api/admin/orders/route.js` `legacyItems()` REBUILT each item keeping only a subset of fields → STRIPPED item.artwork_approved, item.parcels, item.status, item.branding, item.freight_* on every GET. Data WAS saved in orders.items jsonb; the list API dropped it on read. FIX: `legacyItems` now spreads `...item` first (keeps all original fields), then adds normalized aliases. Uploaded artwork survived because it's in order_documents (separate table). Refund persistence is separate: order-level cols (adjustments/adjustment_settled_at/amount_paid) are preserved by `...order` spread in normalizeOrder — they only "didn't save" because orders_adjustments.sql not yet run + credit-settle not yet deployed. PUSH: app/api/admin/orders/route.js. esbuild-clean.
 
+- 2026-07-17 (SIMPLIFY Step 4) — Lily: 欠爸爸账本太复杂,看不到。砍掉。
+  - Lily's model: per order = ¥付了多少 · 汇率 → =A$成本(打给爸爸)。就这样,不要全局账本/还爸爸记录/采购总览页。
+  - **工厂 PO 面板砍简单** (`components/FactoryProcurement.jsx` rewritten): 只留 (a) 工厂 PO 建/编辑/删 + **📄 PO PDF** + **✉ 发工厂**; (b) **工厂发票** (号/额/日期/文件); (c) **支付凭证** 上传(微信截图,存 order_documents docType payment_proof, 缩略图+删除); (d) **本单成本**: 工厂总额 ¥ ÷ 汇率 = **A$ 成本**(绿字,PO 卡片直接显示 + 表单里实时算)。**删掉**: 欠爸爸结余卡、RMB 多笔付款腿的复杂 UI、还爸爸记录、Stat 组件。
+  - **删掉 Sourcing「采购/欠爸爸」页**: 移除 layout.js 的 tab; `app/admin/sourcing/procurement/page.js` 改成 redirect 到 /admin/sourcing/orders。
+  - API `app/api/admin/orders/factory-po/route.js` 不变(savePO 存 total_rmb+fx_rate; savePayment/saveRepayment/summary actions 现在没人调,留着无害)。表 `factory_po_payments`/`dad_repayments` 现在不用了(留在库里无害)。
+  - **PUSH**: `components/FactoryProcurement.jsx`, `app/admin/sourcing/layout.js`, `app/admin/sourcing/procurement/page.js`. (SQL `db/sourcing_factory_po.sql` 若还没跑要跑 —— factory_pos 表要有;你既然看到过面板应该跑过了。)
+
 - 2026-07-17 (Invoice polish) — INDENT Tax Invoice fixes + product size/spec line:
   - **Deliver-To** now falls back to the customer's **company account address** when the order has none (INDENT orders convert from a quote with no address). `app/api/admin/orders/invoice-pdf/route.js` resolves via company_id → name match → company_addresses (default delivery) → billing (uses lib/companyAddress). So Parcelle's address shows instead of "TO BE CONFIRMED".
   - Removed from the invoice/OC PDF (`lib/orderDocPdf.js`): the "**Stock is subject to availability…**" line and the whole "**Good to know / Production only begins… / lead time**" block.

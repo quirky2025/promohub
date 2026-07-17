@@ -12,7 +12,6 @@ const TABS = [
   { href: '/admin/sourcing/factories', label: '工厂管理' },
   { href: '/admin/sourcing/costing', label: '计价 / 报价' },
   { href: '/admin/sourcing/orders', label: '工厂下单 / 订单' },
-  { href: '/admin/sourcing/procurement', label: '采购 / 欠爸爸' },
   { href: '/admin/sourcing/quotes', label: '报价检索' },
   { href: '/admin/sourcing/trends', label: '价格趋势' },
   { href: '/admin/sourcing/freight', label: '运费价格' },
