@@ -516,15 +516,15 @@ export default function AdminOrdersPage() {
         {/* LEFT — LIST (hidden full-screen when an order is open) */}
         <div style={{ display: selected ? 'none' : 'block', width: '100%', overflowY: 'auto', borderRight: '1px solid #E0DDD7' }}>
           {loading ? (
-            <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570' }}>Loading...</div>
+            <div style={{ textAlign: 'center', padding: '60px', color: '#000' }}>Loading...</div>
           ) : shown.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px', color: '#7A7570' }}>No orders yet</div>
+            <div style={{ textAlign: 'center', padding: '60px', color: '#000' }}>No orders yet</div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
               <thead>
                 <tr style={{ background: '#fff', borderBottom: '2px solid #E0DDD7' }}>
                   {['Order #', 'Date', 'Customer', 'Items', 'Total', 'Payment', 'Status', ''].map(h => (
-                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#7A7570', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
+                    <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#000', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -537,19 +537,19 @@ export default function AdminOrdersPage() {
                   return (
                     <tr key={order.id} onClick={() => openDetail(order)}
                       style={{ background: isSelected ? '#FDF8F0' : i % 2 === 0 ? '#fff' : BG, borderBottom: '1px solid #F0EEED', cursor: 'pointer', borderLeft: isSelected ? `3px solid ${GOLD}` : '3px solid transparent' }}>
-                      <td style={{ padding: '12px 16px', fontWeight: 700, color: GOLD, fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{order.invoice_number}</td>
-                      <td style={{ padding: '12px 16px', color: '#7A7570', whiteSpace: 'nowrap' }}>{fmtDate(order.created_at)}</td>
+                      <td style={{ padding: '12px 16px', fontWeight: 700, color: '#000', fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{order.invoice_number}</td>
+                      <td style={{ padding: '12px 16px', color: '#000', whiteSpace: 'nowrap' }}>{fmtDate(order.created_at)}</td>
                       <td style={{ padding: '12px 16px', fontWeight: 600, color: NAVY }}>
                         <div>{order.customer_name}</div>
-                        {order.customer_company && <div style={{ fontSize: '11px', color: '#7A7570', fontWeight: 400 }}>{order.customer_company}</div>}
+                        {order.customer_company && <div style={{ fontSize: '11px', color: '#000', fontWeight: 400 }}>{order.customer_company}</div>}
                       </td>
-                      <td style={{ padding: '12px 16px', color: '#5A5550' }}>
+                      <td style={{ padding: '12px 16px', color: '#000' }}>
                         {itemCount} item{itemCount !== 1 ? 's' : ''}
                       </td>
                       <td style={{ padding: '12px 16px', color: NAVY, fontWeight: 700 }}>
                         {netTotal(order) !== (Number(order.total) || 0) ? (
                           <>
-                            <span style={{ textDecoration: 'line-through', color: '#B0AAA3', fontWeight: 400, fontSize: '11px' }}>{fmt(order.total)}</span>{' '}
+                            <span style={{ textDecoration: 'line-through', color: '#000', fontWeight: 400, fontSize: '11px' }}>{fmt(order.total)}</span>{' '}
                             {fmt(netTotal(order))}
                           </>
                         ) : fmt(order.total)}
@@ -563,7 +563,7 @@ export default function AdminOrdersPage() {
                       <td style={{ padding: '12px 16px' }}>
                         <a href={`mailto:${order.customer_email}?subject=Re: Order ${order.invoice_number}`}
                           onClick={e => e.stopPropagation()}
-                          style={{ color: GOLD, fontSize: '12px', fontWeight: 600, textDecoration: 'none' }}>
+                          style={{ color: '#000', fontSize: '12px', fontWeight: 600, textDecoration: 'none' }}>
                           Reply →
                         </a>
                       </td>
@@ -582,11 +582,11 @@ export default function AdminOrdersPage() {
             <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: NAVY, padding: 0, marginBottom: '12px' }}>← Back to orders</button>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
               <div>
-                <div style={{ fontSize: '12px', color: GOLD, fontWeight: 700, fontFamily: 'monospace', marginBottom: '4px' }}>{selected.invoice_number}</div>
+                <div style={{ fontSize: '12px', color: '#000', fontWeight: 700, fontFamily: 'monospace', marginBottom: '4px' }}>{selected.invoice_number}</div>
                 <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '24px', color: NAVY, margin: '0 0 4px' }}>{selected.customer_name}</h2>
-                <div style={{ fontSize: '13px', color: '#7A7570' }}>
+                <div style={{ fontSize: '13px', color: '#000' }}>
                   {selected.customer_company && `${selected.customer_company} · `}
-                  <a href={`mailto:${selected.customer_email}`} style={{ color: GOLD }}>{selected.customer_email}</a>
+                  <a href={`mailto:${selected.customer_email}`} style={{ color: '#000' }}>{selected.customer_email}</a>
                   {selected.customer_phone && ` · ${selected.customer_phone}`}
                 </div>
               </div>
@@ -602,7 +602,7 @@ export default function AdminOrdersPage() {
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', background: paid ? '#F0FDF4' : '#FFFBEB', border: `1px solid ${paid ? '#BBF7D0' : '#FDE68A'}`, borderRadius: '10px', padding: '10px 16px', marginBottom: '16px' }}>
                   <div style={{ fontSize: '13px', fontWeight: 700, color: paid ? '#166534' : '#92400E' }}>
                     {paid ? '✅ Payment received' : '⏳ Payment not received'} — {fmt(settled ? netPaid : selected.total)}
-                    {settled && <span style={{ fontWeight: 400, color: '#7A7570' }}> (paid {fmt(selected.total)} {netAdj < 0 ? '− ' + fmt(Math.abs(netAdj)) + ' refunded' : '+ ' + fmt(netAdj) + ' balance'})</span>}
+                    {settled && <span style={{ fontWeight: 400, color: '#000' }}> (paid {fmt(selected.total)} {netAdj < 0 ? '− ' + fmt(Math.abs(netAdj)) + ' refunded' : '+ ' + fmt(netAdj) + ' balance'})</span>}
                   </div>
                   <button onClick={() => window.open(`/api/admin/orders/invoice-pdf?id=${selected.id}`, '_blank')}
                     style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '8px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
@@ -614,7 +614,7 @@ export default function AdminOrdersPage() {
 
             {/* ORDER PROGRESS */}
             <div style={{ background: BG, borderRadius: '12px', padding: '16px', marginBottom: '20px' }}>
-              <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>Order Progress</div>
+              <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>Order Progress</div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 {STATUS_FLOW.filter(s => s.key !== 'cancelled').map((s, i) => {
                   const statusKeys = STATUS_FLOW.filter(x => x.key !== 'cancelled').map(x => x.key);
@@ -638,7 +638,7 @@ export default function AdminOrdersPage() {
               </div>
 
               {/* Timeline */}
-              <div style={{ marginTop: '12px', fontSize: '12px', color: '#7A7570', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+              <div style={{ marginTop: '12px', fontSize: '12px', color: '#000', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                 {selected.created_at && <span>🕐 Ordered: {fmtDateTime(selected.created_at)}</span>}
                 {selected.artwork_approved_at && <span>✅ Approved: {fmtDateTime(selected.artwork_approved_at)}</span>}
                 {selected.production_started_at && <span>🏭 Production: {fmtDateTime(selected.production_started_at)}</span>}
@@ -660,7 +660,7 @@ export default function AdminOrdersPage() {
               );
               return (
                 <div style={{ background: ready ? '#F0FDF4' : '#FFFBEB', border: `1px solid ${ready ? '#BBF7D0' : '#FDE68A'}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '20px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Production Gate — both required</div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Production Gate — both required</div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     {chip(artOk, `Artwork approved (${nApproved}/${its.length})`)}
                     {chip(paid, 'Payment received')}
@@ -668,7 +668,7 @@ export default function AdminOrdersPage() {
                       ? <span style={{ fontSize: '12px', fontWeight: 700, color: '#166534' }}>→ Ready for production ✅</span>
                       : <span style={{ fontSize: '12px', fontWeight: 700, color: '#92400E' }}>→ Production locked 🔒</span>}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#7A7570', marginTop: '9px' }}>
+                  <div style={{ fontSize: '11px', color: '#000', marginTop: '9px' }}>
                     Approve each product's artwork below (upload the approved file). Payment is marked in the Payment section.
                   </div>
                 </div>
@@ -681,8 +681,8 @@ export default function AdminOrdersPage() {
                 style={{ background: NAVY, color: '#fff', border: 'none', borderRadius: '8px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, cursor: artworkBusy ? 'wait' : 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
                 {artworkBusy ? '⏳ Creating…' : '🎨 Send for artwork approval'}
               </button>
-              <Link href="/admin/artworks" style={{ fontSize: '12px', color: GOLD, fontWeight: 700, textDecoration: 'none' }}>Open Artwork Management →</Link>
-              <span style={{ fontSize: '11px', color: '#7A7570' }}>Creates one proof card per product; upload &amp; send each from the Artwork board.</span>
+              <Link href="/admin/artworks" style={{ fontSize: '12px', color: '#000', fontWeight: 700, textDecoration: 'none' }}>Open Artwork Management →</Link>
+              <span style={{ fontSize: '11px', color: '#000' }}>Creates one proof card per product; upload &amp; send each from the Artwork board.</span>
             </div>
 
             <datalist id="deliverToOpts">
@@ -710,7 +710,7 @@ export default function AdminOrdersPage() {
                 <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid #F0EEED' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div>
-                      <div style={{ fontSize: '11px', color: GOLD, fontWeight: 700, fontFamily: 'monospace' }}>{selected.invoice_number}-{i + 1}</div>
+                      <div style={{ fontSize: '11px', color: '#000', fontWeight: 700, fontFamily: 'monospace' }}>{selected.invoice_number}-{i + 1}</div>
                       <div style={{ fontWeight: 600, color: NAVY, fontSize: '13px' }}>{name}</div>
                       {sku && <div style={{ fontSize: '12px', color: '#000', fontFamily: 'monospace' }}>SKU: {sku}</div>}
                       {item.colour && <div style={{ fontSize: '12px', color: '#000' }}>Colour: {item.colour}</div>}
@@ -722,16 +722,16 @@ export default function AdminOrdersPage() {
                           <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#92400E', fontWeight: 700, marginBottom: '6px' }}>Revise to final spec</div>
                           <input value={itemEdit[i].branding} onChange={e => setIE(i, 'branding', e.target.value)} placeholder="Branding (final, e.g. Digital Print / 3 colour)" style={{ ...shipInput, width: '100%', marginBottom: '6px', boxSizing: 'border-box' }} />
                           <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: '11px', color: '#7A7570' }}>Qty</span>
+                            <span style={{ fontSize: '11px', color: '#000' }}>Qty</span>
                             <input value={itemEdit[i].qty} onChange={e => setIE(i, 'qty', e.target.value)} inputMode="numeric" style={{ ...shipInput, width: '70px' }} />
-                            <span style={{ fontSize: '11px', color: '#7A7570' }}>Unit $</span>
+                            <span style={{ fontSize: '11px', color: '#000' }}>Unit $</span>
                             <input value={itemEdit[i].unitPrice} onChange={e => setIE(i, 'unitPrice', e.target.value)} inputMode="decimal" style={{ ...shipInput, width: '90px' }} />
                             <button onClick={() => saveItemEdit(i)} style={miniBtn(NAVY, '#fff')}>Save</button>
                             <button onClick={() => cancelItemEdit(i)} style={miniBtn('#fff', '#7A7570', '#E0DDD7')}>Cancel</button>
                           </div>
                         </div>
                       ) : (
-                        <button onClick={() => startItemEdit(i, item)} style={{ marginTop: '4px', background: 'none', border: 'none', color: GOLD, fontSize: '11px', fontWeight: 700, cursor: 'pointer', padding: 0 }}>✎ Edit final spec / price</button>
+                        <button onClick={() => startItemEdit(i, item)} style={{ marginTop: '4px', background: 'none', border: 'none', color: '#000', fontSize: '11px', fontWeight: 700, cursor: 'pointer', padding: 0 }}>✎ Edit final spec / price</button>
                       )}
                     </div>
                     <div style={{ fontWeight: 700, color: NAVY }}>{fmt(sub)}</div>
@@ -774,7 +774,7 @@ export default function AdminOrdersPage() {
 
                   {/* per-product FREIGHT — one or more parcels (a product can ship to >1 address) */}
                   <div style={{ marginTop: '10px', background: '#FAF8F4', borderRadius: '8px', padding: '9px 11px' }}>
-                    <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#7A7570', marginBottom: '6px', fontWeight: 700 }}>🚚 Freight — this product ({parcelsOf(i, item).length} parcel{parcelsOf(i, item).length !== 1 ? 's' : ''})</div>
+                    <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#000', marginBottom: '6px', fontWeight: 700 }}>🚚 Freight — this product ({parcelsOf(i, item).length} parcel{parcelsOf(i, item).length !== 1 ? 's' : ''})</div>
                     {parcelsOf(i, item).map((pc, pIdx) => {
                       const nkey = `${i}:${pIdx}`;
                       const emailVal = notifyEmail[nkey] ?? pc.notifyEmail ?? selected.customer_email ?? '';
@@ -782,7 +782,7 @@ export default function AdminOrdersPage() {
                       return (
                       <div key={pIdx} style={{ marginBottom: '8px', paddingBottom: multi ? '8px' : '0', borderBottom: multi ? '1px dashed #E8E2D6' : 'none' }}>
                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-                          <span style={{ fontSize: '11px', color: '#7A7570', width: '16px' }}>{pIdx + 1}.</span>
+                          <span style={{ fontSize: '11px', color: '#000', width: '16px' }}>{pIdx + 1}.</span>
                           <select value={pc.carrier || ''} onChange={e => setParcel(i, item, pIdx, 'carrier', e.target.value)} style={{ ...shipInput, width: '150px', cursor: 'pointer' }}>
                             <option value="">Carrier…</option>
                             {CARRIERS.map(c => <option key={c} value={c}>{c}</option>)}
@@ -792,9 +792,9 @@ export default function AdminOrdersPage() {
                           {multi && <button onClick={() => removeParcel(i, item, pIdx)} title="Remove this address" style={{ background: 'none', border: 'none', color: '#B4413E', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}>✕</button>}
                         </div>
                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginTop: '5px', marginLeft: '22px' }}>
-                          <span style={{ fontSize: '11px', color: '#7A7570' }}>Recipient</span>
+                          <span style={{ fontSize: '11px', color: '#000' }}>Recipient</span>
                           <input list="recipientOpts" placeholder="pick or add" value={pc.recipient || ''} onChange={e => setParcel(i, item, pIdx, 'recipient', e.target.value)} style={{ ...shipInput, width: '140px' }} />
-                          <span style={{ fontSize: '11px', color: '#7A7570' }}>Notify</span>
+                          <span style={{ fontSize: '11px', color: '#000' }}>Notify</span>
                           <input list="emailOpts" placeholder="pick or type email" value={emailVal} onChange={e => setNotifyEmail(p => ({ ...p, [nkey]: e.target.value }))} style={{ ...shipInput, width: '190px' }} />
                           <button onClick={() => notifyShipment(i, pIdx, pc, 'shipped')} style={miniBtn('#166534', '#fff')}>📧 Notify shipped</button>
                           <button onClick={() => notifyShipment(i, pIdx, pc, 'delivered')} style={miniBtn('#1B2A4A', '#fff')}>📦 Notify delivered</button>
@@ -812,7 +812,7 @@ export default function AdminOrdersPage() {
 
                   {/* per-product DOCUMENTS */}
                   <div style={{ marginTop: '8px' }}>
-                    <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#7A7570', marginBottom: '6px', fontWeight: 700 }}>Documents — this product</div>
+                    <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.4px', color: '#000', marginBottom: '6px', fontWeight: 700 }}>Documents — this product</div>
                     <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       {[['invoice', '🧾 Invoice'], ['product_photo', '📷 Product photo'], ['supplier_payment_proof', '💳 Supplier payment proof']].map(([dt, label]) => (
                         <label key={dt} style={{ display: 'inline-block' }}>
@@ -824,7 +824,7 @@ export default function AdminOrdersPage() {
                     {orderDocs.filter(d => d.order_item_index === i).length > 0 && (
                       <div style={{ marginTop: '6px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                         {orderDocs.filter(d => d.order_item_index === i).map(d => (
-                          <a key={d.id} href={d.file_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: GOLD, textDecoration: 'none' }}>📎 {d.file_name || d.title} ↗</a>
+                          <a key={d.id} href={d.file_url} target="_blank" rel="noreferrer" style={{ fontSize: '11px', color: '#000', textDecoration: 'none' }}>📎 {d.file_name || d.title} ↗</a>
                         ))}
                       </div>
                     )}
@@ -842,7 +842,7 @@ export default function AdminOrdersPage() {
               <Row label="Total (incl. GST)" value={fmt(selected.total)} bold />
               <Row label="Payment Method" value={selected.payment_method === 'eft' ? 'EFT Bank Transfer' : 'Credit Card (Stripe)'} />
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
-                <span style={{ color: '#7A7570', fontSize: '13px', width: '140px' }}>Payment Status</span>
+                <span style={{ color: '#000', fontSize: '13px', width: '140px' }}>Payment Status</span>
                 {['paid', 'unpaid'].map(p => {
                   const ps = PAYMENT_STATUS[p];
                   return (
@@ -862,7 +862,7 @@ export default function AdminOrdersPage() {
                   style={{ padding: '9px 16px', borderRadius: '8px', background: GOLD, color: '#fff', border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
                   🧾 Generate Tax Invoice (PDF)
                 </button>
-                <span style={{ fontSize: '11px', color: '#7A7570', alignSelf: 'center' }}>Opens a PDF you can save or send to the customer.</span>
+                <span style={{ fontSize: '11px', color: '#000', alignSelf: 'center' }}>Opens a PDF you can save or send to the customer.</span>
               </div>
 
               {/* CREDIT NOTE / BALANCE — record spec-change adjustments (ex-GST, − credit / + charge) */}
@@ -873,7 +873,7 @@ export default function AdminOrdersPage() {
                 const totalAdj = Math.round((net + gstAdj) * 100) / 100;
                 return (
                   <div style={{ marginTop: '14px', background: '#FAF8F4', borderRadius: '10px', padding: '12px 14px' }}>
-                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Credit note / adjustment (spec changes — ex GST)</div>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Credit note / adjustment (spec changes — ex GST)</div>
                     {adjRows.map((r, idx) => (
                       <div key={idx} style={{ display: 'flex', gap: '6px', marginBottom: '6px', alignItems: 'center' }}>
                         <input value={r.desc} onChange={e => setAdjRow(idx, 'desc', e.target.value)} placeholder="e.g. Pen: pad print → digital print" style={{ ...shipInput, flex: 1, minWidth: '180px' }} />
@@ -881,7 +881,7 @@ export default function AdminOrdersPage() {
                         <button onClick={() => removeAdjRow(idx)} style={{ background: 'none', border: 'none', color: '#B4413E', cursor: 'pointer', fontSize: '13px', fontWeight: 700 }}>✕</button>
                       </div>
                     ))}
-                    <div style={{ fontSize: '11px', color: '#7A7570', marginBottom: '8px' }}>Enter each change: <strong>−</strong> credit to customer (cheaper), <strong>+</strong> extra charge (dearer). Amounts are ex GST.</div>
+                    <div style={{ fontSize: '11px', color: '#000', marginBottom: '8px' }}>Enter each change: <strong>−</strong> credit to customer (cheaper), <strong>+</strong> extra charge (dearer). Amounts are ex GST.</div>
                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', marginBottom: '8px' }}>
                       <button onClick={addAdjRow} style={miniBtn('#fff', NAVY, NAVY)}>＋ Add line</button>
                       <button onClick={saveAdjustments} style={miniBtn(NAVY, '#fff')}>Save adjustments</button>
@@ -896,7 +896,7 @@ export default function AdminOrdersPage() {
                           style={{ padding: '9px 16px', borderRadius: '8px', background: NAVY, color: '#fff', border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
                           {credit ? '🧾 Generate Credit Note' : '🧾 Generate Balance Invoice'}
                         </button>
-                        <span style={{ fontSize: '11px', color: '#7A7570', marginLeft: '8px' }}>Save first, then generate.</span>
+                        <span style={{ fontSize: '11px', color: '#000', marginLeft: '8px' }}>Save first, then generate.</span>
 
                         {/* Settle to bank (only for SAVED adjustments) */}
                         {Array.isArray(selected.adjustments) && selected.adjustments.length > 0 && (
@@ -921,7 +921,8 @@ export default function AdminOrdersPage() {
               })()}
             </Section>
 
-            {/* DELIVERY */}
+            {/* DELIVERY + SHIPMENTS hidden — freight is now per product */}
+            {false && (<>
             <Section title="🚚 Delivery">
               {/* Prominent, editable delivery address — CHECK before dispatch */}
               <div style={{ background: '#FFF8EC', border: `2px solid ${GOLD}`, borderRadius: '10px', padding: '12px 14px', marginBottom: '14px' }}>
@@ -939,7 +940,7 @@ export default function AdminOrdersPage() {
 
               {/* Carrier + Tracking */}
               <div style={{ marginTop: '4px' }}>
-                <div style={{ fontSize: '12px', color: '#7A7570', marginBottom: '6px', fontWeight: 600 }}>Carrier</div>
+                <div style={{ fontSize: '12px', color: '#000', marginBottom: '6px', fontWeight: 600 }}>Carrier</div>
                 <select value={carrier} onChange={e => setCarrier(e.target.value)}
                   style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', marginBottom: '10px', boxSizing: 'border-box', background: '#fff' }}>
                   <option value="">Select carrier…</option>
@@ -948,7 +949,7 @@ export default function AdminOrdersPage() {
                   <option value="Direct Freight Express">Direct Freight Express</option>
                   <option value="Courier">Other / Courier</option>
                 </select>
-                <div style={{ fontSize: '12px', color: '#7A7570', marginBottom: '6px', fontWeight: 600 }}>Tracking Details</div>
+                <div style={{ fontSize: '12px', color: '#000', marginBottom: '6px', fontWeight: 600 }}>Tracking Details</div>
                 <input value={trackingNumber} onChange={e => setTrackingNumber(e.target.value)}
                   placeholder="Tracking number..."
                   style={{ width: '100%', padding: '8px 12px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '13px', fontFamily: '"DM Sans", sans-serif', marginBottom: '6px', boxSizing: 'border-box' }} />
@@ -968,11 +969,11 @@ export default function AdminOrdersPage() {
                   📦 Mark Delivered &amp; Notify
                 </button>
                 <button onClick={() => fulfil('feedback')} disabled={saving}
-                  style={{ background: '#fff', color: '#7A7570', border: '1.5px solid #E0DDD7', borderRadius: '8px', padding: '9px 14px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+                  style={{ background: '#fff', color: '#000', border: '1.5px solid #E0DDD7', borderRadius: '8px', padding: '9px 14px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
                   💬 Send Feedback Request
                 </button>
               </div>
-              <p style={{ fontSize: '11px', color: '#9CA3AF', margin: '8px 0 0' }}>Tip: single-parcel orders can use the tracking above. For split orders sent to several addresses / over several days, use <strong>Shipments</strong> below.</p>
+              <p style={{ fontSize: '11px', color: '#000', margin: '8px 0 0' }}>Tip: single-parcel orders can use the tracking above. For split orders sent to several addresses / over several days, use <strong>Shipments</strong> below.</p>
             </Section>
 
             {/* SHIPMENTS (multi-parcel) */}
@@ -999,7 +1000,7 @@ export default function AdminOrdersPage() {
                         {s.address && <div style={{ fontSize: '12px', color: '#000', marginBottom: '3px' }}><strong>To:</strong> {s.address}</div>}
                         <div style={{ fontSize: '12px', color: '#000', marginBottom: '3px' }}>
                           {s.carrier || 'Carrier —'}{s.tracking_number ? ` · ${s.tracking_number}` : ''}{dd ? ` · shipped ${dd}` : ''}
-                          {s.tracking_url && <> · <a href={s.tracking_url} target="_blank" rel="noreferrer" style={{ color: GOLD, fontWeight: 600 }}>Track →</a></>}
+                          {s.tracking_url && <> · <a href={s.tracking_url} target="_blank" rel="noreferrer" style={{ color: '#000', fontWeight: 600 }}>Track →</a></>}
                         </div>
                         {s.notified_at && <div style={{ fontSize: '11px', color: '#166534', marginBottom: '4px' }}>✓ Customer notified</div>}
                         <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
@@ -1077,6 +1078,7 @@ export default function AdminOrdersPage() {
                 </div>
               </div>
             </Section>
+            </>)}
 
             {/* DOCUMENTS / EVIDENCE VAULT */}
             <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #F0EEED' }}>
@@ -1109,7 +1111,7 @@ export default function AdminOrdersPage() {
               )}
             </div>
 
-            <div style={{ marginTop: '16px', fontSize: '12px', color: '#B0AAA3', textAlign: 'center' }}>
+            <div style={{ marginTop: '16px', fontSize: '12px', color: '#000', textAlign: 'center' }}>
               {selected.created_at && `Ordered ${new Date(selected.created_at).toLocaleString('en-AU', { timeZone: 'Australia/Sydney', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`}
             </div>
            </div>
@@ -1125,7 +1127,7 @@ export default function AdminOrdersPage() {
 function Section({ title, children }) {
   return (
     <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #F0EEED' }}>
-      <div style={{ fontSize: '12px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>{title}</div>
+      <div style={{ fontSize: '12px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>{title}</div>
       {children}
     </div>
   );
@@ -1141,7 +1143,7 @@ function Row({ label, value, bold }) {
   if (!value) return null;
   return (
     <div style={{ display: 'flex', gap: '12px', marginBottom: '8px', fontSize: '13px' }}>
-      <span style={{ color: '#7A7570', width: '140px', flexShrink: 0 }}>{label}</span>
+      <span style={{ color: '#000', width: '140px', flexShrink: 0 }}>{label}</span>
       <span style={{ color: '#1B2A4A', fontWeight: bold ? 700 : 400, flex: 1 }}>{value}</span>
     </div>
   );
@@ -1243,7 +1245,7 @@ function NewOrderModal({ onClose, onCreated }) {
           </div>
           <div style={{ marginBottom: '16px' }}><label style={niLabel}>Delivery address</label><input style={niStyle} value={cust.address} onChange={e => setC('address', e.target.value)} placeholder="Street, suburb, state, postcode" /></div>
 
-          <div style={{ fontSize: '12px', fontWeight: 700, color: '#7A7570', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Products</div>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>Products</div>
           {items.map((it, i) => (
             <div key={i} style={{ border: '1px solid #ECE8E1', borderRadius: '10px', padding: '12px', marginBottom: '10px', position: 'relative' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
@@ -1275,12 +1277,12 @@ function NewOrderModal({ onClose, onCreated }) {
           <button onClick={addRow} style={{ background: '#fff', border: `1.5px solid ${NAVY}`, color: NAVY, borderRadius: '8px', padding: '7px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', marginBottom: '16px' }}>＋ Add product</button>
 
           <div style={{ background: '#FAF8F4', borderRadius: '10px', padding: '12px 16px', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}><span style={{ color: '#7A7570' }}>Subtotal (excl GST)</span><strong style={{ color: NAVY }}>{money2(subtotal)}</strong></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}><span style={{ color: '#000' }}>Subtotal (excl GST)</span><strong style={{ color: NAVY }}>{money2(subtotal)}</strong></div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px', alignItems: 'center' }}>
-              <span style={{ color: '#7A7570' }}>Shipping (${SHIPPING}/item · {nLines} item{nLines !== 1 ? 's' : ''})</span>
+              <span style={{ color: '#000' }}>Shipping (${SHIPPING}/item · {nLines} item{nLines !== 1 ? 's' : ''})</span>
               <input style={{ ...niStyle, width: '90px', textAlign: 'right' }} inputMode="decimal" value={shipping} onChange={e => setShipping(e.target.value)} placeholder={String(SHIPPING * nLines)} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}><span style={{ color: '#7A7570' }}>GST (10%)</span><strong style={{ color: NAVY }}>{money2(gst)}</strong></div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '6px' }}><span style={{ color: '#000' }}>GST (10%)</span><strong style={{ color: NAVY }}>{money2(gst)}</strong></div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', borderTop: '1px solid #E0DDD7', paddingTop: '8px' }}><span style={{ color: NAVY, fontWeight: 700 }}>Total (incl GST)</span><strong style={{ color: NAVY }}>{money2(total)}</strong></div>
           </div>
 
@@ -1290,7 +1292,7 @@ function NewOrderModal({ onClose, onCreated }) {
             <button onClick={onClose} style={{ background: '#fff', border: '1.5px solid #E0DDD7', color: NAVY, borderRadius: '9px', padding: '11px 18px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
             <button onClick={submit} disabled={busy} style={{ background: busy ? '#D9CDB4' : GOLD, border: 'none', color: '#fff', borderRadius: '9px', padding: '11px 22px', fontSize: '13px', fontWeight: 700, cursor: busy ? 'wait' : 'pointer' }}>{busy ? '⏳ Creating…' : 'Create order + artwork cards'}</button>
           </div>
-          <div style={{ fontSize: '11px', color: '#7A7570', marginTop: '10px', textAlign: 'right' }}>Creates a confirmed order (EFT · unpaid) + one artwork card per product. No email is sent to the customer.</div>
+          <div style={{ fontSize: '11px', color: '#000', marginTop: '10px', textAlign: 'right' }}>Creates a confirmed order (EFT · unpaid) + one artwork card per product. No email is sent to the customer.</div>
         </div>
       </div>
     </div>
