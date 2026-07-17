@@ -86,6 +86,18 @@ export default function FactoryProcurement({ orderNumber, order }) {
     const ok = await post({ action: 'saveRepayment', ...repayForm });
     if (ok) setRepayForm(null);
   }
+  async function sendPO(po) {
+    const to = prompt(`发工厂 PO ${po.po_number} 到工厂邮箱。\n留空则用工厂档案里的 Email；也可以在这里输入/覆盖收件邮箱：`, po.factories?.email || '');
+    if (to === null) return;
+    setBusy(true);
+    try {
+      const res = await fetch('/api/admin/orders/factory-po', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ orderNumber, action: 'sendPO', id: po.id, toOverride: to.trim() || undefined }) });
+      const d = await res.json();
+      if (!res.ok) alert('发送失败: ' + (d.error || 'unknown'));
+      else { alert('已发送到 ' + d.to); if (d.pos) setData({ pos: d.pos, payments: d.payments || [], repayments: d.repayments || [], ledger: d.ledger || {} }); }
+    } catch (e) { alert('发送失败: ' + e.message); }
+    setBusy(false);
+  }
 
   return (
     <div style={{ marginTop: 8 }}>
@@ -115,7 +127,9 @@ export default function FactoryProcurement({ orderNumber, order }) {
                     <div style={{ fontSize: 12.5, color: '#000', marginTop: 2 }}>工厂总额 <strong>{rmb(po.total_rmb)}</strong> · 已付 {rmb(paidRmb)} · 还差 <strong style={{ color: paidRmb >= (Number(po.total_rmb) || 0) - 0.01 ? GREEN : RED }}>{rmb(Math.max(0, (Number(po.total_rmb) || 0) - paidRmb))}</strong></div>
                     {po.factory_invoice_number && <div style={{ fontSize: 11.5, color: '#000', marginTop: 2 }}>工厂发票 {po.factory_invoice_number} · {rmb(po.factory_invoice_rmb)} {po.factory_invoice_date ? `· ${po.factory_invoice_date}` : ''} {po.factory_invoice_url ? <a href={po.factory_invoice_url} target="_blank" rel="noreferrer" style={{ color: NAVY, fontWeight: 700 }}> 查看→</a> : ''}</div>}
                   </div>
-                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                  <div style={{ display: 'flex', gap: 6, flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                    <a href={`/api/admin/orders/factory-po?pdf=1&poId=${po.id}`} target="_blank" rel="noreferrer" style={{ ...btn('#fff'), color: NAVY, border: `1.5px solid ${NAVY}`, textDecoration: 'none' }}>📄 PO PDF</a>
+                    <button onClick={() => sendPO(po)} disabled={busy} style={btn(GREEN)}>✉ 发工厂</button>
                     <button onClick={() => setPoForm({ id: po.id, orderNumber, factoryId: po.factory_id || '', productName: po.product_name || '', productSku: po.product_sku || '', quantity: po.quantity ?? '', unitPriceRmb: po.unit_price_rmb ?? '', extraRmb: po.extra_rmb ?? '', totalRmb: po.total_rmb ?? '', fxRate: po.fx_rate ?? '4.5', factoryInvoiceNumber: po.factory_invoice_number || '', factoryInvoiceRmb: po.factory_invoice_rmb ?? '', factoryInvoiceDate: po.factory_invoice_date || '', factoryInvoiceUrl: po.factory_invoice_url || '', status: po.status || 'draft', notes: po.notes || '' })} style={{ ...btn('#fff'), color: NAVY, border: `1.5px solid ${NAVY}` }}>编辑</button>
                     <button onClick={async () => { if (confirm(`删除工厂 PO ${po.po_number}?（连同它的付款记录）`)) await post({ action: 'deletePO', id: po.id }); }} style={{ ...btn('#fff'), color: RED, border: `1.5px solid ${RED}` }}>删除</button>
                   </div>

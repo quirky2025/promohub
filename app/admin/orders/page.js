@@ -102,10 +102,30 @@ export default function AdminOrdersPage() {
   //   (1) artwork is approved  AND  (2) payment has been received.
   function prodBlockReason(o) {
     if (!o) return '';
-    const approved = o.artwork_status === 'approved';
+    const approved = o.artwork_required === false || o.artwork_status === 'approved';
     const paid = o.payment_status === 'paid';
     if (approved && paid) return '';
+    if (o.artwork_required === false) return paid ? '' : `Can't start production yet:\n✗ Payment received\n\n(No artwork needed for this order.)`;
     return `Can't start production yet:\n${approved ? '✓' : '✗'} Artwork approved\n${paid ? '✓' : '✗'} Payment received\n\nBoth are required before production.`;
+  }
+
+  async function deleteOrder() {
+    if (!selected) return;
+    if (!confirm(`彻底删除订单 ${selected.invoice_number || selected.order_number}（${selected.customer_name || ''}）？\n此操作不可恢复。若已收款/退款，请先在财务处理。`)) return;
+    const res = await fetch(`/api/admin/orders?id=${selected.id}`, { method: 'DELETE' });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) { alert('删除失败: ' + (d.error || 'unknown')); return; }
+    setSelected(null);
+    setOrders(prev => prev.filter(o => o.id !== selected.id));
+  }
+
+  async function toggleArtworkRequired() {
+    if (!selected) return;
+    const currentlyRequired = selected.artwork_required !== false;
+    const val = !currentlyRequired; // flip: required(true) <-> not required(false)
+    await supabase.from('orders').update({ artwork_required: val }).eq('id', selected.id);
+    setSelected(prev => ({ ...prev, artwork_required: val }));
+    setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, artwork_required: val } : o));
   }
 
   async function updateStatus(id, status) {
@@ -580,7 +600,10 @@ export default function AdminOrdersPage() {
         {selected && (
           <div style={{ flex: 1, overflowY: 'auto', padding: '20px 28px', background: '#fff' }}>
            <div style={{ maxWidth: '1080px', margin: '0 auto' }}>
-            <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: NAVY, padding: 0, marginBottom: '12px' }}>← Back to orders</button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: NAVY, padding: 0 }}>← Back to orders</button>
+              <button onClick={deleteOrder} title="删除订单" style={{ background: 'none', border: '1px solid #E0C9C9', color: '#991B1B', fontSize: '12px', fontWeight: 700, cursor: 'pointer', borderRadius: '6px', padding: '5px 12px' }}>🗑 Delete order</button>
+            </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
               <div>
                 <div style={{ fontSize: '12px', color: '#000', fontWeight: 700, fontFamily: 'monospace', marginBottom: '4px' }}>{selected.invoice_number}</div>
@@ -618,6 +641,8 @@ export default function AdminOrdersPage() {
               <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>Order Progress</div>
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                 {STATUS_FLOW.filter(s => s.key !== 'cancelled').map((s, i) => {
+                  const noArt = selected.artwork_required === false;
+                  if (noArt && (s.key === 'artwork_sent' || s.key === 'artwork_approved')) return null;
                   const statusKeys = STATUS_FLOW.filter(x => x.key !== 'cancelled').map(x => x.key);
                   const currentIdx = statusKeys.indexOf(selected.status);
                   const thisIdx = statusKeys.indexOf(s.key);
@@ -650,8 +675,9 @@ export default function AdminOrdersPage() {
             {/* PRODUCTION GATE — summary (upload/approve is per product, below) */}
             {(() => {
               const its = Array.isArray(selected.items) ? selected.items : [];
+              const noArt = selected.artwork_required === false;
               const nApproved = its.filter(it => it.artwork_approved).length;
-              const artOk = its.length > 0 && nApproved === its.length;
+              const artOk = noArt || (its.length > 0 && nApproved === its.length);
               const paid = selected.payment_status === 'paid';
               const ready = artOk && paid;
               const chip = (ok, label) => (
@@ -661,22 +687,30 @@ export default function AdminOrdersPage() {
               );
               return (
                 <div style={{ background: ready ? '#F0FDF4' : '#FFFBEB', border: `1px solid ${ready ? '#BBF7D0' : '#FDE68A'}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '20px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>Production Gate — both required</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                    <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Production Gate — {noArt ? 'payment only' : 'both required'}</div>
+                    <button onClick={toggleArtworkRequired} style={{ background: 'none', border: '1px solid #D8CFC0', color: NAVY, fontSize: '11px', fontWeight: 700, cursor: 'pointer', borderRadius: '6px', padding: '3px 9px' }}>
+                      {noArt ? '↩ 改回需要印刷' : '无需印刷 No artwork'}
+                    </button>
+                  </div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    {chip(artOk, `Artwork approved (${nApproved}/${its.length})`)}
+                    {noArt ? chip(true, '无需印刷 No artwork needed') : chip(artOk, `Artwork approved (${nApproved}/${its.length})`)}
                     {chip(paid, 'Payment received')}
                     {ready
                       ? <span style={{ fontSize: '12px', fontWeight: 700, color: '#166534' }}>→ Ready for production ✅</span>
                       : <span style={{ fontSize: '12px', fontWeight: 700, color: '#92400E' }}>→ Production locked 🔒</span>}
                   </div>
                   <div style={{ fontSize: '11px', color: '#000', marginTop: '9px' }}>
-                    Approve each product's artwork below (upload the approved file). Payment is marked in the Payment section.
+                    {noArt
+                      ? 'This order needs no artwork — only payment is required before production.'
+                      : "Approve each product's artwork below (upload the approved file). Payment is marked in the Payment section."}
                   </div>
                 </div>
               );
             })()}
 
-            {/* SEND PRODUCTS FOR ONLINE ARTWORK APPROVAL */}
+            {/* SEND PRODUCTS FOR ONLINE ARTWORK APPROVAL (hidden when no artwork needed) */}
+            {selected.artwork_required !== false && (
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '18px', flexWrap: 'wrap' }}>
               <button onClick={sendForArtworkApproval} disabled={artworkBusy}
                 style={{ background: NAVY, color: '#fff', border: 'none', borderRadius: '8px', padding: '9px 16px', fontSize: '13px', fontWeight: 700, cursor: artworkBusy ? 'wait' : 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
@@ -685,6 +719,7 @@ export default function AdminOrdersPage() {
               <Link href="/admin/artworks" style={{ fontSize: '12px', color: '#000', fontWeight: 700, textDecoration: 'none' }}>Open Artwork Management →</Link>
               <span style={{ fontSize: '11px', color: '#000' }}>Creates one proof card per product; upload &amp; send each from the Artwork board.</span>
             </div>
+            )}
 
             <datalist id="deliverToOpts">
               {knownAddresses.map(a => <option key={a} value={a} />)}
@@ -737,7 +772,8 @@ export default function AdminOrdersPage() {
                     </div>
                     <div style={{ fontWeight: 700, color: NAVY }}>{fmt(sub)}</div>
                   </div>
-                  {/* per-product ARTWORK approval */}
+                  {/* per-product ARTWORK approval (hidden when order needs no artwork) */}
+                  {selected.artwork_required !== false && (
                   <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     {item.artwork_approved ? (
                       <>
@@ -760,6 +796,7 @@ export default function AdminOrdersPage() {
                       </>
                     )}
                   </div>
+                  )}
                   {/* per-product stage */}
                   <div style={{ display: 'flex', gap: '5px', marginTop: '8px', flexWrap: 'wrap' }}>
                     {ITEM_STAGES.map(s => {

@@ -75,6 +75,8 @@ export async function POST(request) {
       quote_ref: q.quote_number || null,
       order_type: isIndent ? 'indent' : 'local',
       sourcing_quote_ref: isIndent ? (q.quote_number || null) : null,
+      // INDENT items with no branding need no artwork → skip the artwork gate.
+      artwork_required: !(isIndent && items.every((it) => !it.branding)),
       created_at: new Date().toISOString(),
     };
 

@@ -102,3 +102,26 @@ export async function PATCH(request) {
     return Response.json({ error: e.message }, { status: 500 });
   }
 }
+
+// DELETE ?kind=quote|enquiry&id=…  → permanently remove a quote or enquiry
+// (used to clean up old / duplicate records like FlagDisplays, AdoreEco).
+export async function DELETE(request) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorized();
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const kind = searchParams.get('kind');
+    if (!id || !kind) return Response.json({ error: 'Missing id/kind' }, { status: 400 });
+    const table = kind === 'quote' ? 'quotes' : 'quote_requests';
+    const idCol = kind === 'quote' ? 'quote_number' : 'id';
+    const db = sourcingDb();
+    const { data: before } = await db.from(table).select('*').eq(idCol, id).single();
+    const { error } = await db.from(table).delete().eq(idCol, id);
+    if (error) return Response.json({ error: error.message }, { status: 500 });
+    try { await audit(db, user.email, 'deal_delete', kind, id, before || null, null); } catch (_) { /* ignore */ }
+    return Response.json({ ok: true });
+  } catch (e) {
+    return Response.json({ error: e.message }, { status: 500 });
+  }
+}
