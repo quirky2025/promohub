@@ -132,6 +132,7 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
   - ⚠️ **RUN SQL** `db/orders_step_dates.sql` (orders += `artwork_sent_at`, `delivered_at`; 其余已存在).
   - ORDER PROGRESS 下的 Timeline 重建成逐步列表:下单/发印刷稿/印刷稿批准/进入生产/已发货/已送达,每步显示日期或灰色"待定 —"。无印刷单自动跳过两个印刷步骤。updateStatus 现在也给 artwork_sent_at 和 delivered_at 盖时间戳(点进度按钮时)。File: `app/admin/orders/page.js`.
   - **PUSH**: `db/orders_step_dates.sql`, `app/admin/orders/page.js`.
+  - FIX (Lily, Ian 多产品): 生产/发货/送达每个产品时间不同 → 从**订单级时间线拿掉**这三步(订单级只留 下单/印刷稿),改成**每个产品下面**显示 进入生产/已发货/已送达 的日期。item-status route 现在给 `item.stage_dates[stage]=now` 盖时间戳(存 items jsonb,无需 SQL)。点每个产品的阶段按钮就记该产品的日期。Files: `app/api/admin/orders/item-status/route.js`, `app/admin/orders/page.js`.
 
 - 2026-07-17 (Delivery address on every order) — Lily: 每单顶部一定要有 DELIVERY ADDRESS,默认来自客户账户,可改、可加多个(Ian 2 个地址)。
   - ⚠️ **RUN SQL** `db/orders_delivery_addresses.sql` (orders += `delivery_addresses` jsonb — array of address strings; first mirrors into delivery_address for the invoice).
