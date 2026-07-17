@@ -13,10 +13,11 @@ export async function POST(request) {
   if (!user) return unauthorized();
 
   try {
-    const { orderId, index, status } = await request.json();
-    if (!orderId || index == null || !STAGES.includes(status)) {
-      return Response.json({ error: 'Missing/invalid fields' }, { status: 400 });
-    }
+    const body = await request.json();
+    const { orderId, index, status, dateOnly, stage, date } = body;
+    if (!orderId || index == null) return Response.json({ error: 'Missing fields' }, { status: 400 });
+    if (dateOnly) { if (!STAGES.includes(stage)) return Response.json({ error: 'Invalid stage' }, { status: 400 }); }
+    else if (!STAGES.includes(status)) return Response.json({ error: 'Invalid status' }, { status: 400 });
 
     const db = sourcingDb();
     const { data: order, error: readErr } = await db
@@ -29,9 +30,19 @@ export async function POST(request) {
     const now = new Date().toISOString();
     const items = order.items.map((it, i) => {
       if (i !== idx) return it;
+      if (dateOnly) {
+        const stage_dates = { ...(it.stage_dates || {}), [stage]: date || null };
+        return { ...it, stage_dates };
+      }
       const stage_dates = { ...(it.stage_dates || {}), [status]: now };
       return { ...it, status, stage_dates };
     });
+
+    if (dateOnly) {
+      const { error: upErr } = await db.from('orders').update({ items }).eq('id', orderId);
+      if (upErr) return Response.json({ error: upErr.message }, { status: 500 });
+      return Response.json({ success: true, items });
+    }
 
     const { error: upErr } = await db.from('orders').update({ items }).eq('id', orderId);
     if (upErr) return Response.json({ error: upErr.message }, { status: 500 });

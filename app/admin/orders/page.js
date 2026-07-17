@@ -119,9 +119,9 @@ export default function AdminOrdersPage() {
   function prodBlockReason(o) {
     if (!o) return '';
     const approved = o.artwork_required === false || o.artwork_status === 'approved';
-    const paid = o.payment_status === 'paid';
+    const paid = o.payment_status === 'paid' || o.pay_on_account === true;
     if (approved && paid) return '';
-    if (o.artwork_required === false) return paid ? '' : `Can't start production yet:\n✗ Payment received\n\n(No artwork needed for this order.)`;
+    if (o.artwork_required === false) return paid ? '' : `Can't start production yet:\n✗ Payment received (or mark 月结 / pay later)\n\n(No artwork needed for this order.)`;
     return `Can't start production yet:\n${approved ? '✓' : '✗'} Artwork approved\n${paid ? '✓' : '✗'} Payment received\n\nBoth are required before production.`;
   }
 
@@ -142,6 +142,16 @@ export default function AdminOrdersPage() {
     await supabase.from('orders').update({ artwork_required: val }).eq('id', selected.id);
     setSelected(prev => ({ ...prev, artwork_required: val }));
     setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, artwork_required: val } : o));
+  }
+
+  // Per-order (flexible, Lily decides case by case): allow production without
+  // prepayment — e.g. monthly-account customers, or a one-off you trust.
+  async function toggleOnAccount() {
+    if (!selected) return;
+    const val = !(selected.pay_on_account === true);
+    await supabase.from('orders').update({ pay_on_account: val }).eq('id', selected.id);
+    setSelected(prev => ({ ...prev, pay_on_account: val }));
+    setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, pay_on_account: val } : o));
   }
 
   async function updateStatus(id, status) {
@@ -413,6 +423,36 @@ export default function AdminOrdersPage() {
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
     if (selected?.id === id) setSelected(prev => ({ ...prev, ...updates }));
     setDeliveryList(clean.length ? clean : ['']);
+  }
+
+  // datetime-local <-> ISO helpers (local time so it reads right for Lily in AU)
+  const toLocalInput = (iso) => { if (!iso) return ''; const d = new Date(iso); const l = new Date(d.getTime() - d.getTimezoneOffset() * 60000); return l.toISOString().slice(0, 16); };
+
+  // Edit any order-level step date (historical backfill). field ∈ created_at /
+  // artwork_sent_at / artwork_approved_at / production_started_at / dispatched_at / delivered_at.
+  async function saveOrderDate(field, localValue) {
+    if (!selected) return;
+    const iso = localValue ? new Date(localValue).toISOString() : null;
+    await fetch('/api/admin/orders/update', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: selected.id, [field]: iso }),
+    });
+    setSelected(prev => ({ ...prev, [field]: iso }));
+    setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, [field]: iso } : o));
+  }
+
+  // Edit a per-product stage date (production / dispatched / delivered differ per product).
+  async function saveItemStageDate(index, stage, localValue) {
+    const iso = localValue ? new Date(localValue).toISOString() : null;
+    const res = await fetch('/api/admin/orders/item-status', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: selected.id, index, dateOnly: true, stage, date: iso }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (data.items) {
+      setSelected(prev => ({ ...prev, items: data.items }));
+      setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, items: data.items } : o));
+    }
   }
 
   async function saveDetails(id) {
@@ -751,21 +791,23 @@ export default function AdminOrdersPage() {
               {(() => {
                 const noArt = selected.artwork_required === false;
                 const steps = [
-                  { emoji: '🕐', label: '下单 Ordered', at: selected.created_at },
+                  { emoji: '🕐', label: '下单 Ordered', at: selected.created_at, field: 'created_at' },
                   ...(noArt ? [] : [
-                    { emoji: '🎨', label: '发印刷稿 Artwork sent', at: selected.artwork_sent_at },
-                    { emoji: '✅', label: '印刷稿批准 Approved', at: selected.artwork_approved_at },
+                    { emoji: '🎨', label: '发印刷稿 Artwork sent', at: selected.artwork_sent_at, field: 'artwork_sent_at' },
+                    { emoji: '✅', label: '印刷稿批准 Approved', at: selected.artwork_approved_at, field: 'artwork_approved_at' },
                   ]),
                 ];
                 return (
                   <div style={{ marginTop: '12px', display: 'grid', gap: '5px' }}>
                     {steps.map((s, k) => (
-                      <div key={k} style={{ display: 'flex', gap: '8px', fontSize: '12px', alignItems: 'center' }}>
+                      <div key={k} style={{ display: 'flex', gap: '8px', fontSize: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                         <span style={{ width: '180px', color: '#000', fontWeight: 600 }}>{s.emoji} {s.label}</span>
-                        <span style={{ color: s.at ? '#000' : '#B0AAA3', fontWeight: s.at ? 700 : 400 }}>{s.at ? fmtDateTime(s.at) : '待定 —'}</span>
+                        <span style={{ width: '150px', color: s.at ? '#000' : '#B0AAA3', fontWeight: s.at ? 700 : 400 }}>{s.at ? fmtDateTime(s.at) : '待定 —'}</span>
+                        <input type="datetime-local" defaultValue={toLocalInput(s.at)} onChange={e => saveOrderDate(s.field, e.target.value)}
+                          title="改日期" style={{ fontSize: '11px', padding: '2px 5px', border: '1px solid #E0DDD7', borderRadius: '5px', color: '#000' }} />
                       </div>
                     ))}
-                    <div style={{ fontSize: '11px', color: '#000', marginTop: '2px' }}>进入生产 / 发货 / 送达的日期按<strong>每个产品</strong>分开记 —— 见下方每个产品。</div>
+                    <div style={{ fontSize: '11px', color: '#000', marginTop: '2px' }}>进入生产 / 发货 / 送达的日期按<strong>每个产品</strong>分开记(可改)—— 见下方每个产品。日期框可直接改历史日期。</div>
                   </div>
                 );
               })()}
@@ -775,9 +817,10 @@ export default function AdminOrdersPage() {
             {(() => {
               const its = Array.isArray(selected.items) ? selected.items : [];
               const noArt = selected.artwork_required === false;
+              const onAccount = selected.pay_on_account === true;
               const nApproved = its.filter(it => it.artwork_approved).length;
               const artOk = noArt || (its.length > 0 && nApproved === its.length);
-              const paid = selected.payment_status === 'paid';
+              const paid = selected.payment_status === 'paid' || onAccount;
               const ready = artOk && paid;
               const chip = (ok, label) => (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', padding: '4px 10px', borderRadius: '16px', fontSize: '12px', fontWeight: 700, background: ok ? '#D1FAE5' : '#FEE2E2', color: ok ? '#065F46' : '#991B1B' }}>
@@ -788,13 +831,18 @@ export default function AdminOrdersPage() {
                 <div style={{ background: ready ? '#F0FDF4' : '#FFFBEB', border: `1px solid ${ready ? '#BBF7D0' : '#FDE68A'}`, borderRadius: '12px', padding: '14px 16px', marginBottom: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                     <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Production Gate — {noArt ? 'payment only' : 'both required'}</div>
-                    <button onClick={toggleArtworkRequired} style={{ background: 'none', border: '1px solid #D8CFC0', color: NAVY, fontSize: '11px', fontWeight: 700, cursor: 'pointer', borderRadius: '6px', padding: '3px 9px' }}>
-                      {noArt ? '↩ 改回需要印刷' : '无需印刷 No artwork'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <button onClick={toggleOnAccount} style={{ background: onAccount ? '#EAF3DE' : 'none', border: '1px solid #D8CFC0', color: onAccount ? '#3B6D11' : NAVY, fontSize: '11px', fontWeight: 700, cursor: 'pointer', borderRadius: '6px', padding: '3px 9px' }}>
+                        {onAccount ? '✓ 月结 · 免付款闸' : '月结 · 先做后付'}
+                      </button>
+                      <button onClick={toggleArtworkRequired} style={{ background: 'none', border: '1px solid #D8CFC0', color: NAVY, fontSize: '11px', fontWeight: 700, cursor: 'pointer', borderRadius: '6px', padding: '3px 9px' }}>
+                        {noArt ? '↩ 改回需要印刷' : '无需印刷 No artwork'}
+                      </button>
+                    </div>
                   </div>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     {noArt ? chip(true, '无需印刷 No artwork needed') : chip(artOk, `Artwork approved (${nApproved}/${its.length})`)}
-                    {chip(paid, 'Payment received')}
+                    {chip(paid, onAccount ? '月结 · 先做后付 (免付款)' : 'Payment received')}
                     {ready
                       ? <span style={{ fontSize: '12px', fontWeight: 700, color: '#166534' }}>→ Ready for production ✅</span>
                       : <span style={{ fontSize: '12px', fontWeight: 700, color: '#92400E' }}>→ Production locked 🔒</span>}
@@ -915,14 +963,18 @@ export default function AdminOrdersPage() {
                   {(() => {
                     const sd = item.stage_dates || {};
                     const rows = [
-                      { emoji: '🏭', label: '进入生产', at: sd.in_production },
-                      { emoji: '🚚', label: '已发货', at: sd.dispatched },
-                      { emoji: '📦', label: '已送达', at: sd.delivered },
+                      { emoji: '🏭', label: '进入生产', stage: 'in_production', at: sd.in_production },
+                      { emoji: '🚚', label: '已发货', stage: 'dispatched', at: sd.dispatched },
+                      { emoji: '📦', label: '已送达', stage: 'delivered', at: sd.delivered },
                     ];
                     return (
-                      <div style={{ marginTop: '6px', display: 'flex', gap: '14px', flexWrap: 'wrap', fontSize: '11px' }}>
+                      <div style={{ marginTop: '6px', display: 'flex', gap: '12px', flexWrap: 'wrap', fontSize: '11px', alignItems: 'center' }}>
                         {rows.map((r, k) => (
-                          <span key={k} style={{ color: r.at ? '#000' : '#B0AAA3', fontWeight: r.at ? 700 : 400 }}>{r.emoji} {r.label}: {r.at ? fmtDateTime(r.at) : '待定'}</span>
+                          <span key={k} style={{ display: 'inline-flex', gap: '4px', alignItems: 'center', color: '#000' }}>
+                            {r.emoji} {r.label}:
+                            <input type="datetime-local" defaultValue={toLocalInput(r.at)} onChange={e => saveItemStageDate(i, r.stage, e.target.value)}
+                              title="改日期" style={{ fontSize: '11px', padding: '1px 4px', border: '1px solid #E0DDD7', borderRadius: '5px', color: '#000' }} />
+                          </span>
                         ))}
                       </div>
                     );
