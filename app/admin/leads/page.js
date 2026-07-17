@@ -139,6 +139,17 @@ export default function AdminDealsPage() {
     await patch('status', { status: 'won' });
   }
 
+  async function deleteDeal() {
+    if (!selected) return;
+    const label = selected.kind === 'quote' ? '报价' : '询盘';
+    const who = selected.customer_company || selected.customer_name || '';
+    if (!confirm(`彻底删除这个${label}${who ? '（' + who + '）' : ''}？此操作不可恢复。`)) return;
+    const res = await fetch(`/api/admin/deals?kind=${selected.kind}&id=${encodeURIComponent(selected.id)}`, { method: 'DELETE' });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) { alert('删除失败: ' + (d.error || 'unknown')); return; }
+    setSelected(null); setDetail(null); fetchDeals();
+  }
+
   async function addActivity() {
     if (!detail?.company?.id || !actBody.trim()) return;
     setActSaving(true);
@@ -238,7 +249,10 @@ export default function AdminDealsPage() {
             <div style={{ background: '#fff', border: '1px solid #E0DDD7', borderRadius: '12px', padding: '20px', position: 'sticky', top: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><KindTag kind={selected.kind} />{detail?.record?.quote_type === 'indent' && <span style={{ background: '#7C2D12', color: '#fff', padding: '2px 8px', borderRadius: '5px', fontSize: '10px', fontWeight: 700, letterSpacing: '0.05em' }}>INDENT</span>}<StatusPill status={selected.status} /></div>
-                <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', fontSize: '20px', color: '#B0AAA3', cursor: 'pointer', lineHeight: 1 }}>×</button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <button onClick={deleteDeal} title="删除" style={{ background: 'none', border: '1px solid #E0C9C9', color: '#991B1B', fontSize: '12px', fontWeight: 700, cursor: 'pointer', borderRadius: '6px', padding: '4px 10px' }}>🗑 删除</button>
+                  <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', fontSize: '20px', color: '#B0AAA3', cursor: 'pointer', lineHeight: 1 }}>×</button>
+                </div>
               </div>
               <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '22px', color: NAVY, margin: '6px 0 2px' }}>{selected.customer_company || selected.customer_name || '(no name)'}</h2>
               <div style={{ color: '#7A7570', fontSize: '12px', marginBottom: '14px' }}>{selected.customer_name}{selected.customer_email ? ` · ${selected.customer_email}` : ''}</div>

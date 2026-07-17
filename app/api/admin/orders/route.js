@@ -294,3 +294,37 @@ export async function PATCH(request) {
     return Response.json({ error: error.message }, { status: 500 });
   }
 }
+
+// DELETE ?id=…  → permanently remove an order (used to clean up duplicates /
+// mistakes). Best-effort cleanup of related rows by order number so nothing is
+// left dangling. Bank transactions are NOT auto-reversed here — if the order was
+// paid/refunded, settle that first.
+export async function DELETE(request) {
+  const user = await getAdminUser(request);
+  if (!user) return unauthorized();
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    if (!id) return Response.json({ error: 'Missing order id' }, { status: 400 });
+    const db = sourcingDb();
+
+    const { data: order } = await db.from('orders').select('*').eq('id', id).single();
+    const nums = [order?.order_number, order?.invoice_number].filter(Boolean);
+
+    // Best-effort related cleanup (ignore missing tables / no rows).
+    if (nums.length) {
+      for (const t of ['artworks', 'order_documents', 'order_shipments']) {
+        try { await db.from(t).delete().in('order_number', nums); } catch (_) { /* ignore */ }
+      }
+      try { await db.from('factory_pos').delete().in('order_number', nums); } catch (_) { /* ignore */ }
+    }
+
+    const { error } = await db.from('orders').delete().eq('id', id);
+    if (error) return Response.json({ error: error.message }, { status: 500 });
+
+    try { await audit(db, user.email, 'order_delete', 'order', id, order || null, null); } catch (_) { /* ignore */ }
+    return Response.json({ success: true });
+  } catch (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+}

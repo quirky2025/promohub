@@ -1,5 +1,32 @@
 import { getAdminUser, unauthorized } from '@/lib/adminAuth';
 import { sourcingDb } from '@/lib/sourcingDb';
+import { generateFactoryPoPDF } from '@/lib/factoryPoDocPdf';
+import { Resend } from 'resend';
+import { quirkyEmail } from '@/lib/emailLayout';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Map a factory_pos row (+ joined factory) into the Factory PO PDF shape.
+function poPdfPayload(po) {
+  const f = po.factories || {};
+  return {
+    poNumber: po.po_number,
+    date: new Date(po.created_at || Date.now()).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' }),
+    ourRef: po.order_number || '',
+    supplier: {
+      name: f.name,
+      contact: f.contact_person,
+      phone: [f.phone, f.wechat ? `WeChat: ${f.wechat}` : null].filter(Boolean).join('  '),
+      address: f.address,
+    },
+    shipTo: { label: 'Our forwarder (EXW collection)', address: 'To be advised — please hold for collection and notify us when ready.' },
+    incoterm: 'EXW',
+    paymentTerms: f.payment_terms || '30% deposit, 70% before shipment',
+    items: [{ name: po.product_name || 'Product', spec: po.product_sku || '', qty: po.quantity, unitRmb: po.unit_price_rmb }],
+    charges: Number(po.extra_rmb) ? [{ label: 'Setup / tooling / sample', amountRmb: po.extra_rmb }] : [],
+    notes: po.notes || '',
+  };
+}
 
 // Factory PO (China procurement) + RMB payments (Dad's WeChat) + Dad-loan ledger.
 // FX convention: fx_rate = ¥ per A$1, so AUD = RMB / fx_rate.
@@ -70,6 +97,15 @@ export async function GET(request) {
   const orderNumber = searchParams.get('orderNumber');
   const db = sourcingDb();
   try {
+    // Factory PO PDF (inline). ?pdf=1&poId=…
+    if (searchParams.get('pdf')) {
+      const poId = searchParams.get('poId');
+      if (!poId) return Response.json({ error: 'poId required' }, { status: 400 });
+      const { data: po } = await db.from('factory_pos').select('*, factories(*)').eq('id', poId).single();
+      if (!po) return Response.json({ error: 'PO not found' }, { status: 404 });
+      const bytes = await generateFactoryPoPDF(poPdfPayload(po));
+      return new Response(Buffer.from(bytes), { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `inline; filename="PO_${po.po_number}.pdf"` } });
+    }
     if (searchParams.get('all')) return Response.json(await summary(db));
     if (!orderNumber) return Response.json({ error: 'orderNumber required' }, { status: 400 });
     return Response.json(await bundle(db, orderNumber));
@@ -116,6 +152,28 @@ export async function POST(request) {
       const { data, error } = await db.from('factory_pos').insert(row).select('*').single();
       if (error) return Response.json({ error: error.message }, { status: 500 });
       return Response.json({ po: data, ...(row.order_number ? await bundle(db, row.order_number) : {}) });
+    }
+
+    if (action === 'sendPO') {
+      if (!body.id) return Response.json({ error: 'id required' }, { status: 400 });
+      const { data: po } = await db.from('factory_pos').select('*, factories(*)').eq('id', body.id).single();
+      if (!po) return Response.json({ error: 'PO not found' }, { status: 404 });
+      const f = po.factories || {};
+      const to = (body.toOverride || f.email || '').trim();
+      if (!to.includes('@')) return Response.json({ error: '没有工厂邮箱。请到 工厂管理 给这家工厂填 Email，或手动填收件地址。' }, { status: 400 });
+      const bytes = await generateFactoryPoPDF(poPdfPayload(po));
+      const html = `
+        <p style="font-size:15px;margin:0 0 16px;color:#000;">Hi ${f.contact_person || 'there'},</p>
+        <p style="font-size:15px;line-height:1.6;margin:0 0 16px;color:#000;">Please find attached our Purchase Order <strong>${po.po_number}</strong> for <strong>${po.product_name || 'product'}</strong> (Qty ${po.quantity || ''}). Could you please confirm receipt and the expected completion date?</p>
+        <p style="font-size:14px;line-height:1.6;color:#000;margin:16px 0 0;">Thank you,<br>QuirkyPromo Sourcing · hello@quirkypromo.com.au</p>`;
+      await resend.emails.send({
+        from: 'QuirkyPromo <noreply@quirkypromo.com.au>', replyTo: 'hello@quirkypromo.com.au',
+        to: [to], subject: `Purchase Order ${po.po_number} — QuirkyPromo`,
+        html: quirkyEmail(html),
+        attachments: [{ filename: `PO_${po.po_number}.pdf`, content: Buffer.from(bytes).toString('base64') }],
+      });
+      try { await db.from('factory_pos').update({ status: po.status === 'draft' ? 'sent' : po.status, updated_at: new Date().toISOString() }).eq('id', po.id); } catch (_) { /* ignore */ }
+      return Response.json({ success: true, to, ...(po.order_number ? await bundle(db, po.order_number) : {}) });
     }
 
     if (action === 'deletePO') {
