@@ -467,6 +467,11 @@ export default function AdminOrdersPage() {
   }
 
   const fmt = v => v != null ? `$${Number(v).toFixed(2)}` : '—';
+  // Net order total = original total + settled adjustment (credit/balance, inc GST).
+  const netTotal = (o) => {
+    const adj = Math.round((o.adjustments || []).reduce((s, a) => s + (Number(a.amount) || 0), 0) * 1.1 * 100) / 100;
+    return (o.adjustment_settled_at && Math.abs(adj) >= 0.01) ? Math.round(((Number(o.total) || 0) + adj) * 100) / 100 : (Number(o.total) || 0);
+  };
   const fmtDate = d => d ? new Date(d).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: '2-digit' }) : null;
   const fmtDateTime = d => d ? new Date(d).toLocaleString('en-AU', { timeZone: 'Australia/Sydney', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : null;
 
@@ -541,7 +546,14 @@ export default function AdminOrdersPage() {
                       <td style={{ padding: '12px 16px', color: '#5A5550' }}>
                         {itemCount} item{itemCount !== 1 ? 's' : ''}
                       </td>
-                      <td style={{ padding: '12px 16px', color: NAVY, fontWeight: 700 }}>{fmt(order.total)}</td>
+                      <td style={{ padding: '12px 16px', color: NAVY, fontWeight: 700 }}>
+                        {netTotal(order) !== (Number(order.total) || 0) ? (
+                          <>
+                            <span style={{ textDecoration: 'line-through', color: '#B0AAA3', fontWeight: 400, fontSize: '11px' }}>{fmt(order.total)}</span>{' '}
+                            {fmt(netTotal(order))}
+                          </>
+                        ) : fmt(order.total)}
+                      </td>
                       <td style={{ padding: '12px 16px' }}>
                         <span style={{ background: pay.bg, color: pay.color, fontSize: '11px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px' }}>{pay.label}</span>
                       </td>
