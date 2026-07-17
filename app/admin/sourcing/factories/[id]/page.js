@@ -95,18 +95,30 @@ export default function FactoryDetailPage() {
         />
       )}
 
-      <h2 className="srcx-h1" style={{ fontSize: 19 }}>报价历史({quotes.length} 条)</h2>
+      <h2 className="srcx-h1" style={{ fontSize: 19 }}>产品列表({grouped.length} 个产品)</h2>
 
       {!grouped.length && (
-        <div className="srcx-empty">这家工厂还没有报价记录,点上方「+ 录入报价」</div>
+        <div className="srcx-empty">这家工厂还没有产品,点上方「+ 录入产品/报价」</div>
       )}
 
       {grouped.map(([product, list]) => (
         <div key={product} className="srcx-card">
-          <div className="srcx-row" style={{ justifyContent: 'space-between', marginBottom: 8 }}>
-            <h2 style={{ margin: 0 }}>
-              {product} <span className="srcx-muted">报过 {list.length} 次</span>
-            </h2>
+          <div className="srcx-row" style={{ justifyContent: 'space-between', marginBottom: 8, alignItems: 'flex-start' }}>
+            <div className="srcx-row" style={{ gap: 12, alignItems: 'flex-start' }}>
+              {list[0].image_url ? (
+                <img src={list[0].image_url} alt="" style={{ width: 54, height: 54, objectFit: 'cover', borderRadius: 8, border: '1px solid #e5e0d5' }} />
+              ) : (
+                <div style={{ width: 54, height: 54, borderRadius: 8, background: '#f4f0e8', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#000', fontSize: 11 }}>无图</div>
+              )}
+              <div>
+                <h2 style={{ margin: 0 }}>{product}</h2>
+                <div style={{ fontSize: 12, color: '#000', marginTop: 2 }}>
+                  {list[0].sku && <span style={{ fontFamily: 'monospace', color: '#1b2a4a', fontWeight: 700 }}>{list[0].sku}</span>}
+                  {list[0].status && list[0].status !== 'active' && <span> · {list[0].status}</span>}
+                  <span> · 报过 {list.length} 次</span>
+                </div>
+              </div>
+            </div>
             {list.length > 1 && (
               <Link
                 className="srcx-link"
@@ -177,7 +189,8 @@ function QuoteForm({ factoryId, names, freight, onSaved }) {
     printing_method: '', lead_time_days: '', exchange_rate: '',
     est_unit_weight_g: '', domestic_freight_rmb: '', notes: '',
     units_per_carton: '', carton_length_cm: '', carton_width_cm: '', carton_height_cm: '',
-    available_colours: '',
+    available_colours: '', image_url: '', status: 'active',
+    setup_cost_rmb: '', tooling_cost_rmb: '', sample_cost_rmb: '',
   });
   const [tiers, setTiers] = useState([{ quantity: '', rmb: '', aud: '' }]);
   const [saving, setSaving] = useState(false);
@@ -313,6 +326,25 @@ function QuoteForm({ factoryId, names, freight, onSaved }) {
         <div className="srcx-field">
           <label>每箱数量 *(算箱数/体积重)</label>
           <input type="number" value={head.units_per_carton} onChange={set('units_per_carton')} placeholder="如 60" />
+        </div>
+      </div>
+
+      <div className="srcx-grid srcx-grid-4" style={{ marginTop: 12 }}>
+        <div className="srcx-field">
+          <label>产品图片 URL</label>
+          <input value={head.image_url} onChange={set('image_url')} placeholder="图片链接(可后补)" />
+        </div>
+        <div className="srcx-field">
+          <label>开模费 Tooling (RMB)</label>
+          <input type="number" step="0.01" value={head.tooling_cost_rmb} onChange={set('tooling_cost_rmb')} />
+        </div>
+        <div className="srcx-field">
+          <label>版费 Setup (RMB)</label>
+          <input type="number" step="0.01" value={head.setup_cost_rmb} onChange={set('setup_cost_rmb')} />
+        </div>
+        <div className="srcx-field">
+          <label>样品费 Sample (RMB)</label>
+          <input type="number" step="0.01" value={head.sample_cost_rmb} onChange={set('sample_cost_rmb')} />
         </div>
       </div>
 

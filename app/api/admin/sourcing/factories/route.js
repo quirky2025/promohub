@@ -52,6 +52,7 @@ export async function POST(request) {
   }
   const payload = {
     name: body.name.trim(),
+    short_code: body.short_code?.trim().toUpperCase() || null,   // used to build product SKUs
     contact_person: body.contact_person?.trim() || null,
     wechat: body.wechat?.trim() || null,
     phone: body.phone?.trim() || null,
