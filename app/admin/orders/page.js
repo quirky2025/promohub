@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js';
 import Link from 'next/link';
 import OrderDocuments from '@/components/OrderDocuments';
 import FactoryProcurement from '@/components/FactoryProcurement';
+import ProductSupplierPO from '@/components/ProductSupplierPO';
 import { tierMargin, SHIPPING, GST } from '@/lib/pricing';
 
 const supabase = createClient(
@@ -1099,6 +1100,10 @@ export default function AdminOrdersPage() {
                       </div>
                     )}
                   </div>
+                  {/* per-product Supplier PO (local suppliers → same purchase_orders as Production) */}
+                  {selected.order_type !== 'indent' && (
+                    <ProductSupplierPO orderId={selected.id} orderNumber={selected.order_number || selected.invoice_number} itemIndex={i} productName={name} productSku={sku} />
+                  )}
                 </div>
                 );
               })}
