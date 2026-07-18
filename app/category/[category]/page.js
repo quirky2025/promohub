@@ -45,6 +45,7 @@ export default function CategoryPage() {
   const categoryName = titleFromSlug(category);
   const categoryKey = (category || '').toLowerCase();
 
+  const [banner, setBanner] = useState(null);   // hero image set in admin → Catalog → Banners
   const [subcategories, setSubcategories] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const [displayed, setDisplayed] = useState([]);
@@ -58,6 +59,22 @@ export default function CategoryPage() {
   const [minQtyFilter, setMinQtyFilter] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [page, setPage] = useState(0);
+
+  // Hero banner for this category (admin → Catalog → Banners). None → stays navy.
+  useEffect(() => {
+    if (!category) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from('category_banners').select('*')
+          .eq('category_slug', String(category).toLowerCase())
+          .maybeSingle();
+        if (!cancelled) setBanner(data || null);
+      } catch { /* table may not exist yet — keep navy */ }
+    })();
+    return () => { cancelled = true; };
+  }, [category]);
 
   // Fetch subcategories + first batch of products
   useEffect(() => {
@@ -167,13 +184,17 @@ export default function CategoryPage() {
       </div>
 
       {/* HEADER */}
-      <div className="qp-padx" style={{ background: NAVY, padding: '40px 40px 48px' }}>
+      {/* Hero — banner image set in admin → Catalog → Banners; falls back to navy. */}
+      <div className="qp-padx" style={{
+        background: banner?.image_url ? `linear-gradient(rgba(27,42,74,${(banner.overlay_pct ?? 45) / 100}), rgba(27,42,74,${(banner.overlay_pct ?? 45) / 100})), url(${banner.image_url}) center/cover no-repeat` : NAVY,
+        padding: '40px 40px 48px',
+      }}>
         <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-          <h1 className="qp-cat-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '42px', fontWeight: 600, margin: '0 0 10px', color: '#fff' }}>
-            Custom Printed {categoryName}
+          <h1 className="qp-cat-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '42px', fontWeight: 600, margin: '0 0 10px', color: '#fff', textShadow: banner?.image_url ? '0 2px 12px rgba(0,0,0,.45)' : 'none' }}>
+            {banner?.headline || `Custom Printed ${categoryName}`}
           </h1>
-          <p style={{ color: 'rgba(255,255,255,.65)', margin: '0', fontSize: '15px' }}>
-            {total} products · {subcategories.length} subcategories · Australia-wide delivery
+          <p style={{ color: 'rgba(255,255,255,.8)', margin: '0', fontSize: '15px', textShadow: banner?.image_url ? '0 1px 8px rgba(0,0,0,.5)' : 'none' }}>
+            {banner?.subheadline || `${total} products · ${subcategories.length} subcategories · Australia-wide delivery`}
           </p>
         </div>
       </div>
