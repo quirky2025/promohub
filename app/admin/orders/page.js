@@ -81,6 +81,7 @@ export default function AdminOrdersPage() {
   const [deliveryAddr, setDeliveryAddr] = useState('');
   const [deliveryList, setDeliveryList] = useState(['']);   // order-level delivery addresses (first = primary)
   const [acctAddrBusy, setAcctAddrBusy] = useState(false);
+  const [estDispatch, setEstDispatch] = useState('');       // estimated dispatch/delivery date
   const [carrier, setCarrier] = useState('');
   const [saving, setSaving]           = useState(false);
   const [shipments, setShipments]     = useState([]);
@@ -146,6 +147,17 @@ export default function AdminOrdersPage() {
 
   // Per-order (flexible, Lily decides case by case): allow production without
   // prepayment — e.g. monthly-account customers, or a one-off you trust.
+  async function saveEstDispatch(val) {
+    if (!selected) return;
+    const v = val || null;
+    await fetch('/api/admin/orders/update', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: selected.id, estimated_dispatch_date: v }),
+    });
+    setSelected(prev => ({ ...prev, estimated_dispatch_date: v }));
+    setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, estimated_dispatch_date: v } : o));
+  }
+
   async function toggleOnAccount() {
     if (!selected) return;
     const val = !(selected.pay_on_account === true);
@@ -494,6 +506,7 @@ export default function AdminOrdersPage() {
     setTrackingNumber(order.tracking_number || '');
     setTrackingUrl(order.tracking_url || '');
     setDeliveryAddr(order.delivery_address || '');
+    setEstDispatch(order.estimated_dispatch_date || '');
     {
       const list = Array.isArray(order.delivery_addresses) && order.delivery_addresses.length
         ? order.delivery_addresses
@@ -718,6 +731,28 @@ export default function AdminOrdersPage() {
                 </div>
               </div>
             </div>
+
+            {/* ESTIMATED DISPATCH / DELIVERY DATE — amber as it nears, red when overdue */}
+            {(() => {
+              const ed = selected.estimated_dispatch_date;
+              const done = ['dispatched', 'delivered', 'completed', 'cancelled'].includes(selected.status);
+              let color = '#0C447C', bg = '#EAF2FB', note = '';
+              if (ed && !done) {
+                const days = Math.ceil((new Date(ed).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86400000);
+                if (days < 0) { color = '#991B1B'; bg = '#FEE2E2'; note = `⚠ 已逾期 ${-days} 天`; }
+                else if (days <= 3) { color = '#92400E'; bg = '#FEF3C7'; note = `⏳ 还有 ${days} 天`; }
+                else { color = '#166534'; bg = '#F0FDF4'; note = `还有 ${days} 天`; }
+              }
+              return (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', background: bg, border: `1px solid ${color}33`, borderRadius: '10px', padding: '10px 14px', marginBottom: '16px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 800, color }}>🗓 预计发货/交货 Est. dispatch</span>
+                  <input type="date" value={estDispatch} onChange={e => { setEstDispatch(e.target.value); saveEstDispatch(e.target.value); }}
+                    style={{ padding: '5px 8px', border: `1px solid ${color}55`, borderRadius: '7px', fontSize: '13px', color: '#000', fontWeight: 700 }} />
+                  {note && <span style={{ fontSize: '13px', fontWeight: 800, color }}>{note}</span>}
+                  {!ed && <span style={{ fontSize: '11px', color: '#000' }}>填工厂给的交期</span>}
+                </div>
+              );
+            })()}
 
             {/* DELIVERY ADDRESS — order level, default from account, editable, add more */}
             <div style={{ background: '#FBFAF8', border: '1px solid #E0DDD7', borderRadius: '10px', padding: '12px 14px', marginBottom: '16px' }}>
