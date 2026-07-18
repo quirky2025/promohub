@@ -136,6 +136,9 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
 
 - 2026-07-17 DONE — 计价 ③ **手填国际运费**:③ 加了「手填 Manual · 货代一口价」输入框(不走引擎,填 ¥就自动选中 → ⑤到岸 ⑦客户价出数)。¥185 = DHL HK 国际运费,放这里。File: `app/admin/sourcing/costing/page.js`。**PUSH** 它。¥185 是国际段(不是 ② 中国端)—— Parcelle 用手填 185 即可。
 
+- 2026-07-17 DONE — 统一 PO 总列表(架构①):新页 `/admin/pos`「全部 PO」(Production 导航加入口)。合并 purchase_orders(LOCAL/AUD)+ factory_pos(INDENT/RMB),打 LOCAL/INDENT 标签,筛选+搜索,点订单号跳订单(deep-link)。读两表不迁移。无 SQL。Files: `app/admin/pos/page.js`, `app/admin/production/page.js`(nav)。**PUSH**。
+  架构 TODO:② 本地订单每产品加 Supplier PO 块(接 purchase_orders)③ 订单文档区理顺(PO/供应商发票/客户发票/artwork/产品图)。
+
 - 2026-07-17 FIX(持久化根因)+ 双日期:
   - **月结/无需印刷/status 一刷新就回退** 根因:前端 `supabase.from('orders').update()` 被 RLS 悄悄挡掉(或列没跑 SQL)。改成走 **/api/admin/orders/update 服务端(service key)**,失败弹红字(不再默默失败)。update route 允许字段加:artwork_required, status, required_date + 之前的。toggleArtworkRequired/toggleOnAccount/updateStatus 全改走服务端 persistOrderField。⚠️ 仍需跑 `orders_artwork_required.sql`+`orders_pay_on_account.sql`+`orders_step_dates.sql` 否则列不存在会弹错。
   - **双关键日期(醒目,本地+China 都有)**:订单顶部一排两大卡:🎯 **客户要求日期 REQUIRED(红框死线)** + 🗓 **预计发货/交货 EST. DISPATCH**(变色)。预计晚于要求 → 红色「⚠ 会迟」警告。⚠️ RUN SQL `db/orders_required_date.sql` + `db/orders_estimated_dispatch.sql`。Files: 两个 sql, update route, orders page。**PUSH**.
