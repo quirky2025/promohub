@@ -14,6 +14,7 @@ const NAV = [
   { label: 'Invoices', href: '/admin/invoices' },
   { label: 'Production', href: '/admin/production' },
   { label: 'Suppliers', href: '/admin/suppliers' },
+  { label: '全部 PO', href: '/admin/pos' },
   { label: 'Products', href: '/admin/products' },
 ];
 
