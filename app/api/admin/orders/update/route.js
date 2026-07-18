@@ -15,6 +15,7 @@ export async function PATCH(request) {
       'pay_on_account',                         // monthly account → production without prepayment
       'artwork_required',                        // no-artwork orders (INDENT / no print)
       'estimated_dispatch_date',                // est. dispatch/delivery date (factory lead time)
+      'required_date',                           // customer hard deadline
       'status', 'production_started_at',         // status changes via service key (client RLS-safe)
       'created_at', 'artwork_sent_at', 'artwork_approved_at', 'production_started_at', 'dispatched_at', 'delivered_at', // editable step dates (historical backfill)
     ]) {

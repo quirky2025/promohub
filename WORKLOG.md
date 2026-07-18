@@ -136,7 +136,11 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
 
 - 2026-07-17 DONE — 计价 ③ **手填国际运费**:③ 加了「手填 Manual · 货代一口价」输入框(不走引擎,填 ¥就自动选中 → ⑤到岸 ⑦客户价出数)。¥185 = DHL HK 国际运费,放这里。File: `app/admin/sourcing/costing/page.js`。**PUSH** 它。¥185 是国际段(不是 ② 中国端)—— Parcelle 用手填 185 即可。
 
-- 2026-07-17 DONE — 订单预计发货/交货日期:⚠️ RUN SQL `db/orders_estimated_dispatch.sql`(orders += estimated_dispatch_date date)。订单顶部(客户信息下)一条 🗓 预计发货/交货,填工厂交期,改即存。变色:>3天绿、≤3天琥珀、逾期(未发货)红。update route 加 estimated_dispatch_date。Files: `db/orders_estimated_dispatch.sql`, `app/api/admin/orders/update/route.js`, `app/admin/orders/page.js`. **PUSH**. TODO 剩:Dashboard「⚠️交货提醒」高亮列表(列快到期/逾期单)+ 供应商付款字段。
+- 2026-07-17 FIX(持久化根因)+ 双日期:
+  - **月结/无需印刷/status 一刷新就回退** 根因:前端 `supabase.from('orders').update()` 被 RLS 悄悄挡掉(或列没跑 SQL)。改成走 **/api/admin/orders/update 服务端(service key)**,失败弹红字(不再默默失败)。update route 允许字段加:artwork_required, status, required_date + 之前的。toggleArtworkRequired/toggleOnAccount/updateStatus 全改走服务端 persistOrderField。⚠️ 仍需跑 `orders_artwork_required.sql`+`orders_pay_on_account.sql`+`orders_step_dates.sql` 否则列不存在会弹错。
+  - **双关键日期(醒目,本地+China 都有)**:订单顶部一排两大卡:🎯 **客户要求日期 REQUIRED(红框死线)** + 🗓 **预计发货/交货 EST. DISPATCH**(变色)。预计晚于要求 → 红色「⚠ 会迟」警告。⚠️ RUN SQL `db/orders_required_date.sql` + `db/orders_estimated_dispatch.sql`。Files: 两个 sql, update route, orders page。**PUSH**.
+
+- 2026-07-17 DONE — 订单预计发货/交货日期(旧,已并入上面双日期):⚠️ RUN SQL `db/orders_estimated_dispatch.sql`(orders += estimated_dispatch_date date)。订单顶部(客户信息下)一条 🗓 预计发货/交货,填工厂交期,改即存。变色:>3天绿、≤3天琥珀、逾期(未发货)红。update route 加 estimated_dispatch_date。Files: `db/orders_estimated_dispatch.sql`, `app/api/admin/orders/update/route.js`, `app/admin/orders/page.js`. **PUSH**. TODO 剩:Dashboard「⚠️交货提醒」高亮列表(列快到期/逾期单)+ 供应商付款字段。
 
 - 2026-07-17 DONE — 货代管理:Sourcing 新 tab「货代管理」。⚠️ RUN SQL `db/forwarders.sql`(新表 forwarders + 银行字段;并 seed 了 Zhejiang Bing Supply Chain / Bank of China Yiwu / SWIFT BKCHCNBJ92H / AUD 354577334824 / 运费,幂等)。CRUD:名称/短代码/联系人/微信/电话/Email + 银行(Bank/支行/SWIFT/账号/币种/地址/条款/备注)。Files: `db/forwarders.sql`, `app/api/admin/sourcing/forwarders/route.js`, `app/admin/sourcing/forwarders/page.js`, `app/admin/sourcing/layout.js`(+tab)。**PUSH** 全部。NOTE:以后付货代运费,把 forwarder_payments 关联到 forwarders(现在 Finance 货代付款是 free-text name)—— 待办。
 
