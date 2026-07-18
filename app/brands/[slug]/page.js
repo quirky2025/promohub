@@ -5,6 +5,7 @@ import { MARGIN } from '@/lib/pricing';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { slugify } from '@/lib/slug';
 import ProductImg from '@/components/ProductImg';
 
 const NAVY = '#1B2A4A';
@@ -32,6 +33,7 @@ export default function BrandPage() {
 
   const [allProducts, setAllProducts] = useState([]);
   const [brandName, setBrandName] = useState('');
+  const [banner, setBanner] = useState(null);   // hero image set in admin → Catalog → Banners
   const [displayed, setDisplayed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -65,6 +67,26 @@ export default function BrandPage() {
     }
     if (slug) fetchData();
   }, [slug]);
+
+  // Hero banner (admin → Catalog → Banners → 品牌页). page_key = slugify(brand name),
+  // same rule the admin list uses. None set → hero stays navy.
+  useEffect(() => {
+    if (!brandName) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await supabase
+          .from('page_banners').select('*')
+          .eq('page_type', 'brand')
+          .eq('page_key', slugify(brandName))
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true })
+          .limit(1);
+        if (!cancelled) setBanner(data?.[0] || null);
+      } catch { /* table may not exist yet — keep navy */ }
+    })();
+    return () => { cancelled = true; };
+  }, [brandName]);
 
   function getLowestPrice(product) {
     if (!product.pricing_tiers?.length) return 0;
@@ -135,14 +157,20 @@ export default function BrandPage() {
         </div>
       </div>
 
-      <div style={{ background: NAVY, padding: '56px 40px', textAlign: 'center' }}>
+      {/* Hero — banner image set in admin → Catalog → Banners; falls back to navy. */}
+      <div style={{
+        background: banner?.image_url
+          ? `linear-gradient(rgba(27,42,74,${(banner.overlay_pct ?? 45) / 100}), rgba(27,42,74,${(banner.overlay_pct ?? 45) / 100})), url(${banner.image_url}) center/cover no-repeat`
+          : NAVY,
+        padding: '56px 40px', textAlign: 'center',
+      }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div style={{ display: 'inline-block', background: `${GOLD}25`, color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '5px 14px', borderRadius: '20px', marginBottom: '18px' }}>Brand</div>
-          <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '46px', fontWeight: 600, color: '#fff', margin: '0 0 14px', lineHeight: 1.1, textTransform: 'capitalize' }}>
-            {brandName}
+          <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '46px', fontWeight: 600, color: '#fff', margin: '0 0 14px', lineHeight: 1.1, textTransform: 'capitalize', textShadow: banner?.image_url ? '0 2px 12px rgba(0,0,0,.45)' : 'none' }}>
+            {banner?.headline || brandName}
           </h1>
-          <p style={{ fontSize: '16px', color: 'rgba(255,255,255,.75)', lineHeight: 1.7, margin: 0 }}>
-            Branded {brandName} promotional products, ready to customise with your logo.
+          <p style={{ fontSize: '16px', color: 'rgba(255,255,255,.75)', lineHeight: 1.7, margin: 0, textShadow: banner?.image_url ? '0 1px 8px rgba(0,0,0,.5)' : 'none' }}>
+            {banner?.subheadline || `Branded ${brandName} promotional products, ready to customise with your logo.`}
           </p>
         </div>
       </div>

@@ -14,7 +14,8 @@ const MAX_W = 1920;
 const QUALITY = 0.82;
 
 const TABS = [
-  { key: 'category', label: '分类页', path: (s) => `/category/${s}` },
+  // 分类页的 key = url_pages.slug,「看页面」直接打开客户真实访问的 SEO 链接(如 /custom-bags-australia)
+  { key: 'category', label: '分类页', path: (s) => `/${s}` },
   { key: 'brand', label: '品牌页', path: (s) => `/brands/${s}` },
   { key: 'collection', label: '系列页', path: (s) => `/collections/${s}` },
   { key: 'home', label: '首页轮播', path: () => `/` },
@@ -54,10 +55,34 @@ export default function BannersPage() {
     setRows(d.banners || []);
   }, []);
 
-  // Build the list of pages for the current tab, from real product data.
+  // Build the list of pages for the current tab.
+  // 分类 tab:从 url_pages(status='live')取 —— 这才是客户实际看到的页面清单,
+  // page_key 直接用 url_pages.slug,和前台一一对应(不再用 products.category 的历史值)。
   const loadKeys = useCallback(async (which) => {
     if (which === 'home') { setKeys([]); return; }
-    const col = which === 'category' ? 'category' : which === 'brand' ? 'brand' : 'collection';
+    if (which === 'category') {
+      const { data } = await supabase
+        .from('url_pages')
+        .select('slug, nav_label, h1, page_type, breadcrumb_parent')
+        .eq('status', 'live');
+      const rows = data || [];
+      const label = (r) => r.nav_label || r.h1 || r.slug;
+      // 主分类在前,各自的子分类页跟在后面(缩进显示)
+      const tops = rows
+        .filter(r => r.page_type === 'product_category' && !r.breadcrumb_parent)
+        .sort((a, b) => label(a).localeCompare(label(b)));
+      const out = [];
+      tops.forEach(top => {
+        out.push({ name: label(top), slug: top.slug });
+        rows
+          .filter(r => r.breadcrumb_parent === top.slug && r.page_type !== 'collection')
+          .sort((a, b) => label(a).localeCompare(label(b)))
+          .forEach(child => out.push({ name: `└ ${label(child)}`, slug: child.slug }));
+      });
+      setKeys(out);
+      return;
+    }
+    const col = which === 'brand' ? 'brand' : 'collection';
     const { data } = await supabase.from('products').select(col).eq('is_published', true);
     const names = new Set();
     (data || []).forEach(p => {

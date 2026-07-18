@@ -12,6 +12,7 @@ import {
   getAllLivePageSlugs,
 } from '@/lib/urlPages';
 import { absoluteUrl } from '@/lib/siteUrl';
+import { getPageBanner } from '@/lib/pageBanners';
 import { calculatorFromPrice } from '@/lib/decorationPricing';
 import CategoryFilter from '@/components/CategoryFilter';
 import SeoContent from '@/components/SeoContent';
@@ -56,6 +57,9 @@ export default async function UrlPage({ params }) {
 
   if (!urlPage) notFound();
 
+  // Hero banner set in admin → Catalog → Banners (page_key = this page's slug). Null → navy default.
+  const banner = await getPageBanner('category', slug);
+
   const filterable = urlPage.product_filter?.type === 'category' || urlPage.product_filter?.type === 'subcategory';
   const { products, count, error, unsupported } = await getProductsForUrlPage(urlPage, filterable ? 1000 : 96);
   // 只把筛选+卡片真正用到的精简字段传给客户端(砍掉 product_colours 图数组 / pricing_tiers / decoration_options),
@@ -82,7 +86,7 @@ export default async function UrlPage({ params }) {
   return (
     <main style={{ minHeight: '100vh', background: BG, color: '#000' }}>
       <Breadcrumb urlPage={urlPage} />
-      <Hero urlPage={urlPage} productCount={productCount} />
+      <Hero urlPage={urlPage} productCount={productCount} banner={banner} />
 
       {childPages.length > 0 && (
         <SubcategorySection childPages={childPages} />
@@ -223,21 +227,27 @@ function SubcategorySection({ childPages }) {
   );
 }
 
-function Hero({ urlPage, productCount }) {
-  const intro = urlPage.seo_intro || urlPage.meta_description || '';
+function Hero({ urlPage, productCount, banner }) {
+  const intro = banner?.subheadline || urlPage.seo_intro || urlPage.meta_description || '';
+  // Banner image from admin → Catalog → Banners, with navy overlay for text legibility. No banner → navy.
+  const hasImage = Boolean(banner?.image_url);
+  const overlay = (banner?.overlay_pct ?? 45) / 100;
+  const background = hasImage
+    ? `linear-gradient(rgba(27,42,74,${overlay}), rgba(27,42,74,${overlay})), url(${banner.image_url}) center/cover no-repeat`
+    : NAVY;
 
   return (
-    <section style={{ background: NAVY, padding: '54px 40px 58px' }}>
+    <section style={{ background, padding: '54px 40px 58px' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         <div style={{ maxWidth: '820px' }}>
           <div style={{ display: 'inline-block', background: `${GOLD}25`, color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '1.4px', textTransform: 'uppercase', padding: '5px 13px', borderRadius: '20px', marginBottom: '18px' }}>
             {pageTypeLabel(urlPage)}
           </div>
-          <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '48px', lineHeight: 1.08, color: '#fff', fontWeight: 600, margin: '0 0 16px' }}>
-            {urlPage.h1 || urlPage.nav_label}
+          <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '48px', lineHeight: 1.08, color: '#fff', fontWeight: 600, margin: '0 0 16px', textShadow: hasImage ? '0 2px 12px rgba(0,0,0,.45)' : 'none' }}>
+            {banner?.headline || urlPage.h1 || urlPage.nav_label}
           </h1>
           {intro && (
-            <p style={{ color: 'rgba(255,255,255,.76)', fontSize: '16px', lineHeight: 1.75, margin: '0 0 22px', maxWidth: '780px' }}>
+            <p style={{ color: 'rgba(255,255,255,.76)', fontSize: '16px', lineHeight: 1.75, margin: '0 0 22px', maxWidth: '780px', textShadow: hasImage ? '0 1px 8px rgba(0,0,0,.5)' : 'none' }}>
               {intro}
             </p>
           )}

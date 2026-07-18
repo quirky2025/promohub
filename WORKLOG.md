@@ -5,6 +5,24 @@
 
 ---
 
+## SESSION 2026-07-18 — admin counts + category truth + banner keys (per HANDOVER-CATEGORIES.md §4)
+
+**DECISION (Lily):** Option A — admin follows the live site. Category dropdowns read from live `url_pages`; legacy values (Business/Print/Personal/Promotion/Leisure…) shown in a separate "Legacy" group. Data cleanup (Option B) deferred.
+
+**CODE CHANGED — needs PUSH:**
+- `app/api/admin/products/route.js` — exact `count:'exact', head:true` tab counts (search/category filters applied to counts too); server-side `.range()` pagination (no more `.limit(3000)` truncation); "not published" now includes NULLs.
+- `app/api/admin/categories/route.js` (NEW) — categories/subcategories from live `url_pages.product_filter`; legacy list from paged scan of `products.category`.
+- `app/admin/products/page.js` — tabs use API counts; server pagination; category/subcategory dropdowns follow live site (+ legacy group/option); save/load failures now `alert()`.
+- `app/admin/banners/page.js` — 分类 tab keys now from `url_pages` (status='live'), `page_key = url_pages.slug`, "看页面" opens the real SEO URL `/{slug}`; parents listed with children indented.
+- `lib/pageBanners.js` (NEW) — shared server-side banner fetch.
+- `app/[slug]/page.js` — SEO category pages' hero now shows `page_banners` (page_type='category', page_key=slug). NOTE: ISR revalidate=300 → banner changes appear within ~5 min.
+- `app/category/[category]/page.js` — banner key unified to `url_pages.slug` (no duplicate records between old/new routes).
+- `app/brands/[slug]/page.js` + `app/collections/[slug]/page.js` — heroes now display `page_banners` (previously save-only).
+
+**SQL:** `db/page_banners.sql` must be RUN if not already (if-not-exists, safe to re-run). Old `db/category_banners.sql` remains obsolete — do NOT run.
+
+All 9 files passed esbuild syntax check.
+
 ## KEY FACTS / DECISIONS (read me first)
 
 - **Order/PO numbering (NEW, unified):** `OC{FY}{NNNN}` for orders, `PO{FY}{NNNN}` for supplier POs.
@@ -135,6 +153,11 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
   - FIX (Lily, Ian 多产品): 生产/发货/送达每个产品时间不同 → 从**订单级时间线拿掉**这三步(订单级只留 下单/印刷稿),改成**每个产品下面**显示 进入生产/已发货/已送达 的日期。item-status route 现在给 `item.stage_dates[stage]=now` 盖时间戳(存 items jsonb,无需 SQL)。点每个产品的阶段按钮就记该产品的日期。Files: `app/api/admin/orders/item-status/route.js`, `app/admin/orders/page.js`.
 
 - 2026-07-17 DONE — 计价 ③ **手填国际运费**:③ 加了「手填 Manual · 货代一口价」输入框(不走引擎,填 ¥就自动选中 → ⑤到岸 ⑦客户价出数)。¥185 = DHL HK 国际运费,放这里。File: `app/admin/sourcing/costing/page.js`。**PUSH** 它。¥185 是国际段(不是 ② 中国端)—— Parcelle 用手填 185 即可。
+
+- 2026-07-18 运费统一核对(P0/P1)+ 设计边界记录:
+  - **唯一漏网** `lib/cart.js` 之前硬写 `SHIPPING = 30`(+ 重复 MARGIN/GST/SETUP_FEE),已改成 `import { SHIPPING, GST } from './pricing'`(=**$25/产品/地址**),calcGrand 每产品 $25。**PUSH** `lib/cart.js`。
+  - 其余全链路早已一致(核对过):app/cart(SHIPPING×产品数)· place-order · 订单 PDF/发票(用订单存的 shipping)· FAQ#12 & 运费问答 · PDP 价格区 & USP 图标条($25/item)· /sales-terms($25 per item, per domestic address)。/refund-return 不写具体金额。全库 grep 30/flat shipping 已无(除 PDF 排版 y-=30 无关)。
+  - **⚠️ 设计边界(记下来别忘)**:运费模型 = **$25 × 产品数 × 收货地址数**。但**公开购物车/结账目前是"单收货地址"**(= 产品数 × $25,一个地址)。"× 多地址"只在**后台订单级**用每产品多包裹(parcels)实现。若将来要让**公开结账也支持一单多地址 × $25**,是一个独立的新功能(购物车要能拆地址),不在本次统一范围内。pricing.js SHIPPING 是唯一来源。
 
 - 2026-07-17 DONE — 架构②③(PO/发票统一):
   - **①改**:不做单独「全部 PO」页(Lily 要在原表)。改成:Production 表**内联显示 China 工厂 PO**(标 INDENT,¥金额),和本地 PO 同表。factory_pos 按 order_number 归到对应订单行。INDENT 行的 Supplier Invoice 列也能 +发票号/📎传文件(写 factory_pos，action=setInvoice)。Files: production/page.js, factory-po route(setInvoice)。(单独 /admin/pos 页留着但没入口。)

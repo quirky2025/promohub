@@ -61,22 +61,33 @@ export default function CategoryPage() {
   const [page, setPage] = useState(0);
 
   // Hero banner for this category (admin → Catalog → Banners). None → stays navy.
+  // Unified key rule: page_key = url_pages.slug (same record as the SEO page /custom-xxx-australia
+  // and the admin Banners list), so one category never has two banner records.
   useEffect(() => {
     if (!category) return;
     let cancelled = false;
     (async () => {
       try {
+        const { data: pageRows } = await supabase
+          .from('url_pages')
+          .select('slug')
+          .eq('status', 'live')
+          .eq('product_filter->>type', 'category')
+          .ilike('product_filter->>category', categoryName)
+          .limit(1);
+        const key = pageRows?.[0]?.slug || String(category).toLowerCase();
         const { data } = await supabase
           .from('page_banners').select('*')
           .eq('page_type', 'category')
-          .eq('page_key', String(category).toLowerCase())
+          .eq('page_key', key)
           .eq('is_active', true)
-          .maybeSingle();
-        if (!cancelled) setBanner(data || null);
+          .order('sort_order', { ascending: true })
+          .limit(1);
+        if (!cancelled) setBanner(data?.[0] || null);
       } catch { /* table may not exist yet — keep navy */ }
     })();
     return () => { cancelled = true; };
-  }, [category]);
+  }, [category, categoryName]);
 
   // Fetch subcategories + first batch of products
   useEffect(() => {
