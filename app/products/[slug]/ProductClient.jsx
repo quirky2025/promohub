@@ -905,18 +905,22 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                 const img = getSimilarImage(p);
                 const price = getSimilarLowestPrice(p);
                 return (
-                  <Link key={p.id} href={`/products/${p.slug}`} style={{ textDecoration: 'none' }}>
-                    <div style={{ background: '#ffffff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', transition: 'box-shadow .2s, transform .2s' }}
+                  <Link key={p.id} href={`/products/${p.slug}`} style={{ textDecoration: 'none', display: 'block', height: '100%' }}>
+                    <div style={{ background: '#ffffff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E0DDD7', transition: 'box-shadow .2s, transform .2s', display: 'flex', flexDirection: 'column', height: '100%' }}
                       onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,.1)'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
                       onMouseLeave={e => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}
                     >
-                      <div style={{ height: '180px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px' }}>
+                      <div style={{ height: '180px', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px', flexShrink: 0 }}>
                         {img ? <ProductImg src={img} alt={`${p.name} with logo`} size="list" style={{ width: '100%', height: '100%', objectFit: 'contain' }} /> : <div style={{ fontSize: '32px', color: '#000' }}>📦</div>}
                       </div>
-                      <div style={{ padding: '14px 16px' }}>
+                      {/* flex column + marginTop:auto pins the price/qty row to the bottom, so
+                          cards line up even when titles wrap to 2 lines or a price is missing. */}
+                      <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', flex: 1 }}>
                         <div style={{ fontFamily: '"DM Sans", sans-serif', fontSize: '14px', fontWeight: 600, color: NAVY, marginBottom: '8px', lineHeight: '1.4' }}>{p.name}</div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          {price > 0 && (<div><div style={{ fontSize: '11px', color: '#000' }}>As low as</div><div style={{ fontSize: '16px', fontWeight: 400, color: GOLD }}>${price.toFixed(2)}</div></div>)}
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto' }}>
+                          {price > 0
+                            ? (<div><div style={{ fontSize: '11px', color: '#000' }}>As low as</div><div style={{ fontSize: '16px', fontWeight: 400, color: GOLD }}>${price.toFixed(2)}</div></div>)
+                            : (<div aria-hidden="true" />)}
                           <div style={{ textAlign: 'right' }}><div style={{ fontSize: '11px', color: '#000' }}>Min Qty</div><div style={{ fontSize: '16px', fontWeight: 400, color: NAVY }}>{p.min_qty}</div></div>
                         </div>
                       </div>
