@@ -155,6 +155,18 @@ export async function POST(request) {
       return Response.json({ po: data, ...(row.order_number ? await bundle(db, row.order_number) : {}) });
     }
 
+    // Lightweight: set just the factory-invoice number / file (used from the
+    // Production table's INDENT row, without touching the rest of the PO).
+    if (action === 'setInvoice') {
+      if (!body.id) return Response.json({ error: 'id required' }, { status: 400 });
+      const upd = { updated_at: new Date().toISOString() };
+      if (body.factoryInvoiceNumber !== undefined) upd.factory_invoice_number = text(body.factoryInvoiceNumber);
+      if (body.factoryInvoiceUrl !== undefined) upd.factory_invoice_url = text(body.factoryInvoiceUrl);
+      const { error } = await db.from('factory_pos').update(upd).eq('id', body.id);
+      if (error) return Response.json({ error: error.message }, { status: 500 });
+      return Response.json({ success: true });
+    }
+
     if (action === 'sendPO') {
       if (!body.id) return Response.json({ error: 'id required' }, { status: 400 });
       const { data: po } = await db.from('factory_pos').select('*, factories(*)').eq('id', body.id).single();
