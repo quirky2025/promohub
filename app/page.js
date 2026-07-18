@@ -26,7 +26,6 @@ const BRANDS_SHOP = [
   ['Pierre Cardin', '/brands/pierre-cardin', '/brands/pierre-cardin.jpg'],
   ['CamelBak', '/brands/camelbak', '/brands/camelbak.svg'],
 ];
-const NEW_ARRIVAL_SLUGS = ['aura-vacuum-bottle-1l', 'callahan-cooler-bag', 'archer-galileo-daily-backpack', 'cross-calais-ballpoint-pen'];
 const HELP = [
   ['Prices shown ex GST', 'Item price only'], ['Local stock options', 'Stock confirmed before order'],
   ['Branding options available', 'Print, embroidery, engraving'], ['Artwork approval before production', 'You sign off first'],
@@ -60,16 +59,29 @@ const btn = (bg, color, brd) => ({ display: 'inline-flex', alignItems: 'center',
 
 export const revalidate = 600;
 
+// Homepage "New arrivals" is now AUTOMATIC: it shows the 4 most recently added
+// products that are ticked "✨ New Arrival" in admin → Products (is_new_arrival)
+// and published. Tick/untick in admin — no code change needed.
 async function getNewArrivals() {
+  const cols = 'id, name, slug, product_colours(images, sort_order), pricing_tiers(min_qty, base_price)';
   try {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('products')
-      .select('id, name, slug, product_colours(images, sort_order), pricing_tiers(min_qty, base_price)')
-      .in('slug', NEW_ARRIVAL_SLUGS)
-      .eq('is_published', true);
-    if (error || !data) return [];
-    const order = new Map(NEW_ARRIVAL_SLUGS.map((sl, i) => [sl, i]));
-    return [...data].sort((a, b) => (order.get(a.slug) ?? 99) - (order.get(b.slug) ?? 99));
+      .select(cols)
+      .eq('is_new_arrival', true)
+      .eq('is_published', true)
+      .order('created_at', { ascending: false })
+      .limit(4);
+    // Fallback if this table has no created_at column — still show 4.
+    if (error) {
+      ({ data, error } = await supabase
+        .from('products')
+        .select(cols)
+        .eq('is_new_arrival', true)
+        .eq('is_published', true)
+        .limit(4));
+    }
+    return (!error && data) ? data : [];
   } catch (e) { return []; }
 }
 
