@@ -219,6 +219,25 @@ export default function AdminProductionPage() {
     load();
   }
 
+  // INDENT (factory) PO invoice — number + file, written to factory_pos.
+  async function setFactoryInvoice(id, patch) {
+    await fetch('/api/admin/orders/factory-po', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'setInvoice', id, ...patch }) });
+    load();
+  }
+  function pickFactoryInvFile(po) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.onchange = async () => {
+      const file = input.files?.[0]; if (!file) return;
+      const fd = new FormData(); fd.append('file', file); fd.append('orderNumber', po.order_number || ''); fd.append('docType', 'factory_invoice');
+      const r = await fetch('/api/admin/orders/documents', { method: 'POST', body: fd });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) { alert('上传失败: ' + (d.error || 'unknown')); return; }
+      if (d.document?.file_url) await setFactoryInvoice(po.id, { factoryInvoiceUrl: d.document.file_url });
+    };
+    input.click();
+  }
+
   async function deletePo(id) {
     if (!confirm('Delete this PO? This cannot be undone (its bank ledger entry is removed too).')) return;
     setSaving(true);
@@ -300,7 +319,13 @@ export default function AdminProductionPage() {
                         </td>
                         <td style={{ padding: '12px', color: '#000' }}>{po.factories?.name || '工厂'}</td>
                         <td style={{ padding: '12px', whiteSpace: 'nowrap', color: NAVY }}>¥{Number(po.total_rmb || 0).toLocaleString('en-AU', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
-                        <td style={{ padding: '12px', fontSize: '12px', color: '#000' }}>{po.factory_invoice_number || '—'}</td>
+                        <td style={{ padding: '12px', fontSize: '12px', color: '#000', whiteSpace: 'nowrap' }}>
+                          {po.factory_invoice_number
+                            ? <span style={{ color: '#000' }}>{po.factory_invoice_number}</span>
+                            : <button onClick={() => { const n = prompt('工厂发票号:'); if (n) setFactoryInvoice(po.id, { factoryInvoiceNumber: n }); }} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer', color: NAVY }}>+ Invoice</button>}
+                          {po.factory_invoice_url && <a href={po.factory_invoice_url} target="_blank" rel="noreferrer" title="Open invoice" style={{ marginLeft: '5px', textDecoration: 'none' }}>📄</a>}
+                          <button onClick={() => pickFactoryInvFile(po)} title="上传工厂发票" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', marginLeft: '3px' }}>📎</button>
+                        </td>
                         <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>{cnyPaid ? <span style={{ color: '#065F46', fontWeight: 700, fontSize: '12px' }}>Paid</span> : <a href={`/admin/orders?order=${encodeURIComponent(o.order_number || o.invoice_number)}`} style={{ color: NAVY, fontSize: '11px', fontWeight: 700 }}>在订单里 →</a>}</td>
                         <td style={{ padding: '12px' }}>{last && <button onClick={() => openPo(o)} style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>{list.length ? '+ PO' : 'Raise PO'}</button>}</td>
                       </tr>
