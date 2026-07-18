@@ -1,6 +1,7 @@
 // Homepage V1 — server component (SSR + SEO). Global Nav/Footer from layout.js.
 // Discovery hub + Kit entry + line-draw hero. See HOMEPAGE.md.
 import { supabase } from '@/lib/supabase';
+import HomeCarousel from '@/components/HomeCarousel';
 import { getFirstImage, getLowestPrice } from '@/lib/urlPages';
 import ProductImg from '@/components/ProductImg';
 const NAVY = '#1B2A4A', GOLD = '#C9A96E', GOLD_DK = '#B2925A', CREAM = '#ffffff', LINE = '#E0DDD7', MUTED = '#000000';
@@ -105,6 +106,10 @@ export default async function Home() {
           </div>
         </div>
       </section>
+
+      {/* PROMO CAROUSEL — slides managed in admin → Catalog → Banners → 首页轮播.
+          Renders nothing until at least one slide is added. */}
+      <HomeCarousel />
 
       {/* TRUST STRIP */}
       <section style={{ background: NAVY, padding: '44px 0' }}>
