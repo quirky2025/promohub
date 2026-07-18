@@ -304,6 +304,9 @@ export default function AdminOrdersPage() {
         setSelected(prev => ({ ...prev, items: data.items }));
         setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, items: data.items } : o));
       }
+      // Notifying also advances this product's stage (+ stamps the date), so the
+      // Delivered / Dispatched button and date fill in automatically.
+      await setItemStatus(index, delivered ? 'delivered' : 'dispatched');
       alert(delivered ? 'Delivered notice sent ✅' : 'Shipping notice sent ✅');
     } catch { alert('Notify failed'); }
   }
@@ -452,6 +455,7 @@ export default function AdminOrdersPage() {
 
   // datetime-local <-> ISO helpers (local time so it reads right for Lily in AU)
   const toLocalInput = (iso) => { if (!iso) return ''; const d = new Date(iso); const l = new Date(d.getTime() - d.getTimezoneOffset() * 60000); return l.toISOString().slice(0, 16); };
+  const toDateInput = (iso) => { if (!iso) return ''; const d = new Date(iso); const l = new Date(d.getTime() - d.getTimezoneOffset() * 60000); return l.toISOString().slice(0, 10); };
 
   // Edit any order-level step date (historical backfill). field ∈ created_at /
   // artwork_sent_at / artwork_approved_at / production_started_at / dispatched_at / delivered_at.
@@ -865,8 +869,8 @@ export default function AdminOrdersPage() {
                     {steps.map((s, k) => (
                       <div key={k} style={{ display: 'flex', gap: '8px', fontSize: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
                         <span style={{ width: '180px', color: '#000', fontWeight: 600 }}>{s.emoji} {s.label}</span>
-                        <span style={{ width: '150px', color: s.at ? '#000' : '#B0AAA3', fontWeight: s.at ? 700 : 400 }}>{s.at ? fmtDateTime(s.at) : '待定 —'}</span>
-                        <input type="datetime-local" defaultValue={toLocalInput(s.at)} onChange={e => saveOrderDate(s.field, e.target.value)}
+                        <span style={{ width: '150px', color: s.at ? '#000' : '#B0AAA3', fontWeight: s.at ? 700 : 400 }}>{s.at ? new Date(s.at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '待定 —'}</span>
+                        <input type="date" defaultValue={toDateInput(s.at)} onChange={e => saveOrderDate(s.field, e.target.value)}
                           title="改日期" style={{ fontSize: '11px', padding: '2px 5px', border: '1px solid #E0DDD7', borderRadius: '5px', color: '#000' }} />
                       </div>
                     ))}
@@ -1035,7 +1039,7 @@ export default function AdminOrdersPage() {
                         {rows.map((r, k) => (
                           <span key={k} style={{ display: 'inline-flex', gap: '4px', alignItems: 'center', color: '#000' }}>
                             {r.emoji} {r.label}:
-                            <input type="datetime-local" defaultValue={toLocalInput(r.at)} onChange={e => saveItemStageDate(i, r.stage, e.target.value)}
+                            <input type="date" defaultValue={toDateInput(r.at)} onChange={e => saveItemStageDate(i, r.stage, e.target.value)}
                               title="改日期" style={{ fontSize: '11px', padding: '1px 4px', border: '1px solid #E0DDD7', borderRadius: '5px', color: '#000' }} />
                           </span>
                         ))}
