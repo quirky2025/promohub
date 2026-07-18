@@ -136,6 +136,8 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
 
 - 2026-07-17 DONE — 计价 ③ **手填国际运费**:③ 加了「手填 Manual · 货代一口价」输入框(不走引擎,填 ¥就自动选中 → ⑤到岸 ⑦客户价出数)。¥185 = DHL HK 国际运费,放这里。File: `app/admin/sourcing/costing/page.js`。**PUSH** 它。¥185 是国际段(不是 ② 中国端)—— Parcelle 用手填 185 即可。
 
+- 2026-07-17 DONE — 订单预计发货/交货日期:⚠️ RUN SQL `db/orders_estimated_dispatch.sql`(orders += estimated_dispatch_date date)。订单顶部(客户信息下)一条 🗓 预计发货/交货,填工厂交期,改即存。变色:>3天绿、≤3天琥珀、逾期(未发货)红。update route 加 estimated_dispatch_date。Files: `db/orders_estimated_dispatch.sql`, `app/api/admin/orders/update/route.js`, `app/admin/orders/page.js`. **PUSH**. TODO 剩:Dashboard「⚠️交货提醒」高亮列表(列快到期/逾期单)+ 供应商付款字段。
+
 - 2026-07-17 DONE — 货代管理:Sourcing 新 tab「货代管理」。⚠️ RUN SQL `db/forwarders.sql`(新表 forwarders + 银行字段;并 seed 了 Zhejiang Bing Supply Chain / Bank of China Yiwu / SWIFT BKCHCNBJ92H / AUD 354577334824 / 运费,幂等)。CRUD:名称/短代码/联系人/微信/电话/Email + 银行(Bank/支行/SWIFT/账号/币种/地址/条款/备注)。Files: `db/forwarders.sql`, `app/api/admin/sourcing/forwarders/route.js`, `app/admin/sourcing/forwarders/page.js`, `app/admin/sourcing/layout.js`(+tab)。**PUSH** 全部。NOTE:以后付货代运费,把 forwarder_payments 关联到 forwarders(现在 Finance 货代付款是 free-text name)—— 待办。
 
 - 2026-07-17 DONE — 产品页报价记录:每个产品下加「报价记录」表(折叠)。⚠️ RUN SQL `db/product_cost_records.sql`(新表 product_cost_records,挂 factory_quote_id+sku)。列:日期·数量·工厂成本¥·国内¥·国际运费¥·**Carrier**(DHL HK/大陆/Air/Sea/Express/其他)·总成本到岸 A$·我的报价 A$/个·毛利%。报价 = 毛利%自动算 或 勾「报价手动填」直接输(反算毛利)。表单实时预览。全 CRUD。Files: `db/product_cost_records.sql`, `app/api/admin/sourcing/product-records/route.js`, `components/ProductCostRecords.jsx`, `app/admin/sourcing/factories/[id]/page.js`(import+每产品下挂 <ProductCostRecords quoteId sku>). **PUSH** 全部。NOTE: 计价页的「保存」暂未自动写这个记录表 —— 目前在产品页手动加/算,后续可把计价页保存也 drop 一条进来。
