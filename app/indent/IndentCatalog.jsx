@@ -217,10 +217,17 @@ export default function IndentCatalog({ config }) {
                       <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ fontSize: '14px', fontWeight: 600, color: NAVY, lineHeight: 1.4, textAlign: 'center' }}>{product.name}</div>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: 'auto' }}>
-                          {price > 0 && (
+                          {price > 0 ? (
                             <div style={{ textAlign: 'center' }}>
                               <div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>As low as</div>
                               <div style={{ fontSize: '18px', color: GOLD, fontWeight: 400 }}>${price.toFixed(2)}</div>
+                            </div>
+                          ) : (
+                            // INDENT items are priced per order (qty + factory price + freight),
+                            // so there's no fixed price — show POA (price on application).
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>Price on application</div>
+                              <div style={{ fontSize: '18px', color: GOLD, fontWeight: 400 }}>POA</div>
                             </div>
                           )}
                           <div style={{ textAlign: 'center' }}>

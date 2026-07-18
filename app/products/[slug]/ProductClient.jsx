@@ -920,7 +920,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto' }}>
                           {price > 0
                             ? (<div><div style={{ fontSize: '11px', color: '#000' }}>As low as</div><div style={{ fontSize: '16px', fontWeight: 400, color: GOLD }}>${price.toFixed(2)}</div></div>)
-                            : (<div aria-hidden="true" />)}
+                            : (<div><div style={{ fontSize: '11px', color: '#000' }}>Price on application</div><div style={{ fontSize: '16px', fontWeight: 400, color: GOLD }}>POA</div></div>)}
                           <div style={{ textAlign: 'right' }}><div style={{ fontSize: '11px', color: '#000' }}>Min Qty</div><div style={{ fontSize: '16px', fontWeight: 400, color: NAVY }}>{p.min_qty}</div></div>
                         </div>
                       </div>
