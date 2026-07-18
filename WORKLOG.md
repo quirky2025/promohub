@@ -136,7 +136,13 @@ Needs Lily present to run the small SQL + test the full loop. Hold build until s
 
 - 2026-07-17 DONE — 计价 ③ **手填国际运费**:③ 加了「手填 Manual · 货代一口价」输入框(不走引擎,填 ¥就自动选中 → ⑤到岸 ⑦客户价出数)。¥185 = DHL HK 国际运费,放这里。File: `app/admin/sourcing/costing/page.js`。**PUSH** 它。¥185 是国际段(不是 ② 中国端)—— Parcelle 用手填 185 即可。
 
-- 2026-07-17 DONE — 统一 PO 总列表(架构①):新页 `/admin/pos`「全部 PO」(Production 导航加入口)。合并 purchase_orders(LOCAL/AUD)+ factory_pos(INDENT/RMB),打 LOCAL/INDENT 标签,筛选+搜索,点订单号跳订单(deep-link)。读两表不迁移。无 SQL。Files: `app/admin/pos/page.js`, `app/admin/production/page.js`(nav)。**PUSH**。
+- 2026-07-17 DONE — 架构②③(PO/发票统一):
+  - **①改**:不做单独「全部 PO」页(Lily 要在原表)。改成:Production 表**内联显示 China 工厂 PO**(标 INDENT,¥金额),和本地 PO 同表。factory_pos 按 order_number 归到对应订单行。INDENT 行的 Supplier Invoice 列也能 +发票号/📎传文件(写 factory_pos，action=setInvoice)。Files: production/page.js, factory-po route(setInvoice)。(单独 /admin/pos 页留着但没入口。)
+  - **②每产品 Supplier PO**（本地）:⚠️ RUN SQL `db/purchase_orders_item_index.sql`(purchase_orders += order_item_index)。新组件 `components/ProductSupplierPO.jsx` 挂在订单每个产品下(order_type!=='indent'),接**同一张 purchase_orders**:建单(带 order_item_index)+ ✉发 + 发票号/📎文件 + 标已付 + 删 + PDF。**这里下的单自动进 Production + 全部PO,发票/付款两处同步**(一处数据两处看)。purchase-orders POST 存 order_item_index。Files: `db/purchase_orders_item_index.sql`, `app/api/admin/purchase-orders/route.js`, `components/ProductSupplierPO.jsx`, `app/admin/orders/page.js`.
+  - 统一原则:PO 一张表 purchase_orders(本地) / factory_pos(China)；发票/付款以 PO 为家,订单页每产品 + Production 都是同一记录的窗口,不复制不同步。
+  - **PUSH**: 上述所有 + WORKLOG。
+
+- 2026-07-17 DONE — 统一 PO 总列表(架构①,旧,已并入②③):新页 `/admin/pos`「全部 PO」(Production 导航加入口)。合并 purchase_orders(LOCAL/AUD)+ factory_pos(INDENT/RMB),打 LOCAL/INDENT 标签,筛选+搜索,点订单号跳订单(deep-link)。读两表不迁移。无 SQL。Files: `app/admin/pos/page.js`, `app/admin/production/page.js`(nav)。**PUSH**。
   架构 TODO:② 本地订单每产品加 Supplier PO 块(接 purchase_orders)③ 订单文档区理顺(PO/供应商发票/客户发票/artwork/产品图)。
 
 - 2026-07-17 FIX(持久化根因)+ 双日期:

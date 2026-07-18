@@ -37,6 +37,7 @@ export async function POST(request) {
       po_number,
       order_id: b.orderId || null,
       order_number: b.orderNumber || null,
+      order_item_index: (b.orderItemIndex ?? null),
       supplier_id: b.supplierId || null,
       status: b.status || 'draft',
       cost_subtotal: subtotal,
