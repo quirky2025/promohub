@@ -136,13 +136,23 @@ export default function AdminOrdersPage() {
     setOrders(prev => prev.filter(o => o.id !== selected.id));
   }
 
+  // Persist a single order field via the service-key route (client supabase
+  // writes get silently dropped by RLS, so toggles were reverting on refresh).
+  async function persistOrderField(patch) {
+    const res = await fetch('/api/admin/orders/update', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: selected.id, ...patch }),
+    });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); alert('保存失败(可能是 SQL 没跑): ' + (d.error || res.status)); return false; }
+    setSelected(prev => ({ ...prev, ...patch }));
+    setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, ...patch } : o));
+    return true;
+  }
+
   async function toggleArtworkRequired() {
     if (!selected) return;
     const currentlyRequired = selected.artwork_required !== false;
-    const val = !currentlyRequired; // flip: required(true) <-> not required(false)
-    await supabase.from('orders').update({ artwork_required: val }).eq('id', selected.id);
-    setSelected(prev => ({ ...prev, artwork_required: val }));
-    setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, artwork_required: val } : o));
+    await persistOrderField({ artwork_required: !currentlyRequired });
   }
 
   // Per-order (flexible, Lily decides case by case): allow production without
@@ -160,10 +170,7 @@ export default function AdminOrdersPage() {
 
   async function toggleOnAccount() {
     if (!selected) return;
-    const val = !(selected.pay_on_account === true);
-    await supabase.from('orders').update({ pay_on_account: val }).eq('id', selected.id);
-    setSelected(prev => ({ ...prev, pay_on_account: val }));
-    setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, pay_on_account: val } : o));
+    await persistOrderField({ pay_on_account: !(selected.pay_on_account === true) });
   }
 
   async function updateStatus(id, status) {
@@ -180,7 +187,11 @@ export default function AdminOrdersPage() {
     if (status === 'dispatched')       updates.dispatched_at = now;
     if (status === 'delivered')        updates.delivered_at = now;
 
-    await supabase.from('orders').update(updates).eq('id', id);
+    const res = await fetch('/api/admin/orders/update', {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...updates }),
+    });
+    if (!res.ok) { const d = await res.json().catch(() => ({})); alert('保存失败: ' + (d.error || res.status)); return; }
     setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o));
     if (selected?.id === id) setSelected(prev => ({ ...prev, ...updates }));
   }
