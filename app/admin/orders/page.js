@@ -82,6 +82,7 @@ export default function AdminOrdersPage() {
   const [deliveryList, setDeliveryList] = useState(['']);   // order-level delivery addresses (first = primary)
   const [acctAddrBusy, setAcctAddrBusy] = useState(false);
   const [estDispatch, setEstDispatch] = useState('');       // estimated dispatch/delivery date
+  const [reqDate, setReqDate] = useState('');               // customer required-by (hard deadline)
   const [carrier, setCarrier] = useState('');
   const [saving, setSaving]           = useState(false);
   const [shipments, setShipments]     = useState([]);
@@ -518,6 +519,7 @@ export default function AdminOrdersPage() {
     setTrackingUrl(order.tracking_url || '');
     setDeliveryAddr(order.delivery_address || '');
     setEstDispatch(order.estimated_dispatch_date || '');
+    setReqDate(order.required_date || '');
     {
       const list = Array.isArray(order.delivery_addresses) && order.delivery_addresses.length
         ? order.delivery_addresses
@@ -743,24 +745,38 @@ export default function AdminOrdersPage() {
               </div>
             </div>
 
-            {/* ESTIMATED DISPATCH / DELIVERY DATE — amber as it nears, red when overdue */}
+            {/* KEY DATES — Required (customer deadline) + Estimated dispatch, side by side, prominent */}
             {(() => {
-              const ed = selected.estimated_dispatch_date;
               const done = ['dispatched', 'delivered', 'completed', 'cancelled'].includes(selected.status);
-              let color = '#0C447C', bg = '#EAF2FB', note = '';
-              if (ed && !done) {
-                const days = Math.ceil((new Date(ed).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86400000);
-                if (days < 0) { color = '#991B1B'; bg = '#FEE2E2'; note = `⚠ 已逾期 ${-days} 天`; }
-                else if (days <= 3) { color = '#92400E'; bg = '#FEF3C7'; note = `⏳ 还有 ${days} 天`; }
-                else { color = '#166534'; bg = '#F0FDF4'; note = `还有 ${days} 天`; }
-              }
+              const daysTo = (d) => Math.ceil((new Date(d).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86400000);
+              const req = selected.required_date, ed = selected.estimated_dispatch_date;
+              // colour logic per date
+              const dateStyle = (d) => {
+                if (!d || done) return { color: '#0C447C', bg: '#EAF2FB', note: '' };
+                const n = daysTo(d);
+                if (n < 0) return { color: '#991B1B', bg: '#FEE2E2', note: `⚠ 逾期 ${-n} 天` };
+                if (n <= 3) return { color: '#92400E', bg: '#FEF3C7', note: `⏳ 还有 ${n} 天` };
+                return { color: '#166534', bg: '#F0FDF4', note: `还有 ${n} 天` };
+              };
+              const rq = dateStyle(req), es = dateStyle(ed);
+              const late = req && ed && new Date(ed).setHours(0, 0, 0, 0) > new Date(req).setHours(0, 0, 0, 0) && !done;
+              const card = (title, val, setLocal, field, s, accent) => (
+                <div style={{ flex: '1 1 260px', minWidth: 240, background: s.bg, border: `2px solid ${accent || s.color}`, borderRadius: '12px', padding: '12px 16px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 800, color: accent || s.color, marginBottom: '6px' }}>{title}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <input type="date" value={val} onChange={e => { setLocal(e.target.value); persistOrderField({ [field]: e.target.value || null }); }}
+                      style={{ padding: '7px 10px', border: `1.5px solid ${s.color}66`, borderRadius: '8px', fontSize: '15px', color: '#000', fontWeight: 800 }} />
+                    {s.note && <span style={{ fontSize: '14px', fontWeight: 800, color: s.color }}>{s.note}</span>}
+                  </div>
+                </div>
+              );
               return (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', background: bg, border: `1px solid ${color}33`, borderRadius: '10px', padding: '10px 14px', marginBottom: '16px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 800, color }}>🗓 预计发货/交货 Est. dispatch</span>
-                  <input type="date" value={estDispatch} onChange={e => { setEstDispatch(e.target.value); saveEstDispatch(e.target.value); }}
-                    style={{ padding: '5px 8px', border: `1px solid ${color}55`, borderRadius: '7px', fontSize: '13px', color: '#000', fontWeight: 700 }} />
-                  {note && <span style={{ fontSize: '13px', fontWeight: 800, color }}>{note}</span>}
-                  {!ed && <span style={{ fontSize: '11px', color: '#000' }}>填工厂给的交期</span>}
+                <div style={{ marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                    {card('🎯 客户要求日期 REQUIRED (deadline)', reqDate, setReqDate, 'required_date', rq, '#991B1B')}
+                    {card('🗓 预计发货/交货 EST. DISPATCH', estDispatch, setEstDispatch, 'estimated_dispatch_date', es, null)}
+                  </div>
+                  {late && <div style={{ marginTop: '8px', background: '#FEE2E2', color: '#991B1B', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '8px 14px', fontSize: '13px', fontWeight: 800 }}>⚠ 预计发货({ed})晚于客户要求({req})—— 会迟!</div>}
                 </div>
               );
             })()}
