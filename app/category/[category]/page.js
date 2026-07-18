@@ -67,8 +67,10 @@ export default function CategoryPage() {
     (async () => {
       try {
         const { data } = await supabase
-          .from('category_banners').select('*')
-          .eq('category_slug', String(category).toLowerCase())
+          .from('page_banners').select('*')
+          .eq('page_type', 'category')
+          .eq('page_key', String(category).toLowerCase())
+          .eq('is_active', true)
           .maybeSingle();
         if (!cancelled) setBanner(data || null);
       } catch { /* table may not exist yet — keep navy */ }
