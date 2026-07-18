@@ -73,7 +73,8 @@ export const FAQ_SECTIONS = [
       },
       {
         q: 'What payment methods do you accept?',
-        a: `<p>You can pay by EFT (bank transfer), Visa, Mastercard or American Express. EFT has no surcharge; Visa and Mastercard incur a 2% surcharge, and American Express 3.5%.</p>`,
+        // EFT 句为 2026-07-18 运营定稿(FAQ_CONTENT.md 需求 5),一字不改
+        a: `<p>You can pay by EFT (bank transfer), Visa, Mastercard or American Express. EFT has no surcharge; Visa and Mastercard incur a 2% surcharge, and American Express 3.5%. Card payments carry a 2% processing surcharge, shown transparently at checkout. Prefer to skip it? Pay by EFT bank transfer — no surcharge, and we start production once funds clear.</p>`,
       },
     ],
   },
@@ -104,8 +105,9 @@ export const FAQ_SECTIONS = [
     icon: '🚚',
     questions: [
       {
+        // 口径 2026-07-17(FAQ_CONTENT.md #12)— 文案一字不改照用
         q: 'How much is shipping?',
-        a: `<p>$25 per item, per domestic address, with tracking. International orders are quoted separately.</p>`,
+        a: `<p>Shipping is $25 per product, per delivery address, Australia-wide — and it stays flat no matter the quantity. Each product ships direct from its supplier's warehouse, so 100 or 5,000 units of the same pen still ship for $25. Adding another product or another delivery address adds $25 each — your quote always shows the exact shipping before you commit.</p>`,
       },
       {
         q: 'How long does delivery take?',
