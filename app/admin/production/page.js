@@ -14,7 +14,6 @@ const NAV = [
   { label: 'Invoices', href: '/admin/invoices' },
   { label: 'Production', href: '/admin/production' },
   { label: 'Suppliers', href: '/admin/suppliers' },
-  { label: '全部 PO', href: '/admin/pos' },
   { label: 'Products', href: '/admin/products' },
 ];
 
@@ -42,6 +41,7 @@ export default function AdminProductionPage() {
   const [orders, setOrders] = useState([]);
   const [pos, setPos] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const [factoryPos, setFactoryPos] = useState([]);   // China 工厂 PO (INDENT), shown in the same table
   const [loading, setLoading] = useState(true);
 
   const [poFor, setPoFor] = useState(null);
@@ -70,15 +70,17 @@ export default function AdminProductionPage() {
   async function load() {
     setLoading(true);
     try {
-      const [oRes, pRes, sRes] = await Promise.all([
+      const [oRes, pRes, sRes, fRes] = await Promise.all([
         fetch('/api/admin/orders', { cache: 'no-store' }),
         fetch('/api/admin/purchase-orders', { cache: 'no-store' }),
         fetch('/api/admin/suppliers', { cache: 'no-store' }),
+        fetch('/api/admin/orders/factory-po?all=1', { cache: 'no-store' }),
       ]);
-      const o = await oRes.json(); const p = await pRes.json(); const s = await sRes.json();
+      const o = await oRes.json(); const p = await pRes.json(); const s = await sRes.json(); const f = await fRes.json().catch(() => ({}));
       setOrders((Array.isArray(o.orders) ? o.orders : []).filter(x => x.status !== 'quote' && x.status !== 'cancelled'));
       setPos(Array.isArray(p.purchaseOrders) ? p.purchaseOrders : []);
       setSuppliers(Array.isArray(s.suppliers) ? s.suppliers : []);
+      setFactoryPos(Array.isArray(f.pos) ? f.pos : []);
     } catch { /* ignore */ }
     setLoading(false);
   }
@@ -88,7 +90,11 @@ export default function AdminProductionPage() {
   }
 
   function posForOrder(orderId, orderNumber) {
-    return pos.filter(p => p.order_id === orderId || (orderNumber && p.order_number === orderNumber));
+    const locals = pos.filter(p => p.order_id === orderId || (orderNumber && p.order_number === orderNumber));
+    const facts = factoryPos
+      .filter(f => orderNumber && f.order_number === orderNumber)
+      .map(f => ({ ...f, indent: true }));   // tag China factory POs
+    return [...locals, ...facts];
   }
 
   function linesFromOrder(o) {
@@ -274,6 +280,33 @@ export default function AdminProductionPage() {
                   const first = j === 0;
                   const last = j === rows.length - 1;
                   const ps = po ? (PO_STATUS[po.status] || PO_STATUS.draft) : null;
+
+                  // China factory PO (INDENT) — read-only row; details/pay live on the order's 🏭 panel.
+                  if (po && po.indent) {
+                    const cnyPaid = (po.status === 'paid');
+                    return (
+                      <tr key={o.id + '-' + po.id} style={{ background: i % 2 === 0 ? '#fff' : BG, borderBottom: last ? '1px solid #F0EEED' : '1px dashed #F0EEED' }}>
+                        <td style={{ padding: '12px', fontWeight: 700, color: GOLD, fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{first ? (o.order_number || o.invoice_number) : ''}</td>
+                        <td style={{ padding: '12px', color: NAVY }}>{first ? job : ''}</td>
+                        <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>{first ? (['dispatched', 'delivered', 'completed'].includes(o.status)
+                          ? <span style={{ color: '#166534', fontWeight: 700, fontSize: '11px' }}>{o.status === 'completed' ? '✅ Completed' : o.status === 'delivered' ? '📦 Delivered' : '🚚 Dispatched'}</span>
+                          : (ready ? <span style={{ color: '#065F46', fontWeight: 700 }}>✅ Ready</span> : <span style={{ color: '#8A1C1C', fontSize: '11px', fontWeight: 600 }}>{!isPaid(o) ? 'Awaiting payment' : 'Awaiting artwork'}</span>)) : ''}</td>
+                        <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>
+                          <div style={{ fontFamily: 'monospace' }}>
+                            <a href={`/api/admin/orders/factory-po?pdf=1&poId=${po.id}`} target="_blank" rel="noreferrer" style={{ color: NAVY, textDecoration: 'underline' }}>{po.po_number}</a>
+                            <span style={{ background: '#7C2D12', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '2px 7px', borderRadius: '5px', marginLeft: '6px', letterSpacing: '0.05em' }}>INDENT</span>
+                          </div>
+                          {po.product_name && <div style={{ fontSize: '11px', color: '#000', marginTop: '3px', whiteSpace: 'normal', maxWidth: '230px' }}>{po.product_name}{po.product_sku ? ` (${po.product_sku})` : ''}</div>}
+                        </td>
+                        <td style={{ padding: '12px', color: '#000' }}>{po.factories?.name || '工厂'}</td>
+                        <td style={{ padding: '12px', whiteSpace: 'nowrap', color: NAVY }}>¥{Number(po.total_rmb || 0).toLocaleString('en-AU', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}</td>
+                        <td style={{ padding: '12px', fontSize: '12px', color: '#000' }}>{po.factory_invoice_number || '—'}</td>
+                        <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>{cnyPaid ? <span style={{ color: '#065F46', fontWeight: 700, fontSize: '12px' }}>Paid</span> : <a href={`/admin/orders?order=${encodeURIComponent(o.order_number || o.invoice_number)}`} style={{ color: NAVY, fontSize: '11px', fontWeight: 700 }}>在订单里 →</a>}</td>
+                        <td style={{ padding: '12px' }}>{last && <button onClick={() => openPo(o)} style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '8px', padding: '6px 14px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>{list.length ? '+ PO' : 'Raise PO'}</button>}</td>
+                      </tr>
+                    );
+                  }
+
                   return (
                   <tr key={o.id + '-' + (po ? po.id : 'none')} style={{ background: i % 2 === 0 ? '#fff' : BG, borderBottom: last ? '1px solid #F0EEED' : '1px dashed #F0EEED' }}>
                     <td style={{ padding: '12px', fontWeight: 700, color: GOLD, fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{first ? (o.order_number || o.invoice_number) : ''}</td>
