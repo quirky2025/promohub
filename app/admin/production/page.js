@@ -370,7 +370,7 @@ export default function AdminProductionPage() {
                     <td style={{ padding: '12px', whiteSpace: 'nowrap' }}>
                       {po ? (po.supplier_payment_status === 'paid'
                         ? <span style={{ color: '#065F46', fontWeight: 700, fontSize: '12px' }}>Paid</span>
-                        : <button onClick={() => { if (confirm('Mark supplier as paid?')) patchPo(po.id, { action: 'pay' }); }} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer', color: NAVY }}>Mark paid</button>) : ''}
+                        : <button onClick={() => { const gross = Math.round((Number(po.cost_total) || 0) * 1.1 * 100) / 100; const v = prompt('实付金额(含 GST)。默认 = 成本 +10%:', gross.toFixed(2)); if (v === null) return; patchPo(po.id, { action: 'pay', paidAmount: Number(v) }); }} style={{ background: 'none', border: '1px solid #E0DDD7', borderRadius: '6px', padding: '4px 8px', fontSize: '11px', cursor: 'pointer', color: NAVY }}>Mark paid</button>) : ''}
                     </td>
                     <td style={{ padding: '12px' }}>
                       {last && (

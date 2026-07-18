@@ -95,7 +95,7 @@ export default function ProductSupplierPO({ orderId, orderNumber, itemIndex, pro
             <button onClick={() => pickInvFile(po)} title="传发票文件" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 13 }}>📎</button>
             {po.supplier_payment_status === 'paid'
               ? <span style={{ color: GREEN, fontWeight: 700 }}>已付</span>
-              : <button onClick={() => { if (confirm('标记已付供应商?')) patchPo(po.id, { action: 'pay' }); }} style={{ background: 'none', border: `1px solid ${NAVY}`, borderRadius: 6, color: NAVY, cursor: 'pointer', fontSize: 11, padding: '2px 7px' }}>标已付</button>}
+              : <button onClick={() => { const gross = Math.round((Number(po.cost_total) || 0) * 1.1 * 100) / 100; const v = prompt('实付金额(含 GST)。默认 = 成本 +10%:', gross.toFixed(2)); if (v === null) return; patchPo(po.id, { action: 'pay', paidAmount: Number(v) }); }} style={{ background: 'none', border: `1px solid ${NAVY}`, borderRadius: 6, color: NAVY, cursor: 'pointer', fontSize: 11, padding: '2px 7px' }}>标已付</button>}
             <button onClick={() => delPo(po.id)} style={{ background: 'none', border: 'none', color: RED, cursor: 'pointer', fontSize: 12 }}>删</button>
           </span>
         </div>
