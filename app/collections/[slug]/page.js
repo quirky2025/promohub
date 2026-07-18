@@ -5,6 +5,7 @@ import { MARGIN } from '@/lib/pricing';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
+import { slugify } from '@/lib/slug';
 import ProductImg from '@/components/ProductImg';
 
 const NAVY = '#1B2A4A';
@@ -65,6 +66,7 @@ export default function CollectionPage() {
 
   const [allProducts, setAllProducts] = useState([]);
   const [collectionName, setCollectionName] = useState('');
+  const [banner, setBanner] = useState(null);   // hero image set in admin → Catalog → Banners
   const [displayed, setDisplayed] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -115,6 +117,27 @@ export default function CollectionPage() {
     }
     if (slug) fetchData();
   }, [slug]);
+
+  // Hero banner (admin → Catalog → Banners → 系列页). Admin stores page_key = slugify(collection name);
+  // also try the URL slug as fallback for alias pages (e.g. tradeshow-and-events).
+  useEffect(() => {
+    if (!collectionName && !slug) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const keys = [...new Set([slugify(collectionName), String(slug || '')].filter(Boolean))];
+        const { data } = await supabase
+          .from('page_banners').select('*')
+          .eq('page_type', 'collection')
+          .in('page_key', keys)
+          .eq('is_active', true)
+          .order('sort_order', { ascending: true })
+          .limit(1);
+        if (!cancelled) setBanner(data?.[0] || null);
+      } catch { /* table may not exist yet — keep navy */ }
+    })();
+    return () => { cancelled = true; };
+  }, [collectionName, slug]);
 
   function getLowestPrice(product) {
     if (!product.pricing_tiers?.length) return 0;
@@ -185,14 +208,20 @@ export default function CollectionPage() {
         </div>
       </div>
 
-      <div style={{ background: NAVY, padding: '56px 40px', textAlign: 'center' }}>
+      {/* Hero — banner image set in admin → Catalog → Banners; falls back to navy. */}
+      <div style={{
+        background: banner?.image_url
+          ? `linear-gradient(rgba(27,42,74,${(banner.overlay_pct ?? 45) / 100}), rgba(27,42,74,${(banner.overlay_pct ?? 45) / 100})), url(${banner.image_url}) center/cover no-repeat`
+          : NAVY,
+        padding: '56px 40px', textAlign: 'center',
+      }}>
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div style={{ display: 'inline-block', background: `${GOLD}25`, color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase', padding: '5px 14px', borderRadius: '20px', marginBottom: '18px' }}>Collection</div>
-          <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '46px', fontWeight: 600, color: '#fff', margin: '0 0 14px', lineHeight: 1.1, textTransform: 'capitalize' }}>
-            {collectionName}
+          <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '46px', fontWeight: 600, color: '#fff', margin: '0 0 14px', lineHeight: 1.1, textTransform: 'capitalize', textShadow: banner?.image_url ? '0 2px 12px rgba(0,0,0,.45)' : 'none' }}>
+            {banner?.headline || collectionName}
           </h1>
-          <p style={{ fontSize: '16px', color: 'rgba(255,255,255,.75)', lineHeight: 1.7, margin: 0 }}>
-            Branded promotional products curated for {collectionName}.
+          <p style={{ fontSize: '16px', color: 'rgba(255,255,255,.75)', lineHeight: 1.7, margin: 0, textShadow: banner?.image_url ? '0 1px 8px rgba(0,0,0,.5)' : 'none' }}>
+            {banner?.subheadline || `Branded promotional products curated for ${collectionName}.`}
           </p>
         </div>
       </div>

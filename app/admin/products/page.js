@@ -6,25 +6,10 @@ import Link from 'next/link';
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 
-const CATEGORIES = [
-  'Apparel', 'Bags', 'Business', 'Drinkware', 'Headwear',
-  'Leisure', 'Packaging', 'Pens', 'Personal', 'Print', 'Promotion', 'Technology',
-];
-
-const ALL_SUBCATEGORIES = {
-  'Apparel': ['Apparel Accessories', 'Jackets', 'Socks & Footwear', 'Sweatshirts'],
-  'Bags': ['Backpacks', 'Cooler Bags', 'Crossbody & Belt Bags', 'Drawstring Bags', 'Duffle Bags', 'Jute Bags', 'Laptop Bags', 'Paper Bags', 'Satchel Bags', 'Tote Bags'],
-  'Business': ['Highlighters', 'ID Holders', 'Lanyards', 'Note Pads', 'Notebooks', 'Stationery', 'Sticky Notes'],
-  'Drinkware': ['Ceramic Mugs', 'Coffee Cups', 'Cups & Tumblers', 'Drink Bottles - Glass', 'Drink Bottles - Metal', 'Drink Bottles - Plastic', 'Drinkware Presentation', 'Flasks', 'Travel Mugs'],
-  'Headwear': ['Beanies', 'Bucket Hats', 'Caps', 'Headwear Accessories', 'Headwear Express'],
-  'Leisure': ['Camping & Outdoors', 'Chairs', 'Coasters', 'Games & Puzzles', 'Home & Living', 'Picnic & BBQ', 'Sport', 'Sunglasses', 'Tools', 'Towels', 'Travel', 'Umbrellas'],
-  'Packaging': ['Gift Boxes', 'Packaging Accessories', 'Ribbons'],
-  'Pens': ['Black Refill', 'Metal', 'Novelty', 'Paper', 'Plastic', 'Presentation', 'Refills'],
-  'Personal': ['Candles & Diffusers', 'Hand Sanitiser', 'Lip Balms', 'Lotions & Sunscreens', 'Personal Care'],
-  'Print': ['Pads & Planners', 'Signage'],
-  'Promotion': ['Badges', 'Bottle Openers', 'Fidget Items', 'Key Rings', 'Pet Accessories', 'Promotional', 'Stress Items', 'Stubby & Can Holders', 'Wristbands'],
-  'Technology': ['Charging Cables', 'Earbuds', 'Flash Drives', 'Headphones', 'Mouse Mats', 'Phone Wallets', 'Power Banks', 'Screen Cleaners', 'Sleeves & Cases', 'Speakers', 'Tech Accessories', 'USB Hubs', 'Wireless Chargers'],
-};
+// Categories/subcategories are fetched from /api/admin/categories (live url_pages =
+// what customers actually see). Decision 2026-07-18: admin follows the live site.
+// Legacy DB values (Business / Print / Personal / Promotion / Leisure...) appear in a
+// separate "Legacy" group so old products can still be found and re-classified.
 
 const BRANDS = [
   'Archer', 'Blunt', 'BrandCraft', 'CamelBak', 'Cross', 'Frontier',
@@ -54,25 +39,58 @@ export default function AdminProductsPage() {
   const [success, setSuccess] = useState('');
   const [activeTab, setActiveTab] = useState('classification');
   const [currentPage, setCurrentPage] = useState(1);
+  const [counts, setCounts] = useState({ all: 0, published: 0, unpublished: 0 });
+  const [liveCategories, setLiveCategories] = useState([]);   // [{ category, subcategories: [] }]
+  const [legacyCategories, setLegacyCategories] = useState([]); // DB values not used on the live site
   const PAGE_SIZE = 50;
 
-  const loadProducts = useCallback(async () => {
+  // Category options = what the live site actually uses (url_pages)
+  useEffect(() => {
+    fetch('/api/admin/categories')
+      .then(res => res.json())
+      .then(data => {
+        setLiveCategories(Array.isArray(data?.categories) ? data.categories : []);
+        setLegacyCategories(Array.isArray(data?.legacy) ? data.legacy : []);
+      })
+      .catch(err => console.error('Failed to load categories', err));
+  }, []);
+
+  const loadProducts = useCallback(async (page = 1) => {
     setLoading(true);
-    setCurrentPage(1);
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (categoryFilter) params.set('category', categoryFilter);
     if (publishFilter !== 'all') params.set('published', publishFilter === 'published' ? 'true' : 'false');
-    const res = await fetch(`/api/admin/products?${params}`);
-    const data = await res.json();
-    setProducts(Array.isArray(data) ? data : []);
+    params.set('page', String(page));
+    params.set('pageSize', String(PAGE_SIZE));
+    try {
+      const res = await fetch(`/api/admin/products?${params}`);
+      const data = await res.json();
+      if (!res.ok) {
+        alert(`Failed to load products: ${data?.error || res.status}`);
+        setProducts([]);
+      } else {
+        setProducts(Array.isArray(data.products) ? data.products : []);
+        if (data.counts) setCounts(data.counts);
+      }
+    } catch (err) {
+      alert(`Failed to load products: ${err.message}`);
+      setProducts([]);
+    }
     setLoading(false);
   }, [search, categoryFilter, publishFilter]);
 
+  // Filters changed → back to page 1 (debounced for typing in search)
   useEffect(() => {
-    const t = setTimeout(loadProducts, 300);
+    setCurrentPage(1);
+    const t = setTimeout(() => loadProducts(1), 300);
     return () => clearTimeout(t);
   }, [loadProducts]);
+
+  function goToPage(page) {
+    setCurrentPage(page);
+    loadProducts(page);
+  }
 
   async function saveProduct() {
     if (!editing) return;
@@ -85,8 +103,11 @@ export default function AdminProductsPage() {
     if (res.ok) {
       setSuccess('Saved!');
       setEditing(null);
-      loadProducts();
+      loadProducts(currentPage);
       setTimeout(() => setSuccess(''), 3000);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      alert(`Save failed: ${err?.error || res.status}`);
     }
     setSaving(false);
   }
@@ -135,8 +156,14 @@ export default function AdminProductsPage() {
     marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.08em',
   };
 
-  const publishedCount = products.filter(p => p.is_published).length;
-  const unpublishedCount = products.filter(p => !p.is_published).length;
+  // Exact DB counts from the API (no more counting a truncated array)
+  const totalForTab = publishFilter === 'published' ? counts.published
+    : publishFilter === 'unpublished' ? counts.unpublished
+    : counts.all;
+  const totalPages = Math.max(1, Math.ceil(totalForTab / PAGE_SIZE));
+
+  // Subcategory options follow the selected category (live site truth)
+  const editSubcategories = liveCategories.find(c => c.category === editing?.category)?.subcategories || [];
 
   return (
     <div style={{ background: '#fff', minHeight: '100vh', fontFamily: '"DM Sans", sans-serif' }}>
@@ -179,16 +206,21 @@ export default function AdminProductsPage() {
           <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)}
             style={{ padding: '10px 16px', border: '1.5px solid #E0DDD7', borderRadius: '8px', fontSize: '14px', fontFamily: '"DM Sans", sans-serif', outline: 'none', background: '#fff' }}>
             <option value="">All Categories</option>
-            {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            {liveCategories.map(c => <option key={c.category} value={c.category}>{c.category}</option>)}
+            {legacyCategories.length > 0 && (
+              <optgroup label="Legacy (not on live site)">
+                {legacyCategories.map(c => <option key={c} value={c}>{c}</option>)}
+              </optgroup>
+            )}
           </select>
         </div>
 
         {/* Publish filter tabs */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
           {[
-            { id: 'all', label: `All (${products.length})` },
-            { id: 'published', label: `✅ Published (${publishedCount})` },
-            { id: 'unpublished', label: `⬜ Not Published (${unpublishedCount})` },
+            { id: 'all', label: `All (${counts.all})` },
+            { id: 'published', label: `✅ Published (${counts.published})` },
+            { id: 'unpublished', label: `⬜ Not Published (${counts.unpublished})` },
           ].map(f => (
             <button key={f.id} onClick={() => setPublishFilter(f.id)}
               style={{ padding: '6px 16px', borderRadius: '6px', border: '1.5px solid', borderColor: publishFilter === f.id ? NAVY : '#E0DDD7', background: publishFilter === f.id ? NAVY : '#fff', color: publishFilter === f.id ? '#fff' : '#7A7570', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
@@ -211,7 +243,7 @@ export default function AdminProductsPage() {
                 </tr>
               </thead>
               <tbody>
-                {products.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE).map((product, i) => (
+                {products.map((product, i) => (
                   <tr key={product.id} style={{ borderBottom: '1px solid #F0EEED', background: i % 2 === 0 ? '#fff' : '#FAFAF9' }}>
                     <td style={{ padding: '12px 16px', textAlign: 'center' }}>
                       <span title={product.is_published ? 'Published' : 'Not published'} style={{ fontSize: '16px' }}>
@@ -239,18 +271,18 @@ export default function AdminProductsPage() {
               </tbody>
             </table>
             {products.length === 0 && <div style={{ textAlign: 'center', padding: '40px', color: '#7A7570' }}>No products found</div>}
-            {/* Pagination */}
-            {products.length > PAGE_SIZE && (
+            {/* Pagination — server-side, driven by exact DB counts */}
+            {totalPages > 1 && (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '24px', borderTop: '1px solid #E0DDD7' }}>
-                <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}
-                  style={{ padding: '8px 16px', border: '1.5px solid #E0DDD7', borderRadius: '6px', background: currentPage === 1 ? '#ffffff' : '#fff', color: currentPage === 1 ? '#B0AAA3' : NAVY, cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 600 }}>
+                <button onClick={() => goToPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}
+                  style={{ padding: '8px 16px', border: '1.5px solid #E0DDD7', borderRadius: '6px', background: '#fff', color: currentPage === 1 ? '#B0AAA3' : NAVY, cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 600 }}>
                   ← Prev
                 </button>
-                <span style={{ fontSize: '13px', color: '#7A7570', fontFamily: '"DM Sans", sans-serif' }}>
-                  Page {currentPage} of {Math.ceil(products.length / PAGE_SIZE)} ({products.length} products)
+                <span style={{ fontSize: '13px', color: '#000', fontFamily: '"DM Sans", sans-serif' }}>
+                  Page {currentPage} of {totalPages} ({totalForTab} products)
                 </span>
-                <button onClick={() => setCurrentPage(p => Math.min(Math.ceil(products.length / PAGE_SIZE), p + 1))} disabled={currentPage === Math.ceil(products.length / PAGE_SIZE)}
-                  style={{ padding: '8px 16px', border: '1.5px solid #E0DDD7', borderRadius: '6px', background: currentPage === Math.ceil(products.length / PAGE_SIZE) ? '#ffffff' : '#fff', color: currentPage === Math.ceil(products.length / PAGE_SIZE) ? '#B0AAA3' : NAVY, cursor: currentPage === Math.ceil(products.length / PAGE_SIZE) ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 600 }}>
+                <button onClick={() => goToPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}
+                  style={{ padding: '8px 16px', border: '1.5px solid #E0DDD7', borderRadius: '6px', background: '#fff', color: currentPage === totalPages ? '#B0AAA3' : NAVY, cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', fontFamily: '"DM Sans", sans-serif', fontSize: '13px', fontWeight: 600 }}>
                   Next →
                 </button>
               </div>
@@ -305,16 +337,22 @@ export default function AdminProductsPage() {
                       <label style={labelStyle}>Category</label>
                       <select value={editing.category || ''} onChange={e => updateField('category', e.target.value)} style={inputStyle}>
                         <option value="">Select...</option>
-                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                        {liveCategories.map(c => <option key={c.category} value={c.category}>{c.category}</option>)}
+                        {editing.category && !liveCategories.some(c => c.category === editing.category) && (
+                          <option value={editing.category}>{editing.category} (legacy — not on live site)</option>
+                        )}
                       </select>
                     </div>
                     <div>
                       <label style={labelStyle}>Subcategory</label>
                       <select value={editing.subcategory || ''} onChange={e => updateField('subcategory', e.target.value)} style={inputStyle}>
                         <option value="">Select subcategory...</option>
-                        {(ALL_SUBCATEGORIES[editing.category] || []).map(s => (
+                        {editSubcategories.map(s => (
                           <option key={s} value={s}>{s}</option>
                         ))}
+                        {editing.subcategory && !editSubcategories.includes(editing.subcategory) && (
+                          <option value={editing.subcategory}>{editing.subcategory} (legacy — not on live site)</option>
+                        )}
                       </select>
                     </div>
                     <div>
