@@ -304,6 +304,9 @@ export default function AdminOrdersPage() {
         setSelected(prev => ({ ...prev, items: data.items }));
         setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, items: data.items } : o));
       }
+      // Notifying also advances this product's stage (+ stamps the date), so the
+      // Delivered / Dispatched button and date fill in automatically.
+      await setItemStatus(index, delivered ? 'delivered' : 'dispatched');
       alert(delivered ? 'Delivered notice sent ✅' : 'Shipping notice sent ✅');
     } catch { alert('Notify failed'); }
   }
