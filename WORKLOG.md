@@ -12,6 +12,8 @@
 - **CODE — PUSH:** `app/products/[slug]/page.js` (metadata), `ProductClient.jsx` (H1+breadcrumb), `ASColourClient.jsx` (breadcrumb), `ProductJsonLd.jsx` (product/variant/breadcrumb names); `app/api/admin/product-titles/route.js` (NEW — preview CSV generator per spec formula: base minus type noun + Material(barrel) + Mechanism + Type singular, dedupe, ≤55, drop Mechanism→Material, no padding; Presentation/Gift Sets kept as-is).
 - **Flow:** Lily downloads `/api/admin/product-titles?category=Pens` → reviews CSV → returns final → I emit UPDATE SQL. Slugs frozen (untouched).
 - Also this session: pens material = barrel-primary via `penPrimaryMaterial` (component collocations "steel ball/metal clip/silicone grip" stripped before scan), PP folded into Plastic; collection rules share the same derivation.
+- **PDP polish (Lily):** edit modal no longer closes on backdrop click (SEO editing session safety); ALL-CAPS colour names title-cased at display (`formatColourName` in lib/colourName.js — mixed-case untouched, data/slugs untouched); Materials & Dimensions unified into the LEFT gold blocks (specs-jsonb products fall back from Material/Size spec rows, duplicates dropped from the right table).
+- Title enrichment CSV verdict: formula output too poor (Lily) — 424 pens titles to be hand-written by dev from full product data at NP115 standard ("Customised Six Coloured Pencil Sets in Tube with Sharpener" style); richer CSV export pending.
 
 ## SESSION 2026-07-19 (later 5) — TAXONOMY_V2 Pens (material subcats → rule collections)
 

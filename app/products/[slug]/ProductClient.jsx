@@ -110,6 +110,15 @@ export default function ProductClient({ product, mainImage, colours, extraImages
     return out;
   })();
 
+  // ── Unified spec placement (Lily 2026-07): Materials & Dimensions ALWAYS live
+  // in the LEFT gold-bordered blocks (style-guide look). Products whose data only
+  // has them inside the specs jsonb fall back to those values here, and
+  // FlatSpecTable drops the duplicate rows from the right-hand table.
+  const _specsArr = Array.isArray(product.specs) ? product.specs : [];
+  const _specVal = (re) => _specsArr.find(s => s?.name && s?.value && re.test(String(s.name).trim()))?.value || null;
+  const materialsDisplay = product.materials || _specVal(/^materials?$/i);
+  const dimensionsDisplay = product.dimensions || _specVal(/^(dimensions?|size)$/i);
+
   useEffect(() => {
     async function fetchSimilar() {
       if (!product.subcategory) return;
@@ -663,16 +672,16 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                         </ul>
                       </div>
                     )}
-                    {product.materials && (
+                    {materialsDisplay && (
                       <div style={{ marginBottom: '12px', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #E0DDD7', borderLeft: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Materials</div>
-                        <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{product.materials}</div>
+                        <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{materialsDisplay}</div>
                       </div>
                     )}
-                    {product.dimensions && (
+                    {dimensionsDisplay && (
                       <div style={{ marginBottom: '12px', padding: '12px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #E0DDD7', borderLeft: `3px solid ${GOLD}` }}>
                         <div style={{ fontSize: '11px', fontWeight: 700, color: '#000', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '4px' }}>Dimensions</div>
-                        <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{product.dimensions}</div>
+                        <div style={{ fontSize: '13px', color: NAVY, fontWeight: 500, lineHeight: 1.6 }}>{dimensionsDisplay}</div>
                       </div>
                     )}
                     {decorations.length > 0 && (
@@ -1416,7 +1425,12 @@ function FlatSpecTable({ product }) {
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
     : `Production: ${product.supplier === 'PromoBrands' ? '7-10' : '3-7'} business days (after artwork approval)`;
 // 通用 specs 表(Technology 起所有抓了 specs 的产品)— 必须放在 Drinkware 判断之前
-  const specRows = Array.isArray(product.specs) ? product.specs.filter(s => s && s.name && s.value && !/lead\s*time/i.test(s.name)) : [];
+// Material / Size rows excluded: they render in the LEFT gold blocks (统一风格, Lily 2026-07).
+  const specRows = Array.isArray(product.specs)
+    ? product.specs.filter(s => s && s.name && s.value
+        && !/lead\s*time/i.test(s.name)
+        && !/^(materials?|dimensions?|size)$/i.test(String(s.name).trim()))
+    : [];
   if (specRows.length > 0) {
     return (
       <div>
