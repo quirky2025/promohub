@@ -5,6 +5,13 @@
 
 ---
 
+## SESSION 2026-07-19 (later 3) — D9 · PDP "Also found in" (PDP_ALSO_FOUND_IN_SPEC.md)
+
+- `lib/alsoFoundIn.js` — links per product: published smart collections (from materialised collection_products — no rule runs per request) > colour collection pages > its subcategory page > eco page (compound is_eco, fallback /sustainability) > brand page. Live + non-noindex only, cap 8, dedup.
+- `app/products/[slug]/page.js` — computes list server-side, passes to both clients.
+- `ProductClient.jsx` — chips row between specs/tabs and Similar Products. `ASColourClient.jsx` — chips row at page bottom.
+- NOTE: colour/subcategory page "≥4 products" gate not re-checked per request (perf); those pages are seeded with stock, and smart collections enforce ≥4 at publish.
+
 ## SESSION 2026-07-19 (later 2) — D8 · Collections Manager built (COLLECTIONS_MANAGER_SPEC.md)
 
 - **RUN:** `db/smart_collections.sql` — smart_collections (rules/pinned/excluded/status) + collection_products materialised map (FK cascade). Map feeds D9 Also Found In.

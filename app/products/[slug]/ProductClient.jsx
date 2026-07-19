@@ -31,7 +31,7 @@ function isGoodAltText(alt, name, colourNames) {
   return t.length >= 8 && t.length <= 125;
 }
 
-export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations, secondaryColours, initialColourIndex }) {
+export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations, secondaryColours, initialColourIndex, alsoFoundIn }) {
   // 4B-3: SSR pre-selects a colour from ?colour=<colour_slug> (page.js passes its index).
   const [selectedColour, setSelectedColour] = useState(initialColourIndex ?? null);
   const [selectedSecondary, setSelectedSecondary] = useState(0);
@@ -895,6 +895,21 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           </div>
         </div>
       </div>
+
+      {/* D9 · Also found in — small link chips, quiet by design (below specs, above Similar) */}
+      {Array.isArray(alsoFoundIn) && alsoFoundIn.length > 0 && (
+        <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '20px 40px' }}>
+          <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Also found in</span>
+            {alsoFoundIn.map(l => (
+              <a key={l.href} href={l.href}
+                style={{ fontSize: '12.5px', color: NAVY, textDecoration: 'none', border: '1px solid #E0DDD7', borderRadius: '20px', padding: '5px 14px', fontWeight: 600, background: '#fff' }}>
+                {l.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {similarProducts.length > 0 && (
         <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '48px 40px' }}>

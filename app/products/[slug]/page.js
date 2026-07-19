@@ -3,6 +3,7 @@ import ProductClient from './ProductClient';
 import ASColourClient from './ASColourClient';
 import ProductJsonLd from './ProductJsonLd';
 import { startingUnitPrice } from '@/lib/decorationPricing';
+import { getAlsoFoundIn } from '@/lib/alsoFoundIn';
 import { COLOUR_SWATCH } from '@/lib/colourSwatch';
 import { colourSlug } from '@/lib/colourName';
 import { absoluteUrl } from '@/lib/siteUrl';
@@ -128,6 +129,9 @@ export default async function ProductPage({ params, searchParams }) {
   const pricingTiers = [...(product.pricing_tiers || [])].sort((a, b) => a.sort_order - b.sort_order);
   const decorations = [...(product.decoration_options || [])].sort((a, b) => a.sort_order - b.sort_order);
 
+  // D9: "Also found in" internal links (scenario collections > colours > subcategory > eco > brand)
+  const alsoFoundIn = await getAlsoFoundIn(product);
+
   // ── GET COLOUR NAMES ──
   let colourData = [];
   let fromColoursField = false;
@@ -230,6 +234,7 @@ export default async function ProductPage({ params, searchParams }) {
           colours={colours}
           pricingTiers={pricingTiers}
           initialColourIndex={initialColourIndex}
+          alsoFoundIn={alsoFoundIn}
         />
       ) : (
         <ProductClient
@@ -241,6 +246,7 @@ export default async function ProductPage({ params, searchParams }) {
           decorations={decorations}
           secondaryColours={product.secondary_colours || null}
           initialColourIndex={initialColourIndex}
+          alsoFoundIn={alsoFoundIn}
         />
       )}
     </>

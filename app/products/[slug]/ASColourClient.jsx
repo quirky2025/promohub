@@ -84,7 +84,7 @@ const COLLAPSE_AT = 40;
 const money = (n) => `$${(Math.round(n * 100) / 100).toFixed(2)}`;
 const aud = (n) => '$' + Number(n || 0).toLocaleString('en-AU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-export default function ASColourClient({ product, mainImage, extraImages = [], colours = [], pricingTiers = [], initialColourIndex = null }) {
+export default function ASColourClient({ product, mainImage, extraImages = [], colours = [], pricingTiers = [], initialColourIndex = null, alsoFoundIn = [] }) {
   const type = decoType(product);
 
   useEffect(() => {
@@ -718,6 +718,21 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
           </div>
         </div>
       </div>
+
+      {/* D9 · Also found in — small link chips (quiet, below the main content) */}
+      {Array.isArray(alsoFoundIn) && alsoFoundIn.length > 0 && (
+        <div style={{ background: '#fff', borderTop: '1px solid #E0DDD7', padding: '20px 40px' }}>
+          <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: '#1B2A4A', textTransform: 'uppercase', letterSpacing: '0.8px' }}>Also found in</span>
+            {alsoFoundIn.map(l => (
+              <a key={l.href} href={l.href}
+                style={{ fontSize: '12.5px', color: '#1B2A4A', textDecoration: 'none', border: '1px solid #E0DDD7', borderRadius: '20px', padding: '5px 14px', fontWeight: 600, background: '#fff' }}>
+                {l.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {quoteOpen && (
         <ASQuoteModal product={product} selection={quoteSelection} colourName={selectedColour !== null ? (colours[selectedColour] && colours[selectedColour].name) : ''} qty={totalQty || minQty} unitPrice={blendedUnit} subtotal={exGst} shipping={SHIPPING} gst={gstAmt} total={grand} onClose={() => setQuoteOpen(false)} />
