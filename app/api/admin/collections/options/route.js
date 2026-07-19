@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { isAdmin, unauthorized } from '@/lib/adminAuth';
 import { sourcingDb } from '@/lib/sourcingDb';
+import { productMaterialFamilies } from '@/lib/smartCollections';
 
 // D8 — distinct values for the rule builder, scanned from real product data.
 export async function GET(request) {
@@ -19,7 +20,7 @@ export async function GET(request) {
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await db
       .from('products')
-      .select('category, subcategory, brand, supplier, colour_slugs, material_tags, decoration_model')
+      .select('name, materials, category, subcategory, brand, supplier, colour_slugs, material_tags, decoration_model')
       .eq('is_published', true)
       .range(from, from + PAGE - 1);
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -34,7 +35,8 @@ export async function GET(request) {
       if (p.brand) brands.add(p.brand);
       if (p.supplier) suppliers.add(p.supplier);
       (Array.isArray(p.colour_slugs) ? p.colour_slugs : []).forEach(c => c && colours.add(c));
-      (Array.isArray(p.material_tags) ? p.material_tags : []).forEach(m => m && materials.add(String(m).toLowerCase()));
+      // material options = the same FAMILIES the sidebar filter shows
+      productMaterialFamilies(p).forEach(m => m && materials.add(m));
       if (p.decoration_model) decoModels.add(p.decoration_model);
     });
     if (!data || data.length < PAGE) break;
