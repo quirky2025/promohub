@@ -18,7 +18,7 @@ import { computeFacets, applyFilters } from '@/lib/filterFacets';
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 
-export default function CategoryFilter({ products = [], category, includeType = true }) {
+export default function CategoryFilter({ products = [], category, includeType = true, materialLinks = [] }) {
   const [selected, setSelected] = useState({});
   const [filterOpen, setFilterOpen] = useState(false);
   const [visible, setVisible] = useState(24);
@@ -46,6 +46,24 @@ export default function CategoryFilter({ products = [], category, includeType = 
         <span>{filterOpen ? '▲' : '▼'}</span>
       </button>
       <div className={`qp-cat-filter${filterOpen ? ' qp-cat-open' : ''}`} style={{ width: '240px', flexShrink: 0 }}>
+        {/* TAXONOMY_V2 step 4 — secondary "Shop by material" entry. NAVIGATION
+            (jumps to a landing page), deliberately boxed + navy-headed so it
+            can't be mistaken for the Material FILTER below. */}
+        {materialLinks.length > 0 && (
+          <div style={{ marginBottom: '14px', border: '1px solid #E0DDD7', borderRadius: '10px', overflow: 'hidden', background: '#fff' }}>
+            <div style={{ background: NAVY, color: '#fff', textAlign: 'center', textTransform: 'uppercase', letterSpacing: '0.8px', padding: '10px 14px', fontWeight: 700, fontSize: '12px' }}>
+              Shop by material
+            </div>
+            <div style={{ padding: '6px 0' }}>
+              {materialLinks.map(l => (
+                <a key={l.href} href={l.href}
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', fontSize: '13.5px', fontWeight: 600, color: NAVY, textDecoration: 'none', borderBottom: '1px solid #F0EEED' }}>
+                  {l.label} <span style={{ color: GOLD }}>›</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
         <FilterSidebar facets={facets} selected={selected} onToggle={onToggle} onClear={clearAll} resultCount={filtered.length} />
       </div>
       <div style={{ flex: 1 }}>

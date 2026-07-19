@@ -32,11 +32,18 @@ export async function POST(request) {
     if (!slug) return NextResponse.json({ error: 'slug required' }, { status: 400 });
     if (isReservedSlug(slug)) return NextResponse.json({ error: `"${slug}" is a reserved URL — pick another slug` }, { status: 400 });
 
-    // slug must not clash with an existing url_pages row that isn't ours
+    // slug clash with an existing url_pages row that isn't ours:
+    // blocked by default, but an explicit takeover is allowed (TAXONOMY_V2:
+    // converting a subcategory/compound page to collection supply — the URL,
+    // title/meta and copy stay, only the product grid source changes).
     const { data: clash } = await db
-      .from('url_pages').select('slug, product_filter').eq('slug', slug).maybeSingle();
-    if (clash && clash.product_filter?.type !== 'smart_collection') {
-      return NextResponse.json({ error: `/${slug} already exists as another page — pick another slug` }, { status: 400 });
+      .from('url_pages').select('slug, product_filter, page_type').eq('slug', slug).maybeSingle();
+    if (clash && clash.product_filter?.type !== 'smart_collection' && !b.allow_takeover) {
+      return NextResponse.json({
+        error: `/${slug} already exists as another page`,
+        code: 'slug_taken',
+        existing_type: clash.product_filter?.type || clash.page_type || 'page',
+      }, { status: 409 });
     }
 
     const row = {
@@ -75,7 +82,10 @@ export async function DELETE(request) {
   const { error } = await db.from('smart_collections').delete().eq('id', id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (col?.slug) {
-    await db.from('url_pages').delete().eq('slug', col.slug)
+    // NEVER hard-delete the url_pages row — taken-over pages carry SEO copy.
+    // Draft = off the site + out of the sitemap, content preserved.
+    await db.from('url_pages').update({ status: 'draft', updated_at: new Date().toISOString() })
+      .eq('slug', col.slug)
       .eq('product_filter->>type', 'smart_collection');
   }
   return NextResponse.json({ ok: true });

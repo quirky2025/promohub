@@ -10,6 +10,7 @@ import {
   getLowestPrice,
   getProductsForUrlPage,
   getAllLivePageSlugs,
+  getMaterialCollectionLinks,
 } from '@/lib/urlPages';
 import { absoluteUrl } from '@/lib/siteUrl';
 import { getPageBanner } from '@/lib/pageBanners';
@@ -60,7 +61,10 @@ export default async function UrlPage({ params }) {
   // Hero banner set in admin → Catalog → Banners (page_key = this page's slug). Null → navy default.
   const banner = await getPageBanner('category', slug);
 
-  const filterable = urlPage.product_filter?.type === 'category' || urlPage.product_filter?.type === 'subcategory';
+  // smart_collection pages get the same filter sidebar as subcategory pages —
+  // TAXONOMY_V2: converted material pages must be visually identical to before.
+  const pfType = urlPage.product_filter?.type;
+  const filterable = pfType === 'category' || pfType === 'subcategory' || pfType === 'smart_collection';
   const { products, count, error, unsupported } = await getProductsForUrlPage(urlPage, filterable ? 1000 : 96);
   // 只把筛选+卡片真正用到的精简字段传给客户端(砍掉 product_colours 图数组 / pricing_tiers / decoration_options),
   // 大幅缩小 RSC payload —— 类目页仍偏慢的主因。
@@ -83,6 +87,14 @@ export default async function UrlPage({ params }) {
     : [];
   const productCount = count ?? products.length;
 
+  // "Shop by material" links (published attribute collections for this category).
+  // Category prop for the filter sidebar: smart_collection pages carry no
+  // category in product_filter — derive it from the resolved products.
+  const filterCategory = urlPage.product_filter?.category || products[0]?.category || null;
+  const materialLinks = urlPage.product_filter?.type === 'category'
+    ? await getMaterialCollectionLinks(urlPage.product_filter.category)
+    : [];
+
   return (
     <main style={{ minHeight: '100vh', background: BG, color: '#000' }}>
       <Breadcrumb urlPage={urlPage} />
@@ -90,6 +102,21 @@ export default async function UrlPage({ params }) {
 
       {childPages.length > 0 && (
         <SubcategorySection childPages={childPages} />
+      )}
+
+      {/* TAXONOMY_V2 step 4 — primary "Shop by material" entry (below Browse by Subcategory) */}
+      {materialLinks.length > 0 && (
+        <section style={{ background: '#fff', borderBottom: '1px solid #E0DDD7', padding: '20px 40px' }}>
+          <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Shop by material</span>
+            {materialLinks.map(l => (
+              <Link key={l.href} href={l.href}
+                style={{ fontSize: '13px', color: NAVY, textDecoration: 'none', border: '1px solid #E0DDD7', borderRadius: '20px', padding: '6px 16px', fontWeight: 600, background: '#fff' }}>
+                {l.label}
+              </Link>
+            ))}
+          </div>
+        </section>
       )}
 
       <section style={{ maxWidth: '1400px', margin: '0 auto', padding: '42px 40px 58px' }}>
@@ -122,7 +149,7 @@ export default async function UrlPage({ params }) {
             </div>
 
             {filterable ? (
-              <CategoryFilter products={filterProducts} category={urlPage.product_filter?.category} includeType={urlPage.product_filter?.type === 'category'} />
+              <CategoryFilter products={filterProducts} category={filterCategory} includeType={urlPage.product_filter?.type === 'category'} materialLinks={materialLinks} />
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(214px, 1fr))', gap: '20px' }}>
                 {products.map((product) => (
