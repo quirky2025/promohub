@@ -5,6 +5,18 @@
 
 ---
 
+## SESSION 2026-07-19 (later 5) — TAXONOMY_V2 Pens (material subcats → rule collections)
+
+- **CODE — PUSH:**
+  - `app/api/admin/collections/route.js` — slug takeover: 409 `slug_taken` unless `allow_takeover`; publish then flips the EXISTING url_pages row to smart_collection supply (URL/title/meta/copy untouched). DELETE now soft-drafts the url_pages row (never hard-deletes SEO copy).
+  - `app/admin/collections/[id]/page.js` — takeover confirm dialog on save.
+  - `app/[slug]/page.js` + `lib/urlPages.js` + `lib/smartCollections.js` — smart_collection pages now render the SAME filter sidebar as subcategory pages (layout parity for converted URLs); category pages get "Shop by material" chips (published ctype='attribute' collections whose rules.category includes the page category) + secondary boxed nav block at top of the filter sidebar (visually separated from the Material FILTER).
+  - `lib/filterConfig.js` — Pens Material facet excludes Silicone (stylus TIP component, §2.6; facet-layer only, data untouched).
+  - `app/admin/products/page.js` — per-row "View ↗" link to the live PDP (Lily request).
+- **Browse by Subcategory auto-cleanup:** taken-over pages become page_type='collection' → excluded from the subcategory card grid (existing filter in getChildPageCards). Nav dropdown links unchanged (still valid LPs).
+- **DATA (Lily/data line):** §2.5 — 11 products with subcategory 'Metal Pens'/'Eco Pens' (non-pen-type values) to be re-typed; orphan check after. SQL given in chat.
+- **PENDING Lily:** §5 Eco Pens — convert to collection same batch, or keep as-is for now.
+
 ## SESSION 2026-07-19 (later 4) — D10 · CMS Phase 2 Blog
 
 - **RUN:** `db/blog_posts.sql`.

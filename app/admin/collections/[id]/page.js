@@ -97,11 +97,27 @@ export default function CollectionEditorPage() {
   async function save({ silent } = {}) {
     if (!col.name.trim()) { alert('Name required'); return null; }
     setBusy('save');
-    const res = await fetch('/api/admin/collections', {
+    let res = await fetch('/api/admin/collections', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...col, slug: col.slug || slugify(col.name) }),
     });
-    const data = await res.json().catch(() => ({}));
+    let data = await res.json().catch(() => ({}));
+    // URL already belongs to an existing page → explicit takeover (URL + copy stay,
+    // only the product grid switches to this collection's rules).
+    if (res.status === 409 && data?.code === 'slug_taken') {
+      const ok = confirm(
+        `/${col.slug || slugify(col.name)} already exists as a "${data.existing_type}" page.\n\n` +
+        `Take it over? The URL, title/meta and copy stay exactly as they are — ` +
+        `only the product grid switches to this collection's rules (on publish).`
+      );
+      if (ok) {
+        res = await fetch('/api/admin/collections', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...col, slug: col.slug || slugify(col.name), allow_takeover: true }),
+        });
+        data = await res.json().catch(() => ({}));
+      }
+    }
     setBusy('');
     if (!res.ok) { alert(`Save failed: ${data?.error || res.status}`); return null; }
     setCol(prev => ({ ...prev, ...data.collection, rules: { ...EMPTY_RULES, ...(data.collection.rules || {}) } }));

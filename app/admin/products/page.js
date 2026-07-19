@@ -260,7 +260,12 @@ export default function AdminProductsPage() {
                     <td style={{ padding: '12px 16px', textAlign: 'center' }}>{product.is_eco ? '🌿' : '—'}</td>
                     <td style={{ padding: '12px 16px', textAlign: 'center' }}>{product.is_new_arrival ? '✨' : '—'}</td>
                     <td style={{ padding: '12px 16px', textAlign: 'center' }}>{product.is_sale ? '🏷️' : '—'}</td>
-                    <td style={{ padding: '12px 16px' }}>
+                    <td style={{ padding: '12px 16px', whiteSpace: 'nowrap' }}>
+                      <a href={`/products/${product.slug}`} target="_blank" rel="noreferrer"
+                        title="Open the live product page in a new tab"
+                        style={{ color: NAVY, border: '1.5px solid #E0DDD7', borderRadius: '6px', padding: '6px 12px', fontSize: '12px', fontWeight: 600, textDecoration: 'none', marginRight: '8px', fontFamily: '"DM Sans", sans-serif' }}>
+                        View ↗
+                      </a>
                       <button onClick={() => startEdit(product)}
                         style={{ background: GOLD, color: '#fff', border: 'none', borderRadius: '6px', padding: '6px 14px', fontSize: '12px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
                         Edit
