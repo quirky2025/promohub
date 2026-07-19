@@ -5,6 +5,18 @@
 
 ---
 
+## SESSION 2026-07-19 (later) — D7 · CMS Phase 1 built (CMS_CONTENT_EDITOR_SPEC.md)
+
+- **RUN:** `db/cms_url_page_revisions.sql` — url_page_revisions table (draft/published history, unique draft per slug, keep last 10 published versions).
+- **NEW CODE — PUSH:**
+  - `app/api/admin/content/route.js` — page list (search) + has_draft flag.
+  - `app/api/admin/content/page/route.js` — GET page/draft/revisions; POST save_draft / publish / rollback / discard_draft. Publish compiles structured guide blocks → `url_pages.seo_content` HTML (front end unchanged), updates title/meta/seo_intro/faq + `updated_at` (= sitemap lastmod). Server-side HTML sanitiser.
+  - `app/api/admin/content/upload/route.js` — content images → R2 `content/<slug>/`, browser-compressed webp.
+  - `app/admin/content/page.js` — Catalog → Content list.
+  - `app/admin/content/[slug]/page.js` — editor: hero (REUSES page_banners record — same as Banners page, per Lily's "unify" decision), title/meta with 60/165 counters, intro textarea, repeatable guide blocks (H2/H3 + limited rich text: bold/link/lists only + optional image with REQUIRED alt), FAQ blocks (auto FAQPage schema via existing front end), paste-cleaning, Preview tab (renders real SeoContent component), Publish + version rollback. Existing seo_content imported as one "EXISTING CONTENT" raw block.
+  - `app/admin/layout.js` — Catalog gets Content tab.
+- Editor known scope (Phase 1): url slug read-only; colour/font locked; image library browsing deferred; Blog = Phase 2.
+
 ## SESSION 2026-07-19 — ops queue A/B/C (FAQ copy, pens $30 fix, subcat deep copy, Brevo)
 
 - **A2/A3 DONE (code):** `app/faq/faqData.js` — #12 shipping answer swapped to 2026-07-17 wording (verbatim); payment answer + EFT sentence appended (verbatim, Lily approved). Pens 6-FAQ schema verified live (same source `url_pages.faq` renders text + FAQPage JSON-LD).
