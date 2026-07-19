@@ -60,7 +60,8 @@ export async function POST(req) {
     }
 
     // Mirror to Brevo (safe no-op if not configured). Don't block the response on it.
-    const brevo = await upsertBrevoContact({ email: clean, attributes: { SOURCE: 'footer_signup' } });
+    // 需求口径 2026-07-18:进 Newsletter 列表(brevo.js 按名称解析),属性 SOURCE=footer
+    const brevo = await upsertBrevoContact({ email: clean, attributes: { SOURCE: 'footer' } });
     if (brevo.ok && !brevo.skipped) {
       await admin.from('contacts').update({ brevo_synced_at: now }).ilike('email', clean);
     }
