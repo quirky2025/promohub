@@ -5,6 +5,17 @@
 
 ---
 
+## SESSION 2026-07-19 (later 2) — D8 · Collections Manager built (COLLECTIONS_MANAGER_SPEC.md)
+
+- **RUN:** `db/smart_collections.sql` — smart_collections (rules/pinned/excluded/status) + collection_products materialised map (FK cascade). Map feeds D9 Also Found In.
+- **NEW CODE — PUSH:**
+  - `lib/smartCollections.js` — rule engine (AND across fields, OR within; price/print-method post-filters; membership = hits + pinned − excluded). No import from urlPages (one-directional).
+  - `app/api/admin/collections/route.js` (CRUD; slug validated vs reserved + url_pages clashes), `…/options/route.js` (distinct field values from products), `…/preview/route.js` (count + first 24, thin<4 warning), `…/publish/route.js` (publish = materialise + upsert url_pages live w/ product_filter {type:'smart_collection'}; unpublish = url_pages draft + clear map; refresh action for after product imports).
+  - `app/admin/collections/page.js` + `app/admin/collections/[id]/page.js` — list + rule-builder editor (live preview, pin ordering, exclude blacklist, slug locked after publish).
+  - `lib/urlPages.js` — getProductsForUrlPage handles type 'smart_collection' (LIVE rule resolution → new imports auto-appear; pinned first).
+  - `app/admin/layout.js` — Catalog gets Collections tab.
+- NOTE: product-data-change incremental refresh of the materialised map = manual "Refresh members" button for now (or republish). Collection pages themselves are always live-resolved.
+
 ## SESSION 2026-07-19 (later) — D7 · CMS Phase 1 built (CMS_CONTENT_EDITOR_SPEC.md)
 
 - **RUN:** `db/cms_url_page_revisions.sql` — url_page_revisions table (draft/published history, unique draft per slug, keep last 10 published versions).
