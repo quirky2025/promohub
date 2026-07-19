@@ -192,11 +192,30 @@ export default function AdminProductsPage() {
       </div>
 
       <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '32px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '12px', flexWrap: 'wrap' }}>
           <h1 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '32px', fontWeight: 600, color: NAVY, margin: 0 }}>Product Management</h1>
-          {success && (
-            <div style={{ background: '#D1FAE5', color: '#065F46', padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: 600 }}>✅ {success}</div>
-          )}
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+            {success && (
+              <div style={{ background: '#D1FAE5', color: '#065F46', padding: '10px 20px', borderRadius: '8px', fontSize: '14px', fontWeight: 600 }}>✅ {success}</div>
+            )}
+            <button
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/admin/product-titles?category=Pens');
+                  if (!res.ok) { const d = await res.json().catch(() => ({})); alert(`Download failed: ${d?.error || res.status}`); return; }
+                  const blob = await res.blob();
+                  const a = document.createElement('a');
+                  a.href = URL.createObjectURL(blob);
+                  a.download = 'product_titles_pens_preview.csv';
+                  a.click();
+                  URL.revokeObjectURL(a.href);
+                } catch (e) { alert(`Download failed: ${e.message}`); }
+              }}
+              title="Preview CSV of enriched display titles (Pens pilot) — review in Excel, send back for import"
+              style={{ background: '#fff', color: NAVY, border: '1.5px solid #E0DDD7', borderRadius: '8px', padding: '9px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
+              ⬇ Titles CSV (Pens)
+            </button>
+          </div>
         </div>
 
         {/* Filters */}
