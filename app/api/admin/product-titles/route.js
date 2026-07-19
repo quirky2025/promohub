@@ -78,7 +78,7 @@ export async function GET(request) {
   for (let from = 0; ; from += PAGE) {
     const { data, error } = await db
       .from('products')
-      .select('supplier_sku, name, subcategory, materials, pen_mechanism')
+      .select('supplier_sku, name, display_title, subcategory, materials, dimensions, pen_mechanism, features, is_eco, colours, specs, seo_description')
       .eq('category', category)
       .eq('is_published', true)
       .order('name')
@@ -88,10 +88,27 @@ export async function GET(request) {
     if (!data || data.length < PAGE) break;
   }
 
-  const lines = ['supplier_sku,name,display_title,material,mechanism,type'];
+  // Rich context so title writing can describe what the product actually IS
+  // (contents, packaging, accessories) — not just re-assemble the name.
+  const flatFeatures = (f) => Array.isArray(f) ? f.filter(Boolean).join(' | ') : '';
+  const flatColours = (c) => {
+    const arr = Array.isArray(c) ? c : (typeof c === 'string' ? (() => { try { return JSON.parse(c); } catch { return []; } })() : []);
+    return Array.isArray(arr) ? arr.map(x => x?.name).filter(Boolean).join(' / ') : '';
+  };
+  const flatSpecs = (s) => Array.isArray(s)
+    ? s.filter(x => x?.name && x?.value).map(x => `${x.name}: ${x.value}`).join(' | ')
+    : '';
+
+  const lines = ['supplier_sku,name,current_display_title,draft_title,material,mechanism,type,eco,features,materials_text,dimensions,colours,specs,seo_description'];
   for (const p of rows) {
     const t = buildTitle(p);
-    lines.push([p.supplier_sku, p.name, t.display, t.material, t.mechanism, t.type].map(csvCell).join(','));
+    lines.push([
+      p.supplier_sku, p.name, p.display_title || '', t.display, t.material, t.mechanism, t.type,
+      p.is_eco ? 'ECO' : '',
+      flatFeatures(p.features), p.materials || '', p.dimensions || '',
+      flatColours(p.colours), flatSpecs(p.specs),
+      String(p.seo_description || '').slice(0, 300),
+    ].map(csvCell).join(','));
   }
 
   return new Response('﻿' + lines.join('\r\n'), {
