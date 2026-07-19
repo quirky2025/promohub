@@ -5,6 +5,14 @@
 
 ---
 
+## SESSION 2026-07-20 — PRODUCT_TITLE_ENRICHMENT (display_title, Pens pilot) + pens material hardening
+
+- **Answer to ops:** yes — front-end display splits cleanly from internal `name`. New `display_title` column feeds PDP H1, title template, Product JSON-LD (+colour variants), breadcrumb tail (visual + BreadcrumbList LD). `name` untouched for search/cart/invoices/supplier matching. All reads fall back to `name` → zero change until data lands.
+- **RUN:** `alter table public.products add column if not exists display_title text;`
+- **CODE — PUSH:** `app/products/[slug]/page.js` (metadata), `ProductClient.jsx` (H1+breadcrumb), `ASColourClient.jsx` (breadcrumb), `ProductJsonLd.jsx` (product/variant/breadcrumb names); `app/api/admin/product-titles/route.js` (NEW — preview CSV generator per spec formula: base minus type noun + Material(barrel) + Mechanism + Type singular, dedupe, ≤55, drop Mechanism→Material, no padding; Presentation/Gift Sets kept as-is).
+- **Flow:** Lily downloads `/api/admin/product-titles?category=Pens` → reviews CSV → returns final → I emit UPDATE SQL. Slugs frozen (untouched).
+- Also this session: pens material = barrel-primary via `penPrimaryMaterial` (component collocations "steel ball/metal clip/silicone grip" stripped before scan), PP folded into Plastic; collection rules share the same derivation.
+
 ## SESSION 2026-07-19 (later 5) — TAXONOMY_V2 Pens (material subcats → rule collections)
 
 - **CODE — PUSH:**

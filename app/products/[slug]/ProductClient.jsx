@@ -268,7 +268,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           <span style={{ margin: '0 8px' }}>›</span>
           <Link href={`/category/${slugify(product.category)}/${slugify(product.subcategory)}`} style={{ color: '#000', textDecoration: 'none' }}>{product.subcategory}</Link>
           <span style={{ margin: '0 8px' }}>›</span>
-          <span style={{ color: NAVY, fontWeight: 600 }}>{product.name}</span>
+          <span style={{ color: NAVY, fontWeight: 600 }}>{product.display_title || product.name}</span>
         </div>
       </div>
 
@@ -305,7 +305,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   </div>
 )}
             <div style={{ fontSize: '12px', color: '#000', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku}</div>
-            <h1 className="qp-pdp-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.name}</h1>
+            <h1 className="qp-pdp-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.display_title || product.name}</h1>
             {product.seo_description && (
               <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.7, margin: '12px 0 0', fontFamily: '"DM Sans", sans-serif' }}>
                 {product.seo_description}
