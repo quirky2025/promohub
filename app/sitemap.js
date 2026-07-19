@@ -117,6 +117,22 @@ export default async function sitemap() {
     priority: pagePriority(page),
   }));
 
+  // blog posts (published only)
+  const { data: blogRows } = await supabase
+    .from('blog_posts')
+    .select('slug, updated_at, published_at')
+    .eq('status', 'published')
+    .limit(500);
+  const blogEntries = [
+    ...(blogRows && blogRows.length ? [staticEntry('/blog')] : []),
+    ...(blogRows || []).map((post) => ({
+      url: absoluteUrl(`/blog/${post.slug}`),
+      lastModified: dateOrNow(post.updated_at || post.published_at),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    })),
+  ];
+
   // products: published + non-empty slug + non-empty name; canonical /products/[slug].
   // No image gate: every published product currently has imagery, and the old
   // gate required a heavy product_colours join that broke pagination (see above).
@@ -137,5 +153,5 @@ export default async function sitemap() {
     });
   }
 
-  return [...staticEntries, ...urlPageEntries, ...productEntries];
+  return [...staticEntries, ...urlPageEntries, ...blogEntries, ...productEntries];
 }

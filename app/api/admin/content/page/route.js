@@ -16,39 +16,8 @@ import { sourcingDb } from '@/lib/sourcingDb';
 
 const KEEP_PUBLISHED_VERSIONS = 10; // spec asks ≥5
 
-// ---- minimal server-side sanitiser (single trusted admin, belt & braces) ----
-function sanitizeHtml(html) {
-  let s = String(html || '');
-  s = s.replace(/<\/(?:script|style|iframe|object|embed)>/gi, '');
-  s = s.replace(/<(?:script|style|iframe|object|embed)[^>]*>/gi, '');
-  s = s.replace(/\son\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, ''); // onload= etc.
-  s = s.replace(/\sstyle\s*=\s*(?:"[^"]*"|'[^']*')/gi, '');          // inline styles
-  s = s.replace(/javascript\s*:/gi, '');
-  return s;
-}
-
-function esc(text) {
-  return String(text || '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-// Compile structured guide blocks → the single seo_content HTML string the
-// front end already renders (components/SeoContent.jsx). Front end unchanged.
-function compileSeoContent(guideBlocks) {
-  const parts = [];
-  for (const b of guideBlocks || []) {
-    if (!b) continue;
-    if (b.level === 'raw') {
-      if (b.html && String(b.html).trim()) parts.push(sanitizeHtml(b.html));
-      continue;
-    }
-    const tag = b.level === 'h3' ? 'h3' : 'h2';
-    if (b.heading && String(b.heading).trim()) parts.push(`<${tag}>${esc(b.heading)}</${tag}>`);
-    if (b.image_url) parts.push(`<p><img src="${esc(b.image_url)}" alt="${esc(b.image_alt || '')}" style="max-width:100%;border-radius:8px" /></p>`);
-    if (b.html && String(b.html).trim()) parts.push(sanitizeHtml(b.html));
-  }
-  return parts.join('\n');
-}
+// Shared sanitiser/compiler (also used by the blog module)
+import { sanitizeHtml, compileBlocks as compileSeoContent } from '@/lib/cmsHtml';
 
 function cleanFaq(faq) {
   return (Array.isArray(faq) ? faq : [])

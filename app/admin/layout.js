@@ -28,6 +28,7 @@ const DOMAINS = [
     { label: 'Products', href: '/admin/products' },
     { label: 'Content', href: '/admin/content' },
     { label: 'Collections', href: '/admin/collections' },
+    { label: 'Blog', href: '/admin/blog' },
     { label: 'Banners', href: '/admin/banners' },
   ] },
   { key: 'customers', label: 'Customers', href: '/admin/customers', tabs: [] },

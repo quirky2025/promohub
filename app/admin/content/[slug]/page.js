@@ -5,70 +5,14 @@
 // intro, guide blocks, FAQ, title/meta. Draft → Preview → Publish + rollback.
 // Rich text is LIMITED: bold / link / lists. No fonts, no sizes, no colours.
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import SeoContent from '@/components/SeoContent';
+import AdminRichText, { compressImage } from '@/components/AdminRichText';
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
-const MAX_W = 1920;
-const QUALITY = 0.82;
-
-// ---------- helpers ----------
-
-const ALLOWED_TAGS = new Set(['P', 'BR', 'B', 'STRONG', 'EM', 'I', 'A', 'UL', 'OL', 'LI', 'H2', 'H3', 'IMG']);
-
-// Paste/HTML cleaner — keeps only allowed tags + href/src/alt. Kills Word/web styling.
-function cleanHtml(dirty) {
-  if (typeof window === 'undefined') return dirty || '';
-  const doc = new DOMParser().parseFromString(`<div>${dirty || ''}</div>`, 'text/html');
-  const walk = (node) => {
-    let out = '';
-    node.childNodes.forEach((child) => {
-      if (child.nodeType === Node.TEXT_NODE) { out += child.textContent.replace(/</g, '&lt;'); return; }
-      if (child.nodeType !== Node.ELEMENT_NODE) return;
-      const tag = child.tagName;
-      const inner = walk(child);
-      if (!ALLOWED_TAGS.has(tag)) { out += inner; return; }
-      if (tag === 'BR') { out += '<br />'; return; }
-      if (tag === 'A') {
-        const href = child.getAttribute('href') || '';
-        if (/^javascript:/i.test(href)) { out += inner; return; }
-        out += `<a href="${href.replace(/"/g, '&quot;')}">${inner}</a>`;
-        return;
-      }
-      if (tag === 'IMG') {
-        const src = child.getAttribute('src') || '';
-        const alt = child.getAttribute('alt') || '';
-        if (src) out += `<img src="${src.replace(/"/g, '&quot;')}" alt="${alt.replace(/"/g, '&quot;')}" style="max-width:100%;border-radius:8px" />`;
-        return;
-      }
-      const t = tag.toLowerCase();
-      out += `<${t}>${inner}</${t}>`;
-    });
-    return out;
-  };
-  return walk(doc.body.firstChild);
-}
-
-function compressImage(file) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const url = URL.createObjectURL(file);
-    img.onload = () => {
-      URL.revokeObjectURL(url);
-      const scale = Math.min(1, MAX_W / img.width);
-      const w = Math.round(img.width * scale), h = Math.round(img.height * scale);
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      c.toBlob(b => b ? resolve(b) : reject(new Error('compress failed')), 'image/webp', QUALITY);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Not an image file (save iPhone HEIC as JPG first)')); };
-    img.src = url;
-  });
-}
 
 // Compile blocks → HTML exactly like the server does (for Preview parity).
 function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -82,70 +26,6 @@ function compilePreview(blocks) {
     if (b.html?.trim()) parts.push(b.html);
   }
   return parts.join('\n');
-}
-
-// ---------- limited rich text ----------
-
-function RichText({ value, onChange, minHeight = 90, placeholder }) {
-  const ref = useRef(null);
-  const lastValue = useRef(value);
-  // Frozen initial content: React must NEVER rewrite innerHTML on re-render,
-  // or the caret jumps to the start on every keystroke. External updates
-  // (loading a draft/rollback) are applied by the effect below instead.
-  const initial = useRef(value);
-
-  useEffect(() => {
-    if (ref.current && value !== lastValue.current && document.activeElement !== ref.current) {
-      ref.current.innerHTML = value || '';
-      lastValue.current = value;
-    }
-  }, [value]);
-
-  function emit() {
-    const html = ref.current?.innerHTML || '';
-    lastValue.current = html;
-    onChange(html);
-  }
-  function cmd(name) {
-    ref.current?.focus();
-    if (name === 'createLink') {
-      const url = window.prompt('Link URL (e.g. /custom-packaging-australia or https://…)');
-      if (!url) return;
-      document.execCommand('createLink', false, url);
-    } else {
-      document.execCommand(name, false, null);
-    }
-    emit();
-  }
-  function onPaste(e) {
-    e.preventDefault();
-    const html = e.clipboardData.getData('text/html') || esc(e.clipboardData.getData('text/plain')).replace(/\n/g, '<br />');
-    document.execCommand('insertHTML', false, cleanHtml(html));
-    emit();
-  }
-
-  const btn = { background: '#fff', border: '1px solid #E0DDD7', borderRadius: 6, padding: '4px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer', color: NAVY };
-  return (
-    <div>
-      <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
-        <button type="button" style={btn} onClick={() => cmd('bold')}><b>B</b></button>
-        <button type="button" style={btn} onClick={() => cmd('createLink')}>🔗 Link</button>
-        <button type="button" style={btn} onClick={() => cmd('insertUnorderedList')}>• List</button>
-        <button type="button" style={btn} onClick={() => cmd('insertOrderedList')}>1. List</button>
-      </div>
-      <div
-        ref={ref}
-        contentEditable
-        suppressContentEditableWarning
-        onInput={emit}
-        onBlur={() => { const c = cleanHtml(ref.current?.innerHTML); if (c !== lastValue.current) { ref.current.innerHTML = c; lastValue.current = c; onChange(c); } }}
-        onPaste={onPaste}
-        data-placeholder={placeholder || ''}
-        style={{ border: '1.5px solid #E0DDD7', borderRadius: 8, padding: '10px 12px', minHeight, fontSize: 14, lineHeight: 1.7, color: '#000', outline: 'none', background: '#fff' }}
-        dangerouslySetInnerHTML={{ __html: initial.current || '' }}
-      />
-    </div>
-  );
 }
 
 // ---------- page ----------
@@ -404,7 +284,7 @@ export default function ContentEditorPage() {
                       onClick={() => { if (confirm('Delete this block?')) upd({ guide_blocks: payload.guide_blocks.filter((_, x) => x !== i) }); }}>✕</button>
                   </span>
                 </div>
-                <RichText value={b.html || ''} onChange={html => updBlock(i, { html })} placeholder="Write the section content…" />
+                <AdminRichText value={b.html || ''} onChange={html => updBlock(i, { html })} placeholder="Write the section content…" />
                 {b.level !== 'raw' && (
                   <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                     {b.image_url && <img src={b.image_url} alt="" style={{ height: 44, borderRadius: 6 }} />}
@@ -439,7 +319,7 @@ export default function ContentEditorPage() {
                   <button style={{ ...smallBtn, color: '#991B1B', borderColor: '#E0C9C9' }}
                     onClick={() => { if (confirm('Delete this FAQ?')) upd({ faq: payload.faq.filter((_, x) => x !== i) }); }}>✕</button>
                 </div>
-                <RichText value={f.answer || ''} onChange={answer => updFaq(i, { answer })} minHeight={60} placeholder="Answer…" />
+                <AdminRichText value={f.answer || ''} onChange={answer => updFaq(i, { answer })} minHeight={60} placeholder="Answer…" />
               </div>
             ))}
             <button style={{ ...smallBtn, borderStyle: 'dashed', width: '100%', padding: '10px 0' }}

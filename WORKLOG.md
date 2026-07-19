@@ -5,6 +5,17 @@
 
 ---
 
+## SESSION 2026-07-19 (later 4) — D10 · CMS Phase 2 Blog
+
+- **RUN:** `db/blog_posts.sql`.
+- **NEW/CHANGED CODE — PUSH:**
+  - `lib/cmsHtml.js` — shared sanitize/compile/addHeadingIds; `app/api/admin/content/page/route.js` refactored to use it.
+  - `components/AdminRichText.jsx` — rich text extracted from the page editor (content editor `[slug]/page.js` refactored to import it).
+  - `app/api/admin/blog/route.js` — CRUD + publish/unpublish (slug locked after publish; alt text required for cover; content_html compiled at publish).
+  - `app/admin/blog/page.js` + `app/admin/blog/[id]/page.js` — list + editor (cover, meta, target keyword internal, TOC toggle, blocks, related products/pages searchable multi-select). Catalog → Blog tab in `app/admin/layout.js`.
+  - `app/blog/page.js` (index) + `app/blog/[slug]/page.js` (detail: breadcrumb, auto-TOC from H2 ids, body via SeoContent styles, Article JSON-LD, end CTA Get a Quote + related product grid + related page chips). ISR 300.
+  - `app/sitemap.js` — /blog + published posts included.
+
 ## SESSION 2026-07-19 (later 3) — D9 · PDP "Also found in" (PDP_ALSO_FOUND_IN_SPEC.md)
 
 - `lib/alsoFoundIn.js` — links per product: published smart collections (from materialised collection_products — no rule runs per request) > colour collection pages > its subcategory page > eco page (compound is_eco, fallback /sustainability) > brand page. Live + non-noindex only, cap 8, dedup.
