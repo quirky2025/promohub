@@ -5,6 +5,15 @@
 
 ---
 
+## SESSION 2026-07-19 — ops queue A/B/C (FAQ copy, pens $30 fix, subcat deep copy, Brevo)
+
+- **A2/A3 DONE (code):** `app/faq/faqData.js` — #12 shipping answer swapped to 2026-07-17 wording (verbatim); payment answer + EFT sentence appended (verbatim, Lily approved). Pens 6-FAQ schema verified live (same source `url_pages.faq` renders text + FAQPage JSON-LD).
+- **A1 (SQL, given to Lily):** replace `$30 flat shipping Australia-wide.` in `url_pages.seo_content` for `branded-pens-australia` with approved $25 sentence.
+- **B4 (SQL, given to Lily):** eco-pens-australia + custom-metal-pens-australia title/meta/seo_intro/seo_content/faq from `PENS_SUBCATS_DEEP_COPY.md` (verbatim; internal Chinese note dropped; Corporate Gifts scenario page link skipped — page not live yet; /sustainability link skipped — no natural anchor in approved copy, flagged to ops).
+- **C5 DONE (code):** subscribe SOURCE → `footer`; `lib/brevo.js` resolves Brevo list by name 'Newsletter' (env BREVO_LIST_ID still overrides); success msg → "You're in — welcome email on its way."
+- **C6 BLOCKED:** `POPUP_LEAD_CAPTURE_SPEC.md` does NOT exist in outputs/dev_requests → reported back to ops line.
+- D specs present: CMS_CONTENT_EDITOR_SPEC.md, COLLECTIONS_MANAGER_SPEC.md. Not started.
+
 ## SESSION 2026-07-18 — admin counts + category truth + banner keys (per HANDOVER-CATEGORIES.md §4)
 
 **DECISION (Lily):** Option A — admin follows the live site. Category dropdowns read from live `url_pages`; legacy values (Business/Print/Personal/Promotion/Leisure…) shown in a separate "Legacy" group. Data cleanup (Option B) deferred.

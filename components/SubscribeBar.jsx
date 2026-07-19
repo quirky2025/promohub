@@ -24,7 +24,7 @@ export default function SubscribeBar() {
         body: JSON.stringify({ email: clean }),
       });
       const data = await res.json();
-      if (res.ok) { setStatus('done'); setEmail(''); setMsg("You're in — thanks for subscribing!"); }
+      if (res.ok) { setStatus('done'); setEmail(''); setMsg("You're in — welcome email on its way."); }
       else { setStatus('error'); setMsg(data.error || 'Something went wrong. Please try again.'); }
     } catch {
       setStatus('error'); setMsg('Something went wrong. Please try again.');
