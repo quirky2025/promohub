@@ -315,9 +315,10 @@ export default function AdminProductsPage() {
         )}
       </div>
 
-      {/* Edit Modal */}
+      {/* Edit Modal — deliberately NOT closable by clicking the backdrop:
+          Lily edits SEO product-by-product; a stray click must never nuke unsaved edits. */}
       {editing && (
-        <div onClick={e => e.target === e.currentTarget && setEditing(null)}
+        <div
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
           <div style={{ background: '#fff', borderRadius: '16px', maxWidth: '700px', width: '100%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
 

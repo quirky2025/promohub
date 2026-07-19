@@ -9,7 +9,7 @@ import { gaEvent } from '@/lib/gtag';
 import CartDrawer from '@/components/CartDrawer';
 import { getColourHex } from '@/lib/colourSwatch';
 import { slugify } from '@/lib/slug';
-import { colourImageAlt, cleanColour } from '@/lib/colourName';
+import { colourImageAlt, cleanColour, formatColourName } from '@/lib/colourName';
 import ProductImg from '@/components/ProductImg';
 import { uploadImage } from '@/lib/imageHost';
 import QuoteWizard from './QuoteWizard';
@@ -104,7 +104,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
       const { name } = cleanColour(c?.name);
       if (name) {
         const k = name.toLowerCase();
-        if (!seen.has(k)) { seen.add(k); out.push(name); }
+        if (!seen.has(k)) { seen.add(k); out.push(formatColourName(name)); }
       }
     }
     return out;
@@ -326,7 +326,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                           : hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: hex, border: hex === '#FFFFFF' ? '1px solid #E0DDD7' : '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
                           : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
                       </div>
-                      <div style={{ fontSize: '10px', color: selectedSecondary === i ? GOLD : '#000', fontWeight: selectedSecondary === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
+                      <div style={{ fontSize: '10px', color: selectedSecondary === i ? GOLD : '#000', fontWeight: selectedSecondary === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{formatColourName(c.name)}</div>
                     </div>
                   );
                 })}
@@ -351,7 +351,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                           : hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: hex, border: hex === '#FFFFFF' ? '1px solid #E0DDD7' : '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
                           : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
                       </div>
-                      <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#000', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{c.name}</div>
+                      <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#000', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{formatColourName(c.name)}</div>
                     </div>
                   );
                 })}
