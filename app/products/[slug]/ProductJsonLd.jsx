@@ -78,7 +78,7 @@ export default async function ProductJsonLd({ product, images = [], pricingTiers
   // ── base Product fields (shared by Product and ProductGroup) ──
   const base = {
     '@context': 'https://schema.org',
-    name: product.name,
+    name: product.display_title || product.name,
     ...(description ? { description } : {}),
     ...(product.supplier_sku ? { sku: String(product.supplier_sku) } : {}),
     brand: { '@type': 'Brand', name: brand },
@@ -113,7 +113,7 @@ export default async function ProductJsonLd({ product, images = [], pricingTiers
         const offer = offerFor(vUrl);
         return {
           '@type': 'Product',
-          name: `${product.name} - ${v.colour_name}`,
+          name: `${product.display_title || product.name} - ${v.colour_name}`,
           color: v.colour_name,
           image: v.image_url,
           url: vUrl,
@@ -144,7 +144,7 @@ export default async function ProductJsonLd({ product, images = [], pricingTiers
       items.push({ '@type': 'ListItem', position: pos++, name: product.subcategory, item: s.url });
     }
   }
-  items.push({ '@type': 'ListItem', position: pos, name: product.name, item: canonical });
+  items.push({ '@type': 'ListItem', position: pos, name: product.display_title || product.name, item: canonical });
 
   const breadcrumbLd = {
     '@context': 'https://schema.org',

@@ -50,7 +50,7 @@ export async function generateMetadata({ params, searchParams }) {
 
   const { data: product } = await supabase
     .from('products')
-    .select('name, slug, meta_title, meta_description, seo_description, category, subcategory, materials, is_eco')
+    .select('name, display_title, slug, meta_title, meta_description, seo_description, category, subcategory, materials, is_eco')
     .eq('slug', slug)
     .eq('is_published', true)
     .single();
@@ -68,14 +68,18 @@ export async function generateMetadata({ params, searchParams }) {
   }
 
 
+  // PRODUCT_TITLE_ENRICHMENT: display_title (when populated) feeds the customer-
+  // facing title/H1/JSON-LD; internal `name` keeps serving search/cart/invoices.
+  const displayName = product.display_title || product.name;
+
   const title =
     withBrand(product.meta_title) ||
-    `Custom ${product.name} with Logo | ${BRAND}`;
+    `Custom ${displayName} with Logo | ${BRAND}`;
 
   const description =
     product.meta_description ||
     product.seo_description ||
-    `Order custom ${product.name.toLowerCase()} with your logo for corporate gifts, events and brand promotions. ` +
+    `Order custom ${displayName.toLowerCase()} with your logo for corporate gifts, events and brand promotions. ` +
       `${product.materials ? product.materials + '. ' : ''}` +
       `Fast Australia-wide delivery, branding options and bulk quote support.`;
 

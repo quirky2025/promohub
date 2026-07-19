@@ -247,7 +247,7 @@ export default function ASColourClient({ product, mainImage, extraImages = [], c
             </>
           )}
           <span style={{ color: '#C8C4BC', margin: '0 8px' }}>/</span>
-          <span style={{ color: NAVY }}>{product.name}</span>
+          <span style={{ color: NAVY }}>{product.display_title || product.name}</span>
         </div>
       </div>
 
