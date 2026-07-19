@@ -485,6 +485,12 @@ export default function AdminProductsPage() {
               {activeTab === 'seo' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div>
+                    <label style={labelStyle}>Display Title <span style={{ color: '#9CA3AF', fontWeight: 400, textTransform: 'none' }}>(customer-facing H1 / breadcrumb / Google name — blank = product name; internal name &amp; URL never change)</span></label>
+                    <input type="text" value={editing.display_title || ''} onChange={e => updateField('display_title', e.target.value || null)}
+                      placeholder={editing.name} maxLength={70} style={inputStyle} />
+                    <div style={{ fontSize: '11px', color: (editing.display_title || '').length > 55 ? '#B91C1C' : '#9CA3AF', marginTop: '4px', textAlign: 'right', fontWeight: (editing.display_title || '').length > 55 ? 700 : 400 }}>{(editing.display_title || '').length}/55</div>
+                  </div>
+                  <div>
                     <label style={labelStyle}>Meta Title <span style={{ color: '#9CA3AF', fontWeight: 400, textTransform: 'none' }}>(60 chars max)</span></label>
                     <input type="text" value={editing.meta_title || ''} onChange={e => updateField('meta_title', e.target.value)}
                       placeholder="e.g. Custom Canvas Cooler Bags | QuirkyPromo Australia" maxLength={60} style={inputStyle} />

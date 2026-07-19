@@ -5,7 +5,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-const LIST_COLUMNS = 'id, name, slug, category, subcategory, brand, collection, is_eco, is_new_arrival, is_sale, is_published, indent_type, status, meta_title, meta_description, alt_text, supplier_sku, seo_description, features, dimensions, materials, capacity, packing, description';
+const LIST_COLUMNS = 'id, name, display_title, slug, category, subcategory, brand, collection, is_eco, is_new_arrival, is_sale, is_published, indent_type, status, meta_title, meta_description, alt_text, supplier_sku, seo_description, features, dimensions, materials, capacity, packing, description';
 
 // Apply search + category filters (shared by the count queries and the list query)
 function applyCommonFilters(query, { search, category }) {
