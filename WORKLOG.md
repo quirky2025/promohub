@@ -5,6 +5,17 @@
 
 ---
 
+## SESSION 2026-07-21 — display_title 全类目批量完成(18 类目)+ 58 新品数据抓取 + 改类修正
+
+- **标题批量(今日主任务,完成):** 18 个类目 ~4700+ 产品 display_title 全部手写交付(Pens 424 之前已交)。本场新增:Key Rings 144 / Marketing Materials 27 / Office & Desk 405 / Outdoor & Sports 305 / Packaging 85 / Personal Care 142 / Pet 39 / Technology 426 / Tools & Auto 104 / Toys & Games 279 / Travel 40;此前已交 Bags/Barware/Drinkware/Flags/Giveaways/Headwear/Home。**Apparel 按 Lily 指示挂起。**
+- **交付位置:** `outputs/titles/` — 每类目 `*_FINAL(_QUALIFIED).csv`(sku,name,display_title,note)+ `*_IMPORT.sql`(update+meta_title 清空,begin/commit)。锁定规则:无逗号/≤68 字符/数字规格前置/限定词 md5(sku) 加权轮换(Custom30 Promo25 Customised15 LogoPrinted15 Imprinted10 Advertising5)/QLP 功能词/澳拼。
+- **RUN(Lily,按序):** ① 各类目 `*_IMPORT.sql`(未跑的)② `TOOLS_RECATEGORISE_FIX.sql` + `TOYS_OFFICE_RECATEGORISE_FIX.sql` ③ 58 新品数据 UPDATE(chat 分段贴)④ `THINDATA_TITLES_PATCH.sql`(31 个升级标题,**最后跑**)。
+- **58 新品数据抓取:** Trends 官网(trends.com.au,web_fetch 免登录)抓 specs/features/packing/materials/dimensions → UPDATE SQL 贴 chat。57 成功;129724 官网无页 → **下线**(SQL 已给)。133810 Kadi Large 经经销商镜像补齐。
+- **下线(本场累计):** 129191/129192(Office 特价重复)、H337(Personal Care 口罩)、PS5115/PS5023/PS5092(无容量 U 盘)、129724。
+- **改类(SQL 已给,含标题):** 128390 SPICE 笔礼盒→Pens/Pen Gift Sets;LL0030/LL3076→Toys & Games;LL3035/LL3033/LL3036→Home & Living(Candles & Diffusers);LL6370/LL8239→Home & Living/Kitchen & Dining;LL1002/LL6376→Home & Living;LN38/LN40→Key Rings;K235/K247/LL678/LN709→Giveaways/Novelty Giveaways。121121/121124/K228 分类先不动(Lily)。
+- **数据修正:** K490 颜色 Custom→Clear;112193 电池 AA→AAA;PSSUN03 颜色确认 White。
+- **挂起:** Merch Pack 集合(32 个,`MERCH_PACKS_LIST.csv`,标题收尾后一起弄)、Apparel 标题、供应商库存前端展示(讨论中)、搜索框加清除 X(待做)。
+
 ## SESSION 2026-07-20 — PRODUCT_TITLE_ENRICHMENT (display_title, Pens pilot) + pens material hardening
 
 - **Answer to ops:** yes — front-end display splits cleanly from internal `name`. New `display_title` column feeds PDP H1, title template, Product JSON-LD (+colour variants), breadcrumb tail (visual + BreadcrumbList LD). `name` untouched for search/cart/invoices/supplier matching. All reads fall back to `name` → zero change until data lands.

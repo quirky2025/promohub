@@ -511,7 +511,10 @@ export default function Nav() {
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               onKeyDown={handleSearch}
-              style={{ width: '100%', padding: '16px 52px 16px 22px', borderRadius: '10px', border: '1px solid rgba(255,255,255,.25)', background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: '15px', outline: 'none', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
+              style={{ width: '100%', padding: '16px 84px 16px 22px', borderRadius: '10px', border: '1px solid rgba(255,255,255,.25)', background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: '15px', outline: 'none', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
+            {searchQuery && (
+              <span onClick={() => setSearchQuery('')} aria-label="Clear search" style={{ position: 'absolute', right: '50px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.6)', fontSize: '20px', cursor: 'pointer', lineHeight: 1, padding: '4px' }}>×</span>
+            )}
             <span onClick={handleSearchClick} style={{ position: 'absolute', right: '18px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.6)', fontSize: '20px', cursor: 'pointer' }}>🔍</span>
           </div>
           <div className="qp-topbar-right" style={{ display: 'flex', alignItems: 'center', gap: '32px', flexShrink: 0 }}>
@@ -551,7 +554,10 @@ export default function Nav() {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             onKeyDown={handleSearch}
-            style={{ width: '100%', padding: '12px 44px 12px 16px', borderRadius: '10px', border: '1px solid rgba(255,255,255,.25)', background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: '15px', outline: 'none', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
+            style={{ width: '100%', padding: '12px 72px 12px 16px', borderRadius: '10px', border: '1px solid rgba(255,255,255,.25)', background: 'rgba(255,255,255,.1)', color: '#fff', fontSize: '15px', outline: 'none', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
+          {searchQuery && (
+            <span onClick={() => setSearchQuery('')} aria-label="Clear search" style={{ position: 'absolute', right: '42px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.6)', fontSize: '18px', cursor: 'pointer', lineHeight: 1, padding: '4px' }}>×</span>
+          )}
           <span onClick={handleSearchClick} style={{ position: 'absolute', right: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,.6)', fontSize: '18px', cursor: 'pointer' }}>🔍</span>
         </div>
       </div>
@@ -733,7 +739,10 @@ export default function Nav() {
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => { if (e.key === 'Enter') { setMobileOpen(false); handleSearch(e); } }}
-                  style={{ width: '100%', padding: '11px 40px 11px 14px', borderRadius: '8px', border: '1px solid #D8D2C6', background: '#ffffff', color: '#000', fontSize: '15px', outline: 'none', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
+                  style={{ width: '100%', padding: '11px 64px 11px 14px', borderRadius: '8px', border: '1px solid #D8D2C6', background: '#ffffff', color: '#000', fontSize: '15px', outline: 'none', fontFamily: '"DM Sans", sans-serif', boxSizing: 'border-box' }} />
+                {searchQuery && (
+                  <span onClick={() => setSearchQuery('')} aria-label="Clear search" style={{ position: 'absolute', right: '38px', top: '50%', transform: 'translateY(-50%)', color: '#9A958C', fontSize: '17px', cursor: 'pointer', lineHeight: 1, padding: '4px' }}>×</span>
+                )}
                 <span onClick={() => { setMobileOpen(false); handleSearchClick(); }} style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#9A958C', fontSize: '17px', cursor: 'pointer' }}>🔍</span>
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
