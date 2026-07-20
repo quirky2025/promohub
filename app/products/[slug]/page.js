@@ -72,9 +72,13 @@ export async function generateMetadata({ params, searchParams }) {
   // facing title/H1/JSON-LD; internal `name` keeps serving search/cart/invoices.
   const displayName = product.display_title || product.name;
 
+  // Enriched titles carry their own commercial qualifier (Custom / Promotional /
+  // Logo Printed…) — don't wrap them in the template or Google sees "Custom Custom …".
+  const hasQualifier = /^(custom|customised|promotional|advertising|logo\s?printed|imprinted|branded|personalised|printed)\b/i.test(displayName);
+
   const title =
     withBrand(product.meta_title) ||
-    `Custom ${displayName} with Logo | ${BRAND}`;
+    (hasQualifier ? `${displayName} | ${BRAND}` : `Custom ${displayName} with Logo | ${BRAND}`);
 
   const description =
     product.meta_description ||
