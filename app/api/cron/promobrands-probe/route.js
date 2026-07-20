@@ -49,6 +49,7 @@ export async function GET(request) {
         got_len: key ? key.length : 0,
         got_head: got ? got.slice(0, 4) : null,
         would_match_after_trim: !!env && env === got,
+        env_keys_seen: Object.keys(process.env).filter(k => /PROBE|TRENDS|PROMOB/i.test(k)),
       },
     }, { status: 401 });
   }
