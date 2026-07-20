@@ -1,4 +1,4 @@
-// D11 · PromoBrands API 探测代理(key 保护;调通后可删)
+// D11 · PromoBrands API 探测代理(key 保护;调通后可删)v2
 // 认证:AWS Cognito refresh_token 流 —— 用 PROMOBRANDS_CLIENT_ID + PROMOBRANDS_REFRESH_TOKEN
 // 换 id_token(60 分钟有效,模块级缓存 55 分钟),再以 Bearer id_token 调 api.promobrands.com.au。
 // 用法:
