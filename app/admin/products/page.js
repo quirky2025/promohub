@@ -200,20 +200,21 @@ export default function AdminProductsPage() {
             )}
             <button
               onClick={async () => {
+                const cat = categoryFilter || 'Pens';
                 try {
-                  const res = await fetch('/api/admin/product-titles?category=Pens');
+                  const res = await fetch(`/api/admin/product-titles?category=${encodeURIComponent(cat)}`);
                   if (!res.ok) { const d = await res.json().catch(() => ({})); alert(`Download failed: ${d?.error || res.status}`); return; }
                   const blob = await res.blob();
                   const a = document.createElement('a');
                   a.href = URL.createObjectURL(blob);
-                  a.download = 'product_titles_pens_preview.csv';
+                  a.download = `product_titles_${cat.toLowerCase().replace(/[^a-z0-9]+/g, '_')}.csv`;
                   a.click();
                   URL.revokeObjectURL(a.href);
                 } catch (e) { alert(`Download failed: ${e.message}`); }
               }}
-              title="Preview CSV of enriched display titles (Pens pilot) — review in Excel, send back for import"
+              title="Full-context titles CSV for the category selected in the dropdown (no selection = Pens)"
               style={{ background: '#fff', color: NAVY, border: '1.5px solid #E0DDD7', borderRadius: '8px', padding: '9px 16px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif' }}>
-              ⬇ Titles CSV (Pens)
+              ⬇ Titles CSV ({categoryFilter || 'Pens'})
             </button>
           </div>
         </div>
