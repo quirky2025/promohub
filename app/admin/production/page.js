@@ -355,7 +355,7 @@ export default function AdminProductionPage() {
                       ) : <span style={{ color: '#000' }}>—</span>}
                     </td>
                     <td style={{ padding: '12px', color: '#000' }}>{po ? <span>{supplierName(po.supplier_id)}{termsBadge(po.supplier_id)}</span> : ''}</td>
-                    <td style={{ padding: '12px', whiteSpace: 'nowrap', color: NAVY }}>{po ? <span>{money(po.cost_total)} <button onClick={() => openEdit(o, po)} style={{ background: 'none', border: 'none', color: GOLD, fontSize: '11px', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>edit</button></span> : ''}</td>
+                    <td style={{ padding: '12px', whiteSpace: 'nowrap', color: NAVY }}>{po ? <span>{money((Number(po.cost_total) || 0) * 1.1)} <span style={{ fontSize: '10px', color: '#000' }}>含GST</span> <button onClick={() => openEdit(o, po)} style={{ background: 'none', border: 'none', color: GOLD, fontSize: '11px', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>edit</button></span> : ''}</td>
                     <td style={{ padding: '12px', whiteSpace: 'nowrap', fontSize: '12px' }}>
                       {po ? (
                         <span>

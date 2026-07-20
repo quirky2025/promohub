@@ -85,7 +85,7 @@ export default function ProductSupplierPO({ orderId, orderNumber, itemIndex, pro
           <a href={`/api/admin/purchase-orders/pdf?id=${po.id}`} target="_blank" rel="noreferrer" style={{ fontFamily: 'monospace', fontWeight: 700, color: NAVY }}>{po.po_number}</a>
           <span style={{ background: '#EEF', color: '#3730A3', fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 10 }}>{PO_STATUS[po.status] || po.status}</span>
           <span>{supName(po.supplier_id)}</span>
-          <span style={{ fontWeight: 700 }}>{money(po.cost_total)}</span>
+          <span style={{ fontWeight: 700 }}>{money((Number(po.cost_total) || 0) * 1.1)} <span style={{ fontSize: 9, color: '#000' }}>含GST</span></span>
           <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center', marginLeft: 'auto', flexWrap: 'wrap' }}>
             <button onClick={() => patchPo(po.id, { action: 'send' })} style={{ background: 'none', border: 'none', color: NAVY, fontWeight: 700, cursor: 'pointer', fontSize: 12 }}>✉ 发</button>
             {po.supplier_invoice_number
