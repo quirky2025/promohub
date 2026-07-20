@@ -38,7 +38,19 @@ export async function GET(request) {
   const key = url.searchParams.get('key');
   const probeKey = process.env.PROBE_KEY || process.env.TRENDS_PROBE_KEY;
   if (!probeKey || key !== probeKey) {
-    return Response.json({ error: 'unauthorized' }, { status: 401 });
+    const env = (probeKey || '').trim();
+    const got = (key || '').trim();
+    return Response.json({
+      error: 'unauthorized',
+      debug: {
+        env_configured: !!probeKey,
+        env_len: probeKey ? probeKey.length : 0,
+        env_head: env ? env.slice(0, 4) : null,
+        got_len: key ? key.length : 0,
+        got_head: got ? got.slice(0, 4) : null,
+        would_match_after_trim: !!env && env === got,
+      },
+    }, { status: 401 });
   }
 
   const path = url.searchParams.get('path') || '/category';
