@@ -116,8 +116,11 @@ async function processChunk(db, slice, token) {
   }));
 
   let writeError = null;
-  const ids = slice.map(p => p.id);
-  const del = await db.from('product_stock').delete().in('product_id', ids);
+  // 只清除本次成功拉到数据的产品的旧行;拉取失败的保留旧数据(宁可旧,不可丢)
+  const ids = results.filter(r => !r.error).map(r => bySku.get(r.sku).id);
+  const del = ids.length
+    ? await db.from('product_stock').delete().in('product_id', ids)
+    : { error: null };
   if (del.error) writeError = `delete: ${del.error.message}`;
   if (!writeError && stockRows.length) {
     const ins = await db.from('product_stock').insert(stockRows);
