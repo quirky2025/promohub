@@ -12,8 +12,9 @@ let cached = { token: null, exp: 0 };
 
 async function idToken() {
   if (cached.token && Date.now() < cached.exp) return cached.token;
-  const clientId = process.env.PROMOBRANDS_CLIENT_ID;
-  const refreshToken = process.env.PROMOBRANDS_REFRESH_TOKEN;
+  // 净化:长 token 粘贴进 Vercel 时常混入换行/空格 → Cognito 报 invalid_grant。
+  const clientId = String(process.env.PROMOBRANDS_CLIENT_ID || '').replace(/\s+/g, '');
+  const refreshToken = String(process.env.PROMOBRANDS_REFRESH_TOKEN || '').replace(/\s+/g, '');
   if (!clientId || !refreshToken) throw new Error('Missing PROMOBRANDS_CLIENT_ID / PROMOBRANDS_REFRESH_TOKEN env vars');
   const res = await fetch(TOKEN_URL, {
     method: 'POST',
@@ -27,7 +28,9 @@ async function idToken() {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok || !data.id_token) {
-    throw new Error(`Cognito token exchange failed (${res.status}): ${JSON.stringify(data).slice(0, 300)}`);
+    // 体检信息:只报长度和首尾片段,不泄露值(clientId 应 26;refresh token 应 ~1800+,eyJjdHki 开头 Qow 结尾)
+    const diag = `clientId_len=${clientId.length} head=${clientId.slice(0, 4)} | rt_len=${refreshToken.length} head=${refreshToken.slice(0, 8)} tail=${refreshToken.slice(-3)}`;
+    throw new Error(`Cognito token exchange failed (${res.status}): ${JSON.stringify(data).slice(0, 200)} [${diag}]`);
   }
   cached = { token: data.id_token, exp: Date.now() + 55 * 60 * 1000 };
   return cached.token;
