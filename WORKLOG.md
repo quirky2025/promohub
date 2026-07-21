@@ -28,6 +28,13 @@
 ### 改动文件清单(本 session PUSH)
 components/ProductSupplierPO.jsx · app/admin/orders/page.js · app/api/admin/orders/review-invite/route.js(新) · app/admin/content/page.js · app/api/admin/content/route.js · app/admin/collections/[id]/page.js · app/api/admin/collections/route.js · app/admin/collections/page.js · lib/alsoFoundIn.js · lib/smartCollections.js · db/ia_taxonomy.sql(新,已 RUN) · app/api/cron/inject-pens-drafts/route.js(新,Pens 7 页草稿注入,跑完可删)
 
+### D13 · 站内产品评价系统(同日加急,Lily:"现在做")✅ 代码完
+- **双轨评价**:⭐ 邀评邮件改链**站内表单** `/review/<token>`(30 秒:星级+姓名+评语);提交后感谢页引导 "Also share it on Google"(GOOGLE_REVIEW_URL,无则隐藏)。Google 商家资料同日找回(Lily 清掉重复条目后正主已验证,Ask for reviews 可用)。
+- **RUN**:`db/product_reviews.sql`(product_reviews 表,token 邀评/待审/上墙;RLS 保持开启,全部走 service key)。
+- 链路:review-invite 建 token 行+发邮件(重发复用未提交 token)→ /api/review/submit(公开,token 一次性)→ **Admin Customers→Reviews** 审核(批准/拒绝/撤回)→ PDP:H1 下星级摘要锚点 + Customer Reviews 卡片墙(≤9 条)+ **AggregateRating/Review JSON-LD(搜索结果带星)**。PDP 读取走 sourcingDb,表不存在也不炸。
+- 新文件:app/review/[token]/(page+ReviewForm) · app/api/review/submit · app/api/admin/reviews · app/admin/reviews/page.js;改:review-invite 路由、products/[slug] page+ProductClient+ProductJsonLd、admin layout(Customers 组加 Reviews tab)。esbuild 10 文件全过。
+- **GBP 运营**:`outputs/GBP_PLAYBOOK.md`(现在就做/每周 20 分钟/每月 5 分钟 + Q&A 五条 + Post 模板);商家描述 V2(透明价格+affordable 卖点)已交付。
+
 ### 待办滚动
 PromoBrands 新凭据(邮件中)/ AS Colour 库存 / 热销榜出数(明晨)/ Merch Pack / Apparel 标题 / P1 编辑器卡死观察(textarea 版后未复发即销)/ Eco Pens 集合(Lily 后台建,slug=eco-pens-australia)/ GOOGLE_REVIEW_URL env / Pens 7 页 push+注入+审核发布
 

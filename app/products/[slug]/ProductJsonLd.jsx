@@ -35,7 +35,7 @@ async function resolveCategoryUrl(type, category, subcategory) {
   return { url: absoluteUrl(path), fallback: true };
 }
 
-export default async function ProductJsonLd({ product, images = [], pricingTiers = [], offerPrice = null }) {
+export default async function ProductJsonLd({ product, images = [], pricingTiers = [], offerPrice = null, reviewsAggregate = null, reviewsSample = [] }) {
   // Data-quality gate (§D): need a published product with a name and an image.
   if (!product?.name) return null;
   const imgs = (images || []).filter(Boolean);
@@ -131,6 +131,27 @@ export default async function ProductJsonLd({ product, images = [], pricingTiers
       '@type': 'Product',
       ...(offer ? { offers: offer } : {}),
     };
+  }
+
+  // D13 · 站内已审核评价 → aggregateRating + review(搜索结果星级富摘要)
+  if (reviewsAggregate?.reviewCount > 0) {
+    mainLd.aggregateRating = {
+      '@type': 'AggregateRating',
+      ratingValue: reviewsAggregate.ratingValue,
+      reviewCount: reviewsAggregate.reviewCount,
+      bestRating: 5,
+      worstRating: 1,
+    };
+    const sample = (reviewsSample || []).filter(r => r.rating);
+    if (sample.length) {
+      mainLd.review = sample.map(r => ({
+        '@type': 'Review',
+        reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5 },
+        author: { '@type': 'Person', name: r.customer_name || 'Verified customer' },
+        ...(r.body ? { reviewBody: r.body } : {}),
+        ...(r.submitted_at ? { datePublished: String(r.submitted_at).slice(0, 10) } : {}),
+      }));
+    }
   }
 
   // ── BreadcrumbList ──
