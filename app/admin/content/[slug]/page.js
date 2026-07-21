@@ -9,7 +9,23 @@ import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import SeoContent from '@/components/SeoContent';
-import AdminRichText, { compressImage } from '@/components/AdminRichText';
+import { compressImage } from '@/components/AdminRichText';
+
+// P1 hotfix (2026-07-21): 富文本 contenteditable 输入失效,正文/FAQ 改用普通 textarea。
+// 纯文本在保存时转 HTML:空行 = 分段 <p>,单换行 = <br />;已含 HTML 标签的内容原样保留。
+function plainToHtml(s) {
+  const v = String(s || '');
+  if (!v.trim() || v.includes('<')) return v;
+  const esc = v.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return esc.split(/\n{2,}/).map(p => `<p>${p.trim().replace(/\n/g, '<br />')}</p>`).join('\n');
+}
+function normalisePayload(p) {
+  return {
+    ...p,
+    guide_blocks: (p.guide_blocks || []).map(b => ({ ...b, html: plainToHtml(b.html) })),
+    faq: (p.faq || []).map(f => ({ ...f, answer: plainToHtml(f.answer) })),
+  };
+}
 
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
@@ -106,7 +122,7 @@ export default function ContentEditorPage() {
   async function saveDraft() {
     if (missingAlt()) { alert('Every image needs alt text before saving — describe the image, include the product term naturally.'); return; }
     setBusy('draft');
-    const r = await post('save_draft', { payload });
+    const r = await post('save_draft', { payload: normalisePayload(payload) });
     if (r) { setDirty(false); setNotice('Draft saved.'); setTimeout(() => setNotice(''), 3000); }
     setBusy('');
   }
@@ -114,7 +130,7 @@ export default function ContentEditorPage() {
     if (missingAlt()) { alert('Every image needs alt text before publishing.'); return; }
     if (!confirm('Publish these changes to the live site?')) return;
     setBusy('publish');
-    const r = await post('publish', { payload });
+    const r = await post('publish', { payload: normalisePayload(payload) });
     if (r) { setDirty(false); setNotice(`Published (v${r.version}). The live page updates within ~5 minutes.`); setTimeout(() => setNotice(''), 6000); load(); }
     setBusy('');
   }
@@ -284,7 +300,9 @@ export default function ContentEditorPage() {
                       onClick={() => { if (confirm('Delete this block?')) upd({ guide_blocks: payload.guide_blocks.filter((_, x) => x !== i) }); }}>✕</button>
                   </span>
                 </div>
-                <AdminRichText value={b.html || ''} onChange={html => updBlock(i, { html })} placeholder="Write the section content…" />
+                <textarea value={b.html || ''} onChange={e => updBlock(i, { html: e.target.value })}
+                  placeholder="Write the section content… (blank line = new paragraph)"
+                  style={{ ...input, width: '100%', minHeight: 140, lineHeight: 1.7, resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
                 {b.level !== 'raw' && (
                   <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                     {b.image_url && <img src={b.image_url} alt="" style={{ height: 44, borderRadius: 6 }} />}
@@ -319,7 +337,9 @@ export default function ContentEditorPage() {
                   <button style={{ ...smallBtn, color: '#991B1B', borderColor: '#E0C9C9' }}
                     onClick={() => { if (confirm('Delete this FAQ?')) upd({ faq: payload.faq.filter((_, x) => x !== i) }); }}>✕</button>
                 </div>
-                <AdminRichText value={f.answer || ''} onChange={answer => updFaq(i, { answer })} minHeight={60} placeholder="Answer…" />
+                <textarea value={f.answer || ''} onChange={e => updFaq(i, { answer: e.target.value })}
+                  placeholder="Answer… (blank line = new paragraph)"
+                  style={{ ...input, width: '100%', minHeight: 80, lineHeight: 1.7, resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box' }} />
               </div>
             ))}
             <button style={{ ...smallBtn, borderStyle: 'dashed', width: '100%', padding: '10px 0' }}
