@@ -5,6 +5,16 @@
 
 ---
 
+## SESSION 2026-07-21(下半场)— D11 · Trends 实时库存上线 ✅
+
+- **已上线:** PDP 颜色区下方金边 Stock Availability 表(每颜色在库数量+下批到货+更新时间,全黑字;Indent 产品不显示)。数据:`product_stock`(当前)+ `product_stock_history`(每日快照,养热销榜)。
+- **同步:** `/api/cron/trends-stock` — Trends Data API(`au.api.trends.nz/api/v1/stock/{sku}.json`,Bearer `TRENDS_API_TOKEN`);每日 UTC18:00 cron + 手动触发(`?key=TRENDS_PROBE_KEY`);时间预算循环+最旧优先+并发3+429退避重试+只删成功产品旧行(宁旧不丢);首轮全量 2101 产品/**2121 with rows**。
+- **踩坑记录:** Vercel env 值误存 Note 栏/Shared 不挂项目/Sensitive 存后不可见;某次 merge Vercel 漏建 Production 构建(空 commit 重推解决);`after()` 自续跑在 Vercel 上不可靠(弃用);delete-then-insert 在限流下丢数据(已改);product_stock RLS 默认开启挡了前台匿名读(disable)。
+- **探测工具(临时,可删):** `/api/cron/trends-probe`、`/api/cron/promobrands-probe`、`/api/admin/trends-probe`;OpenAPI 全谱存 `outputs/document.json`。
+- **PromoBrands:** Cognito 认证代码就绪;去年的 Refresh Token `invalid_grant` 失效,已发邮件等新凭据(D11-5)。
+- **其他:** 前台搜索框加清除 ×(Nav.jsx 三处);AGENTS.md 灰字禁令加强(辅助小字/时间戳也必须黑/navy)。
+- **待办:** 热销榜报表(等 2-3 周快照);新品/下线自动对账(API 有 last_updated/active 字段,基建已备);AS Colour 库存;Merch Pack;Apparel 标题。
+
 ## SESSION 2026-07-21 — display_title 全类目批量完成(18 类目)+ 58 新品数据抓取 + 改类修正
 
 - **标题批量(今日主任务,完成):** 18 个类目 ~4700+ 产品 display_title 全部手写交付(Pens 424 之前已交)。本场新增:Key Rings 144 / Marketing Materials 27 / Office & Desk 405 / Outdoor & Sports 305 / Packaging 85 / Personal Care 142 / Pet 39 / Technology 426 / Tools & Auto 104 / Toys & Games 279 / Travel 40;此前已交 Bags/Barware/Drinkware/Flags/Giveaways/Headwear/Home。**Apparel 按 Lily 指示挂起。**
