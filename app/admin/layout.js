@@ -32,7 +32,10 @@ const DOMAINS = [
     { label: 'Banners', href: '/admin/banners' },
     { label: 'Popular', href: '/admin/popular' },
   ] },
-  { key: 'customers', label: 'Customers', href: '/admin/customers', tabs: [] },
+  { key: 'customers', label: 'Customers', tabs: [
+    { label: 'Customers', href: '/admin/customers' },
+    { label: 'Reviews', href: '/admin/reviews' },
+  ] },
   { key: 'settings', label: 'Settings', href: '/admin/settings', tabs: [] },
 ];
 

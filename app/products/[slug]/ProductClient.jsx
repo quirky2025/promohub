@@ -31,7 +31,7 @@ function isGoodAltText(alt, name, colourNames) {
   return t.length >= 8 && t.length <= 125;
 }
 
-export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations, secondaryColours, initialColourIndex, alsoFoundIn, stockRows }) {
+export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations, secondaryColours, initialColourIndex, alsoFoundIn, stockRows, reviews, reviewsAggregate }) {
   // 4B-3: SSR pre-selects a colour from ?colour=<colour_slug> (page.js passes its index).
   const [selectedColour, setSelectedColour] = useState(initialColourIndex ?? null);
   const [selectedSecondary, setSelectedSecondary] = useState(0);
@@ -316,6 +316,16 @@ export default function ProductClient({ product, mainImage, colours, extraImages
 )}
             <div style={{ fontSize: '12px', color: '#000', marginBottom: '6px', fontFamily: '"DM Mono", monospace', letterSpacing: '1px' }}>{product.supplier_sku}</div>
             <h1 className="qp-pdp-h1" style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '34px', fontWeight: 600, margin: '0 0 8px', color: NAVY, lineHeight: 1.2 }}>{product.display_title || product.name}</h1>
+            {reviewsAggregate?.reviewCount > 0 && (
+              <a href="#reviews" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', textDecoration: 'none', marginBottom: '4px' }}>
+                <span style={{ color: GOLD, fontSize: '15px', letterSpacing: '1px' }}>
+                  {'★'.repeat(Math.round(reviewsAggregate.ratingValue))}{'☆'.repeat(5 - Math.round(reviewsAggregate.ratingValue))}
+                </span>
+                <span style={{ fontSize: '13px', color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif', fontWeight: 600 }}>
+                  {reviewsAggregate.ratingValue} · {reviewsAggregate.reviewCount} review{reviewsAggregate.reviewCount > 1 ? 's' : ''}
+                </span>
+              </a>
+            )}
             {product.seo_description && (
               <p style={{ fontSize: '14px', color: '#000', lineHeight: 1.7, margin: '12px 0 0', fontFamily: '"DM Sans", sans-serif' }}>
                 {product.seo_description}
@@ -960,6 +970,35 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           </div>
         </div>
       </div>
+
+      {/* D13 · Customer Reviews — 站内已审核评价墙(有才显示;全黑字) */}
+      {Array.isArray(reviews) && reviews.length > 0 && (
+        <div id="reviews" style={{ maxWidth: '1200px', margin: '0 auto', padding: '28px 40px 4px' }}>
+          <h2 style={{ fontFamily: '"Cormorant Garamond", serif', fontSize: '26px', color: NAVY, margin: '0 0 4px' }}>Customer Reviews</h2>
+          {reviewsAggregate && (
+            <div style={{ fontSize: '14px', color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif', marginBottom: '14px' }}>
+              <span style={{ color: GOLD, fontSize: '16px', letterSpacing: '1px' }}>
+                {'★'.repeat(Math.round(reviewsAggregate.ratingValue))}{'☆'.repeat(5 - Math.round(reviewsAggregate.ratingValue))}
+              </span>
+              {' '}<strong>{reviewsAggregate.ratingValue}</strong> from {reviewsAggregate.reviewCount} verified customer{reviewsAggregate.reviewCount > 1 ? 's' : ''}
+            </div>
+          )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
+            {reviews.slice(0, 9).map((r, i) => (
+              <div key={i} style={{ background: '#fff', border: '1px solid #E0DDD7', borderLeft: `3px solid ${GOLD}`, borderRadius: '8px', padding: '14px 16px' }}>
+                <div style={{ color: GOLD, fontSize: '15px', letterSpacing: '1px', marginBottom: '4px' }}>
+                  {'★'.repeat(r.rating || 0)}{'☆'.repeat(5 - (r.rating || 0))}
+                </div>
+                {r.body && <div style={{ fontSize: '13.5px', color: '#1a1a1a', lineHeight: 1.65, fontFamily: '"DM Sans", sans-serif', marginBottom: '8px' }}>{r.body}</div>}
+                <div style={{ fontSize: '12px', color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif', fontWeight: 700 }}>
+                  {r.customer_name || 'Verified customer'}
+                  {r.submitted_at && <span style={{ fontWeight: 400 }}> · {new Date(r.submitted_at).toLocaleDateString('en-AU', { year: 'numeric', month: 'short' })}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* D9 · Also found in — small link chips, quiet by design (below specs, above Similar) */}
       {Array.isArray(alsoFoundIn) && alsoFoundIn.length > 0 && (

@@ -146,6 +146,24 @@ export default async function ProductPage({ params, searchParams }) {
     .select('colour_name, qty, next_shipment, synced_at')
     .eq('product_id', product.id);
 
+  // D13: approved on-site reviews(表开 RLS,走 service key;只取已审核)
+  let reviews = [];
+  try {
+    const { sourcingDb } = await import('@/lib/sourcingDb');
+    const { data: revRows } = await sourcingDb()
+      .from('product_reviews')
+      .select('customer_name, rating, body, submitted_at')
+      .eq('product_id', product.id)
+      .eq('status', 'approved')
+      .order('submitted_at', { ascending: false })
+      .limit(50);
+    reviews = revRows || [];
+  } catch { /* reviews table may not exist yet */ }
+  const reviewCount = reviews.length;
+  const ratingValue = reviewCount
+    ? Math.round((reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviewCount) * 10) / 10
+    : null;
+
   // ── GET COLOUR NAMES ──
   let colourData = [];
   let fromColoursField = false;
@@ -239,6 +257,8 @@ export default async function ProductPage({ params, searchParams }) {
         images={[mainImage, ...finalExtras]}
         pricingTiers={pricingTiers}
         offerPrice={offerPrice}
+        reviewsAggregate={reviewCount ? { ratingValue, reviewCount } : null}
+        reviewsSample={reviews.slice(0, 5)}
       />
       {isCalc ? (
         <ASColourClient
@@ -262,6 +282,8 @@ export default async function ProductPage({ params, searchParams }) {
           initialColourIndex={initialColourIndex}
           alsoFoundIn={alsoFoundIn}
           stockRows={stockRows || []}
+          reviews={reviews}
+          reviewsAggregate={reviewCount ? { ratingValue, reviewCount } : null}
         />
       )}
     </>
