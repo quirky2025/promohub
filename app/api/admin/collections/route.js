@@ -13,7 +13,7 @@ export async function GET(request) {
   const db = sourcingDb();
   const { data, error } = await db
     .from('smart_collections')
-    .select('id, name, slug, ctype, status, rules, pinned, excluded, updated_at')
+    .select('id, name, slug, ctype, categories, status, rules, pinned, excluded, updated_at')
     .order('status', { ascending: false })
     .order('name');
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -50,6 +50,7 @@ export async function POST(request) {
       name,
       slug,
       ctype: String(b.ctype || 'scenario'),
+      categories: Array.isArray(b.categories) ? b.categories : [],   // IA 六型分类学:所属品类标签(可多选)
       rules: b.rules || {},
       pinned: Array.isArray(b.pinned) ? b.pinned : [],
       excluded: Array.isArray(b.excluded) ? b.excluded : [],

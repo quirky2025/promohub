@@ -209,6 +209,44 @@ const { data } = await supabase.from('products').select(col).eq('is_published', 
 
 ---
 
+## 5.5 Lily 最新提的、待办(2026-07-22,未开工,她说"先记录,一会儿可能来弄")
+
+### A. PO 分行录入,和供应商发票一致(⚠️ 与另一个 chat 可能重叠 — 先协调!)
+
+Lily:"后台我需要详细的和供应商一样的,比如不印刷的价格,印刷的价格,SETUP CHARGE 的价格……我的 PO 和供应商给我的 INVOICE 要一样。"
+
+背景:Ian 那一单改了印刷方式 + 加了一个收货地址,导致**后台 PO ↔ 客户 INVOICE 价格对不上**,她怀疑亏了。
+
+- **概念澄清(已跟她讲过)**:PO(付供应商成本)和客户 INVOICE(收客户售价)本来就该不同,差额=利润。真正要一致的是 **PO ↔ 供应商发票**。改 PO 只让账变准,**不会让这单不亏**;亏不亏取决于她改印刷/加地址时有没有跟 Ian 重新报价加钱。
+- **数据结构已支持分行**:`purchase_orders.items` 是 jsonb,每行可存 `{stockCode, name, qty, unitCost, branding}`;PO PDF(`lib/poDocPdf.js` / `generatePurchaseOrderPDF`)已经会逐行打印 + 单独一行 freight。
+- **缺的是 UI**:`components/ProductSupplierPO.jsx` 那个「本产品供应商 PO」面板只有一个「成本」总额框(第 116 行),没有分行录入。要改成能录:未印刷单价×数量 / 印刷费 / Setup charge / 运费,合计=PO 总额。位置就在这个现有面板里,**不要新建页面**。
+- **⚠️ 重要**:Lily 明确说"另外一个 chat 也在做,不要乱了"。**动手前先和她确认这块归谁做**,别两个 chat 同时改 `ProductSupplierPO.jsx` / `purchase-orders` 路由撞车。
+- 顺带:如果要建立按行的 GST 逻辑,注意现有面板里成本显示是 `cost_total * 1.1`(GST-inclusive),标已付也是含 GST。分行后要保证合计口径一致。
+
+### B. NOTIFY DELIVERED 没有自动把状态变成 Delivered(待复现)
+
+Lily:"我点了 NOTIFY DELIVERED,上面 DELIVERED 好像不会自动。"
+
+- 之前的改动:`app/admin/orders/page.js` 的 `notifyShipment()` 结尾已加
+  `await setItemStatus(index, delivered ? 'delivered' : 'dispatched');`,本意是点了就把**那个产品**推进到 Delivered 并写日期。
+- 她这次说"上面"没变。需先当面确认她指的是:
+  - **整单状态**没变 → 可能是设计如此(整单要所有产品都 delivered 才翻),不是 bug;或
+  - **那个产品自己的 stage** 也没变 → 那就是 `setItemStatus` 没生效,要查 `notifyShipment` 是否真的走到那一行、`setItemStatus` 写库是否走 service-key 路由并有报错提示。
+- **先复现再改**,别盲改。
+
+### C. 按产品发「Review 邀请」邮件(新功能,未建)
+
+Lily:"我们是不是要建发送 REVIEW 请示的,按产品来发。"
+
+- 需求:某个产品交付后,针对**那个产品**给客户发一封邀评邮件(不是整单一封)。
+- 要建:
+  1. 邮件模板(用 `lib/emailLayout.js` 的 `quirkyEmail()` 包壳,英文,客户面向)。
+  2. 后台每个产品行一个「发送 Review 邀请」按钮,**delivered 之后才亮**(和 B 的 stage 联动)。
+  3. 想清楚评价落到哪里 —— 站内 reviews/testimonials 表?还是引导去 Google 评价?**先问 Lily 评价要收在哪。**
+  4. 记录已发送状态,避免重复发;要有编辑/重发能力(她的规则:每个实体都要能编辑)。
+
+---
+
 ## 6. 每次动手前的自检
 
 - [ ] 这个 UI 放在**哪个页面**?已经跟 Lily 确认过了吗?

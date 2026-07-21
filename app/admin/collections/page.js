@@ -9,7 +9,7 @@ import Link from 'next/link';
 const NAVY = '#1B2A4A';
 const GOLD = '#C9A96E';
 
-const TYPE_LABEL = { scenario: 'Scenario', colour: 'Colour', industry: 'Industry', attribute: 'Attribute', brand: 'Brand' };
+const TYPE_LABEL = { scenario: 'Scenario', colour: 'Colour', material: 'Material', industry: 'Industry', attribute: 'Attribute', brand: 'Brand' };
 
 export default function CollectionsListPage() {
   const [collections, setCollections] = useState([]);
