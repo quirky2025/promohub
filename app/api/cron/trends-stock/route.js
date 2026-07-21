@@ -13,8 +13,9 @@ export const maxDuration = 300;
 
 const BASE = process.env.TRENDS_API_BASE || 'https://au.api.trends.nz';
 const CHUNK = 120;
-const CONCURRENCY = 6;
-const BUDGET_MS = 240000; // 4 分钟预算,给写库和响应留余量
+const CONCURRENCY = 3;        // 温柔敲门,防限流
+const BUDGET_MS = 240000;     // 4 分钟预算,给写库和响应留余量
+const RETRY_WAIT_MS = 1500;   // 429/5xx 重试等待
 
 function authorised(request) {
   const url = new URL(request.url);
@@ -38,15 +39,32 @@ function colourFromDescription(desc, productName) {
   return d === n ? '' : d;
 }
 
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
 async function fetchStock(sku, token) {
-  const res = await fetch(`${BASE}/api/v1/stock/${sku}.json`, {
-    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-    cache: 'no-store',
-  });
-  if (!res.ok) return { sku, error: res.status };
-  const json = await res.json().catch(() => null);
-  if (!json || !Array.isArray(json.data)) return { sku, error: 'bad_body' };
-  return { sku, items: json.data };
+  for (let attempt = 0; attempt < 3; attempt++) {
+    let res;
+    try {
+      res = await fetch(`${BASE}/api/v1/stock/${sku}.json`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        cache: 'no-store',
+      });
+    } catch {
+      await sleep(RETRY_WAIT_MS);
+      continue;
+    }
+    if (res.ok) {
+      const json = await res.json().catch(() => null);
+      if (!json || !Array.isArray(json.data)) return { sku, error: 'bad_body' };
+      return { sku, items: json.data };
+    }
+    if (res.status === 429 || res.status >= 500) {
+      await sleep(RETRY_WAIT_MS * (attempt + 1));
+      continue;
+    }
+    return { sku, error: res.status }; // 404 等硬错误不重试
+  }
+  return { sku, error: 'retries_exhausted' };
 }
 
 async function processChunk(db, slice, token) {
