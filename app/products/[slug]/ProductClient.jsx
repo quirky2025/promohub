@@ -41,6 +41,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   const [activeTab, setActiveTab] = useState('Description');
   const [similarProducts, setSimilarProducts] = useState([]);
   const [quoteOpen, setQuoteOpen] = useState(false);
+  const [stockOpen, setStockOpen] = useState(false); // D11: 库存表默认折叠只显 3 行
   const [cartAdded, setCartAdded] = useState(false);
   // ===== Apparel size matrix =====
   const sizeList = Array.isArray(product.size_chart?.sizes) ? product.size_chart.sizes : [];
@@ -382,7 +383,9 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               const c = colours.find(x => (x.name || '').toLowerCase() === (name || '').toLowerCase());
               return c ? resolveColourHex(c) : null;
             };
-            const rows = [...stockRows].sort((a, b) => (b.qty || 0) - (a.qty || 0));
+            const allRows = [...stockRows].sort((a, b) => (b.qty || 0) - (a.qty || 0));
+            const rows = stockOpen ? allRows : allRows.slice(0, 3);
+            const hiddenCount = allRows.length - 3;
             const hasShipment = rows.some(r => r.next_shipment);
             return (
               <div style={{ padding: '12px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #E0DDD7', borderLeft: `3px solid ${GOLD}` }}>
@@ -413,6 +416,12 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                     })}
                   </tbody>
                 </table>
+                {hiddenCount > 0 && (
+                  <button onClick={() => setStockOpen(v => !v)}
+                    style={{ display: 'block', width: '100%', marginTop: '6px', padding: '7px 0', background: 'none', border: 'none', borderTop: '1px solid #EFEBE3', fontSize: '12.5px', fontWeight: 700, color: NAVY, cursor: 'pointer', fontFamily: '"DM Sans", sans-serif', letterSpacing: '0.3px' }}>
+                    {stockOpen ? 'Show less ▲' : `Show all ${allRows.length} colours ▼`}
+                  </button>
+                )}
                 <div style={{ marginTop: '6px', fontSize: '12px', color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' }}>
                   Live supplier stock. Larger quantities often available — request a quote.
                 </div>
