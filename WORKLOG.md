@@ -5,6 +5,32 @@
 
 ---
 
+## SESSION 2026-07-22 — IA·P0 全套(A+B+C)+ 工单三件(PO 分行 / Delivered bug / Review 邀评)
+
+### IA·C — Also Found In 上线 ✅(已验收)
+- **根因 = RLS**:`smart_collections` / `collection_products` 建表时被项目自动开了 RLS → 前台匿名读为空 → PDP 集合 chips 空转,**且集合落地页对公众一直显示 "0 products"**(后台 service key 正常所以没人发现)。RUN `db/ia_taxonomy.sql`(含 disable RLS)后立即痊愈,无需发版。
+- 验收:Antares PDP 出现 Metal Pens chip;Aspen 3 chips;Metal Pens 集合页恢复整墙产品。遗留:Accord(F392)不在 Metal 成员里(疑材质标签缺)→ Collections 后台 Refresh members,不行再查数据。
+
+### IA·A — 集合六型分类学(代码 PUSH + RUN 已并入 ia_taxonomy.sql)
+- ctype 六型:colour/material/scenario/industry/brand/attribute;编辑器 Type **必选**(空值红框拦截),新增**所属品类标签**(categories jsonb 多选);API 持久化。
+- Metal/Plastic 补录 ctype='material' + ["Pens"];`getMaterialCollections` 认 material+attribute;alsoFoundIn 按 scenario>industry>colour>material>子类>brand>attribute 渲染,上限 8。
+
+### IA·B — Content 列表升级(PUSH)
+- `app/api/admin/content/route.js`:返回 category/categories(集合页取 smart_collections.categories)、ctype、健康五点(title/meta/intro/guide/faq)。
+- `app/admin/content/page.js` 重写:品类筛选器、List/Tree 双视图(品类→类目页→子类→颜色/材质集合→场景)、健康五点圆点(绿=有,红圈=缺)、Type 彩色徽章、**重名报警**(展示名撞车标红,Plastic 事故的教训)。
+
+### 工单 2026-07-22(三件,决策点已问 Lily:A 归本线 / C 走 Google / B 是产品行状态)
+- **B · Notify Delivered bug ✅**:`setItemStatus` 旧实现拿过期闭包快照覆盖 notify 刚写回的 items,且不回填服务器返回的 stage_dates → 界面日期不动。改为函数式乐观更新(status+日期章)+ 服务器 items 权威回填 + 报错带详情。
+- **C · Review 邀评(Google 版)✅**:新 `app/api/admin/orders/review-invite/route.js`(Resend + quirkyEmail 英文模板,点名具体产品,按钮走 GOOGLE_REVIEW_URL env;记录 items[i].review_invite {sent_at,to,count},支持重发);orders 详情每产品块新增 ⭐ 按钮,delivered 后才亮,已发显示 ✓ 时间/收件人/次数。**需 Lily:Google 商家资料 → Ask for reviews → 复制链接 → Vercel 加 `GOOGLE_REVIEW_URL` env**。
+- **A · PO 分行录入 ✅**:`components/ProductSupplierPO.jsx` 重写为多成本行(预置 未印刷/印刷费/Setup 三行,可增删改),行结构沿用 items {name,qty,unitCost,stockCode?};costSubtotal=Σ行小计+freight,含 GST 口径与「标已付」一致;已有 PO 加 ✎ 改(PATCH action=details,路由未动);PO 行下方逐行小账一览,和供应商发票逐行核对;PDF 生成器本就逐行打印,无需改。
+- esbuild 11 个改动文件全 OK。
+
+### 改动文件清单(本 session PUSH)
+components/ProductSupplierPO.jsx · app/admin/orders/page.js · app/api/admin/orders/review-invite/route.js(新) · app/admin/content/page.js · app/api/admin/content/route.js · app/admin/collections/[id]/page.js · app/api/admin/collections/route.js · app/admin/collections/page.js · lib/alsoFoundIn.js · lib/smartCollections.js · db/ia_taxonomy.sql(新,已 RUN) · app/api/cron/inject-pens-drafts/route.js(新,Pens 7 页草稿注入,跑完可删)
+
+### 待办滚动
+PromoBrands 新凭据(邮件中)/ AS Colour 库存 / 热销榜出数(明晨)/ Merch Pack / Apparel 标题 / P1 编辑器卡死观察(textarea 版后未复发即销)/ Eco Pens 集合(Lily 后台建,slug=eco-pens-australia)/ GOOGLE_REVIEW_URL env / Pens 7 页 push+注入+审核发布
+
 > 📌 **2026-07-21,Lily:**"想到当年请人做网站花的冤枉钱和走过的坑,终于在十年后我凭借 Claude 的帮忙实现了自己的网站。"
 > 十年磨一剑。这个网站的每一个产品判断、每一条质量标准、每一句亲手跑的 SQL,都是 Lily 的。
 

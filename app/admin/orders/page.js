@@ -311,6 +311,31 @@ export default function AdminOrdersPage() {
     } catch { alert('Notify failed'); }
   }
 
+  // 工单C · per-product Google review invitation (delivered 后才可发;可重发)
+  async function sendReviewInvite(index, item) {
+    const to = window.prompt('Send the review invitation to:', selected.customer_email || '');
+    if (!to || !to.trim()) return;
+    const already = item.review_invite?.sent_at;
+    const msg = already
+      ? `Already sent ${fmtDateTime(already)} to ${item.review_invite.to}.\n\nSend AGAIN to ${to.trim()}?`
+      : `Email a Google review invitation for product ${index + 1} to ${to.trim()}?`;
+    if (!confirm(msg)) return;
+    try {
+      const res = await fetch('/api/admin/orders/review-invite', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: selected.id, index, to: to.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { alert('Review invite failed: ' + (data?.error || res.status)); return; }
+      if (Array.isArray(data.items)) {
+        const oid = selected.id;
+        setSelected(prev => ({ ...prev, items: data.items }));
+        setOrders(prev => prev.map(o => o.id === oid ? { ...o, items: data.items } : o));
+      }
+      alert('Review invitation sent ⭐');
+    } catch (e) { alert('Review invite failed: ' + String(e?.message || e)); }
+  }
+
   // Revise a line to its FINAL spec / price (order recomputes; a paid order
   // captures amount_paid so a credit note / balance can be worked out).
   const [itemEdit, setItemEdit] = useState({});
@@ -545,21 +570,32 @@ export default function AdminOrdersPage() {
   }
 
   async function setItemStatus(index, status) {
-    const items = (selected.items || []).map((it, i) => i === index ? { ...it, status } : it);
-    setSelected(prev => ({ ...prev, items }));
-    setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, items } : o));
+    // 乐观更新:用函数式 updater 基于“当前”状态改,绝不拿过期快照覆盖
+    // (旧实现用闭包里的 selected.items,会把 notifyShipment 刚写回的 items 冲掉)。
+    const stamp = new Date().toISOString();
+    const flip = (arr) => (arr || []).map((it, i) => i === index
+      ? { ...it, status, stage_dates: { ...(it.stage_dates || {}), [status]: stamp } }
+      : it);
+    const oid = selected.id;
+    setSelected(prev => ({ ...prev, items: flip(prev.items) }));
+    setOrders(prev => prev.map(o => o.id === oid ? { ...o, items: flip(o.items) } : o));
     try {
       const res = await fetch('/api/admin/orders/item-status', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ orderId: selected.id, index, status }),
+        body: JSON.stringify({ orderId: oid, index, status }),
       });
       const data = await res.json();
-      if (!res.ok) { alert('Could not update item status'); return; }
+      if (!res.ok) { alert('Could not update item status: ' + (data?.error || res.status)); return; }
+      // 服务器返回的 items 是权威版(含 stage_dates 日期章)→ 回填本地
+      if (Array.isArray(data.items)) {
+        setSelected(prev => ({ ...prev, items: data.items }));
+        setOrders(prev => prev.map(o => o.id === oid ? { ...o, items: data.items } : o));
+      }
       if (data.overall) {
         setSelected(prev => ({ ...prev, status: data.overall }));
-        setOrders(prev => prev.map(o => o.id === selected.id ? { ...o, status: data.overall } : o));
+        setOrders(prev => prev.map(o => o.id === oid ? { ...o, status: data.overall } : o));
       }
-    } catch { alert('Could not update item status'); }
+    } catch (e) { alert('Could not update item status: ' + String(e?.message || e)); }
   }
 
   async function fetchShipments(orderId) {
@@ -1046,6 +1082,22 @@ export default function AdminOrdersPage() {
                       </div>
                     );
                   })()}
+
+                  {/* 工单C · per-product review invitation — delivered 之后才亮(Google 版) */}
+                  <div style={{ marginTop: '8px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => sendReviewInvite(i, item)}
+                      disabled={istatus !== 'delivered'}
+                      title={istatus !== 'delivered' ? 'Available after this product is delivered' : 'Email a Google review invitation for this product'}
+                      style={{ padding: '4px 12px', borderRadius: '20px', border: `1.5px solid ${istatus === 'delivered' ? '#C9A96E' : '#E0DDD7'}`, background: istatus === 'delivered' ? '#FBF7EF' : '#fff', color: istatus === 'delivered' ? '#7A5A1E' : '#000', fontSize: '11px', fontWeight: 700, cursor: istatus === 'delivered' ? 'pointer' : 'not-allowed', fontFamily: '"DM Sans", sans-serif' }}>
+                      ⭐ {item.review_invite?.sent_at ? 'Re-send review invite' : 'Send review invite'}
+                    </button>
+                    {item.review_invite?.sent_at && (
+                      <span style={{ fontSize: '10px', color: '#166534', fontWeight: 700 }}>
+                        ✓ sent {fmtDateTime(item.review_invite.sent_at)} → {item.review_invite.to}{item.review_invite.count > 1 ? ` (×${item.review_invite.count})` : ''}
+                      </span>
+                    )}
+                  </div>
 
                   {/* per-product FREIGHT — one or more parcels (a product can ship to >1 address) */}
                   <div style={{ marginTop: '10px', background: '#FAF8F4', borderRadius: '8px', padding: '9px 11px' }}>
