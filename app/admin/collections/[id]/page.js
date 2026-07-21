@@ -22,7 +22,7 @@ export default function CollectionEditorPage() {
   const router = useRouter();
   const isNew = id === 'new';
 
-  const [col, setCol] = useState({ name: '', slug: '', ctype: 'scenario', status: 'draft', rules: EMPTY_RULES, pinned: [], excluded: [] });
+  const [col, setCol] = useState({ name: '', slug: '', ctype: '', categories: [], status: 'draft', rules: EMPTY_RULES, pinned: [], excluded: [] });
   const [slugTouched, setSlugTouched] = useState(false);
   const [options, setOptions] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -96,6 +96,7 @@ export default function CollectionEditorPage() {
   // ---- actions ----
   async function save({ silent } = {}) {
     if (!col.name.trim()) { alert('Name required'); return null; }
+    if (!col.ctype) { alert('Type 必选:colour / material / scenario / industry / brand / attribute'); return null; }
     setBusy('save');
     let res = await fetch('/api/admin/collections', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -229,11 +230,32 @@ export default function CollectionEditorPage() {
                   }} />
               </div>
               <div>
-                <label style={label}>Type</label>
-                <select value={col.ctype} onChange={e => setCol(prev => ({ ...prev, ctype: e.target.value }))} style={{ ...input, width: '100%' }}>
-                  {['scenario', 'colour', 'industry', 'attribute', 'brand'].map(t => <option key={t} value={t}>{t}</option>)}
+                <label style={label}>Type *</label>
+                <select value={col.ctype} onChange={e => setCol(prev => ({ ...prev, ctype: e.target.value }))}
+                  style={{ ...input, width: '100%', borderColor: col.ctype ? '#E0DDD7' : '#B91C1C' }}>
+                  <option value="">— 选择类型(必选)—</option>
+                  <option value="colour">colour · 颜色(Black Pens)</option>
+                  <option value="material">material · 材质(Metal Pens)</option>
+                  <option value="scenario">scenario · 场景(Trade Show)</option>
+                  <option value="industry">industry · 行业(Hospitality)</option>
+                  <option value="brand">brand · 品牌(Bic)</option>
+                  <option value="attribute">attribute · 属性(Eco / Low MOQ)</option>
                 </select>
               </div>
+            </div>
+            {/* IA:所属品类标签(可多选;场景/行业类跨品类) */}
+            <div style={{ margin: '10px 0 2px' }}>
+              <label style={label}>所属品类标签</label>
+              <div>
+                {(col.categories || []).map(v => (
+                  <span key={v} style={chip}>{v}<span style={chipX} onClick={() => setCol(prev => ({ ...prev, categories: prev.categories.filter(x => x !== v) }))}>✕</span></span>
+                ))}
+              </div>
+              <select value="" style={{ ...input, width: 260 }}
+                onChange={e => { const v = e.target.value; if (v && !(col.categories || []).includes(v)) setCol(prev => ({ ...prev, categories: [...(prev.categories || []), v] })); }}>
+                <option value="">+ 加品类…</option>
+                {(options?.categories || []).filter(v => !(col.categories || []).includes(v)).map(v => <option key={v} value={v}>{v}</option>)}
+              </select>
             </div>
             <label style={label}>URL slug {col.status === 'published' && <span style={{ color: '#000', fontWeight: 400, textTransform: 'none' }}>(locked after publish)</span>}</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
