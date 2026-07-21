@@ -31,7 +31,7 @@ function isGoodAltText(alt, name, colourNames) {
   return t.length >= 8 && t.length <= 125;
 }
 
-export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations, secondaryColours, initialColourIndex, alsoFoundIn }) {
+export default function ProductClient({ product, mainImage, colours, extraImages, pricingTiers, decorations, secondaryColours, initialColourIndex, alsoFoundIn, stockRows }) {
   // 4B-3: SSR pre-selects a colour from ?colour=<colour_slug> (page.js passes its index).
   const [selectedColour, setSelectedColour] = useState(initialColourIndex ?? null);
   const [selectedSecondary, setSelectedSecondary] = useState(0);
@@ -372,6 +372,53 @@ export default function ProductClient({ product, mainImage, colours, extraImages
               )}
             </div>
           )}
+
+          {/* D11 · 供应商实时库存(有数据才显示;全黑字,金边块风格) */}
+          {Array.isArray(stockRows) && stockRows.length > 0 && (() => {
+            const synced = stockRows.reduce((m, r) => (r.synced_at && r.synced_at > m ? r.synced_at : m), '');
+            const hrs = synced ? Math.max(0, Math.round((Date.now() - new Date(synced).getTime()) / 3600000)) : null;
+            const updatedText = hrs === null ? '' : hrs < 1 ? 'Updated within the hour' : hrs < 48 ? `Updated ${hrs} hour${hrs === 1 ? '' : 's'} ago` : `Updated ${Math.round(hrs / 24)} days ago`;
+            const dotFor = (name) => {
+              const c = colours.find(x => (x.name || '').toLowerCase() === (name || '').toLowerCase());
+              return c ? resolveColourHex(c) : null;
+            };
+            const rows = [...stockRows].sort((a, b) => (b.qty || 0) - (a.qty || 0));
+            const hasShipment = rows.some(r => r.next_shipment);
+            return (
+              <div style={{ padding: '12px 16px', background: '#ffffff', borderRadius: '8px', border: '1px solid #E0DDD7', borderLeft: `3px solid ${GOLD}` }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: 700, color: NAVY, textTransform: 'uppercase', letterSpacing: '0.8px', fontFamily: '"DM Sans", sans-serif' }}>Stock Availability</span>
+                  {updatedText && <span style={{ fontSize: '12px', color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' }}>{updatedText}</span>}
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: '"DM Sans", sans-serif' }}>
+                  <tbody>
+                    {rows.map((r, i) => {
+                      const hex = dotFor(r.colour_name);
+                      return (
+                        <tr key={i} style={{ borderTop: i === 0 ? 'none' : '1px solid #EFEBE3' }}>
+                          <td style={{ padding: '6px 0', fontSize: '13px', color: '#1a1a1a' }}>
+                            {hex && <span style={{ display: 'inline-block', width: '11px', height: '11px', borderRadius: '50%', background: hex, border: '1px solid rgba(0,0,0,.18)', marginRight: '8px', verticalAlign: '-1px', boxSizing: 'border-box' }} />}
+                            {formatColourName(r.colour_name) || 'In stock'}
+                          </td>
+                          <td style={{ padding: '6px 0', fontSize: '13px', textAlign: 'right', fontWeight: 700, color: (r.qty || 0) > 0 ? NAVY : '#C0392B' }}>
+                            {(r.qty ?? 0).toLocaleString()}
+                          </td>
+                          {hasShipment && (
+                            <td style={{ padding: '6px 0 6px 14px', fontSize: '12.5px', textAlign: 'right', color: NAVY, whiteSpace: 'nowrap' }}>
+                              {r.next_shipment ? `Next: ${r.next_shipment}` : ''}
+                            </td>
+                          )}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+                <div style={{ marginTop: '6px', fontSize: '12px', color: '#1a1a1a', fontFamily: '"DM Sans", sans-serif' }}>
+                  Live supplier stock. Larger quantities often available — request a quote.
+                </div>
+              </div>
+            );
+          })()}
 
       {!quoteOnly && (<div>
             <StepLabel num={qtyStep} text={(hasSizes ? 'Enter Quantity per Size' : 'Enter Quantity') + ' *'} />

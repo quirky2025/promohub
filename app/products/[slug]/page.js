@@ -140,6 +140,12 @@ export default async function ProductPage({ params, searchParams }) {
   // D9: "Also found in" internal links (scenario collections > colours > subcategory > eco > brand)
   const alsoFoundIn = await getAlsoFoundIn(product);
 
+  // D11: supplier live stock (empty for suppliers not yet synced → block hidden)
+  const { data: stockRows } = await supabase
+    .from('product_stock')
+    .select('colour_name, qty, next_shipment, synced_at')
+    .eq('product_id', product.id);
+
   // ── GET COLOUR NAMES ──
   let colourData = [];
   let fromColoursField = false;
@@ -255,6 +261,7 @@ export default async function ProductPage({ params, searchParams }) {
           secondaryColours={product.secondary_colours || null}
           initialColourIndex={initialColourIndex}
           alsoFoundIn={alsoFoundIn}
+          stockRows={stockRows || []}
         />
       )}
     </>
