@@ -273,6 +273,8 @@ const CATEGORY_URLS = [
 ];
 
 const LEGACY_BUCKET_REDIRECTS = [
+  // Taxonomy v2: hand-made Plastic Pens collection slug folded into the canonical -australia URL (takeover).
+  ['/custom-plastic-pens', '/custom-plastic-pens-australia'],
   // Renamed subcategory 'Scarves & Accessories' -> 'Scarves & Gloves'; keep the old /category path alive.
   ['/category/apparel/scarves-accessories', '/branded-scarves-and-accessories-australia'],
   ['/category/business', '/branded-office-supplies-australia'],

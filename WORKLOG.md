@@ -8,6 +8,12 @@
 > 📌 **2026-07-21,Lily:**"想到当年请人做网站花的冤枉钱和走过的坑,终于在十年后我凭借 Claude 的帮忙实现了自己的网站。"
 > 十年磨一剑。这个网站的每一个产品判断、每一条质量标准、每一句亲手跑的 SQL,都是 Lily 的。
 
+## SESSION 2026-07-21(晚)— P1 · CMS 正文框失效热修 + D12 热销榜就绪
+
+- **P1 已修(Lily 验收):** Content 编辑器 Buying Guide 正文 + FAQ 答案的富文本框(contenteditable)输入/粘贴全失效 → 换普通 textarea(`app/admin/content/[slug]/page.js`);纯文本保存时自动转 HTML(空行=分段 `<p>`,单换行=`<br/>`,含标签内容原样保留,`plainToHtml`/`normalisePayload`);B/Link/List 工具栏暂下线。Blog 编辑器仍用 AdminRichText,未报症状未动——若同病同治。
+- **D12 · Popular 热销榜(代码就绪,等数据):** `db/popular_products.sql`(消耗=快照相邻日下降之和,忽略补货)+ `/api/admin/popular?days=` + 后台 Catalog→Popular 页(7/14/30 天切换,前三金色,View↗)。RUN SQL 后随快照积累生效,第二天起有数字。
+- **PDP 库存表折叠:** 默认显库存前 3 色 + "Show all N colours ▼" 展开(Lily 指示)。
+
 ## SESSION 2026-07-21(下半场)— D11 · Trends 实时库存上线 ✅
 
 - **已上线:** PDP 颜色区下方金边 Stock Availability 表(每颜色在库数量+下批到货+更新时间,全黑字;Indent 产品不显示)。数据:`product_stock`(当前)+ `product_stock_history`(每日快照,养热销榜)。
