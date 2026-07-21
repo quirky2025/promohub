@@ -373,8 +373,8 @@ export default function ProductClient({ product, mainImage, colours, extraImages
             </div>
           )}
 
-          {/* D11 · 供应商实时库存(有数据才显示;全黑字,金边块风格) */}
-          {Array.isArray(stockRows) && stockRows.length > 0 && (() => {
+          {/* D11 · 供应商实时库存(有数据才显示;Indent 定制货不显示;全黑字,金边块风格) */}
+          {!product.indent_type && Array.isArray(stockRows) && stockRows.length > 0 && (() => {
             const synced = stockRows.reduce((m, r) => (r.synced_at && r.synced_at > m ? r.synced_at : m), '');
             const hrs = synced ? Math.max(0, Math.round((Date.now() - new Date(synced).getTime()) / 3600000)) : null;
             const updatedText = hrs === null ? '' : hrs < 1 ? 'Updated within the hour' : hrs < 48 ? `Updated ${hrs} hour${hrs === 1 ? '' : 's'} ago` : `Updated ${Math.round(hrs / 24)} days ago`;

@@ -1,18 +1,20 @@
-import { after } from 'next/server';
 import { sourcingDb } from '@/lib/sourcingDb';
 
-// D11-3 · Trends 库存定时同步
+// D11-3 · Trends 库存定时同步(确定性版)
 // 数据源:GET https://au.api.trends.nz/api/v1/stock/{code}.json(Bearer TRENDS_API_TOKEN)
 // 返回 data[]: { stock_code, description(品名+颜色), quantity, next_shipment(在途数量), due_date }
 // 写入:product_stock(当前,覆盖式)+ product_stock_history(每日留痕,算热销用)
 // 触发:Vercel Cron(每日)或手动 GET ?key=<TRENDS_PROBE_KEY>
-// 大目录分片:每次处理 CHUNK 个 SKU,处理完自动 after() 续跑下一片,直到全量完成。
+// 策略:单次调用内循环处理,时间预算 BUDGET_MS 用完即返回并报告剩余;
+//       排序 = 最久未同步的产品优先(自平衡:多次触发/隔天 cron 必然覆盖全量)。
+// Indent 定制货无现货库存,跳过(Lily 2026-07-21)。
 
 export const maxDuration = 300;
 
 const BASE = process.env.TRENDS_API_BASE || 'https://au.api.trends.nz';
 const CHUNK = 120;
 const CONCURRENCY = 6;
+const BUDGET_MS = 240000; // 4 分钟预算,给写库和响应留余量
 
 function authorised(request) {
   const url = new URL(request.url);
@@ -47,36 +49,7 @@ async function fetchStock(sku, token) {
   return { sku, items: json.data };
 }
 
-export async function GET(request) {
-  if (!authorised(request)) return Response.json({ error: 'unauthorized' }, { status: 401 });
-  const token = process.env.TRENDS_API_TOKEN;
-  if (!token) return Response.json({ error: 'Missing TRENDS_API_TOKEN' }, { status: 500 });
-
-  const url = new URL(request.url);
-  const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10) || 0);
-  const db = sourcingDb();
-
-  // 全部 Trends 产品(6 位纯数字货号),稳定排序保证分片不重不漏
-  const all = [];
-  const PAGE = 1000;
-  for (let from = 0; ; from += PAGE) {
-    const { data, error } = await db
-      .from('products')
-      .select('id, supplier_sku, name')
-      .eq('is_published', true)
-      .order('supplier_sku')
-      .range(from, from + PAGE - 1);
-    if (error) return Response.json({ error: error.message }, { status: 500 });
-    (data || []).forEach(p => { if (/^\d{6}$/.test(p.supplier_sku || '')) all.push(p); });
-    if (!data || data.length < PAGE) break;
-  }
-
-  const slice = all.slice(offset, offset + CHUNK);
-  if (slice.length === 0) {
-    return Response.json({ done: true, total: all.length, offset });
-  }
-
-  // 并发拉库存(限速礼貌:CONCURRENCY 路并行)
+async function processChunk(db, slice, token) {
   const bySku = new Map(slice.map(p => [p.supplier_sku, p]));
   const results = [];
   const queue = [...slice];
@@ -89,7 +62,7 @@ export async function GET(request) {
   }));
 
   const now = new Date().toISOString();
-  // 同一产品可能多条变体折叠到同一个颜色名(如多尺码颜色为空)→ 按 (product, colour) 聚合防撞唯一键
+  // 同产品多变体可能折叠到同一颜色名(如多尺码)→ 按 (product, colour) 聚合防撞唯一键
   const agg = new Map();
   let okCount = 0, errCount = 0;
   for (const r of results) {
@@ -124,7 +97,6 @@ export async function GET(request) {
     supplier_sku: r._sku, colour_name: r.colour_name, qty: r.qty, supplier: 'Trends',
   }));
 
-  // 覆盖式写入:先删本片产品的旧行,再插新行。单片失败不断链,记录错误继续。
   let writeError = null;
   const ids = slice.map(p => p.id);
   const del = await db.from('product_stock').delete().in('product_id', ids);
@@ -137,24 +109,69 @@ export async function GET(request) {
     await db.from('product_stock_history')
       .upsert(historyRows, { onConflict: 'supplier_sku,colour_name,captured_at', ignoreDuplicates: true });
   }
+  return { okCount, errCount, rows: writeError ? 0 : stockRows.length, writeError };
+}
 
-  // 还有剩余 → 响应后自动续跑下一片
-  const nextOffset = offset + slice.length;
-  const hasMore = nextOffset < all.length;
-  if (hasMore) {
-    const probeKey = process.env.PROBE_KEY || process.env.TRENDS_PROBE_KEY;
-    const selfUrl = `${url.origin}${url.pathname}?key=${encodeURIComponent(probeKey || '')}&offset=${nextOffset}`;
-    after(async () => { try { await fetch(selfUrl); } catch {} });
+export async function GET(request) {
+  if (!authorised(request)) return Response.json({ error: 'unauthorized' }, { status: 401 });
+  const token = process.env.TRENDS_API_TOKEN;
+  if (!token) return Response.json({ error: 'Missing TRENDS_API_TOKEN' }, { status: 500 });
+
+  const started = Date.now();
+  const db = sourcingDb();
+
+  // 全部 Trends 产品(6 位纯数字货号,非 Indent)
+  const all = [];
+  const PAGE = 1000;
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await db
+      .from('products')
+      .select('id, supplier_sku, name, indent_type')
+      .eq('is_published', true)
+      .order('supplier_sku')
+      .range(from, from + PAGE - 1);
+    if (error) return Response.json({ error: error.message }, { status: 500 });
+    (data || []).forEach(p => { if (/^\d{6}$/.test(p.supplier_sku || '') && !p.indent_type) all.push(p); });
+    if (!data || data.length < PAGE) break;
+  }
+
+  // 最久未同步优先:查每个产品最近一次 synced_at,没有记录的排最前
+  const lastSynced = new Map();
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await db
+      .from('product_stock')
+      .select('product_id, synced_at')
+      .range(from, from + PAGE - 1);
+    if (error) break;
+    (data || []).forEach(r => {
+      const cur = lastSynced.get(r.product_id);
+      if (!cur || r.synced_at > cur) lastSynced.set(r.product_id, r.synced_at);
+    });
+    if (!data || data.length < PAGE) break;
+  }
+  all.sort((a, b) => (lastSynced.get(a.id) || '').localeCompare(lastSynced.get(b.id) || ''));
+
+  // 时间预算内循环处理
+  let processed = 0, ok = 0, err = 0, rows = 0;
+  const writeErrors = [];
+  let cursor = 0;
+  while (cursor < all.length && Date.now() - started < BUDGET_MS) {
+    const slice = all.slice(cursor, cursor + CHUNK);
+    const r = await processChunk(db, slice, token);
+    processed += slice.length; ok += r.okCount; err += r.errCount; rows += r.rows;
+    if (r.writeError) writeErrors.push(r.writeError);
+    cursor += slice.length;
   }
 
   return Response.json({
-    offset,
-    processed: slice.length,
-    products_ok: okCount,
-    products_err: errCount,
-    rows_written: writeError ? 0 : stockRows.length,
-    write_error: writeError,
     total_trends_products: all.length,
-    continues: hasMore,
+    processed,
+    products_ok: ok,
+    products_err: err,
+    rows_written: rows,
+    write_errors: writeErrors.length ? writeErrors : null,
+    remaining: all.length - processed,
+    elapsed_s: Math.round((Date.now() - started) / 1000),
+    hint: all.length - processed > 0 ? 'Trigger again to continue (oldest-first, safe to repeat)' : 'All synced',
   });
 }
