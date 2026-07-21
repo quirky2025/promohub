@@ -89,8 +89,8 @@ export async function GET(request) {
   }));
 
   const now = new Date().toISOString();
-  const stockRows = [];
-  const historyRows = [];
+  // 同一产品可能多条变体折叠到同一个颜色名(如多尺码颜色为空)→ 按 (product, colour) 聚合防撞唯一键
+  const agg = new Map();
   let okCount = 0, errCount = 0;
   for (const r of results) {
     if (r.error) { errCount++; continue; }
@@ -98,28 +98,40 @@ export async function GET(request) {
     const p = bySku.get(r.sku);
     for (const it of r.items) {
       const colour = colourFromDescription(it.description, p.name);
-      const qty = Number.isFinite(it.quantity) ? it.quantity : null;
+      const qty = Number.isFinite(it.quantity) ? it.quantity : 0;
       const incoming = Number(it.next_shipment) || 0;
       const due = (it.due_date && it.due_date !== '-') ? String(it.due_date) : null;
-      stockRows.push({
-        product_id: p.id,
-        colour_name: colour,
-        qty,
-        next_shipment: due ? (incoming > 0 ? `${due} (+${incoming})` : due) : null,
-        supplier: 'Trends',
-        synced_at: now,
-      });
-      historyRows.push({ supplier_sku: r.sku, colour_name: colour, qty, supplier: 'Trends' });
+      const key = `${p.id}||${colour.toLowerCase()}`;
+      const prev = agg.get(key);
+      if (prev) {
+        prev.qty += qty;
+        if (!prev.next_shipment && due) prev.next_shipment = incoming > 0 ? `${due} (+${incoming})` : due;
+      } else {
+        agg.set(key, {
+          product_id: p.id,
+          colour_name: colour,
+          qty,
+          next_shipment: due ? (incoming > 0 ? `${due} (+${incoming})` : due) : null,
+          supplier: 'Trends',
+          synced_at: now,
+          _sku: r.sku,
+        });
+      }
     }
   }
+  const stockRows = [...agg.values()].map(({ _sku, ...row }) => row);
+  const historyRows = [...agg.values()].map(r => ({
+    supplier_sku: r._sku, colour_name: r.colour_name, qty: r.qty, supplier: 'Trends',
+  }));
 
-  // 覆盖式写入:先删本片产品的旧行,再插新行
+  // 覆盖式写入:先删本片产品的旧行,再插新行。单片失败不断链,记录错误继续。
+  let writeError = null;
   const ids = slice.map(p => p.id);
   const del = await db.from('product_stock').delete().in('product_id', ids);
-  if (del.error) return Response.json({ error: `delete: ${del.error.message}` }, { status: 500 });
-  if (stockRows.length) {
+  if (del.error) writeError = `delete: ${del.error.message}`;
+  if (!writeError && stockRows.length) {
     const ins = await db.from('product_stock').insert(stockRows);
-    if (ins.error) return Response.json({ error: `insert: ${ins.error.message}` }, { status: 500 });
+    if (ins.error) writeError = `insert: ${ins.error.message}`;
   }
   if (historyRows.length) {
     await db.from('product_stock_history')
@@ -140,7 +152,8 @@ export async function GET(request) {
     processed: slice.length,
     products_ok: okCount,
     products_err: errCount,
-    rows_written: stockRows.length,
+    rows_written: writeError ? 0 : stockRows.length,
+    write_error: writeError,
     total_trends_products: all.length,
     continues: hasMore,
   });
