@@ -193,14 +193,20 @@ async function importTrends(db, started, limit, warningsAll) {
   const have = await existingSkus(db);
   const results = [];
   let imported = 0;
+  // Lily 2026-07-23:之前"本轮扫完"只看 imported<limit,但真正原因常常是图片下载/R2上传太慢
+  // 撞到 230s 时间预算提前收工,不是真的扫完供应商全部页——两种情况混报导致"以为导完了"。
+  // 分开记录:timedOut=true 才是"还没扫完,只是没时间了",不能报 本轮扫完。
+  let timedOut = false;
 
+  outer:
   for (let page = 1; page < 40 && imported < limit; page++) {
-    if (Date.now() - started > 230000) break;
+    if (Date.now() - started > 230000) { timedOut = true; break; }
     const json = await trendsList(token, page);
     const items = json?.data || [];
     if (!items.length) break;
     for (const item of items) {
-      if (imported >= limit || Date.now() - started > 230000) break;
+      if (imported >= limit) break;
+      if (Date.now() - started > 230000) { timedOut = true; break outer; }
       const code = String(item.code || '');
       if (!code || have.has(code.toUpperCase())) continue;
       if (!/^active$/i.test(String(item.active || ''))) continue;
@@ -279,7 +285,7 @@ async function importTrends(db, started, limit, warningsAll) {
     }
     if (page >= (json?.page_count || 1)) break;
   }
-  return { imported, results };
+  return { imported, results, timedOut };
 }
 
 // ════════ PROMOBRANDS ════════
@@ -319,9 +325,13 @@ async function importPB(db, started, limit) {
   const results = [];
   let imported = 0;
   let after = 0;
+  // 见 importTrends 同一条注释:分开记录时间预算截断 vs 真正扫完供应商全部页。
+  let timedOut = false;
 
+  outer:
   for (;;) {
-    if (imported >= limit || Date.now() - started > 230000) break;
+    if (imported >= limit) break;
+    if (Date.now() - started > 230000) { timedOut = true; break; }
     const qs = after > 0 ? `PageSize=100&Order=ASC&After=${after}` : 'PageSize=100&Order=ASC';
     const res = await fetch(`${PB_BASE}/product?${qs}`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, cache: 'no-store' });
     if (!res.ok) throw new Error(`PB /product ${res.status}`);
@@ -330,7 +340,8 @@ async function importPB(db, started, limit) {
 
     for (const prod of list) {
       after = Math.max(after, Number(prod.Product_ID) || after);
-      if (imported >= limit || Date.now() - started > 230000) break;
+      if (imported >= limit) break;
+      if (Date.now() - started > 230000) { timedOut = true; break outer; }
       const code = String(prod.Product_Code || '');
       if (!code || have.has(code.toUpperCase())) continue;
 
@@ -435,7 +446,7 @@ async function importPB(db, started, limit) {
     }
     if (list.length < 100) break;
   }
-  return { imported, results };
+  return { imported, results, timedOut };
 }
 
 // ════════ 入口 ════════
@@ -457,11 +468,19 @@ export async function GET(request) {
     if (supplier === 'trends') {
       const warningsAll = [];
       const r = await importTrends(db, started, limit, warningsAll);
-      return Response.json({ supplier: 'Trends', ...r, elapsed_s: Math.round((Date.now() - started) / 1000), hint: r.imported >= limit ? '还有剩余,再开一次同样的 URL 继续' : '本轮扫完' });
+      // Lily 2026-07-23:imported<limit 不等于"扫完了"——常常是图片下载/R2上传太慢撞了 230s
+      // 时间预算,提前收工。timedOut=true 时必须说明"还没扫完",不能报 本轮扫完。
+      const hint = r.imported >= limit ? '还有剩余,再开一次同样的 URL 继续'
+        : r.timedOut ? '时间用完提前收工,不代表扫完,再开一次同样的 URL 继续'
+        : '本轮扫完';
+      return Response.json({ supplier: 'Trends', ...r, elapsed_s: Math.round((Date.now() - started) / 1000), hint });
     }
     if (supplier === 'pb') {
       const r = await importPB(db, started, limit);
-      return Response.json({ supplier: 'PromoBrands', ...r, elapsed_s: Math.round((Date.now() - started) / 1000), hint: r.imported >= limit ? '还有剩余,再开一次同样的 URL 继续' : '本轮扫完' });
+      const hint = r.imported >= limit ? '还有剩余,再开一次同样的 URL 继续'
+        : r.timedOut ? '时间用完提前收工,不代表扫完,再开一次同样的 URL 继续'
+        : '本轮扫完';
+      return Response.json({ supplier: 'PromoBrands', ...r, elapsed_s: Math.round((Date.now() - started) / 1000), hint });
     }
     return Response.json({ error: 'supplier=trends|pb required' }, { status: 400 });
   } catch (e) {
