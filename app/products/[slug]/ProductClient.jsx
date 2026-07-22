@@ -1454,7 +1454,10 @@ function SpecGroup({ title, children, defaultOpen = true }) {
 }
 
 function NotebookSpecs({ product }) {
-  const leadTime = product.indent_type === 'indent_air'
+  const leadTime = product.quote_only
+    // Lily 2026-07-22: quote_only 产品不能写死交期天数——报价时才由团队确认。
+    ? 'Confirmed with quote'
+    : product.indent_type === 'indent_air'
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Air Freight, after artwork approval)` : 'Indent order (Air Freight) — enquire for lead time')
     : product.indent_type === 'indent_sea'
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
@@ -1508,7 +1511,10 @@ function NotebookSpecs({ product }) {
 function FlatSpecTable({ product }) {
   const [expanded, setExpanded] = useState(false);
   const PREVIEW = 5;
-  const leadTime = product.indent_type === 'indent_air'
+  const leadTime = product.quote_only
+    // Lily 2026-07-22: quote_only 产品不能写死交期天数——报价时才由团队确认。
+    ? 'Confirmed with quote'
+    : product.indent_type === 'indent_air'
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Air Freight, after artwork approval)` : 'Indent order (Air Freight) — enquire for lead time')
     : product.indent_type === 'indent_sea'
     ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')

@@ -2,7 +2,24 @@ import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { sourcingDb } from '@/lib/sourcingDb';
 import { tierMargin, decoUnitPrice, SETUP_FEE } from '@/lib/pricing';
-import { colourSlug } from '@/lib/colourName';
+import { colourSlug, cleanColour } from '@/lib/colourName';
+
+// Lily 2026-07-22: 供应商颜色字段有时不是真颜色,是描述性文字("Design your own" 之类的定制品说明)。
+// 用 cleanColour() 识别——solid/compound 才是真颜色,原样用;其余(full_colour/placeholder/unknown)
+// 一律显示 "Custom",不把供应商的原始措辞抄进色块名。IMAGE-RULES.md §二。
+function displayColourName(raw) {
+  const { name, mode } = cleanColour(raw);
+  return (mode === 'solid' || mode === 'compound') && name ? name : 'Custom';
+}
+
+// MOQ 兜底:没有价格阶梯时(quote_only),先尝试从产品描述文字里抓 "MOQ ... 1,000" 这种写法,
+// 抓不到才退回硬编码 50——50 只是占位,不是真实 MOQ,不能装作权威数字。
+function moqFromText(text) {
+  const m = String(text || '').match(/MOQ[^\d]{0,10}([\d,]{2,7})/i);
+  if (!m) return null;
+  const n = parseInt(m[1].replace(/,/g, ''), 10);
+  return n > 0 ? n : null;
+}
 
 // D15 · API 产品导入器(Trends + PromoBrands)。规则文档:PRICING-RULES.md + IMAGE-RULES.md。
 // - 全部创建为草稿(is_published=false),Lily 后台审核后发布
@@ -201,7 +218,7 @@ async function importTrends(db, started, limit, warningsAll) {
         const colourNames = (Array.isArray(item.colours) ? item.colours : [])
           .map(c => (typeof c === 'string' ? c : c?.name)).filter(Boolean).slice(0, 24);
         // IMAGE-RULES §二:Trends 序号每产品不同,不自动配色图 → 色块用名字(前端 swatch 兜底 hex)
-        const colours = colourNames.map(n => ({ name: n, hex: '', image: '' }));
+        const colours = colourNames.map(n => ({ name: displayColourName(n), hex: '', image: '' }));
 
         const specs = (Array.isArray(item.additional_specifications) ? item.additional_specifications : [])
           .filter(s => s?.specification && s?.description)
@@ -239,7 +256,7 @@ async function importTrends(db, started, limit, warningsAll) {
           packing: typeof item.packaging === 'string' ? item.packaging : null,
           // 无价格阶梯 = 走不了普通计算器,自动转"Get a Quote"模式(前台 quote_only,无 ref 价则显示 Price on application)
           quote_only: !costTiers.length,
-          min_qty: costTiers[0]?.q || 50,
+          min_qty: costTiers[0]?.q || moqFromText(item.description) || 50,
         };
         await createProduct(db, row, tiers, decos, gallery);
         have.add(code.toUpperCase());
@@ -339,7 +356,7 @@ async function importPB(db, started, limit) {
         const names = invColours.length ? [...new Set(invColours)] : (prod.Colour ? [prod.Colour] : ['Default']);
         const colours = names.map(n => {
           const hit = ubByColour.get(n.toLowerCase());
-          return { name: n, hex: '', image: hit ? hit.url : '' };
+          return { name: displayColourName(n), hex: '', image: hit ? hit.url : '' };
         });
 
         const costTiers = pbTiers(prod);
@@ -373,6 +390,12 @@ async function importPB(db, started, limit) {
         }
         const dimDetail = [1, 2, 3, 4].map(i => (/dimension/i.test(prod[`Detail_Name_${i}`] || '') ? prod[`Detail_Description_${i}`] : null)).find(Boolean);
         const matDetail = [1, 2, 3, 4].map(i => (/material/i.test(prod[`Detail_Name_${i}`] || '') ? prod[`Detail_Description_${i}`] : null)).find(Boolean);
+        // MOQ 兜底(Lily 2026-07-22):没有价格阶梯时 min_qty 不能瞎猜 50——PB 有时把真实 MOQ
+        // 放在 Detail_Name/Description 字段里(如 "MOQ"/"1000pcs"),没有才退到描述文字里找 "MOQ ... 数字"。
+        const moqDetail = [1, 2, 3, 4]
+          .map(i => (/moq/i.test(prod[`Detail_Name_${i}`] || '') ? String(prod[`Detail_Description_${i}`] || '').match(/([\d,]{2,7})/) : null))
+          .map(m => (m ? parseInt(m[1].replace(/,/g, ''), 10) : null))
+          .find(n => n > 0);
 
         const row = {
           supplier: 'PromoBrands', supplier_sku: code,
@@ -388,7 +411,8 @@ async function importPB(db, started, limit) {
           is_eco: prod.Is_Eco === 1,
           // 无价格阶梯 = 走不了普通计算器,自动转"Get a Quote"模式(前台 quote_only,无 ref 价则显示 Price on application)
           quote_only: !costTiers.length,
-          min_qty: costTiers[0]?.q || 50,
+          // min_qty 优先级:价格阶梯第一档 > Detail 字段里标"MOQ"的 > 描述文字里的"MOQ ... 数字" > 兜底 50(占位,不代表真实值)
+          min_qty: costTiers[0]?.q || moqDetail || moqFromText(prod.Description) || 50,
         };
         await createProduct(db, row, tiers, decos, gallery);
         have.add(code.toUpperCase());
