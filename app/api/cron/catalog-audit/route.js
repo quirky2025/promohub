@@ -67,15 +67,17 @@ async function auditTrends(db) {
     const items = json?.data || [];
     items.forEach(it => {
       const code = String(it.code || '');
-      if (code) seen.set(code, { name: it.name || '', active: String(it.active || ''), status: String(it.status || '') });
+      // Lily 规则(2026-07-22):Trends 挂 Sale 的都是清仓待下线货,不进新品候选
+      const isSale = /\bsale\b/i.test(JSON.stringify(it.categories || '')) || /\bsale\b/i.test(String(it.status || ''));
+      if (code) seen.set(code, { name: it.name || '', active: String(it.active || ''), status: String(it.status || ''), isSale });
     });
     out.supplierTotal = json?.total_items || seen.size;
     if (!items.length || page >= (json?.page_count || 1)) break;
   }
 
-  // ① Trends 有(活跃)我们没有
+  // ① Trends 有(活跃、非 Sale)我们没有 —— Sale 货按 Lily 规则剔除
   for (const [code, info] of seen) {
-    if (/^active$/i.test(info.active) && !ours.has(code)) {
+    if (/^active$/i.test(info.active) && !info.isSale && !ours.has(code)) {
       out.newAtSupplier.push({ code, name: info.name, link: `https://trends.com.au/product/${info.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}` });
     }
   }
