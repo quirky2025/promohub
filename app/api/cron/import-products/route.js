@@ -6,10 +6,12 @@ import { colourSlug, cleanColour } from '@/lib/colourName';
 
 // Lily 2026-07-22: 供应商颜色字段有时不是真颜色,是描述性文字("Design your own" 之类的定制品说明)。
 // 用 cleanColour() 识别——solid/compound 才是真颜色,原样用;其余(full_colour/placeholder/unknown)
-// 一律显示 "Custom",不把供应商的原始措辞抄进色块名。IMAGE-RULES.md §二。
+// 一律显示 "Custom"。IMAGE-RULES.md §二硬规则:定制品 image 和 hex 都必须空,不能拿到什么图就配什么图
+// (哪怕 unbranded 图集里刚好有同名文件也不行)——所以这里连 isCustom 一起返回,调用处强制清空 image/hex。
 function displayColourName(raw) {
   const { name, mode } = cleanColour(raw);
-  return (mode === 'solid' || mode === 'compound') && name ? name : 'Custom';
+  const isCustom = !((mode === 'solid' || mode === 'compound') && name);
+  return { name: isCustom ? 'Custom' : name, isCustom };
 }
 
 // MOQ 兜底:没有价格阶梯时(quote_only),先尝试从产品描述文字里抓 "MOQ ... 1,000" 这种写法,
@@ -233,7 +235,7 @@ async function importTrends(db, started, limit, warningsAll) {
         const colourNames = (Array.isArray(item.colours) ? item.colours : [])
           .map(c => (typeof c === 'string' ? c : c?.name)).filter(Boolean).slice(0, 24);
         // IMAGE-RULES §二:Trends 序号每产品不同,不自动配色图 → 色块用名字(前端 swatch 兜底 hex)
-        const colours = colourNames.map(n => ({ name: displayColourName(n), hex: '', image: '' }));
+        const colours = colourNames.map(n => ({ name: displayColourName(n).name, hex: '', image: '' }));
 
         const specs = (Array.isArray(item.additional_specifications) ? item.additional_specifications : [])
           .filter(s => s?.specification && s?.description)
@@ -376,8 +378,10 @@ async function importPB(db, started, limit) {
           .map(r => String(r?.InventoryDetails?.colour || '').trim()).filter(c => c && !/^misc$/i.test(c));
         const names = invColours.length ? [...new Set(invColours)] : (prod.Colour ? [prod.Colour] : ['Default']);
         const colours = names.map(n => {
+          const { name: label, isCustom } = displayColourName(n);
+          if (isCustom) return { name: label, hex: '', image: '' }; // IMAGE-RULES §二:定制品 image/hex 都必须空
           const hit = ubByColour.get(n.toLowerCase());
-          return { name: displayColourName(n), hex: '', image: hit ? hit.url : '' };
+          return { name: label, hex: '', image: hit ? hit.url : '' };
         });
 
         const costTiers = pbTiers(prod);
@@ -455,7 +459,9 @@ export async function GET(request) {
   const started = Date.now();
   const url = new URL(request.url);
   const supplier = url.searchParams.get('supplier');
-  const limit = Math.min(20, Math.max(1, parseInt(url.searchParams.get('limit') || '6', 10) || 6));
+  // Lily 2026-07-23:去掉 20 的硬顶——真正的天花板是下面 230s 的时间预算(图片下载/R2上传
+  // 慢才是瓶颈),limit 设再高也不会因此跑更久,只是不再人为卡在一个偏低的数字上。
+  const limit = Math.max(1, parseInt(url.searchParams.get('limit') || '15', 10) || 15);
   const inspect = url.searchParams.get('inspect');
   const db = sourcingDb();
 
