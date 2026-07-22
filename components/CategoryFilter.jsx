@@ -91,6 +91,7 @@ export default function CategoryFilter({ products = [], category, includeType = 
 function ProductCard({ product }) {
   const price = product._price || 0;
   const isCalc = product.decoration_model === 'calculator';
+  const quoteOnly = !!(product._quoteOnly || product.quote_only);
   const swatches = product._swatches || [];
   return (
     <a href={`/products/${product.slug}`} style={{ textDecoration: 'none' }}>
@@ -105,7 +106,12 @@ function ProductCard({ product }) {
           <div style={{ color: NAVY, fontSize: '14px', fontWeight: 700, lineHeight: 1.35, textAlign: 'center' }}>{product.name}</div>
           <div style={{ fontSize: '12px', color: '#000', textAlign: 'center', fontFamily: '"DM Mono", monospace', letterSpacing: '0.5px' }}>{product.supplier_sku || product.subcategory || product.category}</div>
           <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'center', gap: '22px', alignItems: 'flex-end' }}>
-            {price > 0 && (
+            {quoteOnly ? (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '11px', color: '#000' }}>&nbsp;</div>
+                <div style={{ color: GOLD, fontSize: '14px', fontWeight: 700 }}>Get a Quote</div>
+              </div>
+            ) : price > 0 && (
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '11px', color: '#000' }}>{isCalc ? 'From' : 'As low as'}</div>
                 <div style={{ color: GOLD, fontSize: '18px' }}>${price.toFixed(2)}</div>

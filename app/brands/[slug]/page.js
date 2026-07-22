@@ -50,7 +50,7 @@ export default function BrandPage() {
       // 拉所有有 brand 的已发布产品,前端按 slug 匹配 brand
       const { data } = await supabase
         .from('products')
-        .select('id, name, slug, category, subcategory, is_eco, brand, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
+        .select('id, name, slug, category, subcategory, is_eco, brand, min_qty, is_published, quote_only, product_colours(images, sort_order), pricing_tiers(base_price)')
         .eq('is_published', true)
         .not('brand', 'is', null);
 
@@ -225,7 +225,7 @@ export default function BrandPage() {
                       <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ fontSize: '14px', fontWeight: 600, color: NAVY, lineHeight: 1.4, textAlign: 'center' }}>{product.name}</div>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: 'auto' }}>
-                          {price > 0 && (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>As low as</div><div style={{ fontSize: '18px', color: GOLD, fontWeight: 400 }}>${price.toFixed(2)}</div></div>)}
+                          {product.quote_only ? (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '11px', color: '#000' }}>&nbsp;</div><div style={{ color: GOLD, fontSize: '14px', fontWeight: 700 }}>Get a Quote</div></div>) : price > 0 && (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>As low as</div><div style={{ fontSize: '18px', color: GOLD, fontWeight: 400 }}>${price.toFixed(2)}</div></div>)}
                           <div style={{ textAlign: 'center' }}><div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>Min Qty</div><div style={{ fontSize: '18px', color: NAVY, fontWeight: 400 }}>{product.min_qty}</div></div>
                         </div>
                       </div>

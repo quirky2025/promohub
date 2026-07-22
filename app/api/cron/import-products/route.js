@@ -237,6 +237,8 @@ async function importTrends(db, started, limit, warningsAll) {
           dimensions: typeof item.dimensions === 'string' ? item.dimensions : null,
           colours, colour_slugs: colourNames.map(n => colourSlug(n)),
           packing: typeof item.packaging === 'string' ? item.packaging : null,
+          // 无价格阶梯 = 走不了普通计算器,自动转"Get a Quote"模式(前台 quote_only,无 ref 价则显示 Price on application)
+          quote_only: !costTiers.length,
           min_qty: costTiers[0]?.q || 50,
         };
         await createProduct(db, row, tiers, decos, gallery);
@@ -361,6 +363,7 @@ async function importPB(db, started, limit) {
             default_setup_qty: 1, setup_qty_editable: true, type: 'print',
           });
         }
+        if (!decos.length) warnings.push('无印刷方式(Imprint Method 字段空),decos 为空 — 发布前需人工补印刷方式和单价');
 
         const { category, hint } = pbMapCategory(prod);
         const specs = [];
@@ -383,6 +386,8 @@ async function importPB(db, started, limit) {
           colours, colour_slugs: names.filter(n => n !== 'Default').map(n => colourSlug(n)),
           packing: prod.Packing || null,
           is_eco: prod.Is_Eco === 1,
+          // 无价格阶梯 = 走不了普通计算器,自动转"Get a Quote"模式(前台 quote_only,无 ref 价则显示 Price on application)
+          quote_only: !costTiers.length,
           min_qty: costTiers[0]?.q || 50,
         };
         await createProduct(db, row, tiers, decos, gallery);

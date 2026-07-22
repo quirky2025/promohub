@@ -433,6 +433,20 @@ export default function AdminProductsPage() {
                       </div>
                     )}
                   </div>
+                  <div style={{ marginBottom: '16px', padding: '12px 16px', background: editing.quote_only ? '#FFF8E7' : '#ffffff', borderRadius: '10px', border: editing.quote_only ? '1.5px solid #FCD34D' : '1px solid #E0DDD7' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: 600, color: NAVY, marginBottom: editing.quote_only ? '10px' : 0 }}>
+                      <input type="checkbox" checked={!!editing.quote_only} onChange={e => updateField('quote_only', e.target.checked)} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                      💬 Get a Quote only(无购物车计算器,前台显示 "Price on application" 或参考价 + 询价按钮)
+                    </label>
+                    {editing.quote_only && (
+                      <div>
+                        <label style={labelStyle}>参考价 From $(可空 — 空则前台显示 "Price on application")</label>
+                        <input type="number" step="0.01" value={editing.quote_ref_price ?? ''} onChange={e => updateField('quote_ref_price', e.target.value === '' ? null : Number(e.target.value))}
+                          placeholder="供应商裸价成本(未加价),留空=无参考价" style={inputStyle} />
+                        <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '4px' }}>填的是**成本价**,前台按 ×1.40 显示 "From $"。1色1个位置的大概价,不分档。</div>
+                      </div>
+                    )}
+                  </div>
                   <div style={{ display: 'flex', gap: '24px', padding: '16px', background: '#ffffff', borderRadius: '10px' }}>
                     {[
                       { field: 'is_eco', label: '🌿 Eco Product' },

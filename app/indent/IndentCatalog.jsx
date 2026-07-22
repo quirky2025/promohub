@@ -38,7 +38,7 @@ export default function IndentCatalog({ config }) {
       setLoading(true);
       const { data } = await supabase
         .from('products')
-        .select('id, name, slug, category, subcategory, is_eco, min_qty, lead_time_days, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
+        .select('id, name, slug, category, subcategory, is_eco, min_qty, lead_time_days, is_published, quote_only, product_colours(images, sort_order), pricing_tiers(base_price)')
         .eq('indent_type', config.indentType)
         .eq('is_published', true);
       if (data) setAllProducts(data);
