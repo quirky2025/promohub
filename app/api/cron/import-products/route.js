@@ -21,6 +21,15 @@ function moqFromText(text) {
   return n > 0 ? n : null;
 }
 
+// 去 HTML 标签 + 压空白,给两处用:seo_description(卡片下方短摘要,400 字)和
+// description(Description tab 右栏正文,给长一点,2000 字)。Lily 2026-07-23:
+// 导入器之前只填了 seo_description,PDP 的 Description 正文块靠 product.description
+// 渲染,一直是空的——两个字段都要填,来源一样,只是截断长度不同。
+function cleanText(raw, maxLen) {
+  const s = String(raw || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  return s ? s.slice(0, maxLen) : null;
+}
+
 // D15 · API 产品导入器(Trends + PromoBrands)。规则文档:PRICING-RULES.md + IMAGE-RULES.md。
 // - 全部创建为草稿(is_published=false),Lily 后台审核后发布
 // - 定价:基础价 = 供应商价 × tierMargin(档位);印刷 = decoUnitPrice(成本);setup 固定 $60
@@ -248,7 +257,8 @@ async function importTrends(db, started, limit, warningsAll) {
           name: item.name || code,
           slug: await uniqueSlug(db, slugify(item.name || code)),
           category, subcategory: null,
-          seo_description: String(item.description || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 400) || null,
+          seo_description: cleanText(item.description, 400),
+          description: cleanText(item.description, 2000),
           features: (Array.isArray(item.features) ? item.features : []).filter(Boolean).slice(0, 8),
           specs, materials: materials || null,
           dimensions: typeof item.dimensions === 'string' ? item.dimensions : null,
@@ -402,7 +412,8 @@ async function importPB(db, started, limit) {
           name: prod.Name || code,
           slug: await uniqueSlug(db, slugify(prod.Name || code)),
           category, subcategory: null,
-          seo_description: String(prod.Description || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 400) || null,
+          seo_description: cleanText(prod.Description, 400),
+          description: cleanText(prod.Description, 2000),
           features: (Array.isArray(prod.Hightlights) ? prod.Hightlights : []).map(h => h?.Highlights).filter(h => h && !/days service/i.test(h)).slice(0, 8),
           specs, materials: matDetail ? String(matDetail).replace(/•/g, '').trim() : null,
           dimensions: dimDetail || null,
