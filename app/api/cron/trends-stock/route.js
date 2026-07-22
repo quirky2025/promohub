@@ -187,13 +187,16 @@ async function syncPromoBrands(db, started, deadlineMs) {
     let after = 0;
     for (;;) {
       if (Date.now() - started > deadlineMs) { out.error = 'budget exhausted (resume next run)'; break; }
-      const res = await fetch(`${PB_BASE}/product?PageSize=100&Order=ASC&After=${after}`, {
+      // PB 规矩:首页不能带 After(After=0 会回 "Invalid Query Parameter"),翻页才带
+      const qs = after > 0 ? `PageSize=100&Order=ASC&After=${after}` : 'PageSize=100&Order=ASC';
+      const res = await fetch(`${PB_BASE}/product?${qs}`, {
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
         cache: 'no-store',
       });
       if (!res.ok) { out.error = `PB /product ${res.status}`; break; }
       const list = await res.json().catch(() => null);
-      if (!Array.isArray(list) || list.length === 0) break;
+      if (!Array.isArray(list)) { out.error = typeof list === 'string' ? `PB said: ${list}` : 'PB bad body'; break; }
+      if (list.length === 0) break;
       out.pages++;
       let foundAll = false;
       for (const prod of list) {
