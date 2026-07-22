@@ -414,15 +414,32 @@ async function importPB(db, started, limit) {
         }));
 
         // 印刷方式(1-6)→ decoration_options;setup 固定 $60(PRICING-RULES §2.1/§3.1)
+        // Lily 2026-07-23:PB 原始 Des 字段会把位置/尺寸变体(Front)/(Side)/(Medium)/(Small)
+        // 和个别方式的独立 MOQ("| 250 MOQ")一起写在方式名字里,拼出来的名字很别扭("Digital
+        // Transfer (Front) Per Colour/Position"),而且部分产品同一产品不同印刷方式起订量不同,
+        // 之前这个信息被埋没在名字里看不出来。改成:名字只留干净的方式名,(Front)/(Side)/MOQ
+        // 一律挪到 detail(尺寸那一行)最前面,和 Front 的其它 UI 一致展示位置说明。
         const im = prod.Product_Imprint_Method || {};
         const decos = [];
         for (let i = 1; i <= 6; i++) {
-          const des = im[`productImprintmethod${i}Des`];
+          let des = im[`productImprintmethod${i}Des`];
           const cost = Number(im[`productImprintmethod${i}Cost`]);
           if (!des || !(cost > 0)) continue;
+          des = String(des).trim();
+          let qualifier = '';
+          const parenMatch = des.match(/\s*\(([^)]+)\)\s*$/);
+          if (parenMatch) { qualifier = parenMatch[1]; des = des.slice(0, parenMatch.index).trim(); }
+          let moqOverride = null;
+          const moqMatch = des.match(/\|\s*(\d[\d,]*)\s*MOQ\s*$/i);
+          if (moqMatch) { moqOverride = parseInt(moqMatch[1].replace(/,/g, ''), 10); des = des.slice(0, moqMatch.index).trim().replace(/\|\s*$/, '').trim(); }
+          const size = im[`productImprintmethod${i}Size`] || null;
+          const detailParts = [];
+          if (qualifier) detailParts.push(`(${qualifier})`);
+          if (moqOverride > 0) detailParts.push(`${moqOverride} MOQ`);
+          if (size) detailParts.push(size);
           decos.push({
             name: `${des} Per ${im[`productImprintmethod${i}Hascolour`] ? 'Colour/' : ''}Position`,
-            detail: im[`productImprintmethod${i}Size`] || null,
+            detail: detailParts.length ? detailParts.join(' · ') : null,
             per_unit: decoUnitPrice(cost), has_setup: true, setup_fee: SETUP_FEE,
             default_setup_qty: 1, setup_qty_editable: true, type: 'print',
           });
@@ -451,7 +468,11 @@ async function importPB(db, started, limit) {
           category, subcategory: null,
           seo_description: cleanText(prod.Description, 400),
           description: cleanText(prod.Description, 2000),
-          features: (Array.isArray(prod.Hightlights) ? prod.Hightlights : []).map(h => h?.Highlights).filter(h => h && !/days service/i.test(h)).slice(0, 8),
+          // Lily 2026-07-23:发现批量导入的 PB 产品 Features 几乎全空,怀疑是字段名对不上
+          // (原来只认 prod.Hightlights,拼写可能跟 PB 实际字段不一致)——两种拼法都认,保险。
+          features: (Array.isArray(prod.Hightlights) ? prod.Hightlights : Array.isArray(prod.Highlights) ? prod.Highlights : [])
+            .map(h => (typeof h === 'string' ? h : h?.Highlights || h?.Highlight || h?.highlight))
+            .filter(h => h && !/days service/i.test(h)).slice(0, 8),
           specs, materials: matDetail ? String(matDetail).replace(/•/g, '').trim() : null,
           dimensions: dimDetail || null,
           colours, colour_slugs: names.filter(n => n !== 'Default').map(n => colourSlug(n)),
@@ -492,6 +513,27 @@ export async function GET(request) {
       const token = process.env.TRENDS_API_TOKEN;
       const res = await fetch(`${TRENDS_BASE}/api/v1/products/${inspect}.json`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, cache: 'no-store' });
       return Response.json({ inspect, status: res.status, body: await res.json().catch(() => null) });
+    }
+    // PB 没有单条查询接口(见 backfill-description 同款注释),只能翻页找,加个时间预算防超时。
+    if (inspect && supplier === 'pb') {
+      const token = await pbIdToken();
+      let after = 0;
+      for (let i = 0; i < 60; i++) {
+        if (Date.now() - started > 25000) return Response.json({ inspect, found: false, reason: 'timeout while paging' });
+        const qs = after > 0 ? `PageSize=100&Order=ASC&After=${after}` : 'PageSize=100&Order=ASC';
+        const res = await fetch(`${PB_BASE}/product?${qs}`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, cache: 'no-store' });
+        if (!res.ok) return Response.json({ inspect, found: false, reason: `PB ${res.status}` });
+        const list = await res.json().catch(() => null);
+        if (!Array.isArray(list) || !list.length) break;
+        for (const prod of list) {
+          after = Math.max(after, Number(prod.Product_ID) || after);
+          if (String(prod.Product_Code || '').trim().toUpperCase() === String(inspect).trim().toUpperCase()) {
+            return Response.json({ inspect, found: true, body: prod });
+          }
+        }
+        if (list.length < 100) break;
+      }
+      return Response.json({ inspect, found: false, reason: 'not in catalog scan' });
     }
     if (supplier === 'trends') {
       const warningsAll = [];
