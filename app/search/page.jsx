@@ -22,7 +22,7 @@ function SearchResults() {
     if (!term) return;
     setLoading(true);
 
-    const SEL = `id, name, slug, supplier_sku, category, subcategory, min_qty, is_published,
+    const SEL = `id, name, slug, supplier_sku, category, subcategory, min_qty, is_published, quote_only,
         product_colours(id, name, hex, images, sort_order),
         pricing_tiers(base_price)`;
     const esc = term.replace(/[%,]/g, ' ');   // 防止 ilike 通配/or 分隔符注入
@@ -126,7 +126,12 @@ function SearchResults() {
                   <div style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Mono", monospace', marginBottom: '4px' }}>{product.supplier_sku}</div>
                   <div style={{ fontWeight: 600, color: NAVY, fontSize: '15px', marginBottom: '6px', lineHeight: 1.3 }}>{product.name}</div>
                   <div style={{ fontSize: '12px', color: '#000', marginBottom: '10px' }}>{product.category}{product.subcategory ? ` › ${product.subcategory}` : ''}</div>
-                  {price && (
+                  {product.quote_only ? (
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '11px', color: '#000' }}>&nbsp;</div>
+                      <div style={{ color: GOLD, fontSize: '14px', fontWeight: 700 }}>Get a Quote</div>
+                    </div>
+                  ) : price && (
                     <div style={{ fontSize: '13px', color: GOLD, fontWeight: 700 }}>
                       From ${price.toFixed(2)} <span style={{ color: '#000', fontWeight: 400, fontSize: '11px' }}>excl. GST</span>
                     </div>

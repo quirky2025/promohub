@@ -52,7 +52,7 @@ export default async function BlogPostPage({ params }) {
   if (relatedIds.length) {
     const { data } = await supabase
       .from('products')
-      .select('id, name, slug, min_qty, product_colours(images, sort_order), pricing_tiers(min_qty, base_price)')
+      .select('id, name, slug, min_qty, quote_only, product_colours(images, sort_order), pricing_tiers(min_qty, base_price)')
       .eq('is_published', true)
       .in('id', relatedIds);
     relatedProducts = data || [];
@@ -157,7 +157,12 @@ export default async function BlogPostPage({ params }) {
                         </div>
                         <div style={{ padding: '12px 14px 16px', textAlign: 'center' }}>
                           <div style={{ color: NAVY, fontSize: '14px', fontWeight: 700, lineHeight: 1.35, marginBottom: '6px' }}>{p.name}</div>
-                          {price > 0 && <div style={{ color: GOLD, fontSize: '16px' }}>As low as ${price.toFixed(2)}</div>}
+                          {p.quote_only ? (
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: '11px', color: '#000' }}>&nbsp;</div>
+                              <div style={{ color: GOLD, fontSize: '14px', fontWeight: 700 }}>Get a Quote</div>
+                            </div>
+                          ) : price > 0 && <div style={{ color: GOLD, fontSize: '16px' }}>As low as ${price.toFixed(2)}</div>}
                         </div>
                       </article>
                     </Link>

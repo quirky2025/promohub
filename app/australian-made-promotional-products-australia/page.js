@@ -45,7 +45,7 @@ export default function AustralianMadePage() {
       setLoading(true);
       const { data } = await supabase
         .from('products')
-        .select('id, name, slug, category, subcategory, is_australian_made, min_qty, is_published, product_colours(images, sort_order), pricing_tiers(base_price)')
+        .select('id, name, slug, category, subcategory, is_australian_made, min_qty, is_published, quote_only, product_colours(images, sort_order), pricing_tiers(base_price)')
         .eq('is_australian_made', true)
         .eq('is_published', true);
       if (data) setAllProducts(data);
@@ -207,7 +207,12 @@ export default function AustralianMadePage() {
                       <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div style={{ fontSize: '14px', fontWeight: 600, color: NAVY, lineHeight: 1.4, textAlign: 'center' }}>{product.name}</div>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: 'auto' }}>
-                          {price > 0 && (
+                          {product.quote_only ? (
+                            <div style={{ textAlign: 'center' }}>
+                              <div style={{ fontSize: '11px', color: '#000' }}>&nbsp;</div>
+                              <div style={{ color: GOLD, fontSize: '14px', fontWeight: 700 }}>Get a Quote</div>
+                            </div>
+                          ) : price > 0 && (
                             <div style={{ textAlign: 'center' }}>
                               <div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>As low as</div>
                               <div style={{ fontSize: '18px', color: GOLD, fontWeight: 400 }}>${price.toFixed(2)}</div>

@@ -64,7 +64,7 @@ export const revalidate = 600;
 // products that are ticked "✨ New Arrival" in admin → Products (is_new_arrival)
 // and published. Tick/untick in admin — no code change needed.
 async function getNewArrivals() {
-  const cols = 'id, name, slug, product_colours(images, sort_order), pricing_tiers(min_qty, base_price)';
+  const cols = 'id, name, slug, quote_only, product_colours(images, sort_order), pricing_tiers(min_qty, base_price)';
   try {
     let { data, error } = await supabase
       .from('products')
@@ -169,7 +169,9 @@ export default async function Home() {
                   </span>
                   <span style={{ display: 'block', padding: '12px 14px 14px' }}>
                     <span style={{ display: 'block', fontSize: 14, fontWeight: 600, color: NAVY, lineHeight: 1.3 }}>{p.name}</span>
-                    {price > 0 && <span style={{ display: 'block', fontSize: 13, color: MUTED, marginTop: 5 }}>from ${price.toFixed(2)}</span>}
+                    {p.quote_only ? (
+                      <span style={{ display: 'block', fontSize: 13, color: GOLD_DK, fontWeight: 600, marginTop: 5 }}>Get a Quote</span>
+                    ) : price > 0 && <span style={{ display: 'block', fontSize: 13, color: MUTED, marginTop: 5 }}>from ${price.toFixed(2)}</span>}
                   </span>
                 </a>
               );

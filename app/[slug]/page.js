@@ -78,6 +78,7 @@ export default async function UrlPage({ params }) {
         capacity: p.capacity, pen_mechanism: p.pen_mechanism, pen_ink_colour: p.pen_ink_colour,
         _image: getFirstImage(p),
         _price: p.decoration_model === 'calculator' ? (calculatorFromPrice(p) || 0) : getLowestPrice(p),
+        _quoteOnly: !!p.quote_only,
         _swatches: getColourSwatches(p),
         _decorationNames: (p.decoration_options || []).filter((d) => d.type !== 'addon').map((d) => d.name),
       }))
@@ -319,7 +320,12 @@ function ProductCard({ product }) {
             {product.supplier_sku || product.subcategory || product.category}
           </div>
           <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'center', gap: '22px', alignItems: 'flex-end' }}>
-            {price > 0 && (
+            {product.quote_only ? (
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '11px', color: '#000' }}>&nbsp;</div>
+                <div style={{ color: GOLD, fontSize: '14px', fontWeight: 700 }}>Get a Quote</div>
+              </div>
+            ) : price > 0 && (
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '11px', color: '#000' }}>{isCalc ? 'From' : 'As low as'}</div>
                 <div style={{ color: GOLD, fontSize: '18px' }}>${price.toFixed(2)}</div>
