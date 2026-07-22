@@ -1,6 +1,7 @@
 import { sourcingDb } from '@/lib/sourcingDb';
 
-// D11-3 · Trends 库存定时同步(确定性版)
+// D11-3/5 · 供应商库存定时同步(确定性版):先 Trends,后 PromoBrands,同一预算内跑完。
+// (Hobby 计划 cron 上限 2 个,故两家共用本路由;路径名沿用 trends-stock。)
 // 数据源:GET https://au.api.trends.nz/api/v1/stock/{code}.json(Bearer TRENDS_API_TOKEN)
 // 返回 data[]: { stock_code, description(品名+颜色), quantity, next_shipment(在途数量), due_date }
 // 写入:product_stock(当前,覆盖式)+ product_stock_history(每日留痕,算热销用)
@@ -133,6 +134,122 @@ async function processChunk(db, slice, token) {
   return { okCount, errCount, rows: writeError ? 0 : stockRows.length, writeError };
 }
 
+// ── D11-5 · PromoBrands(Cognito 认证;/product 分页返回体自带 Inventory)──
+const PB_TOKEN_URL = 'https://promobrandrestapi.auth.ap-southeast-2.amazoncognito.com/oauth2/token';
+const PB_BASE = process.env.PROMOBRANDS_API_BASE || 'https://api.promobrands.com.au';
+
+async function pbIdToken() {
+  const clientId = String(process.env.PROMOBRANDS_CLIENT_ID || '').replace(/\s+/g, '');
+  const refreshToken = String(process.env.PROMOBRANDS_REFRESH_TOKEN || '').replace(/\s+/g, '');
+  if (!clientId || !refreshToken) return null;
+  const res = await fetch(PB_TOKEN_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ grant_type: 'refresh_token', client_id: clientId, refresh_token: refreshToken }),
+    cache: 'no-store',
+  });
+  const data = await res.json().catch(() => ({}));
+  return data.id_token || null;
+}
+
+function pbColour(c) {
+  const v = String(c || '').trim();
+  return /^misc$/i.test(v) ? '' : v;
+}
+
+// 同步 PromoBrands:翻遍 PB 目录页,命中我们库里的 PB SKU 就写库存。
+async function syncPromoBrands(db, started, deadlineMs) {
+  const out = { supplier: 'PromoBrands', products_ok: 0, rows_written: 0, pages: 0, skipped: false, error: null };
+  try {
+    const token = await pbIdToken();
+    if (!token) { out.skipped = true; out.error = 'no credentials'; return out; }
+
+    // 我们库里的 PB 产品
+    const ours = new Map(); // Product_Code(upper) -> {id, name}
+    const PAGE = 1000;
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await db
+        .from('products')
+        .select('id, supplier_sku, name, indent_type')
+        .eq('is_published', true)
+        .eq('supplier', 'PromoBrands')
+        .range(from, from + PAGE - 1);
+      if (error) { out.error = error.message; return out; }
+      (data || []).forEach(p => { if (!p.indent_type && p.supplier_sku) ours.set(String(p.supplier_sku).toUpperCase(), p); });
+      if (!data || data.length < PAGE) break;
+    }
+    if (ours.size === 0) { out.skipped = true; out.error = 'no PromoBrands products in DB'; return out; }
+
+    const now = new Date().toISOString();
+    const stockRows = [];
+    const historyRows = [];
+    const okIds = [];
+    let after = 0;
+    for (;;) {
+      if (Date.now() - started > deadlineMs) { out.error = 'budget exhausted (resume next run)'; break; }
+      const res = await fetch(`${PB_BASE}/product?PageSize=100&Order=ASC&After=${after}`, {
+        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+        cache: 'no-store',
+      });
+      if (!res.ok) { out.error = `PB /product ${res.status}`; break; }
+      const list = await res.json().catch(() => null);
+      if (!Array.isArray(list) || list.length === 0) break;
+      out.pages++;
+      for (const prod of list) {
+        after = Math.max(after, Number(prod.Product_ID) || after);
+        const mine = ours.get(String(prod.Product_Code || '').toUpperCase());
+        if (!mine) continue;
+        const inv = Array.isArray(prod.Inventory) ? prod.Inventory : [];
+        const agg = new Map();
+        for (const row of inv) {
+          const d = row?.InventoryDetails || {};
+          const colour = pbColour(d.colour);
+          const qty = parseInt(d.onHand, 10) || 0;
+          let next = null;
+          const eta = Array.isArray(d.etaStock) ? d.etaStock[0] : null;
+          if (eta && typeof eta === 'object') {
+            const date = eta.eta || eta.date || eta.etaDate || '';
+            const q = eta.qty || eta.quantity || '';
+            next = [date, q ? `(+${q})` : ''].filter(Boolean).join(' ') || null;
+          }
+          const key = colour.toLowerCase();
+          const prev = agg.get(key);
+          if (prev) { prev.qty += qty; if (!prev.next_shipment && next) prev.next_shipment = next; }
+          else agg.set(key, { product_id: mine.id, colour_name: colour, qty, next_shipment: next, supplier: 'PromoBrands', synced_at: now });
+        }
+        if (agg.size) {
+          okIds.push(mine.id);
+          out.products_ok++;
+          for (const r of agg.values()) {
+            stockRows.push(r);
+            historyRows.push({ supplier_sku: String(prod.Product_Code), colour_name: r.colour_name, qty: r.qty, supplier: 'PromoBrands' });
+          }
+        }
+      }
+      if (list.length < 100) break;
+    }
+
+    if (okIds.length) {
+      for (let i = 0; i < okIds.length; i += 300) {
+        const del = await db.from('product_stock').delete().in('product_id', okIds.slice(i, i + 300));
+        if (del.error) { out.error = `delete: ${del.error.message}`; return out; }
+      }
+      for (let i = 0; i < stockRows.length; i += 500) {
+        const ins = await db.from('product_stock').insert(stockRows.slice(i, i + 500));
+        if (ins.error) { out.error = `insert: ${ins.error.message}`; return out; }
+      }
+      out.rows_written = stockRows.length;
+      if (historyRows.length) {
+        await db.from('product_stock_history')
+          .upsert(historyRows, { onConflict: 'supplier_sku,colour_name,captured_at', ignoreDuplicates: true });
+      }
+    }
+  } catch (e) {
+    out.error = String(e?.message || e);
+  }
+  return out;
+}
+
 export async function GET(request) {
   if (!authorised(request)) return Response.json({ error: 'unauthorized' }, { status: 401 });
   const token = process.env.TRENDS_API_TOKEN;
@@ -184,15 +301,21 @@ export async function GET(request) {
     cursor += slice.length;
   }
 
+  // Trends 跑完(或预算用尽)后,剩余预算给 PromoBrands
+  const pb = await syncPromoBrands(db, started, BUDGET_MS + 30000);
+
   return Response.json({
-    total_trends_products: all.length,
-    processed,
-    products_ok: ok,
-    products_err: err,
-    rows_written: rows,
-    write_errors: writeErrors.length ? writeErrors : null,
-    remaining: all.length - processed,
+    trends: {
+      total_products: all.length,
+      processed,
+      products_ok: ok,
+      products_err: err,
+      rows_written: rows,
+      write_errors: writeErrors.length ? writeErrors : null,
+      remaining: all.length - processed,
+    },
+    promobrands: pb,
     elapsed_s: Math.round((Date.now() - started) / 1000),
-    hint: all.length - processed > 0 ? 'Trigger again to continue (oldest-first, safe to repeat)' : 'All synced',
+    hint: (all.length - processed > 0 || (pb.error && !pb.skipped)) ? 'Trigger again to continue (safe to repeat)' : 'All synced',
   });
 }
