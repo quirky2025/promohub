@@ -41,6 +41,12 @@ components/ProductSupplierPO.jsx · app/admin/orders/page.js · app/api/admin/or
 - 同步:并入 `/api/cron/trends-stock`(Hobby cron 限 2 个,两家共车:先 Trends 后 PB);支持 `?only=pb` 专列手动补跑;匹配 supplier='PromoBrands'(810 现货),命中即从目录翻页流中提取,**找齐提前收工**;colour='MISC'→''。首轮:608 产品/1510 行/9 页/18 秒。
 - 全家福(published):Trends 2683 / Logoline 837 / PromoBrands 810 / AS Colour 420 / IntexGlobal 369 / Gildan 67。下一步 D11-6:Logoline(Lily 已有 API 资料待发)→ AS Colour。
 
+### D14 · 目录对账首轮执行(2026-07-22)
+- 报告上线(`/api/cron/catalog-audit?key=`,实时 HTML:新品清单 + 下架清单 + 现成 SQL;Trends Sale 货按 Lily 规则排除在新品候选外)。
+- **首轮下线 67 个**(供应商已停售):Trends 45(121xxx 系列为主,含 108470/110096/122322 等)、PromoBrands 22(B113/T295/F501/T840/RB402 等)。is_published=false 可逆。
+- 家规文档族扩编:`IMAGE-RULES.md`(图片双表机制/R2 三尺寸/自检 SQL/十大坑,Lily 提供入库)+ `PRICING-RULES.md` 修订(Lily:服装印刷计算器仅限 AS Colour/Gildan;Trends/PB/LL 服装按硬货规则)。
+- 下一步 D15:API 导入器(Trends 单查接口先行、PB 目录流第二班;定价走 lib/pricing.js,图片按 IMAGE-RULES 三尺寸+人工检查点,全部草稿制)。
+
 ### 待办滚动
 PromoBrands 新凭据(邮件中)/ AS Colour 库存 / 热销榜出数(明晨)/ Merch Pack / Apparel 标题 / P1 编辑器卡死观察(textarea 版后未复发即销)/ Eco Pens 集合(Lily 后台建,slug=eco-pens-australia)/ GOOGLE_REVIEW_URL env / Pens 7 页 push+注入+审核发布
 
