@@ -165,7 +165,7 @@ export default function ProductClient({ product, mainImage, colours, extraImages
   const canAdd = isValidQty && (colours.length === 0 || selectedColour !== null);
   // ── Quote-only (indent) products: hide the calculator/cart, show a reference "From $X" + Get a Quote ──
   const quoteOnly = !!product.quote_only;
-  const refSell = product.quote_ref_price != null ? Number(product.quote_ref_price) * MARGIN : null;
+  // Lily 2026-07-22: quote_ref_price no longer drives a displayed "From $X" — always Price on application.
   const collectionLabel = product.collection
     ? (Array.isArray(product.collection) ? product.collection.join(', ') : product.collection)
     : null;
@@ -651,15 +651,9 @@ export default function ProductClient({ product, mainImage, colours, extraImages
           {quoteOnly && (
             <div style={{ background: NAVY, borderRadius: '16px', padding: '24px', color: '#fff' }}>
               <div style={{ display: 'inline-block', background: 'rgba(201,169,110,.18)', color: GOLD, fontSize: '11px', fontWeight: 700, letterSpacing: '0.5px', textTransform: 'uppercase', padding: '5px 12px', borderRadius: '20px', marginBottom: '14px' }}>Indent · Made to Order</div>
-              {refSell != null ? (
-                <div style={{ marginBottom: '10px' }}>
-                  <div style={{ fontSize: '11px', color: '#fff', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '4px' }}>From (excl. GST)</div>
-                  <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '32px', fontWeight: 500, color: GOLD }}>${refSell.toFixed(2)}</div>
-                  <div style={{ fontSize: '12px', color: 'rgba(255,255,255,.7)', marginTop: '2px' }}>Indicative price incl. 1 print position. Final price depends on quantity, decoration &amp; freight.</div>
-                </div>
-              ) : (
-                <div style={{ fontSize: '18px', fontWeight: 600, color: GOLD, marginBottom: '8px' }}>Price on application</div>
-              )}
+              {/* Lily 2026-07-22: quote_only 一律不再显示具体的 From $X 参考价（哪怕配了 quote_ref_price），
+                  一律 Price on application，避免和实际报价对不上。quote_ref_price 字段保留但不再用于前台显示。 */}
+              <div style={{ fontSize: '18px', fontWeight: 600, color: GOLD, marginBottom: '8px' }}>Price on application</div>
               <div style={{ marginTop: '14px' }}>
                 {product.min_qty ? (
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '9px 0', borderTop: '1px solid rgba(255,255,255,.12)', fontSize: '13px' }}>
