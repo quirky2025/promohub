@@ -217,17 +217,39 @@ async function importTrends(db, started, limit, warningsAll) {
 
       const warnings = [];
       try {
-        // 图片:media.trends.nz/images/<code>_<n>.jpg → R2 扁平 <code>-<n>.webp
-        const count = Math.min(Number(item.image_count) || 0, 12) || 6;
+        // 图片:优先用 item.images[].link(API 原始真实地址,最可靠)。
+        // 2026-07-23 发现:猜文件名的旧写法(下划线分隔、从 1 开始编号,如 <code>_1.jpg)
+        // 和 Trends 实际地址(连字符分隔、从 0 开始编号,如 129451-0.jpg ~ 129451-4.jpg)对不上,
+        // 导致一整批新品(129xxx/133xxx 段)全部误判"无可用图片"。IMAGE-RULES.md 也提过
+        // Trends 编号规律每个产品不同,不该硬猜——有真实 link 就直接用,没有才退回猜测兜底。
+        const rawImages = Array.isArray(item.images) ? item.images : [];
         const gallery = [];
-        for (let n = 1; n <= count; n++) {
-          const url = await imageToR2(
-            `https://media.trends.nz/images/${code}_${n}.jpg`,
-            `suppliers/trends/products/_variants/w{w}/${code}-${n}.webp`,
-            n <= 2 ? warnings : [] // 只对前两张的失败记 warning,后面的可能本来就不存在
-          );
-          if (url) gallery.push(url);
-          else if (n > (Number(item.image_count) || 0)) break;
+        if (rawImages.length) {
+          let n = 0;
+          for (const im of rawImages.slice(0, 12)) {
+            const link = String(im?.link || im?.url || '').trim().replace(/^\/\//, 'https://');
+            if (!link) continue;
+            n += 1;
+            const url = await imageToR2(
+              link,
+              `suppliers/trends/products/_variants/w{w}/${code}-${n}.webp`,
+              n <= 2 ? warnings : []
+            );
+            if (url) gallery.push(url);
+          }
+        }
+        if (!gallery.length) {
+          // 兜底:猜测地址,连字符分隔、从 0 开始编号(与实测数据一致)
+          const count = Math.min(Number(item.image_count) || 0, 12) || 6;
+          for (let n = 0; n < count; n++) {
+            const url = await imageToR2(
+              `https://media.trends.nz/images/${code}-${n}.jpg`,
+              `suppliers/trends/products/_variants/w{w}/${code}-${n + 1}.webp`,
+              n <= 1 ? warnings : []
+            );
+            if (url) gallery.push(url);
+            else if (n >= (Number(item.image_count) || 0)) break;
+          }
         }
         if (!gallery.length) { results.push({ code, result: 'skipped: 无可用图片' }); continue; }
 
