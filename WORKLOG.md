@@ -35,6 +35,12 @@ components/ProductSupplierPO.jsx · app/admin/orders/page.js · app/api/admin/or
 - 新文件:app/review/[token]/(page+ReviewForm) · app/api/review/submit · app/api/admin/reviews · app/admin/reviews/page.js;改:review-invite 路由、products/[slug] page+ProductClient+ProductJsonLd、admin layout(Customers 组加 Reviews tab)。esbuild 10 文件全过。
 - **GBP 运营**:`outputs/GBP_PLAYBOOK.md`(现在就做/每周 20 分钟/每月 5 分钟 + Q&A 五条 + Post 模板);商家描述 V2(透明价格+affordable 卖点)已交付。
 
+### D11-5 · PromoBrands 库存上线 ✅(验收:Accord 页 Gloss Silver 701 / Gunmetal 382)
+- 凭据破案:refresh token 在 Vercel 被**粘贴了两次**(rt_len 3537 vs 正确 1857)→ 净化重贴即通(PB 没错怪)。代码加了 env 空白净化 + 长度体检诊断。
+- PB 接口特性:产品返回体自带 `Inventory[]`(colour/onHand/etaStock/lastUpdated),无独立库存端点;**首页不能带 After 参数**(会回 200 + "Invalid Query Parameter" 字符串),翻页才带 After=<lastId>;限速 10 req/s。
+- 同步:并入 `/api/cron/trends-stock`(Hobby cron 限 2 个,两家共车:先 Trends 后 PB);支持 `?only=pb` 专列手动补跑;匹配 supplier='PromoBrands'(810 现货),命中即从目录翻页流中提取,**找齐提前收工**;colour='MISC'→''。首轮:608 产品/1510 行/9 页/18 秒。
+- 全家福(published):Trends 2683 / Logoline 837 / PromoBrands 810 / AS Colour 420 / IntexGlobal 369 / Gildan 67。下一步 D11-6:Logoline(Lily 已有 API 资料待发)→ AS Colour。
+
 ### 待办滚动
 PromoBrands 新凭据(邮件中)/ AS Colour 库存 / 热销榜出数(明晨)/ Merch Pack / Apparel 标题 / P1 编辑器卡死观察(textarea 版后未复发即销)/ Eco Pens 集合(Lily 后台建,slug=eco-pens-australia)/ GOOGLE_REVIEW_URL env / Pens 7 页 push+注入+审核发布
 
