@@ -195,10 +195,13 @@ async function syncPromoBrands(db, started, deadlineMs) {
       const list = await res.json().catch(() => null);
       if (!Array.isArray(list) || list.length === 0) break;
       out.pages++;
+      let foundAll = false;
       for (const prod of list) {
         after = Math.max(after, Number(prod.Product_ID) || after);
         const mine = ours.get(String(prod.Product_Code || '').toUpperCase());
         if (!mine) continue;
+        ours.delete(String(prod.Product_Code || '').toUpperCase());
+        if (ours.size === 0) foundAll = true;
         const inv = Array.isArray(prod.Inventory) ? prod.Inventory : [];
         const agg = new Map();
         for (const row of inv) {
@@ -226,7 +229,7 @@ async function syncPromoBrands(db, started, deadlineMs) {
           }
         }
       }
-      if (list.length < 100) break;
+      if (foundAll || list.length < 100) break;
     }
 
     if (okIds.length) {
@@ -257,6 +260,13 @@ export async function GET(request) {
 
   const started = Date.now();
   const db = sourcingDb();
+
+  // PB 专列:?only=pb → 全部预算给 PromoBrands(手动补跑用)
+  const only = new URL(request.url).searchParams.get('only');
+  if (only === 'pb') {
+    const pb = await syncPromoBrands(db, started, BUDGET_MS);
+    return Response.json({ promobrands: pb, elapsed_s: Math.round((Date.now() - started) / 1000) });
+  }
 
   // 全部 Trends 产品(6 位纯数字货号,非 Indent)
   const all = [];
