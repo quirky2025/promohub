@@ -209,7 +209,7 @@ async function importTrends(db, started, limit, warningsAll) {
     for (const item of items) {
       if (imported >= limit) break;
       if (Date.now() - started > 230000) { timedOut = true; break outer; }
-      const code = String(item.code || '');
+      const code = String(item.code || '').trim();
       if (!code || have.has(code.toUpperCase())) continue;
       if (!/^active$/i.test(String(item.active || ''))) continue;
       const isSale = /\bsale\b/i.test(JSON.stringify(item.categories || '')) || /\bsale\b/i.test(String(item.status || ''));
@@ -344,7 +344,7 @@ async function importPB(db, started, limit) {
       after = Math.max(after, Number(prod.Product_ID) || after);
       if (imported >= limit) break;
       if (Date.now() - started > 230000) { timedOut = true; break outer; }
-      const code = String(prod.Product_Code || '');
+      const code = String(prod.Product_Code || '').trim(); // PB 偶尔带尾随空格(如 "S940 "),不清掉会存进 supplier_sku 里
       if (!code || have.has(code.toUpperCase())) continue;
 
       const warnings = [];
