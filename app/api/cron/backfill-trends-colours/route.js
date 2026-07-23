@@ -1,5 +1,29 @@
+import sharp from 'sharp';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { sourcingDb } from '@/lib/sourcingDb';
 import { colourSlug, cleanColour } from '@/lib/colourName';
+
+const R2_PUBLIC = process.env.R2_PUBLIC_BASE || 'https://pub-fbec7c9199f04af8ab95a413a4620d37.r2.dev';
+const VARIANTS = [160, 400, 900];
+const r2 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: { accessKeyId: process.env.R2_ACCESS_KEY_ID, secretAccessKey: process.env.R2_SECRET_ACCESS_KEY },
+});
+async function imageToR2(srcUrl, keyStem) {
+  try {
+    const res = await fetch(srcUrl, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length < 100) return null;
+    for (const w of VARIANTS) {
+      const webp = await sharp(buf).resize({ width: w, withoutEnlargement: true }).webp({ quality: 82 }).toBuffer();
+      const key = keyStem.replace('{w}', String(w));
+      await r2.send(new PutObjectCommand({ Bucket: process.env.R2_BUCKET, Key: key, Body: webp, ContentType: 'image/webp' }));
+    }
+    return `${R2_PUBLIC}/${keyStem.replace('{w}', '400')}`;
+  } catch { return null; }
+}
 
 // D15 补漏 · 批量回填 Trends 产品的颜色 + description(Lily 2026-07-23 用 107039 实测坐实的
 // 两个 bug,import-products/route.js 里已经修好解析逻辑,但只对以后的导入生效——这批已经
@@ -61,15 +85,36 @@ export async function GET(request) {
 
         const colourNames = String(item.colours || '').replace(/\.\s*$/, '')
           .split(',').map(s => s.trim()).filter(Boolean).slice(0, 24);
-        const colours = colourNames.map(n => ({ name: displayColourName(n).name, hex: '', image: '' }));
-        const colour_slugs = colourNames.map(n => colourSlug(n));
+
+        // 用 caption(跟 colours 字符串精确对应)配真实颜色照片,不用粗粒度的 colour 字段
+        const rawImages = Array.isArray(item.images) ? item.images : [];
+        const imgByColour = new Map();
+        let n = 0;
+        for (const im of rawImages.slice(0, 12)) {
+          const link = String(im?.link || im?.url || '').trim().replace(/^\/\//, 'https://');
+          if (!link) continue;
+          n += 1;
+          const url = await imageToR2(link, `suppliers/trends/products/_variants/w{w}/${code}-${n}.webp`);
+          if (!url) continue;
+          const captionTag = String(im?.caption || '').trim().toLowerCase();
+          if (captionTag && !imgByColour.has(captionTag)) imgByColour.set(captionTag, url);
+        }
+
+        const colours = colourNames.map(cn => {
+          const { name: label, isCustom } = displayColourName(cn);
+          if (isCustom) return { name: label, hex: '', image: '' };
+          const hit = imgByColour.get(cn.toLowerCase());
+          return { name: label, hex: '', image: hit || '' };
+        });
+        const colour_slugs = colourNames.map(cn => colourSlug(cn));
 
         const featuresJoined = (Array.isArray(item.features) ? item.features : []).filter(Boolean).join('. ');
         const description = row.description || cleanText(item.description, 2000) || cleanText(featuresJoined, 2000);
         const seo_description = cleanText(item.description, 400) || cleanText(featuresJoined, 400);
 
-        const hadColours = Array.isArray(row.colours) && row.colours.length > 0;
-        const changed = { colours_added: !hadColours && colours.length > 0, description_added: !row.description && !!description };
+        // 2026-07-23:第二轮跑这个要能把第一轮"只有颜色名字、没有真实照片"的颜色升级成真实照片,
+        // 所以只要新算出来的颜色列表非空就覆盖(幂等,不会丢数据,顶多重复写入同样内容)。
+        const changed = { colours_added: colours.length > 0, description_added: !row.description && !!description };
 
         if (!dry && (changed.colours_added || changed.description_added)) {
           const update = {};

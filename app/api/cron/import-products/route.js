@@ -255,6 +255,12 @@ async function importTrends(db, started, limit, warningsAll) {
         // Trends 编号规律每个产品不同,不该硬猜——有真实 link 就直接用,没有才退回猜测兜底。
         const rawImages = Array.isArray(item.images) ? item.images : [];
         const gallery = [];
+        // Lily 2026-07-23(107039 实测):item.images[] 每张图其实自带 caption 字段(如
+        // "Bright Green"/"Dark Green"),跟 colours 字符串里的颜色名精确对得上,不是瞎猜文件名——
+        // 这个可以放心拿来配色块真实照片。注意 colour 字段(小写、粗粒度)不能用来配,
+        // 比如 Bright Green 和 Dark Green 的 colour 字段都是 "green",分不清是哪个,
+        // 必须用 caption(跟 colours 字符串里的名字一模一样)才能精确对应。
+        const imgByColour = new Map();
         if (rawImages.length) {
           let n = 0;
           for (const im of rawImages.slice(0, 12)) {
@@ -266,7 +272,11 @@ async function importTrends(db, started, limit, warningsAll) {
               `suppliers/trends/products/_variants/w{w}/${code}-${n}.webp`,
               n <= 2 ? warnings : []
             );
-            if (url) gallery.push(url);
+            if (url) {
+              gallery.push(url);
+              const captionTag = String(im?.caption || '').trim().toLowerCase();
+              if (captionTag && !imgByColour.has(captionTag)) imgByColour.set(captionTag, url);
+            }
           }
         }
         if (!gallery.length) {
@@ -290,8 +300,13 @@ async function importTrends(db, started, limit, warningsAll) {
         // 导致 Trends 产品的"选择颜色"那一步整个消失。改成按逗号拆字符串,顺手去掉结尾句号。
         const colourNames = String(item.colours || '').replace(/\.\s*$/, '')
           .split(',').map(s => s.trim()).filter(Boolean).slice(0, 24);
-        // IMAGE-RULES §二:Trends 序号每产品不同,不自动配色图 → 色块用名字(前端 swatch 兜底 hex)
-        const colours = colourNames.map(n => ({ name: displayColourName(n).name, hex: '', image: '' }));
+        // 有真实颜色照片(caption 精确匹配)就用,没有的(Custom/未识别)才交给前端用 hex/主图兜底
+        const colours = colourNames.map(n => {
+          const { name: label, isCustom } = displayColourName(n);
+          if (isCustom) return { name: label, hex: '', image: '' };
+          const hit = imgByColour.get(n.toLowerCase());
+          return { name: label, hex: '', image: hit || '' };
+        });
 
         const specs = (Array.isArray(item.additional_specifications) ? item.additional_specifications : [])
           .filter(s => s?.specification && s?.description)
