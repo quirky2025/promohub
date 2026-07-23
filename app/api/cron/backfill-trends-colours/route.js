@@ -61,18 +61,26 @@ export async function GET(request) {
   const started = Date.now();
   const url = new URL(request.url);
   const dry = url.searchParams.get('dry') === '1';
+  // Lily 2026-07-23:这次要给每个产品重新下载/处理/上传真实颜色照片,比第一版单纯拉 JSON 重
+  // 很多,86 个一次跑爆了 Vercel 时间限额(504)。改成跟主导入器一样分批跑:每次处理有限数量,
+  // 已经有真实照片的自动跳过(不用你记哪些跑过了),再开同一个 URL 继续处理剩下的。
+  const limit = Math.max(1, parseInt(url.searchParams.get('limit') || '10', 10) || 10);
   const db = sourcingDb();
   const token = process.env.TRENDS_API_TOKEN;
   const results = [];
 
   try {
-    const { data: rows, error } = await db.from('products')
+    const { data: allRows, error } = await db.from('products')
       .select('id, supplier_sku, colours, description')
       .eq('supplier', 'Trends').gte('created_at', BATCH_SINCE);
     if (error) throw new Error(error.message);
 
-    for (const row of (rows || [])) {
-      if (Date.now() - started > 250000) { results.push({ code: row.supplier_sku, result: 'skipped: 时间用完,再开一次同样的 URL 继续' }); continue; }
+    // 已经有真实颜色照片的(至少一个 colour 的 image 非空)算处理过,跳过,不重复下载上传
+    const todo = (allRows || []).filter(r => !(Array.isArray(r.colours) && r.colours.some(c => c?.image)));
+    const rows = todo.slice(0, limit);
+
+    for (const row of rows) {
+      if (Date.now() - started > 200000) { results.push({ code: row.supplier_sku, result: 'skipped: 时间用完,再开一次同样的 URL 继续' }); continue; }
       const code = row.supplier_sku;
       try {
         const res = await fetch(`${TRENDS_BASE}/api/v1/products/${code}.json`, {
@@ -130,7 +138,9 @@ export async function GET(request) {
       }
     }
 
-    return Response.json({ dry, scanned: (rows || []).length, results, elapsed_s: Math.round((Date.now() - started) / 1000) });
+    const remaining = todo.length - rows.length;
+    const hint = remaining > 0 ? `还有 ${remaining} 个待处理,再开一次同样的 URL 继续` : '这批全部处理完了';
+    return Response.json({ dry, total_todo: todo.length, processed: rows.length, remaining, hint, results, elapsed_s: Math.round((Date.now() - started) / 1000) });
   } catch (e) {
     return Response.json({ error: String(e?.message || e) }, { status: 500 });
   }
