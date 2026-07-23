@@ -175,7 +175,9 @@ async function syncPromoBrands(db, started, deadlineMs) {
         .eq('supplier', 'PromoBrands')
         .range(from, from + PAGE - 1);
       if (error) { out.error = error.message; return out; }
-      (data || []).forEach(p => { if (!p.indent_type && p.supplier_sku) ours.set(String(p.supplier_sku).toUpperCase(), p); });
+      // Lily 2026-07-24 踩坑:这里之前没有 .trim(),supplier_sku 带空格的(比如 "B118 "、"M452 ")
+      // 永远匹配不上 PB 干净的 Product_Code,库存永远补不上——跟今天一整天遇到的 trim 坑是同一个模式。
+      (data || []).forEach(p => { if (!p.indent_type && p.supplier_sku) ours.set(String(p.supplier_sku).trim().toUpperCase(), p); });
       if (!data || data.length < PAGE) break;
     }
     if (ours.size === 0) { out.skipped = true; out.error = 'no PromoBrands products in DB'; return out; }
@@ -201,9 +203,10 @@ async function syncPromoBrands(db, started, deadlineMs) {
       let foundAll = false;
       for (const prod of list) {
         after = Math.max(after, Number(prod.Product_ID) || after);
-        const mine = ours.get(String(prod.Product_Code || '').toUpperCase());
+        const pcode = String(prod.Product_Code || '').trim().toUpperCase();
+        const mine = ours.get(pcode);
         if (!mine) continue;
-        ours.delete(String(prod.Product_Code || '').toUpperCase());
+        ours.delete(pcode);
         if (ours.size === 0) foundAll = true;
         const inv = Array.isArray(prod.Inventory) ? prod.Inventory : [];
         const agg = new Map();
@@ -234,6 +237,11 @@ async function syncPromoBrands(db, started, deadlineMs) {
       }
       if (foundAll || list.length < 100) break;
     }
+
+    // 诊断:扫完/预算用完之后,ours 里还剩多少个没在 PB 目录页里遇到过(帮排查"明明有货但同步
+    // 不上"是扫描没覆盖到,还是 PB 目录本身没有这个码)。剩太多不代表全错,PB 目录本身有分页深度。
+    out.unmatched_count = ours.size;
+    if (ours.size > 0 && ours.size <= 20) out.unmatched_sample = [...ours.keys()];
 
     if (okIds.length) {
       for (let i = 0; i < okIds.length; i += 300) {

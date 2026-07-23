@@ -52,7 +52,7 @@ export async function GET(request) {
     const validPairs = new Set((navSubs || []).map((r) => `${r.category}|||${r.subcategory}`));
 
     const { data: rows, error } = await db.from('products')
-      .select('id, supplier, supplier_sku, name, slug, category, subcategory, colours, features, description, display_title')
+      .select('id, supplier, supplier_sku, name, slug, category, subcategory, colours, features, description, display_title, indent_type')
       .in('supplier', ['Trends', 'PromoBrands'])
       .gte('created_at', BATCH_SINCE);
     if (error) throw new Error(`products: ${error.message}`);
@@ -73,7 +73,10 @@ export async function GET(request) {
       if (!Array.isArray(p.colours) || p.colours.length === 0) { flags.push('colours_empty'); bump('colours_empty'); }
       if (!Array.isArray(p.features) || p.features.length === 0) { flags.push('features_empty'); bump('features_empty'); }
       if (!p.description) { flags.push('description_empty'); bump('description_empty'); }
-      if (!stockedIds.has(p.id)) { flags.push('no_stock_row'); bump('no_stock_row'); }
+      // Lily 2026-07-24:Indent(定制/海运)款本来就没有现货库存,不该算进"缺库存"名单里,
+      // 之前只按 SKU 里有没有 ".MTO" 猜 Indent,漏掉了一批 6 位数字编码、但 indent_type 也是
+      // indent_sea 的笔类产品(Atlantis Pen 103204 等),现在直接认 indent_type 字段,不再猜。
+      if (!p.indent_type && !stockedIds.has(p.id)) { flags.push('no_stock_row'); bump('no_stock_row'); }
       if (p.display_title && /\b[A-Z0-9]{2,}[.\-]?[A-Z0-9]*\b/.test(p.supplier_sku) && p.display_title.toUpperCase().includes(String(p.supplier_sku).replace(/\.MTO$/i, '').toUpperCase())) {
         flags.push('display_title_still_has_sku'); bump('display_title_still_has_sku');
       }
