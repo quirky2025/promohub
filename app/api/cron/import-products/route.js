@@ -401,11 +401,23 @@ function pbMapCategory(prod) {
   return { category: FALLBACK_CAT, hint: cats.map(c => c.Category_Name).join('/') || 'unmapped' };
 }
 
+// Lily 2026-07-23(D435 Discovery A5 Notebook 实测):不是所有产品都有"Unbranded"(table4)
+// 这个纯裸货价格档——有些产品(比如带印刷的笔记本)只提供"10 Days Service"(table1)/"7 Days
+// Service"(table5)这种含服务的价格,table4 是空的。之前只认 table4,这类产品全被误判成
+// 没价格→quote_only。改成按优先级依次尝试,哪个有数据用哪个。
 function pbTiers(prod) {
-  const t = prod?.Product_Price_Table?.Product_Price_table4; // Unbranded
+  const tables = ['Product_Price_table4', 'Product_Price_table1', 'Product_Price_table5'];
+  let t = null;
+  let tKey = 'productPricetable4';
+  for (const key of tables) {
+    const candidate = prod?.Product_Price_Table?.[key];
+    if (candidate && Number(candidate[`${key.replace('Product_Price_table', 'productPricetable')}Qty1`]) > 0) {
+      t = candidate; tKey = key.replace('Product_Price_table', 'productPricetable'); break;
+    }
+  }
   const out = [];
   if (t) for (let i = 1; i <= 7; i++) {
-    const q = Number(t[`productPricetable4Qty${i}`]); const pr = Number(t[`productPricetable4Price${i}`]);
+    const q = Number(t[`${tKey}Qty${i}`]); const pr = Number(t[`${tKey}Price${i}`]);
     if (q > 0 && pr > 0) out.push({ q, cost: pr });
   }
   return out.sort((a, b) => a.q - b.q);
