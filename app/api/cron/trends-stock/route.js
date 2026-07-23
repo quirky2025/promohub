@@ -147,6 +147,7 @@ async function pbIdToken() {
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ grant_type: 'refresh_token', client_id: clientId, refresh_token: refreshToken }),
     cache: 'no-store',
+    signal: AbortSignal.timeout(15000),
   });
   const data = await res.json().catch(() => ({}));
   return data.id_token || null;
@@ -191,10 +192,21 @@ async function syncPromoBrands(db, started, deadlineMs) {
       if (Date.now() - started > deadlineMs) { out.error = 'budget exhausted (resume next run)'; break; }
       // PB 规矩:首页不能带 After(After=0 会回 "Invalid Query Parameter"),翻页才带
       const qs = after > 0 ? `PageSize=100&Order=ASC&After=${after}` : 'PageSize=100&Order=ASC';
-      const res = await fetch(`${PB_BASE}/product?${qs}`, {
-        headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-        cache: 'no-store',
-      });
+      let res;
+      try {
+        // Lily 2026-07-24 踩坑:之前这个 fetch 没设超时,PB 那边一旦某次请求卡住不响应,
+        // 整个函数会一直挂着(比 Vercel maxDuration 表现得还诡异,客户端连接一直不断),
+        // 前端轮询几分钟都拿不到结果。加 15s 超时,卡住就直接判定这页失败、跳出循环报错,
+        // 而不是无限期挂起。
+        res = await fetch(`${PB_BASE}/product?${qs}`, {
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+          cache: 'no-store',
+          signal: AbortSignal.timeout(15000),
+        });
+      } catch (e) {
+        out.error = `PB /product fetch failed/timeout: ${String(e?.message || e)}`;
+        break;
+      }
       if (!res.ok) { out.error = `PB /product ${res.status}`; break; }
       const list = await res.json().catch(() => null);
       if (!Array.isArray(list)) { out.error = typeof list === 'string' ? `PB said: ${list}` : 'PB bad body'; break; }
