@@ -485,6 +485,9 @@ export default function Home() {
                         : <div style={{ fontSize: '40px', color: '#D0CCC8' }}>📦</div>}
                     </div>
                     <div style={{ padding: '14px 16px' }}>
+                      {product.supplier_sku && (
+                        <div style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Mono", monospace', marginBottom: '4px' }}>SKU: {product.supplier_sku}</div>
+                      )}
                       <div style={{ fontSize: '14px', fontWeight: 600, color: NAVY, marginBottom: '8px', lineHeight: 1.3 }}>{product.name}</div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         {price > 0 && (
