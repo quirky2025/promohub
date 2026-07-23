@@ -1,0 +1,192 @@
+import sharp from 'sharp';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { sourcingDb } from '@/lib/sourcingDb';
+import { colourSlug, cleanColour } from '@/lib/colourName';
+import { tierMargin } from '@/lib/pricing';
+
+// D15 补漏 · 批量回填 PB 产品的颜色图片(用真实 img.colour 字段匹配,配合模糊包含匹配)+
+// 用修好的 pbTiers()(按 Des 文字找 Unbranded,不按编号猜)重新判断 quote_only/tiers。
+// 根因(Lily 2026-07-23 用 S898.06/S777/D435 三个例子发现):
+// ① 之前颜色图片靠猜文件名 "_ub_<颜色>" 模式,PB 实际文件名五花八门,根本对不上;
+// ② 之前价格表只认固定编号(table4=Unbranded),但编号每个产品不一样,D435 的 Unbranded 在 table5。
+// import-products/route.js 已经修好这两处解析逻辑,但只对以后的导入生效——这批已经进库的 PB
+// 产品需要重新拉一次原始数据,重建 colours/pricing_tiers。
+// PB 没有单条查询接口,只能翻页扫全部目录,一次性收集这批需要的 code,分批处理避免超时。
+// 用法:GET /api/cron/backfill-pb-colours?key=<PROBE_KEY>&limit=8&dry=1
+
+export const maxDuration = 280;
+
+const PB_TOKEN_URL = 'https://promobrandrestapi.auth.ap-southeast-2.amazoncognito.com/oauth2/token';
+const PB_BASE = process.env.PROMOBRANDS_API_BASE || 'https://api.promobrands.com.au';
+const R2_PUBLIC = process.env.R2_PUBLIC_BASE || 'https://pub-fbec7c9199f04af8ab95a413a4620d37.r2.dev';
+const VARIANTS = [160, 400, 900];
+const BATCH_SINCE = '2026-07-22 00:00:00';
+
+function authorised(request) {
+  const key = new URL(request.url).searchParams.get('key');
+  const probeKey = process.env.PROBE_KEY || process.env.TRENDS_PROBE_KEY;
+  return !!probeKey && key === probeKey;
+}
+function displayColourName(raw) {
+  const { name, mode } = cleanColour(raw);
+  const isCustom = !((mode === 'solid' || mode === 'compound') && name);
+  return { name: isCustom ? 'Custom' : name, isCustom };
+}
+const slugify = (s) => String(s || '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+
+const r2 = new S3Client({
+  region: 'auto',
+  endpoint: `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+  credentials: { accessKeyId: process.env.R2_ACCESS_KEY_ID, secretAccessKey: process.env.R2_SECRET_ACCESS_KEY },
+});
+async function imageToR2(srcUrl, keyStem) {
+  try {
+    const res = await fetch(srcUrl, { cache: 'no-store' });
+    if (!res.ok) return null;
+    const buf = Buffer.from(await res.arrayBuffer());
+    if (buf.length < 100) return null;
+    for (const w of VARIANTS) {
+      const webp = await sharp(buf).resize({ width: w, withoutEnlargement: true }).webp({ quality: 82 }).toBuffer();
+      const key = keyStem.replace('{w}', String(w));
+      await r2.send(new PutObjectCommand({ Bucket: process.env.R2_BUCKET, Key: key, Body: webp, ContentType: 'image/webp' }));
+    }
+    return `${R2_PUBLIC}/${keyStem.replace('{w}', '400')}`;
+  } catch { return null; }
+}
+
+async function pbIdToken() {
+  const clientId = String(process.env.PROMOBRANDS_CLIENT_ID || '').replace(/\s+/g, '');
+  const refreshToken = String(process.env.PROMOBRANDS_REFRESH_TOKEN || '').replace(/\s+/g, '');
+  const res = await fetch(PB_TOKEN_URL, {
+    method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ grant_type: 'refresh_token', client_id: clientId, refresh_token: refreshToken }),
+    cache: 'no-store',
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!data.id_token) throw new Error('PB token exchange failed');
+  return data.id_token;
+}
+
+function pbTiers(prod) {
+  const table = prod?.Product_Price_Table || {};
+  const keys = Object.keys(table).filter(k => /^Product_Price_table\d+$/.test(k));
+  const prefixOf = (k) => k.replace('Product_Price_table', 'productPricetable');
+  const hasData = (t, prefix) => t && Number(t[`${prefix}Qty1`]) > 0;
+  let chosen = null;
+  for (const k of keys) {
+    const t = table[k];
+    if (hasData(t, prefixOf(k)) && /unbranded/i.test(String(t[`${prefixOf(k)}Des`] || ''))) { chosen = { t, prefix: prefixOf(k) }; break; }
+  }
+  if (!chosen) for (const k of keys) { const t = table[k]; if (hasData(t, prefixOf(k))) { chosen = { t, prefix: prefixOf(k) }; break; } }
+  const out = [];
+  if (chosen) for (let i = 1; i <= 7; i++) {
+    const q = Number(chosen.t[`${chosen.prefix}Qty${i}`]); const pr = Number(chosen.t[`${chosen.prefix}Price${i}`]);
+    if (q > 0 && pr > 0) out.push({ q, cost: pr });
+  }
+  return out.sort((a, b) => a.q - b.q);
+}
+
+export async function GET(request) {
+  if (!authorised(request)) return Response.json({ error: 'unauthorized' }, { status: 401 });
+  const started = Date.now();
+  const url = new URL(request.url);
+  const dry = url.searchParams.get('dry') === '1';
+  const limit = Math.max(1, parseInt(url.searchParams.get('limit') || '8', 10) || 8);
+  const db = sourcingDb();
+  const results = [];
+
+  try {
+    const { data: allRows, error } = await db.from('products')
+      .select('id, supplier_sku, colours, quote_only, min_qty')
+      .eq('supplier', 'PromoBrands').gte('created_at', BATCH_SINCE);
+    if (error) throw new Error(error.message);
+
+    // 已经有真实照片的(至少一个 colour 的 image 非空)算处理过,跳过
+    const todo = (allRows || []).filter(r => !(Array.isArray(r.colours) && r.colours.some(c => c?.image)));
+    const targets = todo.slice(0, limit);
+    if (!targets.length) return Response.json({ dry, total_todo: 0, hint: '这批全部处理完了', results: [] });
+
+    const need = new Map(targets.map(r => [r.supplier_sku.toUpperCase(), r]));
+    const token = await pbIdToken();
+    let after = 0;
+    for (;;) {
+      if (!need.size || Date.now() - started > 200000) break;
+      const qs = after > 0 ? `PageSize=100&Order=ASC&After=${after}` : 'PageSize=100&Order=ASC';
+      const res = await fetch(`${PB_BASE}/product?${qs}`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, cache: 'no-store' });
+      if (!res.ok) break;
+      const list = await res.json().catch(() => null);
+      if (!Array.isArray(list) || !list.length) break;
+      for (const prod of list) {
+        after = Math.max(after, Number(prod.Product_ID) || after);
+        const codeU = String(prod.Product_Code || '').trim().toUpperCase();
+        const row = need.get(codeU);
+        if (!row) continue;
+        need.delete(codeU);
+        try {
+          const sku = row.supplier_sku.toLowerCase();
+          const unbranded = (prod.Product_Images?.productUnbrandedImages || []).slice(0, 24);
+          const ubByColour = new Map();
+          for (const img of unbranded) {
+            if (!img?.mediaItemUrl) continue;
+            const file = slugify(img.slug || img.mediaItemUrl.split('/').pop().replace(/\.\w+$/, ''));
+            const imgUrl = await imageToR2(img.mediaItemUrl, `suppliers/promobrands/products/_variants/w{w}/unbranded/${sku}/${file}.webp`);
+            if (!imgUrl) continue;
+            let colour = String(img.colour || '').trim();
+            if (!colour || /^unbranded$/i.test(colour)) continue;
+            ubByColour.set(colour.toLowerCase(), { colour, url: imgUrl });
+          }
+          function findUbImage(name) {
+            const key = name.toLowerCase();
+            if (ubByColour.has(key)) return ubByColour.get(key);
+            for (const [k, v] of ubByColour) { if (key.includes(k) || k.includes(key)) return v; }
+            return null;
+          }
+          const invColours = (Array.isArray(prod.Inventory) ? prod.Inventory : [])
+            .map(r => String(r?.InventoryDetails?.colour || '').trim()).filter(c => c && !/^misc$/i.test(c));
+          const names = invColours.length ? [...new Set(invColours)] : (prod.Colour ? [prod.Colour] : ['Default']);
+          const colours = names.map(n => {
+            const { name: label, isCustom } = displayColourName(n);
+            if (isCustom) return { name: label, hex: '', image: '' };
+            const hit = findUbImage(n);
+            return { name: label, hex: '', image: hit ? hit.url : '' };
+          });
+          const colour_slugs = names.filter(n => n !== 'Default').map(n => colourSlug(n));
+
+          const costTiers = pbTiers(prod);
+          const update = { colours, colour_slugs };
+          let tiersChanged = false;
+          if (row.quote_only && costTiers.length) {
+            update.quote_only = false;
+            update.min_qty = costTiers[0].q;
+            tiersChanged = true;
+          }
+
+          if (!dry) {
+            const { error: uErr } = await db.from('products').update(update).eq('id', row.id);
+            if (uErr) throw new Error(uErr.message);
+            if (tiersChanged) {
+              const tiers = costTiers.map((t, i, arr) => ({
+                product_id: row.id, sort_order: i, min_qty: t.q,
+                max_qty: arr[i + 1] ? arr[i + 1].q - 1 : null,
+                base_price: Number((t.cost * tierMargin(i)).toFixed(2)),
+              }));
+              await db.from('pricing_tiers').delete().eq('product_id', row.id);
+              await db.from('pricing_tiers').insert(tiers);
+            }
+          }
+          results.push({ code: row.supplier_sku, colours: colours.length, real_images: ubByColour.size, tiers_fixed: tiersChanged });
+        } catch (e) {
+          results.push({ code: row.supplier_sku, result: `error: ${String(e?.message || e).slice(0, 160)}` });
+        }
+      }
+      if (list.length < 100) break;
+    }
+    for (const [, row] of need) results.push({ code: row.supplier_sku, result: 'not found in catalog scan (time budget or gone)' });
+
+    const remaining = todo.length - targets.length;
+    const hint = remaining > 0 ? `还有 ${remaining} 个待处理,再开一次同样的 URL 继续` : '这批全部处理完了';
+    return Response.json({ dry, total_todo: todo.length, processed: targets.length, remaining, hint, results, elapsed_s: Math.round((Date.now() - started) / 1000) });
+  } catch (e) {
+    return Response.json({ error: String(e?.message || e) }, { status: 500 });
+  }
+}

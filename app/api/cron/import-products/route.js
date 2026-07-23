@@ -401,23 +401,31 @@ function pbMapCategory(prod) {
   return { category: FALLBACK_CAT, hint: cats.map(c => c.Category_Name).join('/') || 'unmapped' };
 }
 
-// Lily 2026-07-23(D435 Discovery A5 Notebook 实测):不是所有产品都有"Unbranded"(table4)
-// 这个纯裸货价格档——有些产品(比如带印刷的笔记本)只提供"10 Days Service"(table1)/"7 Days
-// Service"(table5)这种含服务的价格,table4 是空的。之前只认 table4,这类产品全被误判成
-// 没价格→quote_only。改成按优先级依次尝试,哪个有数据用哪个。
+// Lily 2026-07-23(D435 Discovery A5 Notebook 实测,第二版):价格档编号(table1/table4/table5..)
+// 每个产品不固定——D435 的"Unbranded"在 table5,S898.06 的"Unbranded"却在 table4,不能按编号猜。
+// 唯一可靠的是每个表自带的 Des 文字("Unbranded"/"10 Days Service"..)。改成先扫全部表找
+// Des 含"Unbranded"的那个;找不到就退而求其次,挑第一个有真实数据的表(不能整体没价格)。
 function pbTiers(prod) {
-  const tables = ['Product_Price_table4', 'Product_Price_table1', 'Product_Price_table5'];
-  let t = null;
-  let tKey = 'productPricetable4';
-  for (const key of tables) {
-    const candidate = prod?.Product_Price_Table?.[key];
-    if (candidate && Number(candidate[`${key.replace('Product_Price_table', 'productPricetable')}Qty1`]) > 0) {
-      t = candidate; tKey = key.replace('Product_Price_table', 'productPricetable'); break;
+  const table = prod?.Product_Price_Table || {};
+  const keys = Object.keys(table).filter(k => /^Product_Price_table\d+$/.test(k));
+  const prefixOf = (k) => k.replace('Product_Price_table', 'productPricetable');
+  const hasData = (t, prefix) => t && Number(t[`${prefix}Qty1`]) > 0;
+
+  let chosen = null;
+  for (const k of keys) {
+    const t = table[k];
+    if (hasData(t, prefixOf(k)) && /unbranded/i.test(String(t[`${prefixOf(k)}Des`] || ''))) { chosen = { t, prefix: prefixOf(k) }; break; }
+  }
+  if (!chosen) {
+    for (const k of keys) {
+      const t = table[k];
+      if (hasData(t, prefixOf(k))) { chosen = { t, prefix: prefixOf(k) }; break; }
     }
   }
+
   const out = [];
-  if (t) for (let i = 1; i <= 7; i++) {
-    const q = Number(t[`${tKey}Qty${i}`]); const pr = Number(t[`${tKey}Price${i}`]);
+  if (chosen) for (let i = 1; i <= 7; i++) {
+    const q = Number(chosen.t[`${chosen.prefix}Qty${i}`]); const pr = Number(chosen.t[`${chosen.prefix}Price${i}`]);
     if (q > 0 && pr > 0) out.push({ q, cost: pr });
   }
   return out.sort((a, b) => a.q - b.q);
