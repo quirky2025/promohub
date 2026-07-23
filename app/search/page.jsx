@@ -123,7 +123,9 @@ function SearchResults() {
                   }
                 </div>
                 <div style={{ padding: '16px' }}>
-                  <div style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Mono", monospace', marginBottom: '4px' }}>{product.supplier_sku}</div>
+                  {product.supplier_sku && (
+                    <div style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Mono", monospace', marginBottom: '4px' }}>SKU: {product.supplier_sku}</div>
+                  )}
                   <div style={{ fontWeight: 600, color: NAVY, fontSize: '15px', marginBottom: '6px', lineHeight: 1.3 }}>{product.name}</div>
                   <div style={{ fontSize: '12px', color: '#000', marginBottom: '10px' }}>{product.category}{product.subcategory ? ` › ${product.subcategory}` : ''}</div>
                   {product.quote_only ? (

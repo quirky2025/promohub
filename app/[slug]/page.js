@@ -317,7 +317,7 @@ function ProductCard({ product }) {
             {product.name}
           </div>
           <div style={{ fontSize: '12px', color: '#000', textAlign: 'center', fontFamily: '"DM Mono", monospace', letterSpacing: '0.5px' }}>
-            {product.supplier_sku || product.subcategory || product.category}
+            {product.supplier_sku ? `SKU: ${product.supplier_sku}` : (product.subcategory || product.category)}
           </div>
           <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'center', gap: '22px', alignItems: 'flex-end' }}>
             {product.quote_only ? (

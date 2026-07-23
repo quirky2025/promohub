@@ -86,7 +86,7 @@ export async function GET(request) {
 
     for (const row of rows) {
       if (Date.now() - started > 200000) { results.push({ code: row.supplier_sku, result: 'skipped: 时间用完,再开一次同样的 URL 继续' }); continue; }
-      const code = row.supplier_sku;
+      const code = String(row.supplier_sku || '').trim();
       try {
         const res = await fetch(`${TRENDS_BASE}/api/v1/products/${code}.json`, {
           headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' }, cache: 'no-store',
