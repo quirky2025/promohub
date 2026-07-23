@@ -1458,9 +1458,11 @@ function NotebookSpecs({ product }) {
     // Lily 2026-07-22: quote_only 产品不能写死交期天数——报价时才由团队确认。
     ? 'Confirmed with quote'
     : product.indent_type === 'indent_air'
-    ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Air Freight, after artwork approval)` : 'Indent order (Air Freight) — enquire for lead time')
+    // Lily 2026-07-23:Trends Indent 的 lead time 是供应商原文(如"14-16 weeks, sampling is
+    // additional time"),不是纯数字,不能再硬拼"X business days"——直接展示原文整句。
+    ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} (Air Freight, after artwork approval)` : 'Indent order (Air Freight) — enquire for lead time')
     : product.indent_type === 'indent_sea'
-    ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
+    ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
     : `Production: ${product.supplier === 'PromoBrands' ? '7-10' : '3-7'} business days (after artwork approval)`;
   return (
     <div>
@@ -1515,9 +1517,11 @@ function FlatSpecTable({ product }) {
     // Lily 2026-07-22: quote_only 产品不能写死交期天数——报价时才由团队确认。
     ? 'Confirmed with quote'
     : product.indent_type === 'indent_air'
-    ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Air Freight, after artwork approval)` : 'Indent order (Air Freight) — enquire for lead time')
+    // Lily 2026-07-23:Trends Indent 的 lead time 是供应商原文(如"14-16 weeks, sampling is
+    // additional time"),不是纯数字,不能再硬拼"X business days"——直接展示原文整句。
+    ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} (Air Freight, after artwork approval)` : 'Indent order (Air Freight) — enquire for lead time')
     : product.indent_type === 'indent_sea'
-    ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} business days (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
+    ? (product.indent_lead_time ? `Production: ${product.indent_lead_time} (Sea Freight, after artwork approval)` : 'Indent order (Sea Freight) — enquire for lead time')
     : `Production: ${product.supplier === 'PromoBrands' ? '7-10' : '3-7'} business days (after artwork approval)`;
 // 通用 specs 表(Technology 起所有抓了 specs 的产品)— 必须放在 Drinkware 判断之前
 // Material / Size rows excluded: they render in the LEFT gold blocks (统一风格, Lily 2026-07).
