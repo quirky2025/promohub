@@ -344,10 +344,11 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                       <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedSecondary === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedSecondary === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
                         {(c.image || (Array.isArray(c.images) && c.images[0])) ? <ProductImg src={c.image || c.images[0]} alt={colourImageAlt(c.name, product.name)} size="thumb" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                           : hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: hex, border: hex === '#FFFFFF' ? '1px solid #E0DDD7' : '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
-                          // Lily 2026-07-23:Custom/全定制色(无 image 无 hex,IMAGE-RULES §二硬规则)
-                          // 之前是空灰圈,改成用产品主图当缩略图,比空圆好——不违反"Custom 不配假颜色图"
-                          // 的规则,这只是 swatch 没有专属颜色图时的展示兜底,不是给 Custom 配颜色。
-                          : mainImage ? <ProductImg src={mainImage} alt={colourImageAlt(c.name, product.name)} size="thumb" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                          // Lily 2026-07-23:主图兜底只能用于真正的 Custom/全定制色(c.name==='Custom')。
+                          // 之前对"没有 hex 的任何颜色"都用主图兜底,结果 Silver/Clear 这种真实颜色
+                          // (只是字典没收录,不是 Custom)也被套上一张跟颜色无关的主图,显示很怪——
+                          // 字典已经补全常见色,这里再收紧条件,真实颜色字典查不到就回退灰圈,不乱猜图。
+                          : (c.name === 'Custom' && mainImage) ? <ProductImg src={mainImage} alt={colourImageAlt(c.name, product.name)} size="thumb" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                           : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
                       </div>
                       <div style={{ fontSize: '10px', color: selectedSecondary === i ? GOLD : '#000', fontWeight: selectedSecondary === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{formatColourName(c.name)}</div>
@@ -373,10 +374,11 @@ export default function ProductClient({ product, mainImage, colours, extraImages
                       <div style={{ width: '64px', height: '64px', borderRadius: '10px', border: selectedColour === i ? `2.5px solid ${GOLD}` : '1.5px solid #E0DDD7', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', marginBottom: '6px', boxShadow: selectedColour === i ? `0 2px 10px rgba(201,169,110,.3)` : '0 1px 3px rgba(0,0,0,.06)', transition: 'border .15s, box-shadow .15s' }}>
                         {c.image ? <ProductImg src={c.image} alt={colourImageAlt(c.name, product.name)} size="thumb" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                           : hex ? <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: hex, border: hex === '#FFFFFF' ? '1px solid #E0DDD7' : '1px solid rgba(0,0,0,.18)', boxSizing: 'border-box' }} />
-                          // Lily 2026-07-23:Custom/全定制色(无 image 无 hex,IMAGE-RULES §二硬规则)
-                          // 之前是空灰圈,改成用产品主图当缩略图,比空圆好——不违反"Custom 不配假颜色图"
-                          // 的规则,这只是 swatch 没有专属颜色图时的展示兜底,不是给 Custom 配颜色。
-                          : mainImage ? <ProductImg src={mainImage} alt={colourImageAlt(c.name, product.name)} size="thumb" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
+                          // Lily 2026-07-23:主图兜底只能用于真正的 Custom/全定制色(c.name==='Custom')。
+                          // 之前对"没有 hex 的任何颜色"都用主图兜底,结果 Silver/Clear 这种真实颜色
+                          // (只是字典没收录,不是 Custom)也被套上一张跟颜色无关的主图,显示很怪——
+                          // 字典已经补全常见色,这里再收紧条件,真实颜色字典查不到就回退灰圈,不乱猜图。
+                          : (c.name === 'Custom' && mainImage) ? <ProductImg src={mainImage} alt={colourImageAlt(c.name, product.name)} size="thumb" style={{ width: '90%', height: '90%', objectFit: 'contain' }} />
                           : <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E0DDD7' }} />}
                       </div>
                       <div style={{ fontSize: '10px', color: selectedColour === i ? GOLD : '#000', fontWeight: selectedColour === i ? 600 : 400, maxWidth: '64px', lineHeight: '1.2', fontFamily: '"DM Sans", sans-serif' }}>{formatColourName(c.name)}</div>
