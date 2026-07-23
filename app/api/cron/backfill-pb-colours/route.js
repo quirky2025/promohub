@@ -92,19 +92,23 @@ export async function GET(request) {
   const url = new URL(request.url);
   const dry = url.searchParams.get('dry') === '1';
   const limit = Math.max(1, parseInt(url.searchParams.get('limit') || '8', 10) || 8);
+  // Lily 2026-07-23 发现"一直卡住不动"(跟 backfill-trends-colours 同一个根因):靠"有没有真实
+  // 图片"判断处理过没有,但 PB 有些颜色本来就没有对应的 Unbranded 图(或者本来就是 Custom),
+  // 永远判定成"没处理过",每次都占掉批次名额,后面的产品永远轮不到。改成用 offset 游标翻页。
+  const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10) || 0);
   const db = sourcingDb();
   const results = [];
 
   try {
     const { data: allRows, error } = await db.from('products')
       .select('id, supplier_sku, colours, quote_only, min_qty')
-      .eq('supplier', 'PromoBrands').gte('created_at', BATCH_SINCE);
+      .eq('supplier', 'PromoBrands').gte('created_at', BATCH_SINCE)
+      .order('id', { ascending: true });
     if (error) throw new Error(error.message);
 
-    // 已经有真实照片的(至少一个 colour 的 image 非空)算处理过,跳过
-    const todo = (allRows || []).filter(r => !(Array.isArray(r.colours) && r.colours.some(c => c?.image)));
-    const targets = todo.slice(0, limit);
-    if (!targets.length) return Response.json({ dry, total_todo: 0, hint: '这批全部处理完了', results: [] });
+    const todo = allRows || [];
+    const targets = todo.slice(offset, offset + limit);
+    if (!targets.length) return Response.json({ dry, total_todo: todo.length, offset, hint: '这批全部处理完了', results: [] });
 
     const need = new Map(targets.map(r => [r.supplier_sku.toUpperCase(), r]));
     const token = await pbIdToken();
@@ -183,9 +187,11 @@ export async function GET(request) {
     }
     for (const [, row] of need) results.push({ code: row.supplier_sku, result: 'not found in catalog scan (time budget or gone)' });
 
-    const remaining = todo.length - targets.length;
-    const hint = remaining > 0 ? `还有 ${remaining} 个待处理,再开一次同样的 URL 继续` : '这批全部处理完了';
-    return Response.json({ dry, total_todo: todo.length, processed: targets.length, remaining, hint, results, elapsed_s: Math.round((Date.now() - started) / 1000) });
+    const nextOffset = offset + targets.length;
+    const remaining = todo.length - nextOffset;
+    const nextUrl = `${url.origin}${url.pathname}?key=${url.searchParams.get('key')}${dry ? '&dry=1' : ''}&offset=${nextOffset}`;
+    const hint = remaining > 0 ? `还有 ${remaining} 个待处理,下一步打开:${nextUrl}` : '这批全部处理完了';
+    return Response.json({ dry, total_todo: todo.length, processed: targets.length, offset, next_offset: nextOffset, remaining, hint, next_url: remaining > 0 ? nextUrl : null, results, elapsed_s: Math.round((Date.now() - started) / 1000) });
   } catch (e) {
     return Response.json({ error: String(e?.message || e) }, { status: 500 });
   }
