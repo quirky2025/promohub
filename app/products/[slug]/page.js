@@ -137,28 +137,33 @@ export default async function ProductPage({ params, searchParams }) {
   const pricingTiers = [...(product.pricing_tiers || [])].sort((a, b) => a.sort_order - b.sort_order);
   const decorations = [...(product.decoration_options || [])].sort((a, b) => a.sort_order - b.sort_order);
 
-  // D9: "Also found in" internal links (scenario collections > colours > subcategory > eco > brand)
-  const alsoFoundIn = await getAlsoFoundIn(product);
-
-  // D11: supplier live stock (empty for suppliers not yet synced → block hidden)
-  const { data: stockRows } = await supabase
-    .from('product_stock')
-    .select('colour_name, qty, next_shipment, synced_at')
-    .eq('product_id', product.id);
-
-  // D13: approved on-site reviews(表开 RLS,走 service key;只取已审核)
-  let reviews = [];
-  try {
-    const { sourcingDb } = await import('@/lib/sourcingDb');
-    const { data: revRows } = await sourcingDb()
-      .from('product_reviews')
-      .select('customer_name, rating, body, submitted_at')
-      .eq('product_id', product.id)
-      .eq('status', 'approved')
-      .order('submitted_at', { ascending: false })
-      .limit(50);
-    reviews = revRows || [];
-  } catch { /* reviews table may not exist yet */ }
+  // Lily 2026-07-23:"点了图片要过一会儿才跳转"——这几个查询互相不依赖(都只需要 product),
+  // 之前是一个个 await 顺序排队,现在改成并行跑,页面加载时间约等于最慢的那一个,不是三个加起来。
+  const [alsoFoundIn, stockResult, reviewsResult] = await Promise.all([
+    // D9: "Also found in" internal links (scenario collections > colours > subcategory > eco > brand)
+    getAlsoFoundIn(product),
+    // D11: supplier live stock (empty for suppliers not yet synced → block hidden)
+    supabase
+      .from('product_stock')
+      .select('colour_name, qty, next_shipment, synced_at')
+      .eq('product_id', product.id),
+    // D13: approved on-site reviews(表开 RLS,走 service key;只取已审核)
+    (async () => {
+      try {
+        const { sourcingDb } = await import('@/lib/sourcingDb');
+        const { data: revRows } = await sourcingDb()
+          .from('product_reviews')
+          .select('customer_name, rating, body, submitted_at')
+          .eq('product_id', product.id)
+          .eq('status', 'approved')
+          .order('submitted_at', { ascending: false })
+          .limit(50);
+        return revRows || [];
+      } catch { return []; /* reviews table may not exist yet */ }
+    })(),
+  ]);
+  const stockRows = stockResult?.data;
+  const reviews = reviewsResult || [];
   const reviewCount = reviews.length;
   const ratingValue = reviewCount
     ? Math.round((reviews.reduce((s, r) => s + (r.rating || 0), 0) / reviewCount) * 10) / 10
