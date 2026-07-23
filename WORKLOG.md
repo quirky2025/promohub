@@ -18,6 +18,12 @@ Lily 逐个 check 147 个批量导入草稿期间发现的问题 + 已定规矩,
 - PB 印刷方式名字里夹带位置/MOQ限定词("Digital Transfer (Front) Per Colour/Position"、"Silicone Patch | 250 MOQ...")——**已改成用 Logoline 现成产品的真实格式:短横线分隔,"Front - 25 x 15mm",限定词/MOQ 挪到 detail 那一行**,不再塞进方式名字。
 - Trends Indent 类产品(Screen Print/Pad Print 那种真有价格表的)的 `pricing` 是嵌套结构 `[{type,prices:[...],additional_costs:[...]}]`,之前只认扁平结构,导致误判 quote_only、颜色/印刷方式选择器全部消失。已修解析 + 写了 `backfill-indent-pricing` 回填端点修复已进库的。
 - PB Features 字段疑似拼写对不上(`Hightlights` vs `Highlights`),已改成两种都认。
+- **SUBCAT 反复出现空白——找到真根因了**:不是零星数据问题,是 `import-products/route.js` 里 147 个产品的 `subcategory` 字段**被硬编码写死成 null**。已加 `resolveSubcategory()`:去 `nav_subcategories`(唯一正式分类字典)按"当前大类精确匹配→全表精确匹配→当前大类模糊匹配→全表模糊匹配"四级顺序解析,解析不到才留空。导入代码 + 存量回填(`backfill-subcategory`)都已处理,回填时用的是"全表搜索",顺带纠正了好几个原本大类就分错的产品(比如 Neo Keychain Powerbank 从 Office & Desk 改回 Technology)。**剩余约 40 个产品在 `nav_subcategories` 里确实没有对应子类**(比如 "Indent"、"Custom Shape/Full Custom/Ad Labels"),这是真实的分类表空白,需要 Lily 决定新增子类名字,不是代码能自动修的。
+- **PB 颜色列表混入假颜色("Bottle" 这种)**:根因是 PB 原始 `Inventory[].InventoryDetails.colour` 字段里,有的行填的是产品本体名词(比如整个瓶子),混在真正配件颜色(比如 "Black Pouch")旁边。已加 `KNOWN_COLOUR_WORDS` 颜色词字典(复用 `lib/colourSwatch.js`)+ `dropNonColourInventoryTags()`:候选颜色里能匹配到真颜色词的保留,不能匹配、且不带空格修饰词的过滤掉。同步应用到 `import-products`(以后新导入自动生效)和 `backfill-pb-colours`(处理存量)。
+- **`supplier_sku` 前后空格导致匹配失败**:凡是拿 `supplier_sku` 做比较/当 Map key 的地方统一加 `.trim()`。以后写任何新的按 SKU 查找逻辑默认要 trim,不要假设数据干净。
+- **产品列表页看不到 SKU(全站排查,不只是 All Products 页)**:排查了 12 个不同的列表/卡片页面(分类页、子分类页、搜索页、品牌页、系列页、Sale、New Arrivals、Sustainability、Indent、Australian Made、首页等),根因是各自的 Supabase `.select()` 查询里根本没取 `supplier_sku` 字段,前端拿不到。已全部加上字段查询 + 卡片显示"SKU: xxx"。以后新增任何展示产品卡片的页面记得带上这个字段。
+- **Stock Availability 大批量同步,不是一次能跑完**:库存同步 cron 有 Vercel 执行时长上限,Trends 2000+/PB 几百个 SKU 一次跑不完,会提前返回 `"error":"budget exhausted (resume next run)"`,需要连续触发多次直到 remaining 归零。**这是设计上的分批,不是又出 bug**,大批量导入后库存这块要有心理预期。
+- **系统性审核工具**:人工一个个翻页找 bug 效率太低也容易漏,写了 `app/api/cron/audit-d15-batch/route.js`,一次性扫描整批产品的 SUBCAT/颜色/Features/Description/库存/颜色图片重复/分类关键词错配,输出问题清单。**以后每次大批量导入完,先跑这个拿问题清单,不要回到人工点开翻页找。**
 
 **规矩/标准(以后新建同类字段直接照做,不用再问):**
 - **产品标题不能带SKU**,SKU 单独展示,不进 `name`/`display_title`。
@@ -29,6 +35,13 @@ Lily 逐个 check 147 个批量导入草稿期间发现的问题 + 已定规矩,
 **待办(还没做):**
 - 数据库层唯一约束(supplier + upper(trim(supplier_sku)))防止未来并发导入再产生重复。
 - 完整《API新品导入操作指南》——等这批全部验证完(push、回填、SQL都跑完)再整理成文,给下次直接照抄用。
+- 剩余约 40 个产品无匹配子类(nav_subcategories 里真没有对应项),需要 Lily 决定新增子类名字。
+- 8 个 `category_maybe_wrong`(名字关键词跟分类对不上,只是提示要人工确认)、21 个 `features_empty`(部分是供应商本身没给数据)、6 个 `description_empty`——待处理清单,来自 audit-d15-batch。
+
+**工具链/协作规矩(跟产品数据无关,踩过的坑):**
+- 沙盒里 `git commit`(porcelain 命令)会卡死不返回。**Lily 已明确要求以后不由 Claude 代为 commit/push**——以后统一是:Claude 只改文件,把完整的 `git add` / `git commit -m "..."` / `git push` 三行命令给 Lily,她自己在终端跑,不再由 Claude 自己跑 git。
+- 沙盒网络白名单拦截 `quirkypromo.com.au`(curl/fetch 会被拦,403 blocked-by-allowlist),不能硬绕;改用连接 Lily 本地已登录的 Chrome,在页面里同源发 `fetch()` 调用自己的 cron 接口。
+- 用浏览器脚本调用大批量接口时单次执行有约 45 秒超时,比后端实际处理时间(150~270秒)短,采用"先发起不等待、轮询全局变量拿结果"的写法。
 
 ---
 
