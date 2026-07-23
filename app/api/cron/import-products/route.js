@@ -398,7 +398,10 @@ async function importTrends(db, started, limit, warningsAll, subByCategory) {
               name: ac.description,
               detail: ac.branding_area || null,
               per_unit: decoUnitPrice(Number(ac.unit_price) || 0),
-              has_setup: Number(ac.setup_price ?? ac.setup) > 0,
+              // Lily 2026-07-23:之前这里信了供应商原始 setup_price,供应商写 0 我们就显示 $0。
+              // 家规是只要有印刷方式,setup 一律固定收 $60(PRICING-RULES §2.1/§3.1),不管供应商
+              // 自己报价是多少 —— 跟 PB 那边的逻辑对齐,不再看供应商原始值。
+              has_setup: true,
               setup_fee: SETUP_FEE,
               default_setup_qty: 1, setup_qty_editable: true, type: 'print',
             }))
