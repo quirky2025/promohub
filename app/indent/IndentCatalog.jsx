@@ -38,7 +38,7 @@ export default function IndentCatalog({ config }) {
       setLoading(true);
       const { data } = await supabase
         .from('products')
-        .select('id, name, slug, category, subcategory, is_eco, min_qty, lead_time_days, is_published, quote_only, product_colours(images, sort_order), pricing_tiers(base_price)')
+        .select('id, name, slug, supplier_sku, category, subcategory, is_eco, min_qty, lead_time_days, is_published, quote_only, product_colours(images, sort_order), pricing_tiers(base_price)')
         .eq('indent_type', config.indentType)
         .eq('is_published', true);
       if (data) setAllProducts(data);
@@ -215,6 +215,9 @@ export default function IndentCatalog({ config }) {
                         )}
                       </div>
                       <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {product.supplier_sku && (
+                          <div style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Mono", monospace', textAlign: 'center' }}>SKU: {product.supplier_sku}</div>
+                        )}
                         <div style={{ fontSize: '14px', fontWeight: 600, color: NAVY, lineHeight: 1.4, textAlign: 'center' }}>{product.name}</div>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: 'auto' }}>
                           {price > 0 ? (

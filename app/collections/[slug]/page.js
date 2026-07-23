@@ -101,7 +101,7 @@ export default function CollectionPage() {
       const orFilter = values.map(v => `collection.cs.${JSON.stringify([v])}`).join(',');
       const { data, error } = await supabase
         .from('products')
-        .select('id, name, slug, category, subcategory, is_eco, collection, min_qty, is_published, quote_only, product_colours(images, sort_order), pricing_tiers(base_price)')
+        .select('id, name, slug, supplier_sku, category, subcategory, is_eco, collection, min_qty, is_published, quote_only, product_colours(images, sort_order), pricing_tiers(base_price)')
         .eq('is_published', true)
         .or(orFilter);
 
@@ -281,6 +281,7 @@ export default function CollectionPage() {
                         {product.is_eco && (<div style={{ position: 'absolute', top: '10px', left: '10px', background: '#2D6A4F', color: '#fff', fontSize: '10px', fontWeight: 700, padding: '3px 8px', borderRadius: '20px' }}>🌿 ECO</div>)}
                       </div>
                       <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        {product.supplier_sku && (<div style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Mono", monospace', textAlign: 'center' }}>SKU: {product.supplier_sku}</div>)}
                         <div style={{ fontSize: '14px', fontWeight: 600, color: NAVY, lineHeight: 1.4, textAlign: 'center' }}>{product.name}</div>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: 'auto' }}>
                           {product.quote_only ? (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '11px', color: '#000' }}>&nbsp;</div><div style={{ color: GOLD, fontSize: '14px', fontWeight: 700 }}>Get a Quote</div></div>) : price > 0 && (<div style={{ textAlign: 'center' }}><div style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>As low as</div><div style={{ fontSize: '18px', color: GOLD, fontWeight: 400 }}>${price.toFixed(2)}</div></div>)}
