@@ -271,7 +271,10 @@ export async function GET(request) {
     return Response.json({ promobrands: pb, elapsed_s: Math.round((Date.now() - started) / 1000) });
   }
 
-  // 全部 Trends 产品(6 位纯数字货号,非 Indent)
+  // 全部 Trends 产品,非 Indent。
+  // Lily 2026-07-23 踩坑记录:这里以前用 /^\d{6}$/ 猜"是不是 Trends 产品",D15 批量导入的
+  // Trends 新品里有一批是短字母数字码(T874/D436/S850 这种,不是 6 位纯数字),被这条正则
+  // 永久排除在库存同步之外,不管触发多少次都不会补上。现在直接认 supplier 字段,不再猜。
   const all = [];
   const PAGE = 1000;
   for (let from = 0; ; from += PAGE) {
@@ -279,10 +282,11 @@ export async function GET(request) {
       .from('products')
       .select('id, supplier_sku, name, indent_type')
       .eq('is_published', true)
+      .eq('supplier', 'Trends')
       .order('supplier_sku')
       .range(from, from + PAGE - 1);
     if (error) return Response.json({ error: error.message }, { status: 500 });
-    (data || []).forEach(p => { if (/^\d{6}$/.test(p.supplier_sku || '') && !p.indent_type) all.push(p); });
+    (data || []).forEach(p => { if (!p.indent_type) all.push(p); });
     if (!data || data.length < PAGE) break;
   }
 
