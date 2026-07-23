@@ -3,6 +3,23 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { sourcingDb } from '@/lib/sourcingDb';
 import { tierMargin, decoUnitPrice, SETUP_FEE } from '@/lib/pricing';
 import { colourSlug, cleanColour } from '@/lib/colourName';
+import { COLOUR_SWATCH } from '@/lib/colourSwatch';
+
+// Lily 2026-07-23(Windsor Tea Bottle S898.06 实测发现):PB 的 Inventory 里,基础款(没有配件)
+// 有时把自己的品名词当"颜色"用,比如瓶子本体 colour:"Bottle",跟真正颜色变体 "Black Pouch"/
+// "Pink Pouch" 混在一起——"Bottle" 根本不是颜色。规则:某颜色词是单个词、不含任何已知颜色词,
+// 但兄弟颜色词里有含已知颜色词的,就把这个误用词过滤掉。
+const KNOWN_COLOUR_WORDS = Object.keys(COLOUR_SWATCH).map(w => w.toLowerCase());
+function hasKnownColourWord(name) {
+  const low = String(name || '').toLowerCase();
+  return KNOWN_COLOUR_WORDS.some(w => low.includes(w));
+}
+function dropNonColourInventoryTags(names) {
+  if (names.length < 2) return names;
+  const realOnes = names.filter(hasKnownColourWord);
+  if (!realOnes.length) return names;
+  return names.filter(n => hasKnownColourWord(n) || n.trim().includes(' '));
+}
 
 // Lily 2026-07-22: 供应商颜色字段有时不是真颜色,是描述性文字("Design your own" 之类的定制品说明)。
 // 用 cleanColour() 识别——solid/compound 才是真颜色,原样用;其余(full_colour/placeholder/unknown)
@@ -503,7 +520,8 @@ async function importPB(db, started, limit) {
         // 色块:库存里的颜色为准;有对应 ub 分色图用图,没有留给 swatch
         const invColours = (Array.isArray(prod.Inventory) ? prod.Inventory : [])
           .map(r => String(r?.InventoryDetails?.colour || '').trim()).filter(c => c && !/^misc$/i.test(c));
-        const names = invColours.length ? [...new Set(invColours)] : (prod.Colour ? [prod.Colour] : ['Default']);
+        const dedupedInv = [...new Set(invColours)];
+        const names = dedupedInv.length ? dropNonColourInventoryTags(dedupedInv) : (prod.Colour ? [prod.Colour] : ['Default']);
         const colours = names.map(n => {
           const { name: label, isCustom } = displayColourName(n);
           if (isCustom) return { name: label, hex: '', image: '' }; // IMAGE-RULES §二:定制品 image/hex 都必须空

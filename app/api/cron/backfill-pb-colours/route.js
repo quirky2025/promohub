@@ -3,6 +3,24 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { sourcingDb } from '@/lib/sourcingDb';
 import { colourSlug, cleanColour } from '@/lib/colourName';
 import { tierMargin } from '@/lib/pricing';
+import { COLOUR_SWATCH } from '@/lib/colourSwatch';
+
+// Lily 2026-07-23(Windsor Tea Bottle S898.06 实测发现):PB 的 Inventory 里,基础款(没有
+// 配件)有时会把自己的品名词当"颜色"用,比如这款瓶子本体叫 colour:"Bottle",跟真正的颜色
+// 变体 "Black Pouch"/"Pink Pouch" 混在一起——"Bottle" 根本不是颜色,是基础库存行的误用。
+// 规则:如果同一产品里,某个颜色词是单个词、且不含任何已知颜色词,但"兄弟"颜色词里有至少
+// 一个含已知颜色词(比如 "Black Pouch" 含 "Black"),就把这个误用词过滤掉,不当颜色选项。
+const KNOWN_COLOUR_WORDS = Object.keys(COLOUR_SWATCH).map(w => w.toLowerCase());
+function hasKnownColourWord(name) {
+  const low = String(name || '').toLowerCase();
+  return KNOWN_COLOUR_WORDS.some(w => low.includes(w));
+}
+function dropNonColourInventoryTags(names) {
+  if (names.length < 2) return names;
+  const realOnes = names.filter(hasKnownColourWord);
+  if (!realOnes.length) return names; // 一个真颜色词都没有,不敢乱删,原样保留
+  return names.filter(n => hasKnownColourWord(n) || n.trim().includes(' '));
+}
 
 // D15 补漏 · 批量回填 PB 产品的颜色图片(用真实 img.colour 字段匹配,配合模糊包含匹配)+
 // 用修好的 pbTiers()(按 Des 文字找 Unbranded,不按编号猜)重新判断 quote_only/tiers。
@@ -96,18 +114,23 @@ export async function GET(request) {
   // 图片"判断处理过没有,但 PB 有些颜色本来就没有对应的 Unbranded 图(或者本来就是 Custom),
   // 永远判定成"没处理过",每次都占掉批次名额,后面的产品永远轮不到。改成用 offset 游标翻页。
   const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10) || 0);
+  // sku=<code> · 只重跑单个产品(比如发现某个产品的颜色/图片规则问题,补丁修好后单独重跑这一个,
+  // 不用把整批 61 个重新扫一遍)。可传逗号分隔多个。
+  const skuFilter = (url.searchParams.get('sku') || '').split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
   const db = sourcingDb();
   const results = [];
 
   try {
-    const { data: allRows, error } = await db.from('products')
+    let query = db.from('products')
       .select('id, supplier_sku, colours, quote_only, min_qty')
       .eq('supplier', 'PromoBrands').gte('created_at', BATCH_SINCE)
       .order('id', { ascending: true });
+    if (skuFilter.length) query = db.from('products').select('id, supplier_sku, colours, quote_only, min_qty').eq('supplier', 'PromoBrands').in('supplier_sku', skuFilter);
+    const { data: allRows, error } = await query;
     if (error) throw new Error(error.message);
 
     const todo = allRows || [];
-    const targets = todo.slice(offset, offset + limit);
+    const targets = skuFilter.length ? todo : todo.slice(offset, offset + limit);
     if (!targets.length) return Response.json({ dry, total_todo: todo.length, offset, hint: '这批全部处理完了', results: [] });
 
     const need = new Map(targets.map(r => [r.supplier_sku.trim().toUpperCase(), r]));
@@ -147,7 +170,8 @@ export async function GET(request) {
           }
           const invColours = (Array.isArray(prod.Inventory) ? prod.Inventory : [])
             .map(r => String(r?.InventoryDetails?.colour || '').trim()).filter(c => c && !/^misc$/i.test(c));
-          const names = invColours.length ? [...new Set(invColours)] : (prod.Colour ? [prod.Colour] : ['Default']);
+          const dedupedInv = [...new Set(invColours)];
+          const names = dedupedInv.length ? dropNonColourInventoryTags(dedupedInv) : (prod.Colour ? [prod.Colour] : ['Default']);
           const colours = names.map(n => {
             const { name: label, isCustom } = displayColourName(n);
             if (isCustom) return { name: label, hex: '', image: '' };
