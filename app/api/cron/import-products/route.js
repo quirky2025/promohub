@@ -433,13 +433,13 @@ async function importPB(db, started, limit) {
           const moqMatch = des.match(/\|\s*(\d[\d,]*)\s*MOQ\s*$/i);
           if (moqMatch) { moqOverride = parseInt(moqMatch[1].replace(/,/g, ''), 10); des = des.slice(0, moqMatch.index).trim().replace(/\|\s*$/, '').trim(); }
           const size = im[`productImprintmethod${i}Size`] || null;
-          const detailParts = [];
-          if (qualifier) detailParts.push(`(${qualifier})`);
-          if (moqOverride > 0) detailParts.push(`${moqOverride} MOQ`);
-          if (size) detailParts.push(size);
+          // Lily 2026-07-23:站内已有产品(Logoline 等)的真实格式是 "Front - 25 x 15mm"
+          // (位置 + 短横线 + 尺寸,没有括号/中点),照现成标准对齐,不要自创格式。
+          let detail = qualifier && size ? `${qualifier} - ${size}` : (size || qualifier || null);
+          if (moqOverride > 0) detail = detail ? `${detail} (${moqOverride} MOQ)` : `${moqOverride} MOQ`;
           decos.push({
             name: `${des} Per ${im[`productImprintmethod${i}Hascolour`] ? 'Colour/' : ''}Position`,
-            detail: detailParts.length ? detailParts.join(' · ') : null,
+            detail,
             per_unit: decoUnitPrice(cost), has_setup: true, setup_fee: SETUP_FEE,
             default_setup_qty: 1, setup_qty_editable: true, type: 'print',
           });
