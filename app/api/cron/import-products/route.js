@@ -434,12 +434,29 @@ async function importPB(db, started, limit) {
           const file = slugify(img.slug || img.mediaItemUrl.split('/').pop().replace(/\.\w+$/, ''));
           const url = await imageToR2(img.mediaItemUrl, `suppliers/promobrands/products/_variants/w{w}/unbranded/${sku}/${file}.webp`, warnings);
           if (!url) continue;
-          const m = (img.mediaItemUrl.split('/').pop() || '').match(/_ub_(.+)\.\w+$/i);
-          const colour = m ? m[1].replace(/[-_]+/g, ' ').trim() : '';
-          ubByColour.set(colour.toLowerCase() || `c${ubByColour.size}`, { colour, url });
+          // Lily 2026-07-23(S898.06/S777 两个真实例子发现):PB 文件名根本不是 "_ub_<颜色>"
+          // 这种模式(实际是 Windsor_Black_Unbranded.jpg / S777_UB_1.jpg 这种五花八门的格式),
+          // 猜文件名从一开始就是错的。API 其实直接给了 img.colour 字段,应该直接读,猜文件名只
+          // 作最后兜底(img.colour 缺失时)。"Unbranded"/空 不算真颜色,不进匹配池(只进画廊)。
+          let colour = String(img.colour || '').trim();
+          if (!colour || /^unbranded$/i.test(colour)) {
+            const m = (img.mediaItemUrl.split('/').pop() || '').match(/_ub_(.+)\.\w+$/i);
+            colour = m ? m[1].replace(/[-_]+/g, ' ').trim() : '';
+          }
+          if (!colour) continue;
+          ubByColour.set(colour.toLowerCase(), { colour, url });
         }
         if (!gallery.length && !ubByColour.size) { results.push({ code, result: 'skipped: 无可用图片' }); continue; }
         if (!gallery.length) gallery.push([...ubByColour.values()][0].url);
+
+        // 库存颜色名和图片颜色名经常对不上("Black Pouch" vs "Black","Light Green" vs "Green"),
+        // 先精确匹配,不行再互相包含匹配(大小写不敏感),两边都对不上才留空(交给人工/主图兜底)。
+        function findUbImage(name) {
+          const key = name.toLowerCase();
+          if (ubByColour.has(key)) return ubByColour.get(key);
+          for (const [k, v] of ubByColour) { if (key.includes(k) || k.includes(key)) return v; }
+          return null;
+        }
 
         // 色块:库存里的颜色为准;有对应 ub 分色图用图,没有留给 swatch
         const invColours = (Array.isArray(prod.Inventory) ? prod.Inventory : [])
@@ -448,7 +465,7 @@ async function importPB(db, started, limit) {
         const colours = names.map(n => {
           const { name: label, isCustom } = displayColourName(n);
           if (isCustom) return { name: label, hex: '', image: '' }; // IMAGE-RULES §二:定制品 image/hex 都必须空
-          const hit = ubByColour.get(n.toLowerCase());
+          const hit = findUbImage(n);
           return { name: label, hex: '', image: hit ? hit.url : '' };
         });
 
