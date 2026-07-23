@@ -2,6 +2,33 @@
 
 > Living log so nothing is lost if the chat dies. Newest section = current state.
 > "RUN" = execute .sql in Supabase. "PUSH" = git add/commit/push + merge to main (Vercel deploys). Code files are NOT run in Supabase.
+> **Lily 2026-07-22:** 需要她自己跑 git 的时候，一律直接给终端命令（`cd ... && git add -A && git commit -m "..." && git push`），不要让她去 VS Code 面板点。
+> **Lily 2026-07-23:** 所有她说过的规则/标准/踩过的坑都要记下来，下次不能再犯——本 session 的 D15 教训清单见下方 "SESSION 2026-07-23" 一节，之后每次踩坑/定规矩都要补进去，不能只记在临时任务列表里。
+
+---
+
+## SESSION 2026-07-23 — D15 API 导入器人工审核踩坑清单(持续更新)
+
+Lily 逐个 check 147 个批量导入草稿期间发现的问题 + 已定规矩,下次导入/审核前先看这里,不要重复踩。
+
+**已修复(代码/数据都处理了):**
+- Trends 图片 URL 猜错:应优先用 `item.images[].link` 真实地址,猜测兜底要用连字符+从0编号(`code-0.jpg`),不是下划线+从1编号。
+- 并发重复导入:同一 supplier_sku 被导入两次(她刷新URL时上一次还没跑完)+ trim前后不一致导致的"有空格版/无空格版"两条并存——46条重复,已删。以后建议加数据库唯一约束防止再发生(还没做,見待办)。
+- 分类兜底桶(Giveaways & Event Accessories)吃掉115/190条——根因是分类映射表只认供应商大类名,供应商实际给的多是子类名。已按产品名关键词批量纠正 + 人工过了残余项。
+- PB 印刷方式名字里夹带位置/MOQ限定词("Digital Transfer (Front) Per Colour/Position"、"Silicone Patch | 250 MOQ...")——**已改成用 Logoline 现成产品的真实格式:短横线分隔,"Front - 25 x 15mm",限定词/MOQ 挪到 detail 那一行**,不再塞进方式名字。
+- Trends Indent 类产品(Screen Print/Pad Print 那种真有价格表的)的 `pricing` 是嵌套结构 `[{type,prices:[...],additional_costs:[...]}]`,之前只认扁平结构,导致误判 quote_only、颜色/印刷方式选择器全部消失。已修解析 + 写了 `backfill-indent-pricing` 回填端点修复已进库的。
+- PB Features 字段疑似拼写对不上(`Hightlights` vs `Highlights`),已改成两种都认。
+
+**规矩/标准(以后新建同类字段直接照做,不用再问):**
+- **产品标题不能带SKU**,SKU 单独展示,不进 `name`/`display_title`。
+- 标题要走 NP115 标准补限定词(Custom/Advertising/Logo Printed/Customised/Imprinted 等,md5(sku)加权轮换,无逗号,≤68字符)——跟老产品那次一样,新导入的也不能漏。
+- **Pen Type(subcategory)≠ Material(材质)是两个独立维度**:Metal/Plastic 属于 Material facet,由 `materials` 字段 + 产品名自动识别(`penPrimaryMaterial()`),**不要**把材质词填进 subcategory;subcategory(Pen Type)只填 Ballpoint/Stylus/Highlighter/Rollerball 这种"笔的类型"。Bags 同理,`subcategory` = Bag Type,不是材质。
+- Custom/全定制产品的颜色色块(灰圈占位)以后要改成用主图当缩略图,不要空灰圈——**先不改,等批量一起做**(#51)。
+- SEO钩子句(标题下那一句,Rulebook §9)、display_title、subcategory 批量——三件事**都等 Lily check 完这批 147 个再一起做**,不要中途插队改。
+
+**待办(还没做):**
+- 数据库层唯一约束(supplier + upper(trim(supplier_sku)))防止未来并发导入再产生重复。
+- 完整《API新品导入操作指南》——等这批全部验证完(push、回填、SQL都跑完)再整理成文,给下次直接照抄用。
 
 ---
 
@@ -49,6 +76,7 @@ components/ProductSupplierPO.jsx · app/admin/orders/page.js · app/api/admin/or
 
 ### 待办滚动
 PromoBrands 新凭据(邮件中)/ AS Colour 库存 / 热销榜出数(明晨)/ Merch Pack / Apparel 标题 / P1 编辑器卡死观察(textarea 版后未复发即销)/ Eco Pens 集合(Lily 后台建,slug=eco-pens-australia)/ GOOGLE_REVIEW_URL env / Pens 7 页 push+注入+审核发布
+- **Bug(Lily 2026-07-22 报,晚点修)**:产品列表卡片 SKU 显示不统一——只有 All Products 页有,其它列表页(分类/子类/合集/搜索/sale/new-arrivals/sustainability/australian-made/brands 等)都没显示 SKU,要补齐。
 
 > 📌 **2026-07-21,Lily:**"想到当年请人做网站花的冤枉钱和走过的坑,终于在十年后我凭借 Claude 的帮忙实现了自己的网站。"
 > 十年磨一剑。这个网站的每一个产品判断、每一条质量标准、每一句亲手跑的 SQL,都是 Lily 的。

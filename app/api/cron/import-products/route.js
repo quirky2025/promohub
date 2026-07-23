@@ -285,8 +285,11 @@ async function importTrends(db, started, limit, warningsAll) {
         if (!gallery.length) { results.push({ code, result: 'skipped: 无可用图片' }); continue; }
 
         const { category, hint } = trendsMapCategory(item);
-        const colourNames = (Array.isArray(item.colours) ? item.colours : [])
-          .map(c => (typeof c === 'string' ? c : c?.name)).filter(Boolean).slice(0, 24);
+        // Lily 2026-07-23(107039 真实数据实锤):item.colours 根本不是数组,是逗号分隔的字符串
+        // (如 "Clear, Yellow, Orange...Black." 结尾还带句号),之前按数组解析永远得到空数组,
+        // 导致 Trends 产品的"选择颜色"那一步整个消失。改成按逗号拆字符串,顺手去掉结尾句号。
+        const colourNames = String(item.colours || '').replace(/\.\s*$/, '')
+          .split(',').map(s => s.trim()).filter(Boolean).slice(0, 24);
         // IMAGE-RULES §二:Trends 序号每产品不同,不自动配色图 → 色块用名字(前端 swatch 兜底 hex)
         const colours = colourNames.map(n => ({ name: displayColourName(n).name, hex: '', image: '' }));
 
@@ -325,14 +328,18 @@ async function importTrends(db, started, limit, warningsAll) {
         if (!brandingCosts.length && (!Array.isArray(item.branding_options) || !item.branding_options.length)) warnings.push('branding_options 空/未识别,印刷用了通用打底');
 
         const { indentType, indentLeadTime } = trendsIndentInfo(item);
+        const featuresJoined = (Array.isArray(item.features) ? item.features : []).filter(Boolean).join('. ');
 
         const row = {
           supplier: 'Trends', supplier_sku: code,
           name: item.name || code,
           slug: await uniqueSlug(db, slugify(item.name || code)),
           category, subcategory: null,
-          seo_description: cleanText(item.description, 400),
-          description: cleanText(item.description, 2000),
+          // Lily 2026-07-23(107039 实测):有些 Trends 产品 description 字段源头就是空字符串
+          // (不是抓取失败),但 features 数组有真实卖点文字——description 全空时用 features
+          // 拼一段兜底,不要让 Description tab 整个空着。
+          seo_description: cleanText(item.description, 400) || cleanText(featuresJoined, 400),
+          description: cleanText(item.description, 2000) || cleanText(featuresJoined, 2000),
           features: (Array.isArray(item.features) ? item.features : []).filter(Boolean).slice(0, 8),
           specs, materials: materials || null,
           dimensions: typeof item.dimensions === 'string' ? item.dimensions : null,
