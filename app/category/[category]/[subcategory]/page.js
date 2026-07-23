@@ -65,7 +65,7 @@ export default function SubcategoryPage() {
       let query = supabase
         .from('products')
         .select(`
-          id, name, slug, category, subcategory,
+          id, name, slug, supplier_sku, category, subcategory,
           min_qty, is_eco, is_published,
           product_colours ( id, name, hex, images, sort_order ),
           pricing_tiers ( min_qty, base_price )
@@ -85,7 +85,7 @@ export default function SubcategoryPage() {
       const { data: extraData } = await supabase
         .from('products')
         .select(`
-          id, name, slug, category, subcategory,
+          id, name, slug, supplier_sku, category, subcategory,
           min_qty, is_eco, is_published,
           product_colours ( id, name, hex, images, sort_order ),
           pricing_tiers ( min_qty, base_price )
@@ -275,6 +275,9 @@ export default function SubcategoryPage() {
                           )}
                         </div>
                         <div style={{ padding: '14px 16px', flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                          {product.supplier_sku && (
+                            <div style={{ fontSize: '11px', color: '#000', fontFamily: '"DM Mono", monospace', textAlign: 'center' }}>SKU: {product.supplier_sku}</div>
+                          )}
                           <div style={{ fontSize: '14px', fontWeight: 600, color: NAVY, lineHeight: 1.4, textAlign: 'center' }}>{product.name}</div>
                           <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: 'auto' }}>
                             {price > 0 && (
