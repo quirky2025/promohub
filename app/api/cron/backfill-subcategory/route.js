@@ -64,18 +64,34 @@ function pbMapCategory(prod) {
   return { category: FALLBACK_CAT, names };
 }
 
-function resolveSubcategory(category, names, subByCategory) {
-  const valid = subByCategory?.get(category);
-  if (!valid || !valid.length) return null;
+// Lily 2026-07-23(第一轮回填发现):很多产品分类顶级映射表(TRENDS_CAT/PB_CAT)没覆盖到供应商
+// 原始分类树里的这一层("Notebooks & Compendiums"/"Crossbody & Belt Bags"/"Bucket Hats"这些),
+// 于是掉进兜底分类"Giveaways & Event Accessories"——这个兜底桶在 nav_subcategories 里本来就
+// 没有子类,所以按兜底分类去找子类永远找不到。改成:如果供应商原始分类树里的某一层名字,
+// 直接就是 nav_subcategories 里任何一个分类下的正式子类名,直接采用那个(分类,子类)组合,
+// 不局限于当前(可能本来就错的)兜底分类——这样能顺便把分类本身也纠正过来。
+function resolveSubcategoryGlobal(currentCategory, names, subByCategory, allSubEntries) {
   const cleanNames = (names || []).map(n => String(n || '').trim()).filter(Boolean);
+  const valid = subByCategory?.get(currentCategory) || [];
+
   for (const n of cleanNames) {
     const hit = valid.find(v => v.toLowerCase() === n.toLowerCase());
-    if (hit) return hit;
+    if (hit) return { category: currentCategory, subcategory: hit };
+  }
+  for (const n of cleanNames) {
+    const low = n.toLowerCase();
+    const hit = allSubEntries.find(e => e.subcategory.toLowerCase() === low);
+    if (hit) return { category: hit.category, subcategory: hit.subcategory };
   }
   for (const n of cleanNames) {
     const low = n.toLowerCase();
     const hit = valid.find(v => low.includes(v.toLowerCase()) || v.toLowerCase().includes(low));
-    if (hit) return hit;
+    if (hit) return { category: currentCategory, subcategory: hit };
+  }
+  for (const n of cleanNames) {
+    const low = n.toLowerCase();
+    const hit = allSubEntries.find(e => low.includes(e.subcategory.toLowerCase()) || e.subcategory.toLowerCase().includes(low));
+    if (hit) return { category: hit.category, subcategory: hit.subcategory };
   }
   return null;
 }
@@ -107,10 +123,12 @@ export async function GET(request) {
   try {
     const { data: navSubs } = await db.from('nav_subcategories').select('category, subcategory');
     const subByCategory = new Map();
+    const allSubEntries = [];
     (navSubs || []).forEach(r => {
       if (!r.category || !r.subcategory) return;
       if (!subByCategory.has(r.category)) subByCategory.set(r.category, []);
       subByCategory.get(r.category).push(r.subcategory);
+      allSubEntries.push({ category: r.category, subcategory: r.subcategory });
     });
 
     const { data: allRows, error } = await db.from('products')
@@ -162,13 +180,20 @@ export async function GET(request) {
           if (!prod) { results.push({ code: row.supplier_sku, result: 'not found in PB catalog scan (time budget or gone)' }); continue; }
           ({ category, names } = pbMapCategory(prod));
         }
-        const subcategory = resolveSubcategory(category || row.category, names, subByCategory);
-        if (!subcategory) { results.push({ code: row.supplier_sku, result: `no match in nav_subcategories for "${category || row.category}" (names: ${(names||[]).join(', ')})` }); continue; }
+        const match = resolveSubcategoryGlobal(category || row.category, names, subByCategory, allSubEntries);
+        if (!match) { results.push({ code: row.supplier_sku, result: `no match anywhere in nav_subcategories (names: ${(names || []).join(', ')})` }); continue; }
+        const categoryChanged = match.category !== row.category;
         if (!dry) {
-          const { error: uErr } = await db.from('products').update({ subcategory }).eq('id', row.id);
+          const update = { subcategory: match.subcategory };
+          if (categoryChanged) update.category = match.category;
+          const { error: uErr } = await db.from('products').update(update).eq('id', row.id);
           if (uErr) throw new Error(uErr.message);
         }
-        results.push({ code: row.supplier_sku, subcategory, result: dry ? 'would update' : 'updated' });
+        results.push({
+          code: row.supplier_sku, subcategory: match.subcategory,
+          category: categoryChanged ? `${row.category} -> ${match.category}` : row.category,
+          result: dry ? 'would update' : 'updated',
+        });
       } catch (e) {
         results.push({ code: row.supplier_sku, result: `error: ${String(e?.message || e).slice(0, 160)}` });
       }

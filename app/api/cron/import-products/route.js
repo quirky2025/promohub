@@ -192,30 +192,47 @@ function trendsMapCategory(item) {
 // (names,包含比顶级 category 更细的子类名,比如 Trends 的"Drink Bottles"),去 nav_subcategories
 // 正式分类表里找这个 category 下有没有对得上的 subcategory(先精确,再宽松包含匹配),
 // 找到就用,找不到才留空(比硬写死 null 好,不会每个产品都空)。
-function resolveSubcategory(category, names, subByCategory) {
-  const valid = subByCategory?.get(category);
-  if (!valid || !valid.length) return null;
+// 第一轮回填实测发现:很多供应商原始分类名(比如"Notebooks & Compendiums"/"Crossbody & Belt
+// Bags"/"Bucket Hats")没被顶级映射表(TRENDS_CAT/PB_CAT)覆盖,掉进兜底分类,而兜底分类在
+// nav_subcategories 里没有子类,永远配不上——所以放宽:如果供应商原始分类树里任何一层名字,
+// 直接就是 nav_subcategories 里"任何"分类下的正式子类名,直接采用那组(分类,子类),顺便把
+// 分类本身也纠正过来,不局限于当前(可能本来就错的)兜底分类。
+function resolveSubcategory(category, names, subByCategory, allSubEntries) {
   const cleanNames = (names || []).map(n => String(n || '').trim()).filter(Boolean);
+  const valid = subByCategory?.get(category) || [];
   for (const n of cleanNames) {
     const hit = valid.find(v => v.toLowerCase() === n.toLowerCase());
-    if (hit) return hit;
+    if (hit) return { category, subcategory: hit };
+  }
+  for (const n of cleanNames) {
+    const low = n.toLowerCase();
+    const hit = (allSubEntries || []).find(e => e.subcategory.toLowerCase() === low);
+    if (hit) return { category: hit.category, subcategory: hit.subcategory };
   }
   for (const n of cleanNames) {
     const low = n.toLowerCase();
     const hit = valid.find(v => low.includes(v.toLowerCase()) || v.toLowerCase().includes(low));
-    if (hit) return hit;
+    if (hit) return { category, subcategory: hit };
   }
-  return null;
+  for (const n of cleanNames) {
+    const low = n.toLowerCase();
+    const hit = (allSubEntries || []).find(e => low.includes(e.subcategory.toLowerCase()) || e.subcategory.toLowerCase().includes(low));
+    if (hit) return { category: hit.category, subcategory: hit.subcategory };
+  }
+  return { category, subcategory: null };
 }
 
 async function loadSubcategoryMap(db) {
   const { data } = await db.from('nav_subcategories').select('category, subcategory');
   const map = new Map();
+  const all = [];
   (data || []).forEach(r => {
     if (!r.category || !r.subcategory) return;
     if (!map.has(r.category)) map.set(r.category, []);
     map.get(r.category).push(r.subcategory);
+    all.push({ category: r.category, subcategory: r.subcategory });
   });
+  map.__all = all; // 挂一个 __all 方便调用处直接拿到全量(Map 本身用 category 查子类列表)
   return map;
 }
 
@@ -343,8 +360,8 @@ async function importTrends(db, started, limit, warningsAll, subByCategory) {
         }
         if (!gallery.length) { results.push({ code, result: 'skipped: 无可用图片' }); continue; }
 
-        const { category, hint, names: catNames } = trendsMapCategory(item);
-        const subcategory = resolveSubcategory(category, catNames, subByCategory);
+        const { category: catGuess, hint, names: catNames } = trendsMapCategory(item);
+        const { category, subcategory } = resolveSubcategory(catGuess, catNames, subByCategory, subByCategory.__all);
         // Lily 2026-07-23(107039 真实数据实锤):item.colours 根本不是数组,是逗号分隔的字符串
         // (如 "Clear, Yellow, Orange...Black." 结尾还带句号),之前按数组解析永远得到空数组,
         // 导致 Trends 产品的"选择颜色"那一步整个消失。改成按逗号拆字符串,顺手去掉结尾句号。
@@ -604,8 +621,8 @@ async function importPB(db, started, limit, subByCategory) {
         }
         if (!decos.length) warnings.push('无印刷方式(Imprint Method 字段空),decos 为空 — 发布前需人工补印刷方式和单价');
 
-        const { category, hint, names: catNames } = pbMapCategory(prod);
-        const subcategory = resolveSubcategory(category, catNames, subByCategory);
+        const { category: catGuess, hint, names: catNames } = pbMapCategory(prod);
+        const { category, subcategory } = resolveSubcategory(catGuess, catNames, subByCategory, subByCategory.__all);
         const specs = [];
         for (let i = 1; i <= 4; i++) {
           const n = prod[`Detail_Name_${i}`]; const v = prod[`Detail_Description_${i}`];
