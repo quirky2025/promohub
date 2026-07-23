@@ -182,9 +182,41 @@ function trendsMapCategory(item) {
     if (typeof c === 'string') names.push(c);
     else if (c && typeof c === 'object') { if (c.name) names.push(c.name); if (c.category) names.push(c.category); (c.subcategories || c.children || []).forEach?.(s => names.push(s?.name || s)); }
   });
-  for (const n of names) if (TRENDS_SUB_OVERRIDE[n]) return { category: TRENDS_SUB_OVERRIDE[n], hint: n };
-  for (const n of names) if (TRENDS_CAT[n]) return { category: TRENDS_CAT[n], hint: n };
-  return { category: FALLBACK_CAT, hint: names.join('/') || 'unmapped' };
+  for (const n of names) if (TRENDS_SUB_OVERRIDE[n]) return { category: TRENDS_SUB_OVERRIDE[n], hint: n, names };
+  for (const n of names) if (TRENDS_CAT[n]) return { category: TRENDS_CAT[n], hint: n, names };
+  return { category: FALLBACK_CAT, hint: names.join('/') || 'unmapped', names };
+}
+
+// Lily 2026-07-23 发现"SUBCAT一次次是空的":之前 subcategory 一律硬写 null,从来没有真正
+// 赋值过——不是某几个产品漏了,是全部产品都没有。改成:用供应商原始分类树里的每一层名字
+// (names,包含比顶级 category 更细的子类名,比如 Trends 的"Drink Bottles"),去 nav_subcategories
+// 正式分类表里找这个 category 下有没有对得上的 subcategory(先精确,再宽松包含匹配),
+// 找到就用,找不到才留空(比硬写死 null 好,不会每个产品都空)。
+function resolveSubcategory(category, names, subByCategory) {
+  const valid = subByCategory?.get(category);
+  if (!valid || !valid.length) return null;
+  const cleanNames = (names || []).map(n => String(n || '').trim()).filter(Boolean);
+  for (const n of cleanNames) {
+    const hit = valid.find(v => v.toLowerCase() === n.toLowerCase());
+    if (hit) return hit;
+  }
+  for (const n of cleanNames) {
+    const low = n.toLowerCase();
+    const hit = valid.find(v => low.includes(v.toLowerCase()) || v.toLowerCase().includes(low));
+    if (hit) return hit;
+  }
+  return null;
+}
+
+async function loadSubcategoryMap(db) {
+  const { data } = await db.from('nav_subcategories').select('category, subcategory');
+  const map = new Map();
+  (data || []).forEach(r => {
+    if (!r.category || !r.subcategory) return;
+    if (!map.has(r.category)) map.set(r.category, []);
+    map.get(r.category).push(r.subcategory);
+  });
+  return map;
 }
 
 function trendsTiers(item) {
@@ -237,7 +269,7 @@ function trendsIndentInfo(item) {
   return { indentType, indentLeadTime: leadSpec?.description || null };
 }
 
-async function importTrends(db, started, limit, warningsAll) {
+async function importTrends(db, started, limit, warningsAll, subByCategory) {
   const token = process.env.TRENDS_API_TOKEN;
   if (!token) throw new Error('Missing TRENDS_API_TOKEN');
   const have = await existingSkus(db);
@@ -311,7 +343,8 @@ async function importTrends(db, started, limit, warningsAll) {
         }
         if (!gallery.length) { results.push({ code, result: 'skipped: 无可用图片' }); continue; }
 
-        const { category, hint } = trendsMapCategory(item);
+        const { category, hint, names: catNames } = trendsMapCategory(item);
+        const subcategory = resolveSubcategory(category, catNames, subByCategory);
         // Lily 2026-07-23(107039 真实数据实锤):item.colours 根本不是数组,是逗号分隔的字符串
         // (如 "Clear, Yellow, Orange...Black." 结尾还带句号),之前按数组解析永远得到空数组,
         // 导致 Trends 产品的"选择颜色"那一步整个消失。改成按逗号拆字符串,顺手去掉结尾句号。
@@ -366,7 +399,7 @@ async function importTrends(db, started, limit, warningsAll) {
           supplier: 'Trends', supplier_sku: code,
           name: item.name || code,
           slug: await uniqueSlug(db, slugify(item.name || code)),
-          category, subcategory: null,
+          category, subcategory,
           // Lily 2026-07-23(107039 实测):有些 Trends 产品 description 字段源头就是空字符串
           // (不是抓取失败),但 features 数组有真实卖点文字——description 全空时用 features
           // 拼一段兜底,不要让 Description tab 整个空着。
@@ -413,9 +446,11 @@ async function pbIdToken() {
 
 function pbMapCategory(prod) {
   const cats = Array.isArray(prod.Category) ? prod.Category : [];
-  for (const c of cats) for (const ch of (c.Child_Category || [])) if (PB_SUB_OVERRIDE[ch.Category_Name]) return { category: PB_SUB_OVERRIDE[ch.Category_Name], hint: ch.Category_Name };
-  for (const c of cats) if (PB_CAT[c.Category_Name]) return { category: PB_CAT[c.Category_Name], hint: c.Category_Name };
-  return { category: FALLBACK_CAT, hint: cats.map(c => c.Category_Name).join('/') || 'unmapped' };
+  const names = [];
+  cats.forEach(c => { if (c.Category_Name) names.push(c.Category_Name); (c.Child_Category || []).forEach(ch => ch.Category_Name && names.push(ch.Category_Name)); });
+  for (const c of cats) for (const ch of (c.Child_Category || [])) if (PB_SUB_OVERRIDE[ch.Category_Name]) return { category: PB_SUB_OVERRIDE[ch.Category_Name], hint: ch.Category_Name, names };
+  for (const c of cats) if (PB_CAT[c.Category_Name]) return { category: PB_CAT[c.Category_Name], hint: c.Category_Name, names };
+  return { category: FALLBACK_CAT, hint: cats.map(c => c.Category_Name).join('/') || 'unmapped', names };
 }
 
 // Lily 2026-07-23(D435 Discovery A5 Notebook 实测,第二版):价格档编号(table1/table4/table5..)
@@ -448,7 +483,7 @@ function pbTiers(prod) {
   return out.sort((a, b) => a.q - b.q);
 }
 
-async function importPB(db, started, limit) {
+async function importPB(db, started, limit, subByCategory) {
   const token = await pbIdToken();
   const have = await existingSkus(db);
   const results = [];
@@ -569,7 +604,8 @@ async function importPB(db, started, limit) {
         }
         if (!decos.length) warnings.push('无印刷方式(Imprint Method 字段空),decos 为空 — 发布前需人工补印刷方式和单价');
 
-        const { category, hint } = pbMapCategory(prod);
+        const { category, hint, names: catNames } = pbMapCategory(prod);
+        const subcategory = resolveSubcategory(category, catNames, subByCategory);
         const specs = [];
         for (let i = 1; i <= 4; i++) {
           const n = prod[`Detail_Name_${i}`]; const v = prod[`Detail_Description_${i}`];
@@ -588,7 +624,7 @@ async function importPB(db, started, limit) {
           supplier: 'PromoBrands', supplier_sku: code,
           name: prod.Name || code,
           slug: await uniqueSlug(db, slugify(prod.Name || code)),
-          category, subcategory: null,
+          category, subcategory,
           seo_description: cleanText(prod.Description, 400),
           description: cleanText(prod.Description, 2000),
           // Lily 2026-07-23:发现批量导入的 PB 产品 Features 几乎全空,怀疑是字段名对不上
@@ -660,7 +696,8 @@ export async function GET(request) {
     }
     if (supplier === 'trends') {
       const warningsAll = [];
-      const r = await importTrends(db, started, limit, warningsAll);
+      const subByCategory = await loadSubcategoryMap(db);
+      const r = await importTrends(db, started, limit, warningsAll, subByCategory);
       // Lily 2026-07-23:imported<limit 不等于"扫完了"——常常是图片下载/R2上传太慢撞了 230s
       // 时间预算,提前收工。timedOut=true 时必须说明"还没扫完",不能报 本轮扫完。
       const hint = r.imported >= limit ? '还有剩余,再开一次同样的 URL 继续'
@@ -669,7 +706,8 @@ export async function GET(request) {
       return Response.json({ supplier: 'Trends', ...r, elapsed_s: Math.round((Date.now() - started) / 1000), hint });
     }
     if (supplier === 'pb') {
-      const r = await importPB(db, started, limit);
+      const subByCategory = await loadSubcategoryMap(db);
+      const r = await importPB(db, started, limit, subByCategory);
       const hint = r.imported >= limit ? '还有剩余,再开一次同样的 URL 继续'
         : r.timedOut ? '时间用完提前收工,不代表扫完,再开一次同样的 URL 继续'
         : '本轮扫完';
