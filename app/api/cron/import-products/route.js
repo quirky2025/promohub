@@ -171,14 +171,24 @@ function trendsMapCategory(item) {
 }
 
 function trendsTiers(item) {
-  // pricing 结构未官宣,做最常见两种兼容:[{qty,price}] 或 {qty1..,price1..}
+  // pricing 结构未官宣,兼容三种:① 扁平 [{qty,price}] ② {qty1..,price1..}
+  // ③ Indent 结构 [{type,prices:[{quantity,price}],additional_costs:[...]}] ——2026-07-23 发现
+  // 127014/107039 这类 Indent 产品用的是③,之前只认①/②,导致有真实价格表的产品被误判成
+  // quote_only(前台整个变"Get a Quote"模式,颜色/印刷方式选择器全部消失)。
   const out = [];
   const p = item.pricing;
   if (Array.isArray(p)) {
-    p.forEach(t => {
-      const q = Number(t.qty ?? t.min_qty ?? t.quantity); const pr = Number(t.price ?? t.unit_price);
-      if (q > 0 && pr > 0) out.push({ q, cost: pr });
-    });
+    for (const block of p) {
+      if (Array.isArray(block?.prices)) {
+        for (const t of block.prices) {
+          const q = Number(t.quantity ?? t.qty); const pr = Number(t.price ?? t.unit_price);
+          if (q > 0 && pr > 0) out.push({ q, cost: pr });
+        }
+      } else {
+        const q = Number(block.qty ?? block.min_qty ?? block.quantity); const pr = Number(block.price ?? block.unit_price);
+        if (q > 0 && pr > 0) out.push({ q, cost: pr });
+      }
+    }
   } else if (p && typeof p === 'object') {
     for (let i = 1; i <= 8; i++) {
       const q = Number(p[`qty${i}`]); const pr = Number(p[`price${i}`]);
@@ -187,6 +197,27 @@ function trendsTiers(item) {
   }
   out.sort((a, b) => a.q - b.q);
   return out;
+}
+
+// Indent 结构的 pricing[].additional_costs 里 type='DO' 才是真实印刷方式(type='DS' 是
+// Pre-Production Sample 这类样品费,不算印刷方式,排除)。description/branding_area 已经是
+// 现成的干净格式("Screen Print (two colour max)" / "Sides - 150mm x 320mm..."),直接用,不用再拼。
+function trendsBrandingCosts(item) {
+  const p = Array.isArray(item.pricing) ? item.pricing : [];
+  return p.flatMap(block => (Array.isArray(block?.additional_costs) ? block.additional_costs : []))
+    .filter(ac => ac?.type === 'DO' && ac?.description);
+}
+
+// Indent 产品的运输方式(Sea/Air)决定交期文案;lead time 原文来自 additional_specifications
+// 里的 "Production Lead Time",是自由文字(如"14-16 weeks, sampling is additional time"),
+// 不是纯数字——存原文,前台模板要能直接展示整句而不是硬拼"X business days"。
+function trendsIndentInfo(item) {
+  const first = Array.isArray(item.pricing) ? item.pricing[0] : null;
+  const type = String(first?.type || '').toLowerCase();
+  const indentType = /sea/.test(type) ? 'indent_sea' : /air/.test(type) ? 'indent_air' : null;
+  const leadSpec = (Array.isArray(item.additional_specifications) ? item.additional_specifications : [])
+    .find(s => /lead time/i.test(s?.specification || ''));
+  return { indentType, indentLeadTime: leadSpec?.description || null };
 }
 
 async function importTrends(db, started, limit, warningsAll) {
@@ -274,13 +305,26 @@ async function importTrends(db, started, limit, warningsAll) {
           base_price: Number((t.cost * tierMargin(i)).toFixed(2)),
         }));
 
-        // 印刷方式:branding_options 结构未官宣 → 通用 Print 一条打底,细节后补
-        const decos = [{
-          name: 'Print Per Colour/Position', detail: 'Refer to product branding options',
-          per_unit: decoUnitPrice(0.3), has_setup: true, setup_fee: SETUP_FEE,
-          default_setup_qty: 1, setup_qty_editable: true, type: 'print',
-        }];
-        if (!Array.isArray(item.branding_options) || !item.branding_options.length) warnings.push('branding_options 空/未识别,印刷用了通用打底');
+        // 印刷方式:Indent 结构(pricing[].additional_costs,type='DO')有真实方式名+尺寸+单价,
+        // 直接用;没有这个结构的(非 Indent 的普通产品)才退回通用 Print 打底。
+        const brandingCosts = trendsBrandingCosts(item);
+        const decos = brandingCosts.length
+          ? brandingCosts.map(ac => ({
+              name: ac.description,
+              detail: ac.branding_area || null,
+              per_unit: decoUnitPrice(Number(ac.unit_price) || 0),
+              has_setup: Number(ac.setup_price ?? ac.setup) > 0,
+              setup_fee: SETUP_FEE,
+              default_setup_qty: 1, setup_qty_editable: true, type: 'print',
+            }))
+          : [{
+              name: 'Print Per Colour/Position', detail: 'Refer to product branding options',
+              per_unit: decoUnitPrice(0.3), has_setup: true, setup_fee: SETUP_FEE,
+              default_setup_qty: 1, setup_qty_editable: true, type: 'print',
+            }];
+        if (!brandingCosts.length && (!Array.isArray(item.branding_options) || !item.branding_options.length)) warnings.push('branding_options 空/未识别,印刷用了通用打底');
+
+        const { indentType, indentLeadTime } = trendsIndentInfo(item);
 
         const row = {
           supplier: 'Trends', supplier_sku: code,
@@ -297,6 +341,8 @@ async function importTrends(db, started, limit, warningsAll) {
           // 无价格阶梯 = 走不了普通计算器,自动转"Get a Quote"模式(前台 quote_only,无 ref 价则显示 Price on application)
           quote_only: !costTiers.length,
           min_qty: costTiers[0]?.q || moqFromText(item.description) || 50,
+          indent_type: indentType,
+          indent_lead_time: indentLeadTime,
         };
         await createProduct(db, row, tiers, decos, gallery);
         have.add(code.toUpperCase());
