@@ -65,6 +65,11 @@ export async function GET(request) {
   // 很多,86 个一次跑爆了 Vercel 时间限额(504)。改成跟主导入器一样分批跑:每次处理有限数量,
   // 已经有真实照片的自动跳过(不用你记哪些跑过了),再开同一个 URL 继续处理剩下的。
   const limit = Math.max(1, parseInt(url.searchParams.get('limit') || '10', 10) || 10);
+  // Lily 2026-07-23 发现"一直卡住不动":原来靠"有没有真实图片"判断处理过没有,但有些产品的
+  // 颜色本来就是 Custom(比如全定制款),Custom 颜色设计上永远没有图(image 必须留空),导致这些
+  // 产品每次都被判定成"没处理过"、每次都重新占掉一个批次名额,后面的产品永远轮不到。
+  // 改成用 offset 游标翻页,保证每次调用都往前走,不再靠内容判断"是否处理过"。
+  const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10) || 0);
   const db = sourcingDb();
   const token = process.env.TRENDS_API_TOKEN;
   const results = [];
@@ -72,12 +77,12 @@ export async function GET(request) {
   try {
     const { data: allRows, error } = await db.from('products')
       .select('id, supplier_sku, colours, description')
-      .eq('supplier', 'Trends').gte('created_at', BATCH_SINCE);
+      .eq('supplier', 'Trends').gte('created_at', BATCH_SINCE)
+      .order('id', { ascending: true });
     if (error) throw new Error(error.message);
 
-    // 已经有真实颜色照片的(至少一个 colour 的 image 非空)算处理过,跳过,不重复下载上传
-    const todo = (allRows || []).filter(r => !(Array.isArray(r.colours) && r.colours.some(c => c?.image)));
-    const rows = todo.slice(0, limit);
+    const todo = allRows || [];
+    const rows = todo.slice(offset, offset + limit);
 
     for (const row of rows) {
       if (Date.now() - started > 200000) { results.push({ code: row.supplier_sku, result: 'skipped: 时间用完,再开一次同样的 URL 继续' }); continue; }
@@ -138,9 +143,11 @@ export async function GET(request) {
       }
     }
 
-    const remaining = todo.length - rows.length;
-    const hint = remaining > 0 ? `还有 ${remaining} 个待处理,再开一次同样的 URL 继续` : '这批全部处理完了';
-    return Response.json({ dry, total_todo: todo.length, processed: rows.length, remaining, hint, results, elapsed_s: Math.round((Date.now() - started) / 1000) });
+    const nextOffset = offset + rows.length;
+    const remaining = todo.length - nextOffset;
+    const nextUrl = `${url.origin}${url.pathname}?key=${url.searchParams.get('key')}${dry ? '&dry=1' : ''}&offset=${nextOffset}`;
+    const hint = remaining > 0 ? `还有 ${remaining} 个待处理,下一步打开:${nextUrl}` : '这批全部处理完了';
+    return Response.json({ dry, total_todo: todo.length, processed: rows.length, offset, next_offset: nextOffset, remaining, hint, next_url: remaining > 0 ? nextUrl : null, results, elapsed_s: Math.round((Date.now() - started) / 1000) });
   } catch (e) {
     return Response.json({ error: String(e?.message || e) }, { status: 500 });
   }
