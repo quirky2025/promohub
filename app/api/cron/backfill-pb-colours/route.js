@@ -110,7 +110,7 @@ export async function GET(request) {
     const targets = todo.slice(offset, offset + limit);
     if (!targets.length) return Response.json({ dry, total_todo: todo.length, offset, hint: '这批全部处理完了', results: [] });
 
-    const need = new Map(targets.map(r => [r.supplier_sku.toUpperCase(), r]));
+    const need = new Map(targets.map(r => [r.supplier_sku.trim().toUpperCase(), r]));
     const token = await pbIdToken();
     let after = 0;
     for (;;) {
