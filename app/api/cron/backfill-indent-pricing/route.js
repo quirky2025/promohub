@@ -1,5 +1,5 @@
 import { sourcingDb } from '@/lib/sourcingDb';
-import { tierMargin, decoUnitPrice, SETUP_FEE } from '@/lib/pricing';
+import { SETUP_FEE } from '@/lib/pricing';
 
 // D15 补漏 · 一次性回填 Trends Indent 产品的真实价格表/印刷方式/indent_type。
 // 根因(Lily 2026-07-23 用 127014/107039 两个例子发现):import-products/route.js 里
@@ -104,7 +104,8 @@ export async function GET(request) {
           product_id: row.id, sort_order: i,
           min_qty: t.q,
           max_qty: arr[i + 1] ? arr[i + 1].q - 1 : null,
-          base_price: Number((t.cost * tierMargin(i)).toFixed(2)),
+          // 存进货成本(raw cost)。加价(tierMargin)由前台显示时做,别在这里乘,否则加价两遍。见 PRICING-RULES §1.1。
+          base_price: Number(Number(t.cost).toFixed(2)),
         }));
 
         const brandingCosts = trendsBrandingCosts(item);
@@ -113,7 +114,8 @@ export async function GET(request) {
               product_id: row.id, sort_order: i,
               name: ac.description,
               detail: ac.branding_area || null,
-              per_unit: decoUnitPrice(Number(ac.unit_price) || 0),
+              per_unit: Number(ac.unit_price) || 0, // 存印刷进货成本(raw),加价前台做
+
               has_setup: Number(ac.setup_price ?? ac.setup) > 0,
               setup_fee: SETUP_FEE,
               default_setup_qty: 1, setup_qty_editable: true, type: 'print',
