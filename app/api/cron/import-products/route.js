@@ -330,7 +330,7 @@ async function importTrends(db, started, limit, warningsAll, subByCategory) {
         const imgByColour = new Map();
         if (rawImages.length) {
           let n = 0;
-          for (const im of rawImages.slice(0, 12)) {
+          for (const im of rawImages.slice(0, 24)) {
             const link = String(im?.link || im?.url || '').trim().replace(/^\/\//, 'https://');
             if (!link) continue;
             n += 1;
