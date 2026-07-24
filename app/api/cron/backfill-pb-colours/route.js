@@ -193,10 +193,13 @@ export async function GET(request) {
             const { error: uErr } = await db.from('products').update(update).eq('id', row.id);
             if (uErr) throw new Error(uErr.message);
             if (tiersChanged) {
+              // Lily 2026-07-24 实锤(S777 实测,前台价格 = 供应商成本 × margin²):存供应商
+              // 进货成本(raw cost),加价(tierMargin)由前台显示时做,别在这里乘一遍,否则
+              // 前台再乘一次 = 加价两遍。见 PRICING-RULES §1.1、import-products/route.js 同款修复。
               const tiers = costTiers.map((t, i, arr) => ({
                 product_id: row.id, sort_order: i, min_qty: t.q,
                 max_qty: arr[i + 1] ? arr[i + 1].q - 1 : null,
-                base_price: Number((t.cost * tierMargin(i)).toFixed(2)),
+                base_price: Number(Number(t.cost).toFixed(2)),
               }));
               await db.from('pricing_tiers').delete().eq('product_id', row.id);
               await db.from('pricing_tiers').insert(tiers);
