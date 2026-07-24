@@ -1,7 +1,7 @@
 import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { sourcingDb } from '@/lib/sourcingDb';
-import { tierMargin, decoUnitPrice, SETUP_FEE } from '@/lib/pricing';
+import { SETUP_FEE } from '@/lib/pricing';
 import { colourSlug, cleanColour } from '@/lib/colourName';
 import { COLOUR_SWATCH } from '@/lib/colourSwatch';
 
@@ -51,7 +51,8 @@ function cleanText(raw, maxLen) {
 
 // D15 · API 产品导入器(Trends + PromoBrands)。规则文档:PRICING-RULES.md + IMAGE-RULES.md。
 // - 全部创建为草稿(is_published=false),Lily 后台审核后发布
-// - 定价:基础价 = 供应商价 × tierMargin(档位);印刷 = decoUnitPrice(成本);setup 固定 $60
+// - 定价:base_price 和印刷 per_unit 都存【供应商进货成本 raw】,加价(margin)一律由前台显示时做;
+//   ⚠ 绝不在导入时乘 margin,否则前台再乘一次 = 加价两遍。setup 固定 $60。见 PRICING-RULES §1.1。
 //   (Trends/PB 服装按硬货处理 —— PRICING-RULES §3.1,Lily 2026-07-22)
 // - 图片:原图 → sharp → w160/w400/w900 webp → R2(路径按 IMAGE-RULES §三)
 // - 双表:products.colours = 色块(image/hex 二选一);product_colours(Default).images = 画廊(第0张=主图)
@@ -387,7 +388,9 @@ async function importTrends(db, started, limit, warningsAll, subByCategory) {
         const tiers = costTiers.map((t, i, arr) => ({
           min_qty: t.q,
           max_qty: arr[i + 1] ? arr[i + 1].q - 1 : null,
-          base_price: Number((t.cost * tierMargin(i)).toFixed(2)),
+          // 存供应商进货成本(raw cost)。加价(tierMargin)由前台显示时做 —— 别在这里乘,
+          // 否则前台再乘一次 = 加价两遍(成本×margin²)。见 PRICING-RULES §1.1。
+          base_price: Number(Number(t.cost).toFixed(2)),
         }));
 
         // 印刷方式:Indent 结构(pricing[].additional_costs,type='DO')有真实方式名+尺寸+单价,
@@ -397,7 +400,8 @@ async function importTrends(db, started, limit, warningsAll, subByCategory) {
           ? brandingCosts.map(ac => ({
               name: ac.description,
               detail: ac.branding_area || null,
-              per_unit: decoUnitPrice(Number(ac.unit_price) || 0),
+              // 存印刷进货成本(raw)。加价由前台 decoUnitPrice() 显示时做,别在这里乘。
+              per_unit: Number(ac.unit_price) || 0,
               // Lily 2026-07-23:之前这里信了供应商原始 setup_price,供应商写 0 我们就显示 $0。
               // 家规是只要有印刷方式,setup 一律固定收 $60(PRICING-RULES §2.1/§3.1),不管供应商
               // 自己报价是多少 —— 跟 PB 那边的逻辑对齐,不再看供应商原始值。
@@ -407,7 +411,7 @@ async function importTrends(db, started, limit, warningsAll, subByCategory) {
             }))
           : [{
               name: 'Print Per Colour/Position', detail: 'Refer to product branding options',
-              per_unit: decoUnitPrice(0.3), has_setup: true, setup_fee: SETUP_FEE,
+              per_unit: 0.3, has_setup: true, setup_fee: SETUP_FEE,
               default_setup_qty: 1, setup_qty_editable: true, type: 'print',
             }];
         if (!brandingCosts.length && (!Array.isArray(item.branding_options) || !item.branding_options.length)) warnings.push('branding_options 空/未识别,印刷用了通用打底');
@@ -588,7 +592,8 @@ async function importPB(db, started, limit, subByCategory) {
         if (!costTiers.length) warnings.push('无 Unbranded 价格表,tiers 为空');
         const tiers = costTiers.map((t, i, arr) => ({
           min_qty: t.q, max_qty: arr[i + 1] ? arr[i + 1].q - 1 : null,
-          base_price: Number((t.cost * tierMargin(i)).toFixed(2)),
+          // 存供应商进货成本(raw cost)。加价由前台做,别在这里乘,否则加价两遍。见 PRICING-RULES §1.1。
+          base_price: Number(Number(t.cost).toFixed(2)),
         }));
 
         // 印刷方式(1-6)→ decoration_options;setup 固定 $60(PRICING-RULES §2.1/§3.1)
@@ -618,7 +623,7 @@ async function importPB(db, started, limit, subByCategory) {
           decos.push({
             name: `${des} Per ${im[`productImprintmethod${i}Hascolour`] ? 'Colour/' : ''}Position`,
             detail,
-            per_unit: decoUnitPrice(cost), has_setup: true, setup_fee: SETUP_FEE,
+            per_unit: cost, has_setup: true, setup_fee: SETUP_FEE, // 存印刷进货成本(raw),加价前台做
             default_setup_qty: 1, setup_qty_editable: true, type: 'print',
           });
         }
