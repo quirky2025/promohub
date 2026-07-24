@@ -42,6 +42,16 @@ function colourFromDescription(desc, productName) {
 
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
+// Lily 2026-07-24 踩坑:supabase-js 的查询本身没有内置超时,数据库那端一旦卡住,
+// await 会无限期挂着,跟外部 fetch 卡死是一模一样的表现,但之前只顾着给 fetch 加超时,
+// 漏了这里。用 Promise.race 包一层,卡住就当错误处理,不再无限期挂起。
+function withTimeout(promiseLike, ms, label) {
+  return Promise.race([
+    promiseLike,
+    new Promise((resolve) => setTimeout(() => resolve({ data: null, error: { message: `timeout after ${ms}ms: ${label}` } }), ms)),
+  ]);
+}
+
 async function fetchStock(sku, token) {
   for (let attempt = 0; attempt < 3; attempt++) {
     let res;
@@ -287,7 +297,18 @@ export async function GET(request) {
   // PB 专列:?only=pb → 全部预算给 PromoBrands(手动补跑用)
   const only = new URL(request.url).searchParams.get('only');
   if (only === 'pb') {
-    const pb = await syncPromoBrands(db, started, BUDGET_MS);
+    // Lily 2026-07-24 踩坑:光给 PB 官方接口的 fetch 加超时还不够——今天实测发现,加了之后
+    // 还是整个卡住不返回,说明还有别的地方会卡死(比如查我们自己数据库那段循环,没有超时保护)。
+    // 与其一个个找卡点补超时,不如在最外层加个总看门狗:不管卡在哪一步,到点强制返回诊断信息,
+    // 不再让客户端无限期等下去。
+    const WATCHDOG_MS = 270000;
+    const pb = await Promise.race([
+      syncPromoBrands(db, started, BUDGET_MS),
+      new Promise((resolve) => setTimeout(() => resolve({
+        supplier: 'PromoBrands', products_ok: 0, rows_written: 0, pages: 0, skipped: false,
+        error: 'watchdog: 270s 内没有返回,卡在 syncPromoBrands 内部某一步(数据库查询或 PB 接口调用),具体位置需要看 Vercel 函数日志',
+      }), WATCHDOG_MS)),
+    ]);
     return Response.json({ promobrands: pb, elapsed_s: Math.round((Date.now() - started) / 1000) });
   }
 
