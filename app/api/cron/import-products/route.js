@@ -341,8 +341,10 @@ async function importTrends(db, started, limit, warningsAll, subByCategory) {
             );
             if (url) {
               gallery.push(url);
-              const captionTag = String(im?.caption || '').trim().toLowerCase();
-              if (captionTag && !imgByColour.has(captionTag)) imgByColour.set(captionTag, url);
+              // 每张图的颜色在 im.colour 字段("black"/"silver"/"blue"),不是 caption
+              // (caption 是 "Main"/"Back"/"Inside" 这种位置说明,不是颜色)。用 colour 建索引。
+              const colourTag = String(im?.colour || '').trim().toLowerCase();
+              if (colourTag && !imgByColour.has(colourTag)) imgByColour.set(colourTag, url);
             }
           }
         }
@@ -368,12 +370,23 @@ async function importTrends(db, started, limit, warningsAll, subByCategory) {
         // 导致 Trends 产品的"选择颜色"那一步整个消失。改成按逗号拆字符串,顺手去掉结尾句号。
         const colourNames = String(item.colours || '').replace(/\.\s*$/, '')
           .split(',').map(s => s.trim()).filter(Boolean).slice(0, 24);
-        // 有真实颜色照片(caption 精确匹配)就用,没有的(Custom/未识别)才交给前端用 hex/主图兜底
+        // 颜色照片匹配:先精确(colour 字段),再模糊 —— 颜色选项名可能是复合词
+        // ("Silver and black" / "Translucent Blue and black"),而图片颜色标签是单词
+        // ("silver"/"blue"/"black")。按 精确 → 首词 → 互相包含 三级匹配。
+        const matchColourImage = (optName) => {
+          const low = String(optName).toLowerCase().trim();
+          if (imgByColour.has(low)) return imgByColour.get(low);
+          const first = low.split(/[\/,&]|\band\b|\s+/).filter(Boolean)[0];
+          if (first && imgByColour.has(first)) return imgByColour.get(first);
+          for (const [tag, url] of imgByColour) {
+            if (tag && (low.includes(tag) || tag.includes(low))) return url;
+          }
+          return '';
+        };
         const colours = colourNames.map(n => {
           const { name: label, isCustom } = displayColourName(n);
           if (isCustom) return { name: label, hex: '', image: '' };
-          const hit = imgByColour.get(n.toLowerCase());
-          return { name: label, hex: '', image: hit || '' };
+          return { name: label, hex: '', image: matchColourImage(n) };
         });
 
         const specs = (Array.isArray(item.additional_specifications) ? item.additional_specifications : [])
