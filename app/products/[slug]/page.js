@@ -222,9 +222,15 @@ export default async function ProductPage({ params, searchParams }) {
   const extraImages = allSwatch ? sortedImages.slice(1) : sortedImages.slice(colourCount + 1);
 
   // ── BUILD COLOUR OBJECTS ──
-  // priority: inline image on colour entry > image pool slice > none (swatch fallback in UI)
+  // Lily 2026-07-24(Byron Bottle S777 实测发现):供应商自动导入的产品(colours 字段本身
+  // 就是导入时按颜色真实匹配过的,没匹配上就是没有,不是"漏抓"),这种情况下如果还用位置
+  // 图池兜底(colourImages[i]),等于是"随手拿一张不相关的图充数"——真实案例是有的颜色配
+  // 到了品牌宣传照/客户使用照,跟颜色本身毫无关系。规则:没有真实颜色照片就用色块(hex/
+  // 灰圈),不再拿图池瞎配。图池位置兜底只保留给老的手工建品体系(!fromColoursField,
+  // 那边图片本来就是按顺序摆好、没有"匹配失败"这个概念)。
   let colours = colourData.map((c, i) => {
-    const img = c.image || (Array.isArray(c.images) && c.images[0]) || colourImages[i] || null;
+    const poolFallback = fromColoursField ? null : (colourImages[i] || null);
+    const img = c.image || (Array.isArray(c.images) && c.images[0]) || poolFallback;
     return { id: i, name: c.name || `Colour ${i + 1}`, hex: c.hex || null, image: img, images: img ? [img] : [] };
   });
 
